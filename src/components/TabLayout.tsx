@@ -10,10 +10,10 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const tabs = [
-  { to: '/catalog', label: 'Catalog', shortLabel: 'Catalog' },
-  { to: '/events', label: 'Events', shortLabel: 'Events' },
-  { to: '/assistant', label: 'AI Pack Assistant', shortLabel: 'AI Pack' },
-  { to: '/settings', label: 'Settings', shortLabel: 'Settings' },
+  { to: '/catalog', label: 'Catalog', icon: '📦' },
+  { to: '/events', label: 'Events', icon: '📅' },
+  { to: '/assistant', label: 'AI Assistant', icon: '✨' },
+  { to: '/settings', label: 'Settings', icon: '⚙️' },
 ];
 
 export function TabLayout() {
@@ -67,18 +67,18 @@ export function TabLayout() {
   return (
     <div className="app-shell">
       <header className="topbar">
-        <div className="row between wrap">
-          <div className="stack-sm">
+        <div className="topbar-inner">
+          <div className="topbar-title">
             <h1>GearVault</h1>
-            <p className="subtle">Clean, AI-assisted gear workspace</p>
+            <p className="subtle">Professional gear management</p>
           </div>
-          <div className="row wrap topbar-actions">
+          <div className="topbar-actions">
             <span className={`status-chip ${isOnline ? 'online' : 'offline'}`}>
               <span className="status-dot" aria-hidden="true" />
               {isOnline ? 'Online' : 'Offline'}
             </span>
             {!isInstalled && deferredPrompt && (
-              <button className="ghost install-btn" onClick={() => void handleInstall()}>
+              <button className="ghost" onClick={() => void handleInstall()}>
                 Install App
               </button>
             )}
@@ -99,7 +99,10 @@ export function TabLayout() {
             className={({ isActive }) => (isActive ? 'tab active' : 'tab')}
             aria-label={tab.label}
           >
-            {tab.shortLabel}
+            <span role="img" aria-hidden="true" style={{ fontSize: '1.25rem' }}>
+              {tab.icon}
+            </span>
+            <span>{tab.label}</span>
           </NavLink>
         ))}
       </nav>

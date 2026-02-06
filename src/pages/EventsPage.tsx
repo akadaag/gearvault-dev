@@ -11,7 +11,8 @@ export function EventsPage() {
   const [query, setQuery] = useState('');
   const [type, setType] = useState('');
   const [calendarMode, setCalendarMode] = useState<'month' | 'week'>('month');
-  const [showCalendar, setShowCalendar] = useState(true);
+  const [showCalendar, setShowCalendar] = useState(false);
+  const [showCreateForm, setShowCreateForm] = useState(false);
   const [draft, setDraft] = useState({
     title: '',
     type: '',
@@ -59,43 +60,49 @@ export function EventsPage() {
 
     await db.events.add(row);
     setDraft({ title: '', type: '', dateTime: '', location: '', client: '', notes: '' });
+    setShowCreateForm(false);
   }
 
   return (
     <section className="stack-lg">
       <div className="card stack-md">
-        <div className="row between wrap">
-          <h2>Events</h2>
-          <div className="row wrap">
-            <label className="checkbox-inline">
-              <input
-                type="checkbox"
-                checked={showCalendar}
-                onChange={(e) => setShowCalendar(e.target.checked)}
-              />
-              Calendar
-            </label>
-            <select
-              value={calendarMode}
-              onChange={(e) => setCalendarMode(e.target.value as 'month' | 'week')}
-            >
-              <option value="month">Month</option>
-              <option value="week">Week</option>
-            </select>
+        <div className="page-header">
+          <div className="page-title-section">
+            <h2>Events</h2>
+            <p className="subtle">{filtered.length} of {events.length} events</p>
+          </div>
+          <div className="page-actions">
+            <button className="ghost" onClick={() => setShowCalendar((prev) => !prev)}>
+              {showCalendar ? 'Hide' : 'Show'} Calendar
+            </button>
+            <button onClick={() => setShowCreateForm((prev) => !prev)}>
+              {showCreateForm ? 'Hide' : 'New Event'}
+            </button>
           </div>
         </div>
-        <div className="grid filters">
-          <input
-            placeholder="Search events"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
+
+        <input
+          placeholder="Search events..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+
+        <div className="row wrap">
           <select value={type} onChange={(e) => setType(e.target.value)}>
             <option value="">All types</option>
             {eventTypes.map((t) => (
               <option key={t}>{t}</option>
             ))}
           </select>
+          {showCalendar && (
+            <select
+              value={calendarMode}
+              onChange={(e) => setCalendarMode(e.target.value as 'month' | 'week')}
+            >
+              <option value="month">Month view</option>
+              <option value="week">Week view</option>
+            </select>
+          )}
         </div>
       </div>
 
@@ -106,71 +113,107 @@ export function EventsPage() {
           <WeekCalendar events={filtered} />
         ))}
 
-      <div className="card stack-md">
-        <h3>Create Event</h3>
-        <div className="grid two">
-          <input
-            placeholder="Title*"
-            value={draft.title}
-            onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+      {showCreateForm && (
+        <div className="card stack-md">
+          <div className="row between wrap">
+            <h3>Create Event</h3>
+            <button className="ghost" onClick={() => setShowCreateForm(false)}>Close</button>
+          </div>
+          <div className="grid two">
+            <input
+              placeholder="Title*"
+              value={draft.title}
+              onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+            />
+            <input
+              placeholder="Type* (e.g., Wedding, Portrait)"
+              value={draft.type}
+              onChange={(e) => setDraft({ ...draft, type: e.target.value })}
+            />
+            <input
+              type="datetime-local"
+              value={draft.dateTime}
+              onChange={(e) => setDraft({ ...draft, dateTime: e.target.value })}
+            />
+            <input
+              placeholder="Location"
+              value={draft.location}
+              onChange={(e) => setDraft({ ...draft, location: e.target.value })}
+            />
+            <input
+              placeholder="Client"
+              value={draft.client}
+              onChange={(e) => setDraft({ ...draft, client: e.target.value })}
+            />
+          </div>
+          <textarea
+            placeholder="Notes / requirements"
+            value={draft.notes}
+            onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
           />
-          <input
-            placeholder="Type*"
-            value={draft.type}
-            onChange={(e) => setDraft({ ...draft, type: e.target.value })}
-          />
-          <input
-            type="datetime-local"
-            value={draft.dateTime}
-            onChange={(e) => setDraft({ ...draft, dateTime: e.target.value })}
-          />
-          <input
-            placeholder="Location"
-            value={draft.location}
-            onChange={(e) => setDraft({ ...draft, location: e.target.value })}
-          />
-          <input
-            placeholder="Client"
-            value={draft.client}
-            onChange={(e) => setDraft({ ...draft, client: e.target.value })}
-          />
+          {error && <p className="error">{error}</p>}
+          <button onClick={() => void createEvent()}>Create event</button>
         </div>
-        <textarea
-          placeholder="Notes / requirements"
-          value={draft.notes}
-          onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
-        />
-        {error && <p className="error">{error}</p>}
-        <button onClick={() => void createEvent()}>Save event</button>
-      </div>
+      )}
 
-      {filtered.length === 0 && <div className="card empty">No events yet—create your first shoot.</div>}
-      <div className="grid cards">
-        {filtered.map((event) => {
-          const packed = event.packingChecklist.filter((i) => i.packed).length;
-          const total = event.packingChecklist.length;
-          const ratio = total > 0 ? Math.round((packed / total) * 100) : 0;
-          const status = total === 0 ? 'Draft' : packed === total ? 'Ready' : 'Packing';
-          return (
-            <Link key={event.id} to={`/events/${event.id}`} className="gear-card event-card">
-              <div className="row between wrap event-card-head">
-                <strong>{event.title}</strong>
-                <span className={`pill event-status ${status.toLowerCase()}`}>{status}</span>
-              </div>
-              <span className="subtle">{event.type}</span>
-              <span className="subtle">
-                {event.client ?? 'No client'} • {event.location ?? 'No location'}
-              </span>
-              <span className="pill">
-                {packed}/{total} packed
-              </span>
-              <div className="progress-track" aria-hidden="true">
-                <span style={{ width: `${ratio}%` }} />
-              </div>
-            </Link>
-          );
-        })}
-      </div>
+      {filtered.length === 0 && events.length === 0 && (
+        <div className="card empty">
+          <h3>No events yet</h3>
+          <p>Create your first event to get started</p>
+        </div>
+      )}
+
+      {filtered.length === 0 && events.length > 0 && (
+        <div className="card empty">
+          <h3>No results found</h3>
+          <p>Try adjusting your search or filters</p>
+        </div>
+      )}
+
+      {filtered.length > 0 && (
+        <div className="grid cards">
+          {filtered.map((event) => {
+            const packed = event.packingChecklist.filter((i) => i.packed).length;
+            const total = event.packingChecklist.length;
+            const ratio = total > 0 ? Math.round((packed / total) * 100) : 0;
+            const status = total === 0 ? 'Draft' : packed === total ? 'Ready' : 'Packing';
+            return (
+              <Link key={event.id} to={`/events/${event.id}`} className="gear-card event-card">
+                <div className="event-card-head">
+                  <strong>{event.title}</strong>
+                  <span className={`pill event-status ${status.toLowerCase()}`}>{status}</span>
+                </div>
+                <span className="pill">{event.type}</span>
+                {event.dateTime && (
+                  <span className="subtle">
+                    {new Date(event.dateTime).toLocaleDateString(undefined, {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </span>
+                )}
+                <div className="stack-sm" style={{ width: '100%' }}>
+                  {event.client && <span className="subtle">Client: {event.client}</span>}
+                  {event.location && <span className="subtle">📍 {event.location}</span>}
+                </div>
+                {total > 0 && (
+                  <>
+                    <span className="subtle">
+                      {packed}/{total} items packed
+                    </span>
+                    <div className="progress-track" aria-hidden="true">
+                      <span style={{ width: `${ratio}%` }} />
+                    </div>
+                  </>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+      )}
     </section>
   );
 }
@@ -192,22 +235,25 @@ function MonthCalendar({ events }: { events: EventItem[] }) {
   });
 
   return (
-    <div className="card">
+    <div className="card stack-sm">
       <h3>
-        Calendar ({first.toLocaleString(undefined, { month: 'long', year: 'numeric' })})
+        {first.toLocaleString(undefined, { month: 'long', year: 'numeric' })}
       </h3>
       <div className="calendar-grid">
         {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((label) => (
-          <strong key={label}>{label}</strong>
+          <strong key={label} style={{ fontSize: '0.8125rem' }}>{label}</strong>
         ))}
         {cells.map((cell, i) => (
           <div key={i} className="calendar-cell">
             {cell.dayNum > 0 && cell.dayNum <= days && (
               <>
-                <span>{cell.dayNum}</span>
+                <span style={{ fontWeight: 600 }}>{cell.dayNum}</span>
                 {cell.dayEvents.slice(0, 2).map((ev) => (
-                  <small key={ev.id}>{ev.title}</small>
+                  <small key={ev.id} className="subtle" style={{ fontSize: '0.7rem' }}>{ev.title}</small>
                 ))}
+                {cell.dayEvents.length > 2 && (
+                  <small className="subtle" style={{ fontSize: '0.7rem' }}>+{cell.dayEvents.length - 2} more</small>
+                )}
               </>
             )}
           </div>
@@ -235,7 +281,7 @@ function WeekCalendar({ events }: { events: EventItem[] }) {
     <div className="card stack-sm">
       <h3>Week view</h3>
       {week.map((d) => (
-        <div key={d.label} className="checklist-row">
+        <div key={d.label} className="checklist-row stack-sm">
           <strong>{d.label}</strong>
           {d.events.length === 0 ? (
             <p className="subtle">No events</p>

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
 import { makeId } from '../lib/ids';
@@ -8,15 +8,19 @@ import type { PackingChecklistItem } from '../types/models';
 
 export function EventDetailPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const event = useLiveQuery(() => (id ? db.events.get(id) : undefined), [id]);
   const catalog = useLiveQuery(() => db.gearItems.toArray(), [], []);
   const [newItemName, setNewItemName] = useState('');
   const [catalogItemId, setCatalogItemId] = useState('');
+  const [showAddItem, setShowAddItem] = useState(false);
 
   if (!event) return <div className="card">Event not found.</div>;
   const currentEvent = event;
 
   const packed = currentEvent.packingChecklist.filter((i) => i.packed).length;
+  const total = currentEvent.packingChecklist.length;
+  const ratio = total > 0 ? Math.round((packed / total) * 100) : 0;
 
   async function setChecklist(nextChecklist: typeof currentEvent.packingChecklist) {
     await db.events.update(currentEvent.id, {
@@ -51,6 +55,7 @@ export function EventDetailPage() {
     }];
     setNewItemName('');
     await setChecklist(next);
+    setShowAddItem(false);
   }
 
   async function addCatalogItem() {
@@ -68,6 +73,7 @@ export function EventDetailPage() {
     }];
     setCatalogItemId('');
     await setChecklist(next);
+    setShowAddItem(false);
   }
 
   function move(index: number, direction: -1 | 1) {
@@ -91,142 +97,202 @@ export function EventDetailPage() {
   return (
     <section className="stack-lg">
       <div className="card stack-md">
-        <div className="row between wrap">
-          <h2>{currentEvent.title}</h2>
-          <div className="row wrap">
-            <button onClick={() => exportEventToPdf(currentEvent)}>Export PDF</button>
-            <button className="ghost" onClick={exportEventJson}>
-              Export JSON
-            </button>
-            <button className="ghost" onClick={() => window.print()}>
-              Print
-            </button>
-            <button onClick={() => void resetChecklist()}>Reset checklist</button>
+        <div className="page-header">
+          <div className="page-title-section">
+            <h2>{currentEvent.title}</h2>
+            <div className="stack-sm">
+              <div className="row wrap">
+                <span className="pill">{currentEvent.type}</span>
+                {currentEvent.dateTime && (
+                  <span className="subtle">
+                    {new Date(currentEvent.dateTime).toLocaleDateString(undefined, {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })}
+                  </span>
+                )}
+              </div>
+              {currentEvent.location && <span className="subtle">📍 {currentEvent.location}</span>}
+              {currentEvent.client && <span className="subtle">Client: {currentEvent.client}</span>}
+            </div>
+          </div>
+          <div className="page-actions">
+            <button onClick={() => navigate('/events')} className="ghost">← Back</button>
           </div>
         </div>
-        <p className="subtle">
-          {currentEvent.type} • {currentEvent.location ?? 'No location'} • {currentEvent.client ?? 'No client'} • {packed}/
-          {currentEvent.packingChecklist.length} packed
-        </p>
-        <textarea
-          value={currentEvent.notes ?? ''}
-          onChange={async (e) => {
-            await db.events.update(currentEvent.id, { notes: e.target.value, updatedAt: new Date().toISOString() });
-          }}
-        />
-      </div>
 
-      <div className="card stack-md">
-        <h3>Packing checklist</h3>
-        <div className="row wrap">
-          <select value={catalogItemId} onChange={(e) => setCatalogItemId(e.target.value)}>
-            <option value="">Add catalog item...</option>
-            {catalog.map((item) => (
-              <option key={item.id} value={item.id}>
-                {item.name}
-              </option>
-            ))}
-          </select>
-          <button onClick={() => void addCatalogItem()}>Add from catalog</button>
-          <input
-            value={newItemName}
-            onChange={(e) => setNewItemName(e.target.value)}
-            placeholder="Custom checklist item"
-          />
-          <button onClick={() => void addManualItem()}>Add manual item</button>
+        <div className="stack-sm">
+          <div className="row between wrap">
+            <strong>Packing Progress</strong>
+            <span>{packed}/{total} items packed</span>
+          </div>
+          <div className="progress-track">
+            <span style={{ width: `${ratio}%` }} />
+          </div>
         </div>
 
-        <ul className="stack-sm">
-          {currentEvent.packingChecklist.map((item, idx) => (
-            <li key={item.id} className="row between wrap checklist-row">
-              <label className="checkbox-inline">
-                <input
-                  type="checkbox"
-                  checked={item.packed}
-                  onChange={(e) => {
-                    const next = currentEvent.packingChecklist.map((row) =>
-                      row.id === item.id ? { ...row, packed: e.target.checked } : row,
-                    );
-                    void setChecklist(next);
-                  }}
-                />
-                {item.name} × {item.quantity}
-              </label>
-              <div className="row wrap">
-                <select
-                  value={item.priority ?? 'optional'}
-                  onChange={(e) => {
-                    const next = currentEvent.packingChecklist.map((row) =>
-                      row.id === item.id
-                        ? {
-                            ...row,
-                            priority: e.target.value as typeof row.priority,
-                          }
-                        : row,
-                    );
-                    void setChecklist(next);
-                  }}
-                >
-                  <option value="must-have">must-have</option>
-                  <option value="nice-to-have">nice-to-have</option>
-                  <option value="optional">optional</option>
-                </select>
-                <button className="ghost" onClick={() => move(idx, -1)}>
-                  ↑
-                </button>
-                <button className="ghost" onClick={() => move(idx, 1)}>
-                  ↓
-                </button>
-                <button
-                  className="ghost danger"
-                  onClick={() => {
-                    const next = currentEvent.packingChecklist.filter((i) => i.id !== item.id);
-                    void setChecklist(next);
-                  }}
-                >
-                  Remove
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <label className="stack-sm">
+          <strong>Event Notes</strong>
+          <textarea
+            value={currentEvent.notes ?? ''}
+            onChange={async (e) => {
+              await db.events.update(currentEvent.id, { notes: e.target.value, updatedAt: new Date().toISOString() });
+            }}
+            placeholder="Add notes about this event..."
+          />
+        </label>
+
+        <div className="row wrap">
+          <button className="ghost" onClick={() => exportEventToPdf(currentEvent)}>Export PDF</button>
+          <button className="ghost" onClick={exportEventJson}>Export JSON</button>
+          <button className="ghost" onClick={() => window.print()}>Print</button>
+          <button className="ghost danger" onClick={() => void resetChecklist()}>Reset Checklist</button>
+        </div>
       </div>
 
       <div className="card stack-md">
-        <h3>Missing items</h3>
-        <ul className="stack-sm">
-          {currentEvent.missingItems.map((item) => (
-            <li key={item.id} className="row between wrap checklist-row">
-              <div>
+        <div className="row between wrap">
+          <h3>Packing Checklist ({total})</h3>
+          <button onClick={() => setShowAddItem((prev) => !prev)}>
+            {showAddItem ? 'Hide' : '+ Add Item'}
+          </button>
+        </div>
+
+        {showAddItem && (
+          <div className="stack-sm">
+            <label className="stack-sm">
+              <strong>Add from Catalog</strong>
+              <select value={catalogItemId} onChange={(e) => setCatalogItemId(e.target.value)}>
+                <option value="">Choose an item</option>
+                {catalog.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <button onClick={() => void addCatalogItem()} disabled={!catalogItemId}>Add from Catalog</button>
+
+            <hr />
+
+            <label className="stack-sm">
+              <strong>Add Custom Item</strong>
+              <input
+                value={newItemName}
+                onChange={(e) => setNewItemName(e.target.value)}
+                placeholder="Item name"
+                onKeyDown={(e) => e.key === 'Enter' && void addManualItem()}
+              />
+            </label>
+            <button onClick={() => void addManualItem()} disabled={!newItemName.trim()}>Add Manual Item</button>
+          </div>
+        )}
+
+        {currentEvent.packingChecklist.length === 0 ? (
+          <div className="empty">
+            <h4>No items in checklist</h4>
+            <p>Add items to start packing</p>
+          </div>
+        ) : (
+          <div className="stack-sm">
+            {currentEvent.packingChecklist.map((item, idx) => (
+              <div key={item.id} className="checklist-row stack-sm">
+                <div className="row between wrap">
+                  <label className="checkbox-inline">
+                    <input
+                      type="checkbox"
+                      checked={item.packed}
+                      onChange={(e) => {
+                        const next = currentEvent.packingChecklist.map((row) =>
+                          row.id === item.id ? { ...row, packed: e.target.checked } : row,
+                        );
+                        void setChecklist(next);
+                      }}
+                    />
+                    <strong>{item.name} × {item.quantity}</strong>
+                  </label>
+                  <div className="row wrap">
+                    <button className="ghost icon-compact-btn" onClick={() => move(idx, -1)} disabled={idx === 0}>
+                      ↑
+                    </button>
+                    <button className="ghost icon-compact-btn" onClick={() => move(idx, 1)} disabled={idx === currentEvent.packingChecklist.length - 1}>
+                      ↓
+                    </button>
+                  </div>
+                </div>
+
+                <div className="row wrap">
+                  <select
+                    value={item.priority ?? 'optional'}
+                    onChange={(e) => {
+                      const next = currentEvent.packingChecklist.map((row) =>
+                        row.id === item.id
+                          ? {
+                              ...row,
+                              priority: e.target.value as typeof row.priority,
+                            }
+                          : row,
+                      );
+                      void setChecklist(next);
+                    }}
+                  >
+                    <option value="must-have">Must-have</option>
+                    <option value="nice-to-have">Nice-to-have</option>
+                    <option value="optional">Optional</option>
+                  </select>
+                  <button
+                    className="ghost danger"
+                    onClick={() => {
+                      const next = currentEvent.packingChecklist.filter((i) => i.id !== item.id);
+                      void setChecklist(next);
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {currentEvent.missingItems.length > 0 && (
+        <div className="card stack-md">
+          <h3>Missing Items ({currentEvent.missingItems.length})</h3>
+          <p className="subtle">Items suggested by AI that are not in your catalog</p>
+          <div className="stack-sm">
+            {currentEvent.missingItems.map((item) => (
+              <div key={item.id} className="checklist-row stack-sm">
                 <strong>{item.name}</strong>
                 <p className="subtle">{item.reason}</p>
+                <div className="row wrap">
+                  <span className="pill">{item.priority}</span>
+                  <span className="pill">{item.action}</span>
+                  <select
+                    value={item.resolvedStatus ?? 'unresolved'}
+                    onChange={(e) => {
+                      const next = currentEvent.missingItems.map((row) =>
+                        row.id === item.id
+                          ? {
+                              ...row,
+                              resolvedStatus: e.target.value as typeof row.resolvedStatus,
+                            }
+                          : row,
+                      );
+                      void setMissing(next);
+                    }}
+                  >
+                    <option value="unresolved">Unresolved</option>
+                    <option value="planned">Planned</option>
+                    <option value="acquired">Acquired</option>
+                  </select>
+                </div>
               </div>
-              <div className="row wrap">
-                <span className="pill">{item.priority}</span>
-                <span className="pill">{item.action}</span>
-                <select
-                  value={item.resolvedStatus ?? 'unresolved'}
-                  onChange={(e) => {
-                    const next = currentEvent.missingItems.map((row) =>
-                      row.id === item.id
-                        ? {
-                            ...row,
-                            resolvedStatus: e.target.value as typeof row.resolvedStatus,
-                          }
-                        : row,
-                    );
-                    void setMissing(next);
-                  }}
-                >
-                  <option value="unresolved">unresolved</option>
-                  <option value="planned">planned</option>
-                  <option value="acquired">acquired</option>
-                </select>
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
+            ))}
+          </div>
+        </div>
+      )}
     </section>
   );
 }

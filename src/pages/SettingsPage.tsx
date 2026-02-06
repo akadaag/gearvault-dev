@@ -78,9 +78,13 @@ export function SettingsPage() {
     <section className="stack-lg">
       <div className="card stack-md">
         <h2>Settings</h2>
+        <p className="subtle">Customize your GearVault experience</p>
+      </div>
 
-        <label className="row between">
-          <span>Theme</span>
+      <div className="card stack-md">
+        <h3>Appearance</h3>
+        <label className="stack-sm">
+          <strong>Theme</strong>
           <select value={settings.theme} onChange={(e) => void update('theme', e.target.value as typeof settings.theme)}>
             <option value="system">System</option>
             <option value="light">Light</option>
@@ -88,57 +92,86 @@ export function SettingsPage() {
           </select>
         </label>
 
-        <label className="row between">
-          <span>Default currency</span>
-          <input value={settings.defaultCurrency} onChange={(e) => void update('defaultCurrency', e.target.value.toUpperCase())} />
+        <label className="stack-sm">
+          <strong>Default currency</strong>
+          <input value={settings.defaultCurrency} onChange={(e) => void update('defaultCurrency', e.target.value.toUpperCase())} placeholder="EUR" />
         </label>
+      </div>
 
+      <div className="card stack-md">
+        <h3>Sync & Backup</h3>
         <label className="checkbox-inline">
           <input type="checkbox" checked={settings.syncEnabled} onChange={(e) => void update('syncEnabled', e.target.checked)} />
-          Optional sync placeholder
+          <span>Enable cloud sync (coming soon)</span>
         </label>
-        <p className="subtle">Toggle is local and ready for a future Supabase/Firebase/WebDAV adapter.</p>
-
+        <p className="subtle">Ready for future cloud sync integration</p>
+        
         <hr />
 
-        <h3>AI Provider</h3>
-        <label className="row between">
-          <span>Provider</span>
+        <div className="stack-sm">
+          <strong>Export & Import</strong>
+          <div className="row wrap">
+            <button className="ghost" onClick={() => void exportDb()}>Export Database</button>
+            <button className="ghost" onClick={() => fileRef.current?.click()}>Import Database</button>
+            <input ref={fileRef} type="file" accept="application/json" hidden onChange={(e) => void importDb(e.target.files?.[0])} />
+          </div>
+          <p className="subtle">Download or restore your complete database as JSON</p>
+        </div>
+      </div>
+
+      <div className="card stack-md">
+        <h3>AI Assistant</h3>
+        <label className="stack-sm">
+          <strong>AI Provider</strong>
           <select value={settings.aiProvider} onChange={(e) => void update('aiProvider', e.target.value as typeof settings.aiProvider)}>
-            <option value="mock">Mock (offline)</option>
+            <option value="mock">Mock (offline testing)</option>
             <option value="openai">OpenAI</option>
           </select>
         </label>
-        <label>
-          API key (stored locally)
+
+        <label className="stack-sm">
+          <strong>API Key</strong>
           <input
             type="password"
             value={settings.apiKey ?? ''}
             onChange={(e) => void update('apiKey', e.target.value)}
             placeholder="sk-..."
           />
+          <small className="subtle">Stored locally, never synced</small>
         </label>
+
         <label className="checkbox-inline">
           <input type="checkbox" checked={settings.aiLearningEnabled} onChange={(e) => void update('aiLearningEnabled', e.target.checked)} />
-          Enable local AI learning
+          <span>Enable AI learning from feedback</span>
         </label>
+        <p className="subtle">AI learns from your packing list feedback to improve suggestions</p>
+      </div>
 
-        <hr />
-
-        <h3>Data</h3>
+      <div className="card stack-md">
+        <h3>Demo Data</h3>
         <label className="checkbox-inline">
           <input type="checkbox" checked={settings.demoDataEnabled} onChange={(e) => void toggleDemoData(e.target.checked)} />
-          Enable demo/sample data
+          <span>Enable demo data</span>
         </label>
-        <div className="row wrap">
-          <button onClick={() => void seedDemoData(categories)}>Load demo now</button>
-          <button onClick={() => void exportDb()}>Export full DB JSON</button>
-          <button onClick={() => fileRef.current?.click()}>Import DB JSON</button>
-          <input ref={fileRef} type="file" accept="application/json" hidden onChange={(e) => void importDb(e.target.files?.[0])} />
-        </div>
-        <p className="subtle">MVP works fully offline and requires no account/login.</p>
-        {status && <p className="success">{status}</p>}
+        <button className="ghost" onClick={() => void seedDemoData(categories)}>Load Demo Data Now</button>
+        <p className="subtle">Load sample gear items and events to explore features</p>
       </div>
+
+      <div className="card stack-md">
+        <h3>About</h3>
+        <p className="subtle">GearVault is a progressive web app that works completely offline. No account or login required.</p>
+        <div className="stack-sm">
+          <p><strong>Version:</strong> 1.0.0</p>
+          <p><strong>Storage:</strong> IndexedDB (local)</p>
+          <p><strong>Open Source:</strong> Built with React + TypeScript</p>
+        </div>
+      </div>
+
+      {status && (
+        <div className="card">
+          <p className="success">{status}</p>
+        </div>
+      )}
     </section>
   );
 }

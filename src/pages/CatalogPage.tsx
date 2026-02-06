@@ -59,6 +59,7 @@ export function CatalogPage() {
   const [showAddItemForm, setShowAddItemForm] = useState(false);
   const [openCategoryMenuId, setOpenCategoryMenuId] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
   const tags = useMemo(() => {
     const set = new Set<string>();
@@ -218,49 +219,61 @@ export function CatalogPage() {
   return (
     <section className="stack-lg">
       <div className="card stack-md">
-        <div className="row between wrap catalog-header-row">
-          <div className="stack-sm catalog-title-wrap">
+        <div className="page-header">
+          <div className="page-title-section">
             <h2>Catalog</h2>
-            <p className="subtle">{gear.length} items</p>
+            <p className="subtle">{filtered.length} of {gear.length} items</p>
           </div>
-
-          <div className="catalog-add-actions">
-            <button className="icon-circle-btn" aria-label="Open add options" onClick={() => setShowAddActions((prev) => !prev)}>+</button>
-            {showAddActions && (
-              <div className="catalog-add-menu">
-                <button className="ghost" onClick={() => { setShowAddItemForm((prev) => !prev); setShowAddActions(false); }}>
-                  {showAddItemForm ? 'Hide add item form' : 'Add new item'}
-                </button>
-                <button className="ghost" onClick={() => { void addCategory(); }}>Add category</button>
-              </div>
-            )}
+          <div className="page-actions">
+            <button className="ghost" onClick={() => setShowFilters((prev) => !prev)}>
+              {showFilters ? 'Hide' : 'Show'} Filters
+            </button>
+            <div className="catalog-add-actions">
+              <button className="icon-circle-btn" aria-label="Open add options" onClick={() => setShowAddActions((prev) => !prev)}>+</button>
+              {showAddActions && (
+                <div className="catalog-add-menu">
+                  <button className="ghost" onClick={() => { setShowAddItemForm((prev) => !prev); setShowAddActions(false); }}>
+                    {showAddItemForm ? 'Hide add item form' : 'Add new item'}
+                  </button>
+                  <button className="ghost" onClick={() => { void addCategory(); }}>Add category</button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="grid filters">
-          <input aria-label="Search gear" placeholder="Search gear" value={query} onChange={(e) => setQuery(e.target.value)} />
-          <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} aria-label="Filter by category">
-            <option value="all">All categories</option>
-            {categories.map((c) => (<option key={c.id} value={c.id}>{c.name}</option>))}
-          </select>
-          <select value={tagFilter} onChange={(e) => setTagFilter(e.target.value)} aria-label="Filter by tag">
-            <option value="">All tags</option>
-            {tags.map((tag) => (<option key={tag} value={tag}>{tag}</option>))}
-          </select>
-          <select value={conditionFilter} onChange={(e) => setConditionFilter(e.target.value as 'all' | Condition)} aria-label="Condition filter">
-            <option value="all">All conditions</option>
-            <option value="new">New</option>
-            <option value="good">Good</option>
-            <option value="worn">Worn</option>
-          </select>
-          <select value={sortBy} onChange={(e) => setSortBy(e.target.value as 'name' | 'brand' | 'newest' | 'value')} aria-label="Sorting">
-            <option value="name">Sort: Name</option>
-            <option value="brand">Sort: Brand</option>
-            <option value="newest">Sort: Newest</option>
-            <option value="value">Sort: Value</option>
-          </select>
-          <label className="checkbox-inline"><input type="checkbox" checked={essentialOnly} onChange={(e) => setEssentialOnly(e.target.checked)} /> Essential only</label>
-        </div>
+        <input 
+          aria-label="Search gear" 
+          placeholder="Search gear..." 
+          value={query} 
+          onChange={(e) => setQuery(e.target.value)} 
+        />
+
+        {showFilters && (
+          <div className="grid filters">
+            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} aria-label="Filter by category">
+              <option value="all">All categories</option>
+              {categories.map((c) => (<option key={c.id} value={c.id}>{c.name}</option>))}
+            </select>
+            <select value={tagFilter} onChange={(e) => setTagFilter(e.target.value)} aria-label="Filter by tag">
+              <option value="">All tags</option>
+              {tags.map((tag) => (<option key={tag} value={tag}>{tag}</option>))}
+            </select>
+            <select value={conditionFilter} onChange={(e) => setConditionFilter(e.target.value as 'all' | Condition)} aria-label="Condition filter">
+              <option value="all">All conditions</option>
+              <option value="new">New</option>
+              <option value="good">Good</option>
+              <option value="worn">Worn</option>
+            </select>
+            <select value={sortBy} onChange={(e) => setSortBy(e.target.value as 'name' | 'brand' | 'newest' | 'value')} aria-label="Sorting">
+              <option value="name">Sort: Name</option>
+              <option value="brand">Sort: Brand</option>
+              <option value="newest">Sort: Newest</option>
+              <option value="value">Sort: Value</option>
+            </select>
+            <label className="checkbox-inline"><input type="checkbox" checked={essentialOnly} onChange={(e) => setEssentialOnly(e.target.checked)} /> Essential only</label>
+          </div>
+        )}
       </div>
 
       {showAddItemForm && (
@@ -284,26 +297,39 @@ export function CatalogPage() {
             <select value={draft.condition} onChange={(e) => setDraft({ ...draft, condition: e.target.value as Condition })}>
               <option value="new">New</option><option value="good">Good</option><option value="worn">Worn</option>
             </select>
-            <input type="number" min={1} value={draft.quantity} onChange={(e) => setDraft({ ...draft, quantity: Number(e.target.value || 1) })} />
+            <input type="number" min={1} placeholder="Quantity" value={draft.quantity} onChange={(e) => setDraft({ ...draft, quantity: Number(e.target.value || 1) })} />
           </div>
           <textarea placeholder="Notes" value={draft.notes} onChange={(e) => setDraft({ ...draft, notes: e.target.value })} />
           <input placeholder="Tags (comma separated)" value={draft.tagsText} onChange={(e) => setDraft({ ...draft, tagsText: e.target.value })} />
           <textarea placeholder="Custom fields (key:value one per line)" value={draft.customFieldsText} onChange={(e) => setDraft({ ...draft, customFieldsText: e.target.value })} />
-          <label className="stack-sm form-file-label">Photo<input type="file" accept="image/*" onChange={(e) => void handlePhotoUpload(e.target.files?.[0])} /></label>
+          <label className="form-file-label">Photo<input type="file" accept="image/*" onChange={(e) => void handlePhotoUpload(e.target.files?.[0])} /></label>
           <label className="checkbox-inline"><input type="checkbox" checked={draft.essential} onChange={(e) => setDraft({ ...draft, essential: e.target.checked })} /> Mark as essential</label>
           {error && <p className="error">{error}</p>}
           <button onClick={() => void addItem()}>Save item</button>
         </div>
       )}
 
+      {gear.length === 0 && (
+        <div className="card empty">
+          <h3>No gear yet</h3>
+          <p>Add your first item to get started</p>
+        </div>
+      )}
+
+      {filtered.length === 0 && gear.length > 0 && (
+        <div className="card empty">
+          <h3>No results found</h3>
+          <p>Try adjusting your filters or search query</p>
+        </div>
+      )}
+
       <div className="stack-md">
-        {gear.length === 0 && <div className="card empty">No gear yet—add your first item.</div>}
         {categories.map((category, idx) => {
           const items = grouped.get(category.id) ?? [];
           if (!items.length && query) return null;
           return (
             <article className="card" key={category.id}>
-              <div className="row between wrap category-header-row">
+              <div className="category-header-row">
                 <button className="text-btn category-title-btn" onClick={() => void toggleCollapse(category)}>
                   {category.collapsed ? '▸' : '▾'} {category.name} ({items.length})
                 </button>
@@ -319,17 +345,25 @@ export function CatalogPage() {
                   )}
                 </div>
               </div>
-              {!category.collapsed && (
+              {!category.collapsed && items.length > 0 && (
                 <div className="grid cards">
                   {items.map((item) => (
                     <button key={item.id} className="gear-card" onClick={() => navigate(`/catalog/item/${item.id}`)}>
                       <strong>{item.name}</strong>
-                      <span>{item.brand} {item.model}</span>
-                      <span className="subtle">Qty {item.quantity} • {item.condition}</span>
-                      {item.essential && <span className="pill">Essential</span>}
+                      {(item.brand || item.model) && (
+                        <span className="subtle">{item.brand} {item.model}</span>
+                      )}
+                      <div className="row wrap">
+                        <span className="pill">Qty {item.quantity}</span>
+                        <span className="pill">{item.condition}</span>
+                        {item.essential && <span className="pill">⭐ Essential</span>}
+                      </div>
                     </button>
                   ))}
                 </div>
+              )}
+              {!category.collapsed && items.length === 0 && (
+                <p className="subtle" style={{ marginTop: '0.5rem' }}>No items in this category</p>
               )}
             </article>
           );

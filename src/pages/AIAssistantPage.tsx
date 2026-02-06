@@ -83,29 +83,37 @@ export function AIAssistantPage() {
   return (
     <section className="stack-lg">
       <div className="card stack-md">
-        <h2>AI Pack Assistant</h2>
-        <p className="subtle">{catalog.length} items in your catalog</p>
+        <div className="page-header">
+          <div className="page-title-section">
+            <h2>AI Pack Assistant</h2>
+            <p className="subtle">{catalog.length} items in your catalog</p>
+          </div>
+        </div>
+
         <textarea
           className="assistant-prompt"
-          placeholder="e.g. wedding in a dark church, hybrid coverage, long day"
+          placeholder="Describe your event in detail...&#10;&#10;Example: 'Wedding in a dark church, full day coverage from 10am-10pm, hybrid photo/video, need backup equipment, outdoor portraits in the afternoon'"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
+
         <div className="row between wrap">
-          <span className="subtle">Describe your shoot to generate a smart checklist.</span>
+          <span className="subtle">AI will generate a smart packing checklist</span>
           <button onClick={() => void runQuestions()} disabled={loading || !description.trim()}>
-            {loading ? 'Thinking…' : 'Generate'}
+            {loading ? 'Thinking…' : 'Generate Checklist'}
           </button>
         </div>
+
         {error && <p className="error">{error}</p>}
       </div>
 
       {questions.length > 0 && !plan && (
         <div className="card stack-md">
-          <h3>Follow-up questions</h3>
+          <h3>Follow-up Questions</h3>
+          <p className="subtle">Answer these to get a more tailored checklist</p>
           {questions.map((q) => (
-            <label key={q}>
-              {q}
+            <label key={q} className="stack-sm">
+              <strong>{q}</strong>
               <input
                 value={answers[q] ?? ''}
                 onChange={(e) => setAnswers((prev) => ({ ...prev, [q]: e.target.value }))}
@@ -113,7 +121,7 @@ export function AIAssistantPage() {
             </label>
           ))}
           <button onClick={() => void generatePlan(answers)} disabled={loading}>
-            Generate event + checklist
+            {loading ? 'Generating…' : 'Generate Event & Checklist'}
           </button>
         </div>
       )}
@@ -128,49 +136,60 @@ export function AIAssistantPage() {
                 if (latest) navigate(`/events/${latest.id}`);
               }}
             >
-              Open generated event
+              Open Event
             </button>
           </div>
 
-          <h4>Checklist</h4>
-          <ul className="stack-sm">
-            {plan.checklist.map((item) => (
-              <li key={`${item.name}-${item.gearItemId ?? 'x'}`} className="row between wrap checklist-row">
-                <span>
-                  {item.name} × {item.quantity} <small className="subtle">{item.priority}</small>
-                </span>
-                <span className="row">
-                  <button
-                    className="ghost"
-                    onClick={() => void storeSuggestionFeedback(plan.eventType, item.name, true)}
-                  >
-                    Useful
-                  </button>
-                  <button
-                    className="ghost"
-                    onClick={() => void storeSuggestionFeedback(plan.eventType, item.name, false)}
-                  >
-                    Not useful
-                  </button>
-                </span>
-              </li>
-            ))}
-          </ul>
-
-          <h4>Missing / not in your catalog</h4>
-          <ul className="stack-sm">
-            {plan.missingItems.map((item) => (
-              <li key={item.name} className="checklist-row">
-                <strong>{item.name}</strong> — {item.reason}
-                <div className="row wrap">
-                  <span className="pill">{item.priority}</span>
-                  <span className="pill">{item.action}</span>
+          <div className="stack-sm">
+            <h4>Recommended Items ({plan.checklist.length})</h4>
+            <div className="stack-sm">
+              {plan.checklist.map((item) => (
+                <div key={`${item.name}-${item.gearItemId ?? 'x'}`} className="checklist-row">
+                  <div className="row between wrap">
+                    <div className="stack-sm" style={{ flex: 1 }}>
+                      <strong>{item.name} × {item.quantity}</strong>
+                      <span className="pill">{item.priority}</span>
+                    </div>
+                    <div className="row">
+                      <button
+                        className="ghost"
+                        onClick={() => void storeSuggestionFeedback(plan.eventType, item.name, true)}
+                      >
+                        👍 Useful
+                      </button>
+                      <button
+                        className="ghost"
+                        onClick={() => void storeSuggestionFeedback(plan.eventType, item.name, false)}
+                      >
+                        👎 Not useful
+                      </button>
+                    </div>
+                  </div>
                 </div>
-              </li>
-            ))}
-          </ul>
+              ))}
+            </div>
+          </div>
+
+          {plan.missingItems.length > 0 && (
+            <div className="stack-sm">
+              <h4>Missing from Catalog ({plan.missingItems.length})</h4>
+              <div className="stack-sm">
+                {plan.missingItems.map((item) => (
+                  <div key={item.name} className="checklist-row stack-sm">
+                    <strong>{item.name}</strong>
+                    <p className="subtle">{item.reason}</p>
+                    <div className="row wrap">
+                      <span className="pill">{item.priority}</span>
+                      <span className="pill">{item.action}</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           <button
+            className="ghost"
             onClick={() => {
               localStorage.setItem(
                 'gearvault-final-packed-snapshot',
@@ -178,13 +197,14 @@ export function AIAssistantPage() {
               );
             }}
           >
-            Save final packed list snapshot
+            Save Snapshot to Local Storage
           </button>
         </div>
       )}
 
-      <div className="card">
-        <h4>Catalog JSON sent to AI</h4>
+      <div className="card stack-sm">
+        <h4>Catalog Summary</h4>
+        <p className="subtle">This is the data sent to AI for generating checklists</p>
         <pre className="json-preview">{JSON.stringify(summaryCatalog, null, 2)}</pre>
       </div>
     </section>
