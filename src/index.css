@@ -306,6 +306,11 @@ a {
   line-height: 1.1;
 }
 
+.topbar-user,
+.topbar-sync {
+  font-size: 0.78rem;
+}
+
 @media (min-width: 768px) {
   .topbar h1 {
     font-size: 1.75rem;
@@ -336,6 +341,17 @@ a {
   flex-direction: column;
   gap: 1rem;
   padding: 1rem;
+}
+
+.auth-shell {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+}
+
+.auth-card {
+  width: min(520px, 100%);
 }
 
 @media (min-width: 768px) {

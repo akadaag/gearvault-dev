@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { ensureBaseData } from '../db';
+import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -18,6 +19,7 @@ const tabs = [
 
 export function TabLayout() {
   useTheme();
+  const { user, signOut, syncMessage } = useAuth();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState<boolean>(() =>
     window.matchMedia('(display-mode: standalone)').matches,
@@ -70,6 +72,8 @@ export function TabLayout() {
         <div className="topbar-inner">
           <div className="topbar-title">
             <h1>GearVault</h1>
+            <p className="subtle topbar-user">{user?.email}</p>
+            {syncMessage && <p className="subtle topbar-sync">{syncMessage}</p>}
             <div className="topbar-actions">
               <span className={`status-chip ${isOnline ? 'online' : 'offline'}`}>
                 <span className="status-dot" aria-hidden="true" />
@@ -81,6 +85,9 @@ export function TabLayout() {
                 </button>
               )}
               {isInstalled && <span className="pill">Installed</span>}
+              <button className="ghost" onClick={() => void signOut()}>
+                Logout
+              </button>
             </div>
           </div>
         </div>

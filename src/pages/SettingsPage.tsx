@@ -2,14 +2,18 @@ import { useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, ensureBaseData } from '../db';
 import { defaultCategories } from '../constants/defaultCategories';
+import { useAuth } from '../hooks/useAuth';
 import { seedDemoData } from '../lib/demoData';
+import { syncNow } from '../services/sync';
 import type { AppSettings, ExportBundle } from '../types/models';
 
 export function SettingsPage() {
+  const { user, syncMessage } = useAuth();
   const settings = useLiveQuery(() => db.settings.get('app-settings'), []);
   const categories = useLiveQuery(() => db.categories.toArray(), [], defaultCategories);
   const fileRef = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState('');
+  const [syncing, setSyncing] = useState(false);
 
   if (!settings) return <div className="card">Loading settings…</div>;
 
@@ -74,6 +78,20 @@ export function SettingsPage() {
     setStatus('Database imported successfully.');
   }
 
+  async function handleSyncNow() {
+    if (!user) return;
+    setSyncing(true);
+    setStatus('');
+    try {
+      const result = await syncNow(user.id);
+      setStatus(result.direction === 'push' ? 'Local changes synced to cloud.' : 'Cloud changes pulled locally.');
+    } catch (e) {
+      setStatus(e instanceof Error ? e.message : 'Cloud sync failed.');
+    } finally {
+      setSyncing(false);
+    }
+  }
+
   return (
     <section className="stack-lg">
       <div className="card stack-md">
@@ -102,9 +120,15 @@ export function SettingsPage() {
         <h3>Sync & Backup</h3>
         <label className="checkbox-inline">
           <input type="checkbox" checked={settings.syncEnabled} onChange={(e) => void update('syncEnabled', e.target.checked)} />
-          <span>Enable cloud sync (coming soon)</span>
+          <span>Enable cloud sync</span>
         </label>
-        <p className="subtle">Ready for future cloud sync integration</p>
+        <p className="subtle">Your data syncs automatically while online. You can also trigger a manual sync.</p>
+        <div className="row wrap">
+          <button className="ghost" onClick={() => void handleSyncNow()} disabled={!settings.syncEnabled || syncing}>
+            {syncing ? 'Syncing…' : 'Sync now'}
+          </button>
+          {syncMessage && <span className="subtle">{syncMessage}</span>}
+        </div>
         
         <hr />
 
@@ -159,10 +183,10 @@ export function SettingsPage() {
 
       <div className="card stack-md">
         <h3>About</h3>
-        <p className="subtle">GearVault is a progressive web app that works completely offline. No account or login required.</p>
+        <p className="subtle">GearVault is a progressive web app with account-based cloud sync and offline-capable local storage.</p>
         <div className="stack-sm">
           <p><strong>Version:</strong> 1.0.0</p>
-          <p><strong>Storage:</strong> IndexedDB (local)</p>
+          <p><strong>Storage:</strong> IndexedDB + Supabase cloud sync</p>
           <p><strong>Open Source:</strong> Built with React + TypeScript</p>
         </div>
       </div>
