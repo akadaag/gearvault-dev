@@ -70,19 +70,18 @@ export function TabLayout() {
         <div className="topbar-inner">
           <div className="topbar-title">
             <h1>GearVault</h1>
-            <p className="subtle">Professional gear management</p>
-          </div>
-          <div className="topbar-actions">
-            <span className={`status-chip ${isOnline ? 'online' : 'offline'}`}>
-              <span className="status-dot" aria-hidden="true" />
-              {isOnline ? 'Online' : 'Offline'}
-            </span>
-            {!isInstalled && deferredPrompt && (
-              <button className="ghost" onClick={() => void handleInstall()}>
-                Install App
-              </button>
-            )}
-            {isInstalled && <span className="pill">Installed</span>}
+            <div className="topbar-actions">
+              <span className={`status-chip ${isOnline ? 'online' : 'offline'}`}>
+                <span className="status-dot" aria-hidden="true" />
+                {isOnline ? 'Online' : 'Offline'}
+              </span>
+              {!isInstalled && deferredPrompt && (
+                <button className="ghost" onClick={() => void handleInstall()}>
+                  Install App
+                </button>
+              )}
+              {isInstalled && <span className="pill">Installed</span>}
+            </div>
           </div>
         </div>
       </header>
@@ -99,7 +98,7 @@ export function TabLayout() {
             className={({ isActive }) => (isActive ? 'tab active' : 'tab')}
             aria-label={tab.label}
           >
-            <span role="img" aria-hidden="true" style={{ fontSize: '1.25rem' }}>
+            <span role="img" aria-hidden="true" style={{ fontSize: '1.05rem' }}>
               {tab.icon}
             </span>
             <span>{tab.label}</span>
