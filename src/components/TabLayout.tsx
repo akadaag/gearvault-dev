@@ -78,6 +78,12 @@ export function TabLayout() {
     navigate({ pathname: '/catalog', search: params.toString() ? `?${params.toString()}` : '' });
   }
 
+  function openCatalogFilters() {
+    const params = new URLSearchParams(searchParams);
+    params.set('filters', '1');
+    navigate({ pathname: '/catalog', search: params.toString() ? `?${params.toString()}` : '' });
+  }
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -102,13 +108,17 @@ export function TabLayout() {
               </button>
             </div>
             {isCatalogRoute && (
-              <div className="topbar-search">
+              <div className="topbar-search-row">
                 <input
+                  className="topbar-search-input"
                   aria-label="Search catalog items"
                   placeholder="Search gear..."
                   value={catalogQuery}
                   onChange={(event) => handleCatalogSearch(event.target.value)}
                 />
+                <button className="ghost topbar-filter-btn" aria-label="Open filters" onClick={openCatalogFilters}>
+                  Filters
+                </button>
               </div>
             )}
           </div>

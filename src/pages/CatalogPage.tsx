@@ -45,12 +45,13 @@ const initialDraft: GearDraft = {
 
 export function CatalogPage() {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const categories = useLiveQuery(() => db.categories.orderBy('sortOrder').toArray(), [], []);
   const gear = useLiveQuery(() => db.gearItems.toArray(), [], []);
 
   const query = searchParams.get('q')?.trim() ?? '';
-  const [categoryFilter, setCategoryFilter] = useState('all');
+  const selectedCategoryIds = (searchParams.get('cats') ?? '').split(',').filter(Boolean);
+  const showFilterSheet = searchParams.get('filters') === '1';
   const [tagFilter, setTagFilter] = useState('');
   const [essentialOnly, setEssentialOnly] = useState(false);
   const [conditionFilter, setConditionFilter] = useState<'all' | Condition>('all');
@@ -60,7 +61,6 @@ export function CatalogPage() {
   const [showAddItemForm, setShowAddItemForm] = useState(false);
   const [openCategoryMenuId, setOpenCategoryMenuId] = useState<string | null>(null);
   const [error, setError] = useState('');
-  const [showFilters, setShowFilters] = useState(false);
 
   const tags = useMemo(() => {
     const set = new Set<string>();
@@ -80,7 +80,7 @@ export function CatalogPage() {
         categoryNameById.get(item.categoryId),
       ].join(' ');
       if (!fuzzyIncludes(text, query)) return false;
-      if (categoryFilter !== 'all' && item.categoryId !== categoryFilter) return false;
+      if (selectedCategoryIds.length > 0 && !selectedCategoryIds.includes(item.categoryId)) return false;
       if (tagFilter && !item.tags.includes(tagFilter)) return false;
       if (essentialOnly && !item.essential) return false;
       if (conditionFilter !== 'all' && item.condition !== conditionFilter) return false;
@@ -95,7 +95,7 @@ export function CatalogPage() {
     });
 
     return items;
-  }, [categories, categoryFilter, conditionFilter, essentialOnly, gear, query, sortBy, tagFilter]);
+  }, [categories, conditionFilter, essentialOnly, gear, query, selectedCategoryIds, sortBy, tagFilter]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, GearItem[]>();
@@ -217,58 +217,108 @@ export function CatalogPage() {
     setOpenCategoryMenuId(null);
   }
 
+  function updateSearchParams(mutator: (params: URLSearchParams) => void) {
+    const params = new URLSearchParams(searchParams);
+    mutator(params);
+    setSearchParams(params);
+  }
+
+  function toggleCategoryFilter(categoryId: string) {
+    updateSearchParams((params) => {
+      const current = (params.get('cats') ?? '').split(',').filter(Boolean);
+      const next = current.includes(categoryId)
+        ? current.filter((id) => id !== categoryId)
+        : [...current, categoryId];
+
+      if (next.length > 0) params.set('cats', next.join(','));
+      else params.delete('cats');
+    });
+  }
+
+  function closeFilterSheet() {
+    updateSearchParams((params) => {
+      params.delete('filters');
+    });
+  }
+
+  function clearAllFilters() {
+    updateSearchParams((params) => {
+      params.delete('cats');
+    });
+    setTagFilter('');
+    setConditionFilter('all');
+    setEssentialOnly(false);
+    setSortBy('name');
+  }
+
   return (
     <section className="stack-lg">
-      <div className="card stack-md">
-        <div className="page-header">
-          <div className="page-title-section">
-            <h2>Catalog</h2>
-            <p className="subtle">{filtered.length} of {gear.length} items</p>
-          </div>
-          <div className="page-actions">
-            <button className="ghost" onClick={() => setShowFilters((prev) => !prev)}>
-              {showFilters ? 'Hide' : 'Show'} Filters
-            </button>
-            <div className="catalog-add-actions">
-              <button className="icon-circle-btn" aria-label="Open add options" onClick={() => setShowAddActions((prev) => !prev)}>+</button>
-              {showAddActions && (
-                <div className="catalog-add-menu">
-                  <button className="ghost" onClick={() => { setShowAddItemForm((prev) => !prev); setShowAddActions(false); }}>
-                    {showAddItemForm ? 'Hide add item form' : 'Add new item'}
-                  </button>
-                  <button className="ghost" onClick={() => { void addCategory(); }}>Add category</button>
-                </div>
-              )}
-            </div>
-          </div>
+      <div className="catalog-header-row">
+        <div>
+          <h2>Catalog</h2>
+          <p className="subtle">{filtered.length} of {gear.length} items</p>
         </div>
-
-        {showFilters && (
-          <div className="grid filters">
-            <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} aria-label="Filter by category">
-              <option value="all">All categories</option>
-              {categories.map((c) => (<option key={c.id} value={c.id}>{c.name}</option>))}
-            </select>
-            <select value={tagFilter} onChange={(e) => setTagFilter(e.target.value)} aria-label="Filter by tag">
-              <option value="">All tags</option>
-              {tags.map((tag) => (<option key={tag} value={tag}>{tag}</option>))}
-            </select>
-            <select value={conditionFilter} onChange={(e) => setConditionFilter(e.target.value as 'all' | Condition)} aria-label="Condition filter">
-              <option value="all">All conditions</option>
-              <option value="new">New</option>
-              <option value="good">Good</option>
-              <option value="worn">Worn</option>
-            </select>
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value as 'name' | 'brand' | 'newest' | 'value')} aria-label="Sorting">
-              <option value="name">Sort: Name</option>
-              <option value="brand">Sort: Brand</option>
-              <option value="newest">Sort: Newest</option>
-              <option value="value">Sort: Value</option>
-            </select>
-            <label className="checkbox-inline"><input type="checkbox" checked={essentialOnly} onChange={(e) => setEssentialOnly(e.target.checked)} /> Essential only</label>
-          </div>
-        )}
+        <div className="catalog-add-actions">
+          <button className="icon-circle-btn" aria-label="Open add options" onClick={() => setShowAddActions((prev) => !prev)}>+</button>
+          {showAddActions && (
+            <div className="catalog-add-menu">
+              <button className="ghost" onClick={() => { setShowAddItemForm((prev) => !prev); setShowAddActions(false); }}>
+                {showAddItemForm ? 'Hide add item form' : 'Add new item'}
+              </button>
+              <button className="ghost" onClick={() => { void addCategory(); }}>Add category</button>
+            </div>
+          )}
+        </div>
       </div>
+
+      {showFilterSheet && (
+        <>
+          <button className="sheet-overlay" aria-label="Close filters" onClick={closeFilterSheet} />
+          <aside className="filter-sheet card stack-md" aria-label="Catalog filters">
+            <div className="row between">
+              <h3>Filters</h3>
+              <button className="ghost" onClick={closeFilterSheet}>Done</button>
+            </div>
+
+            <div className="stack-sm">
+              <strong>Categories</strong>
+              <div className="catalog-filter-checklist">
+                {categories.map((category) => {
+                  const checked = selectedCategoryIds.includes(category.id);
+                  return (
+                    <label className="checkbox-inline" key={category.id}>
+                      <input type="checkbox" checked={checked} onChange={() => toggleCategoryFilter(category.id)} />
+                      {category.name}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="grid filters">
+              <select value={tagFilter} onChange={(e) => setTagFilter(e.target.value)} aria-label="Filter by tag">
+                <option value="">All tags</option>
+                {tags.map((tag) => (<option key={tag} value={tag}>{tag}</option>))}
+              </select>
+              <select value={conditionFilter} onChange={(e) => setConditionFilter(e.target.value as 'all' | Condition)} aria-label="Condition filter">
+                <option value="all">All conditions</option>
+                <option value="new">New</option>
+                <option value="good">Good</option>
+                <option value="worn">Worn</option>
+              </select>
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value as 'name' | 'brand' | 'newest' | 'value')} aria-label="Sorting">
+                <option value="name">Sort: Name</option>
+                <option value="brand">Sort: Brand</option>
+                <option value="newest">Sort: Newest</option>
+                <option value="value">Sort: Value</option>
+              </select>
+              <label className="checkbox-inline"><input type="checkbox" checked={essentialOnly} onChange={(e) => setEssentialOnly(e.target.checked)} /> Essential only</label>
+            </div>
+
+            <button className="ghost" onClick={clearAllFilters}>Clear all filters</button>
+          </aside>
+        </>
+      )}
 
       {showAddItemForm && (
         <div className="card stack-md catalog-add-form">

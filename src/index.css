@@ -334,6 +334,34 @@ a {
   background: var(--card);
 }
 
+.topbar-search-row {
+  margin-top: 0.45rem;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.topbar-search-input {
+  width: 100%;
+  border-radius: 999px;
+  min-height: 44px;
+  padding-inline: 1rem;
+}
+
+.topbar-filter-btn {
+  min-height: 44px;
+  border-radius: 999px;
+  padding: 0.55rem 0.9rem;
+  white-space: nowrap;
+}
+
+@media (min-width: 768px) {
+  .topbar-search-row {
+    width: min(900px, 100%);
+  }
+}
+
 .topbar-actions button {
   min-height: 32px;
   padding: 0.28rem 0.62rem;
@@ -659,6 +687,13 @@ a {
   position: relative;
 }
 
+.catalog-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
 .icon-circle-btn {
   width: var(--tap);
   min-width: var(--tap);
@@ -685,6 +720,43 @@ a {
   border-radius: var(--radius-md);
   padding: 0.5rem;
   box-shadow: var(--shadow-md);
+}
+
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.28);
+  z-index: 70;
+}
+
+.filter-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 80;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  max-height: min(72vh, 620px);
+  overflow: auto;
+  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
+}
+
+.catalog-filter-checklist {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.45rem;
+}
+
+@media (min-width: 768px) {
+  .filter-sheet {
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(720px, calc(100% - 2rem));
+    border-bottom-left-radius: var(--radius-md);
+    border-bottom-right-radius: var(--radius-md);
+    bottom: 1rem;
+  }
 }
 
 .catalog-add-form {
@@ -816,9 +888,17 @@ a {
 }
 
 .gear-card:hover {
-  border-color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
+  background: var(--card);
+  color: var(--text);
   box-shadow: var(--shadow-md);
   transform: translateY(-2px);
+}
+
+.gear-card:active {
+  background: var(--bg-soft);
+  color: var(--text);
+  border-color: var(--border-strong);
 }
 
 .event-card {
