@@ -31,11 +31,19 @@
   box-sizing: border-box;
 }
 
+html,
+body,
+#root {
+  width: 100%;
+  min-height: 100%;
+}
+
 body {
   margin: 0;
   background: var(--bg);
   color: var(--text);
   -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
 }
 
 #root {
@@ -111,7 +119,7 @@ a {
 }
 
 .app-shell {
-  max-width: 1160px;
+  width: min(1160px, 100%);
   margin: 0 auto;
   padding: max(0.8rem, env(safe-area-inset-top)) 0.85rem calc(5.4rem + env(safe-area-inset-bottom));
 }
@@ -146,13 +154,14 @@ a {
 
 .tabs {
   position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  margin-inline: auto;
   bottom: calc(0.45rem + env(safe-area-inset-bottom));
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 0.4rem;
-  width: min(760px, calc(100vw - 0.9rem));
+  width: min(760px, calc(100% - 0.9rem));
   background: color-mix(in srgb, var(--card) 88%, transparent);
   border: 1px solid var(--border);
   padding: 0.4rem;
