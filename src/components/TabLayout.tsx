@@ -1,4 +1,4 @@
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { ensureBaseData } from '../db';
 import { useAuth } from '../hooks/useAuth';
@@ -20,11 +20,16 @@ const tabs = [
 export function TabLayout() {
   useTheme();
   const { user, signOut, syncMessage } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState<boolean>(() =>
     window.matchMedia('(display-mode: standalone)').matches,
   );
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
+  const isCatalogRoute = location.pathname === '/catalog';
+  const catalogQuery = searchParams.get('q') ?? '';
 
   useEffect(() => {
     void ensureBaseData();
@@ -66,6 +71,13 @@ export function TabLayout() {
     }
   }
 
+  function handleCatalogSearch(value: string) {
+    const params = new URLSearchParams(searchParams);
+    if (value.trim()) params.set('q', value);
+    else params.delete('q');
+    navigate({ pathname: '/catalog', search: params.toString() ? `?${params.toString()}` : '' });
+  }
+
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -89,6 +101,16 @@ export function TabLayout() {
                 Logout
               </button>
             </div>
+            {isCatalogRoute && (
+              <div className="topbar-search">
+                <input
+                  aria-label="Search catalog items"
+                  placeholder="Search gear..."
+                  value={catalogQuery}
+                  onChange={(event) => handleCatalogSearch(event.target.value)}
+                />
+              </div>
+            )}
           </div>
         </div>
       </header>

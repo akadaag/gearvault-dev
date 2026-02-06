@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
 import { makeId } from '../lib/ids';
@@ -45,10 +45,11 @@ const initialDraft: GearDraft = {
 
 export function CatalogPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const categories = useLiveQuery(() => db.categories.orderBy('sortOrder').toArray(), [], []);
   const gear = useLiveQuery(() => db.gearItems.toArray(), [], []);
 
-  const [query, setQuery] = useState('');
+  const query = searchParams.get('q')?.trim() ?? '';
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [tagFilter, setTagFilter] = useState('');
   const [essentialOnly, setEssentialOnly] = useState(false);
@@ -242,13 +243,6 @@ export function CatalogPage() {
           </div>
         </div>
 
-        <input 
-          aria-label="Search gear" 
-          placeholder="Search gear..." 
-          value={query} 
-          onChange={(e) => setQuery(e.target.value)} 
-        />
-
         {showFilters && (
           <div className="grid filters">
             <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} aria-label="Filter by category">
@@ -326,44 +320,50 @@ export function CatalogPage() {
       <div className="stack-md">
         {categories.map((category, idx) => {
           const items = grouped.get(category.id) ?? [];
-          if (!items.length && query) return null;
+          if (!items.length) return null;
           return (
-            <article className="card" key={category.id}>
+            <article className="catalog-group stack-sm" key={category.id}>
               <div className="category-header-row">
                 <button className="text-btn category-title-btn" onClick={() => void toggleCollapse(category)}>
-                  {category.collapsed ? '▸' : '▾'} {category.name} ({items.length})
+                  {category.name} <span className="category-count-pill">{items.length}</span>
                 </button>
-                <div className="category-actions">
-                  <button className="ghost icon-compact-btn" aria-label={`Open actions for ${category.name}`} onClick={() => setOpenCategoryMenuId((prev) => (prev === category.id ? null : category.id))}>⋯</button>
-                  {openCategoryMenuId === category.id && (
-                    <div className="category-menu">
-                      <button className="ghost" onClick={async () => { await reorderCategory(category.id, -1); setOpenCategoryMenuId(null); }} disabled={idx === 0}>Move up</button>
-                      <button className="ghost" onClick={async () => { await reorderCategory(category.id, 1); setOpenCategoryMenuId(null); }} disabled={idx === categories.length - 1}>Move down</button>
-                      <button className="ghost" onClick={async () => { await renameCategory(category); setOpenCategoryMenuId(null); }}>Rename</button>
-                      {!category.isDefault && <button className="ghost danger" onClick={async () => { await deleteCategory(category); setOpenCategoryMenuId(null); }}>Delete</button>}
-                    </div>
-                  )}
+                <div className="row">
+                  <button className="ghost icon-compact-btn category-collapse-btn" aria-label={category.collapsed ? `Expand ${category.name}` : `Collapse ${category.name}`} onClick={() => void toggleCollapse(category)}>
+                    {category.collapsed ? '▾' : '▴'}
+                  </button>
+                  <div className="category-actions">
+                    <button className="ghost icon-compact-btn" aria-label={`Open actions for ${category.name}`} onClick={() => setOpenCategoryMenuId((prev) => (prev === category.id ? null : category.id))}>⋯</button>
+                    {openCategoryMenuId === category.id && (
+                      <div className="category-menu">
+                        <button className="ghost" onClick={async () => { await reorderCategory(category.id, -1); setOpenCategoryMenuId(null); }} disabled={idx === 0}>Move up</button>
+                        <button className="ghost" onClick={async () => { await reorderCategory(category.id, 1); setOpenCategoryMenuId(null); }} disabled={idx === categories.length - 1}>Move down</button>
+                        <button className="ghost" onClick={async () => { await renameCategory(category); setOpenCategoryMenuId(null); }}>Rename</button>
+                        {!category.isDefault && <button className="ghost danger" onClick={async () => { await deleteCategory(category); setOpenCategoryMenuId(null); }}>Delete</button>}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
-              {!category.collapsed && items.length > 0 && (
-                <div className="grid cards">
+              {!category.collapsed && (
+                <div className="catalog-items-list">
                   {items.map((item) => (
-                    <button key={item.id} className="gear-card" onClick={() => navigate(`/catalog/item/${item.id}`)}>
-                      <strong>{item.name}</strong>
-                      {(item.brand || item.model) && (
-                        <span className="subtle">{item.brand} {item.model}</span>
-                      )}
-                      <div className="row wrap">
-                        <span className="pill">Qty {item.quantity}</span>
-                        <span className="pill">{item.condition}</span>
-                        {item.essential && <span className="pill">⭐ Essential</span>}
+                    <button key={item.id} className="gear-card catalog-item-card" onClick={() => navigate(`/catalog/item/${item.id}`)}>
+                      <div className="catalog-item-avatar" aria-hidden="true">{item.name.charAt(0).toUpperCase()}</div>
+                      <div className="catalog-item-main">
+                        <strong>{item.name}</strong>
+                        {(item.brand || item.model) && (
+                          <span className="subtle">{item.brand} {item.model}</span>
+                        )}
+                        <div className="row wrap">
+                          <span className="pill">Qty {item.quantity}</span>
+                          <span className="pill">{item.condition}</span>
+                          {item.essential && <span className="pill">⭐ Essential</span>}
+                        </div>
                       </div>
+                      <span className="catalog-item-arrow" aria-hidden="true">›</span>
                     </button>
                   ))}
                 </div>
-              )}
-              {!category.collapsed && items.length === 0 && (
-                <p className="subtle" style={{ marginTop: '0.5rem' }}>No items in this category</p>
               )}
             </article>
           );
