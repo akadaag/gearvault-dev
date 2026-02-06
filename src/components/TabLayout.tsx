@@ -12,7 +12,7 @@ interface BeforeInstallPromptEvent extends Event {
 const tabs = [
   { to: '/catalog', label: 'Catalog', shortLabel: 'Catalog' },
   { to: '/events', label: 'Events', shortLabel: 'Events' },
-  { to: '/assistant', label: 'AI Pack Assistant', shortLabel: 'Assistant' },
+  { to: '/assistant', label: 'AI Pack Assistant', shortLabel: 'AI Pack' },
   { to: '/settings', label: 'Settings', shortLabel: 'Settings' },
 ];
 
@@ -70,7 +70,7 @@ export function TabLayout() {
         <div className="row between wrap">
           <div>
             <h1>GearVault</h1>
-            <p className="subtle">Local-first gear intelligence for creators.</p>
+            <p className="subtle">AI-assisted gear planning for creators.</p>
           </div>
           <div className="row wrap topbar-actions">
             <span className={`status-chip ${isOnline ? 'online' : 'offline'}`}>
