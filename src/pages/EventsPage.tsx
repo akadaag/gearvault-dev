@@ -149,16 +149,24 @@ export function EventsPage() {
         {filtered.map((event) => {
           const packed = event.packingChecklist.filter((i) => i.packed).length;
           const total = event.packingChecklist.length;
+          const ratio = total > 0 ? Math.round((packed / total) * 100) : 0;
+          const status = total === 0 ? 'Draft' : packed === total ? 'Ready' : 'Packing';
           return (
-            <Link key={event.id} to={`/events/${event.id}`} className="gear-card">
-              <strong>{event.title}</strong>
-              <span>{event.type}</span>
+            <Link key={event.id} to={`/events/${event.id}`} className="gear-card event-card">
+              <div className="row between wrap event-card-head">
+                <strong>{event.title}</strong>
+                <span className={`pill event-status ${status.toLowerCase()}`}>{status}</span>
+              </div>
+              <span className="subtle">{event.type}</span>
               <span className="subtle">
                 {event.client ?? 'No client'} • {event.location ?? 'No location'}
               </span>
               <span className="pill">
                 {packed}/{total} packed
               </span>
+              <div className="progress-track" aria-hidden="true">
+                <span style={{ width: `${ratio}%` }} />
+              </div>
             </Link>
           );
         })}

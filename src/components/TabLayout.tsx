@@ -68,9 +68,9 @@ export function TabLayout() {
     <div className="app-shell">
       <header className="topbar">
         <div className="row between wrap">
-          <div>
+          <div className="stack-sm">
             <h1>GearVault</h1>
-            <p className="subtle">AI-assisted gear planning for creators.</p>
+            <p className="subtle">Clean, AI-assisted gear workspace</p>
           </div>
           <div className="row wrap topbar-actions">
             <span className={`status-chip ${isOnline ? 'online' : 'offline'}`}>

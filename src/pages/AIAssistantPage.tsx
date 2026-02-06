@@ -84,18 +84,19 @@ export function AIAssistantPage() {
     <section className="stack-lg">
       <div className="card stack-md">
         <h2>AI Pack Assistant</h2>
-        <p className="subtle">
-          Describe the event. GearVault asks up to 3 concise follow-up questions, then builds a
-          structured list.
-        </p>
+        <p className="subtle">{catalog.length} items in your catalog</p>
         <textarea
+          className="assistant-prompt"
           placeholder="e.g. wedding in a dark church, hybrid coverage, long day"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
         />
-        <button onClick={() => void runQuestions()} disabled={loading || !description.trim()}>
-          {loading ? 'Thinking…' : 'Start AI packing'}
-        </button>
+        <div className="row between wrap">
+          <span className="subtle">Describe your shoot to generate a smart checklist.</span>
+          <button onClick={() => void runQuestions()} disabled={loading || !description.trim()}>
+            {loading ? 'Thinking…' : 'Generate'}
+          </button>
+        </div>
         {error && <p className="error">{error}</p>}
       </div>
 
