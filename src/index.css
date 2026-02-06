@@ -69,6 +69,14 @@ select {
   padding: 0.65rem 0.8rem;
 }
 
+input[type='checkbox'],
+input[type='radio'] {
+  width: 1.15rem;
+  height: 1.15rem;
+  padding: 0;
+  flex: 0 0 auto;
+}
+
 textarea {
   min-height: 90px;
   resize: vertical;
@@ -293,9 +301,15 @@ a {
 }
 
 .checkbox-inline {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  max-width: 100%;
+  line-height: 1.35;
+}
+
+.checkbox-inline input {
+  margin-top: 0.1rem;
 }
 
 .gear-card {
