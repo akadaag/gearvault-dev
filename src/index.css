@@ -502,7 +502,7 @@ a {
 }
 
 .content.content-catalog {
-  padding-top: 0.12rem;
+  padding-top: 0;
 }
 
 .content-immersive {
@@ -907,6 +907,10 @@ a {
   background: var(--card);
 }
 
+.catalog-page {
+  gap: 0.55rem;
+}
+
 .catalog-group {
   display: flex;
   flex-direction: column;
@@ -947,7 +951,6 @@ a {
 }
 
 .category-toggle-btn {
-  font-size: 1.12rem;
   color: var(--text-soft);
   padding: 0;
   min-height: auto;
@@ -957,6 +960,16 @@ a {
   border: 0;
   background: transparent;
   box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+
+.category-toggle-btn .catalog-item-arrow {
+  padding-left: 0;
+  font-size: 1.35rem;
+  color: currentColor;
 }
 
 .category-toggle-btn:hover {

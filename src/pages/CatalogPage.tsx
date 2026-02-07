@@ -280,7 +280,7 @@ export function CatalogPage() {
                   aria-label={category.collapsed ? `Expand ${category.name}` : `Collapse ${category.name}`}
                   onClick={() => void toggleCollapse(category)}
                 >
-                  {category.collapsed ? '▴' : '▾'}
+                  <span className="catalog-item-arrow" aria-hidden="true">›</span>
                 </button>
               </div>
               {!category.collapsed && (
