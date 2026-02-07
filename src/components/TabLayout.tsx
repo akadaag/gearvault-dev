@@ -6,11 +6,41 @@ import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
 import { MobileBottomNav } from './MobileBottomNav';
 
+const catalogIcon = (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <rect x="3" y="5" width="18" height="14" rx="2" ry="2" />
+    <path d="M9 9h6" />
+    <path d="M9 13h4" />
+  </svg>
+);
+
+const eventsIcon = (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <rect x="3" y="5" width="18" height="16" rx="2" ry="2" />
+    <path d="M8 3v4" />
+    <path d="M16 3v4" />
+    <path d="M3 10h18" />
+  </svg>
+);
+
+const assistantIcon = (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M12 3l2.2 4.8L19 10l-4.8 2.2L12 17l-2.2-4.8L5 10l4.8-2.2L12 3z" />
+  </svg>
+);
+
+const settingsIcon = (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <circle cx="12" cy="12" r="3" />
+    <path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a2 2 0 0 1-2.8 2.8l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a2 2 0 0 1-4 0v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a2 2 0 0 1-2.8-2.8l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H4a2 2 0 0 1 0-4h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a2 2 0 0 1 2.8-2.8l.1.1a1 1 0 0 0 1.1.2h0a1 1 0 0 0 .6-.9V4a2 2 0 0 1 4 0v.2a1 1 0 0 0 .6.9h0a1 1 0 0 0 1.1-.2l.1-.1a2 2 0 0 1 2.8 2.8l-.1.1a1 1 0 0 0-.2 1.1v0a1 1 0 0 0 .9.6H20a2 2 0 0 1 0 4h-.2a1 1 0 0 0-.9.6z" />
+  </svg>
+);
+
 const tabs = [
-  { to: '/catalog', label: 'Catalog', icon: '📦' },
-  { to: '/events', label: 'Events', icon: '📅' },
-  { to: '/assistant', label: 'AI Assistant', icon: '✨' },
-  { to: '/settings', label: 'Settings', icon: '⚙️' },
+  { to: '/catalog', label: 'Catalog', icon: catalogIcon },
+  { to: '/events', label: 'Events', icon: eventsIcon },
+  { to: '/assistant', label: 'AI Assistant', icon: assistantIcon },
+  { to: '/settings', label: 'Settings', icon: settingsIcon },
 ];
 
 export function TabLayout() {

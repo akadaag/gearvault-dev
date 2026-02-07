@@ -547,6 +547,8 @@ a {
 
 /* Mobile-first bottom navigation (CodePen-inspired) */
 .mobile-bottom-nav {
+  --mobile-nav-inactive: #8f949f;
+  --mobile-nav-active: #7835ff;
   position: fixed;
   left: 0;
   right: 0;
@@ -586,7 +588,7 @@ a {
   min-height: 48px;
   padding: 0.35rem 0.4rem;
   text-align: center;
-  color: var(--text-soft);
+  color: var(--mobile-nav-inactive);
   font-weight: 500;
   font-size: 0.7rem;
   display: inline-flex;
@@ -597,6 +599,9 @@ a {
   cursor: pointer;
   gap: 0.08rem;
   position: relative;
+  transform: none;
+  opacity: 1;
+  touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -609,8 +614,22 @@ a {
 }
 
 .mobile-bottom-nav__icon {
-  font-size: 1.04rem;
-  line-height: 1;
+  width: 1.25rem;
+  height: 1.25rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 0;
+}
+
+.mobile-bottom-nav__icon svg {
+  width: 1.22rem;
+  height: 1.22rem;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .mobile-bottom-nav__label {
@@ -618,7 +637,7 @@ a {
 }
 
 .mobile-bottom-nav__item.is-active {
-  color: var(--accent-strong);
+  color: var(--mobile-nav-active);
 }
 
 .mobile-bottom-nav__item.is-active::after {
@@ -634,13 +653,37 @@ a {
 }
 
 .mobile-bottom-nav__item:active {
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  background: color-mix(in srgb, var(--mobile-nav-active) 9%, transparent);
+  transform: scale(0.98);
+  opacity: 0.96;
+}
+
+.mobile-bottom-nav__item,
+.mobile-bottom-nav__item:focus,
+.mobile-bottom-nav__item:active {
+  color: var(--mobile-nav-inactive);
+}
+
+.mobile-bottom-nav__item.is-active,
+.mobile-bottom-nav__item.is-active:focus,
+.mobile-bottom-nav__item.is-active:active {
+  color: var(--mobile-nav-active);
+}
+
+.mobile-bottom-nav__item:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--mobile-nav-active) 45%, transparent);
+  outline-offset: 2px;
 }
 
 @media (hover: hover) {
   .mobile-bottom-nav__item:hover {
-    color: var(--text);
-    background: color-mix(in srgb, var(--bg-soft) 90%, transparent);
+    color: var(--mobile-nav-inactive);
+    background: color-mix(in srgb, var(--bg-soft) 92%, transparent);
+  }
+
+  .mobile-bottom-nav__item.is-active:hover {
+    color: var(--mobile-nav-active);
+    background: color-mix(in srgb, var(--mobile-nav-active) 8%, transparent);
   }
 }
 
