@@ -1,15 +1,9 @@
 import { NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, ensureBaseData } from '../db';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
-
-interface BeforeInstallPromptEvent extends Event {
-  readonly platforms: string[];
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
-}
 
 const tabs = [
   { to: '/catalog', label: 'Catalog', icon: '📦' },
@@ -25,11 +19,6 @@ export function TabLayout() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const gearCount = useLiveQuery(() => db.gearItems.count(), [], 0);
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState<boolean>(() =>
-    window.matchMedia('(display-mode: standalone)').matches,
-  );
-  const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
   const isCatalogRoute = location.pathname === '/catalog';
   const catalogQuery = searchParams.get('q') ?? '';
 
@@ -48,42 +37,6 @@ export function TabLayout() {
     void ensureBaseData();
   }, []);
 
-  useEffect(() => {
-    const onBeforeInstallPrompt = (event: Event) => {
-      event.preventDefault();
-      setDeferredPrompt(event as BeforeInstallPromptEvent);
-    };
-
-    const onInstalled = () => {
-      setIsInstalled(true);
-      setDeferredPrompt(null);
-    };
-
-    const onOnline = () => setIsOnline(true);
-    const onOffline = () => setIsOnline(false);
-
-    window.addEventListener('beforeinstallprompt', onBeforeInstallPrompt);
-    window.addEventListener('appinstalled', onInstalled);
-    window.addEventListener('online', onOnline);
-    window.addEventListener('offline', onOffline);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', onBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', onInstalled);
-      window.removeEventListener('online', onOnline);
-      window.removeEventListener('offline', onOffline);
-    };
-  }, []);
-
-  async function handleInstall() {
-    if (!deferredPrompt) return;
-    await deferredPrompt.prompt();
-    const choice = await deferredPrompt.userChoice;
-    if (choice.outcome === 'accepted') {
-      setDeferredPrompt(null);
-    }
-  }
-
   function handleCatalogSearch(value: string) {
     const params = new URLSearchParams(searchParams);
     if (value.trim()) params.set('q', value);
@@ -94,6 +47,12 @@ export function TabLayout() {
   function openCatalogFilters() {
     const params = new URLSearchParams(searchParams);
     params.set('filters', '1');
+    navigate({ pathname: '/catalog', search: params.toString() ? `?${params.toString()}` : '' });
+  }
+
+  function openCatalogAdd() {
+    const params = new URLSearchParams(searchParams);
+    params.set('add', '1');
     navigate({ pathname: '/catalog', search: params.toString() ? `?${params.toString()}` : '' });
   }
 
@@ -108,16 +67,11 @@ export function TabLayout() {
               {!isCatalogRoute && syncMessage && <p className="subtle topbar-sync">{syncMessage}</p>}
             </div>
             <div className="topbar-actions">
-              <span className={`status-chip ${isOnline ? 'online' : 'offline'}`}>
-                <span className="status-dot" aria-hidden="true" />
-                {isOnline ? 'Online' : 'Offline'}
-              </span>
-              {!isInstalled && deferredPrompt && (
-                <button className="ghost" onClick={() => void handleInstall()}>
-                  Install App
+              {isCatalogRoute && (
+                <button className="icon-circle-btn topbar-add-btn" aria-label="Add new item" onClick={openCatalogAdd}>
+                  +
                 </button>
               )}
-              {isInstalled && <span className="pill">Installed</span>}
             </div>
           </div>
           {isCatalogRoute && (
@@ -130,7 +84,7 @@ export function TabLayout() {
                 onChange={(event) => handleCatalogSearch(event.target.value)}
               />
               <button className="ghost topbar-filter-btn" aria-label="Open filters" onClick={openCatalogFilters}>
-                Filters
+                ⚙
               </button>
             </div>
           )}

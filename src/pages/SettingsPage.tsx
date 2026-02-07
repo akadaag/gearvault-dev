@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, ensureBaseData } from '../db';
 import { defaultCategories } from '../constants/defaultCategories';
@@ -14,6 +14,19 @@ export function SettingsPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const [status, setStatus] = useState('');
   const [syncing, setSyncing] = useState(false);
+  const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
+
+  useEffect(() => {
+    const onOnline = () => setIsOnline(true);
+    const onOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
+    return () => {
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
+    };
+  }, []);
 
   if (!settings) return <div className="card">Loading settings…</div>;
 
@@ -102,6 +115,13 @@ export function SettingsPage() {
       <div className="card stack-md">
         <h3>Account</h3>
         <p><strong>Email:</strong> {user?.email ?? 'Not available'}</p>
+        <p>
+          <strong>Status:</strong>{' '}
+          <span className={`status-chip ${isOnline ? 'online' : 'offline'}`}>
+            <span className="status-dot" aria-hidden="true" />
+            {isOnline ? 'Online' : 'Offline'}
+          </span>
+        </p>
         <div className="row wrap">
           <button className="ghost" onClick={() => void signOut()}>
             Logout

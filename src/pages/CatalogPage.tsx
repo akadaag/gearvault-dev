@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
@@ -57,10 +57,18 @@ export function CatalogPage() {
   const [conditionFilter, setConditionFilter] = useState<'all' | Condition>('all');
   const [sortBy, setSortBy] = useState<'name' | 'brand' | 'newest' | 'value'>('name');
   const [draft, setDraft] = useState<GearDraft>(initialDraft);
-  const [showAddActions, setShowAddActions] = useState(false);
   const [showAddItemForm, setShowAddItemForm] = useState(false);
   const [openCategoryMenuId, setOpenCategoryMenuId] = useState<string | null>(null);
   const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (searchParams.get('add') !== '1') return;
+
+    setShowAddItemForm(true);
+    const params = new URLSearchParams(searchParams);
+    params.delete('add');
+    setSearchParams(params, { replace: true });
+  }, [searchParams, setSearchParams]);
 
   const tags = useMemo(() => {
     const set = new Set<string>();
@@ -163,21 +171,6 @@ export function CatalogPage() {
     await db.gearItems.add(item);
     setDraft(initialDraft);
     setShowAddItemForm(false);
-    setShowAddActions(false);
-  }
-
-  async function addCategory() {
-    const name = window.prompt('New category name');
-    if (!name?.trim()) return;
-    const highest = categories.at(-1)?.sortOrder ?? 0;
-    await db.categories.add({
-      id: makeId(),
-      name: name.trim(),
-      isDefault: false,
-      sortOrder: highest + 1,
-      collapsed: false,
-    });
-    setShowAddActions(false);
   }
 
   async function renameCategory(category: Category) {
@@ -253,20 +246,6 @@ export function CatalogPage() {
 
   return (
     <section className="stack-lg">
-      <div className="catalog-header-actions">
-        <div className="catalog-add-actions">
-          <button className="icon-circle-btn" aria-label="Open add options" onClick={() => setShowAddActions((prev) => !prev)}>+</button>
-          {showAddActions && (
-            <div className="catalog-add-menu">
-              <button className="ghost" onClick={() => { setShowAddItemForm((prev) => !prev); setShowAddActions(false); }}>
-                {showAddItemForm ? 'Hide add item form' : 'Add new item'}
-              </button>
-              <button className="ghost" onClick={() => { void addCategory(); }}>Add category</button>
-            </div>
-          )}
-        </div>
-      </div>
-
       {showFilterSheet && (
         <>
           <button className="sheet-overlay" aria-label="Close filters" onClick={closeFilterSheet} />
@@ -396,12 +375,12 @@ export function CatalogPage() {
                     <button key={item.id} className="gear-card catalog-item-card" onClick={() => navigate(`/catalog/item/${item.id}`)}>
                       <div className="catalog-item-avatar" aria-hidden="true">{item.name.charAt(0).toUpperCase()}</div>
                       <div className="catalog-item-main">
-                        <strong>{item.name}</strong>
+                        <strong className="catalog-item-title">{item.name}</strong>
                         {(item.brand || item.model) && (
-                          <span className="subtle">{item.brand} {item.model}</span>
+                          <span className="subtle catalog-item-subtitle">{item.brand} {item.model}</span>
                         )}
-                        <div className="row wrap">
-                          <span className="pill">Qty {item.quantity}</span>
+                        <div className="row wrap catalog-item-meta-row">
+                          <span className="pill">x{item.quantity}</span>
                           <span className="pill">{item.condition}</span>
                           {item.essential && <span className="pill">⭐ Essential</span>}
                         </div>
