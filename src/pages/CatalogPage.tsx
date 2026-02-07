@@ -42,7 +42,6 @@ export function CatalogPage() {
   const [sortBy, setSortBy] = useState<'name' | 'brand' | 'newest' | 'value'>('name');
   const [draft, setDraft] = useState<GearFormDraft>(initialDraft);
   const [showAddItemForm, setShowAddItemForm] = useState(false);
-  const [openCategoryMenuId, setOpenCategoryMenuId] = useState<string | null>(null);
   const [error, setError] = useState('');
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
@@ -144,41 +143,8 @@ export function CatalogPage() {
     setShowAddItemForm(false);
   }
 
-  async function renameCategory(category: Category) {
-    const name = window.prompt('Rename category', category.name);
-    if (!name?.trim()) return;
-    await db.categories.update(category.id, { name: name.trim() });
-  }
-
-  async function deleteCategory(category: Category) {
-    const fallback = categories.find((c) => c.id !== category.id);
-    if (!fallback) return;
-    if (!window.confirm(`Delete category "${category.name}"? Items move to "${fallback.name}".`)) return;
-
-    const affected = await db.gearItems.where('categoryId').equals(category.id).toArray();
-    await db.transaction('rw', db.categories, db.gearItems, async () => {
-      for (const item of affected) {
-        await db.gearItems.update(item.id, { categoryId: fallback.id, updatedAt: new Date().toISOString() });
-      }
-      await db.categories.delete(category.id);
-    });
-  }
-
-  async function reorderCategory(categoryId: string, direction: -1 | 1) {
-    const idx = categories.findIndex((c) => c.id === categoryId);
-    const target = categories[idx + direction];
-    const current = categories[idx];
-    if (!target || !current) return;
-
-    await db.transaction('rw', db.categories, async () => {
-      await db.categories.update(current.id, { sortOrder: target.sortOrder });
-      await db.categories.update(target.id, { sortOrder: current.sortOrder });
-    });
-  }
-
   async function toggleCollapse(category: Category) {
     await db.categories.update(category.id, { collapsed: !category.collapsed });
-    setOpenCategoryMenuId(null);
   }
 
   function updateSearchParams(mutator: (params: URLSearchParams) => void) {
@@ -300,7 +266,7 @@ export function CatalogPage() {
       )}
 
       <div className="stack-md">
-        {categories.map((category, idx) => {
+        {categories.map((category) => {
           const items = grouped.get(category.id) ?? [];
           if (!items.length) return null;
           return (
@@ -309,22 +275,13 @@ export function CatalogPage() {
                 <button className="text-btn category-title-btn" onClick={() => void toggleCollapse(category)}>
                   {category.name} <span className="category-count-pill">{items.length}</span>
                 </button>
-                <div className="row">
-                  <button className="ghost icon-compact-btn category-collapse-btn" aria-label={category.collapsed ? `Expand ${category.name}` : `Collapse ${category.name}`} onClick={() => void toggleCollapse(category)}>
-                    {category.collapsed ? '▾' : '▴'}
-                  </button>
-                  <div className="category-actions">
-                    <button className="ghost icon-compact-btn" aria-label={`Open actions for ${category.name}`} onClick={() => setOpenCategoryMenuId((prev) => (prev === category.id ? null : category.id))}>⋯</button>
-                    {openCategoryMenuId === category.id && (
-                      <div className="category-menu">
-                        <button className="ghost" onClick={async () => { await reorderCategory(category.id, -1); setOpenCategoryMenuId(null); }} disabled={idx === 0}>Move up</button>
-                        <button className="ghost" onClick={async () => { await reorderCategory(category.id, 1); setOpenCategoryMenuId(null); }} disabled={idx === categories.length - 1}>Move down</button>
-                        <button className="ghost" onClick={async () => { await renameCategory(category); setOpenCategoryMenuId(null); }}>Rename</button>
-                        {!category.isDefault && <button className="ghost danger" onClick={async () => { await deleteCategory(category); setOpenCategoryMenuId(null); }}>Delete</button>}
-                      </div>
-                    )}
-                  </div>
-                </div>
+                <button
+                  className={`ghost icon-compact-btn category-toggle-btn${category.collapsed ? ' is-collapsed' : ''}`}
+                  aria-label={category.collapsed ? `Expand ${category.name}` : `Collapse ${category.name}`}
+                  onClick={() => void toggleCollapse(category)}
+                >
+                  ›
+                </button>
               </div>
               {!category.collapsed && (
                 <div className="catalog-items-surface">
