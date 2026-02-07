@@ -1,9 +1,10 @@
-import { NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, ensureBaseData } from '../db';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
+import { MobileBottomNav } from './MobileBottomNav';
 
 const tabs = [
   { to: '/catalog', label: 'Catalog', icon: '📦' },
@@ -120,21 +121,7 @@ export function TabLayout() {
         <Outlet />
       </main>
 
-      <nav className="tabs" aria-label="Main navigation">
-        {tabs.map((tab) => (
-          <NavLink
-            key={tab.to}
-            to={tab.to}
-            className={({ isActive }) => (isActive ? 'tab active' : 'tab')}
-            aria-label={tab.label}
-          >
-            <span role="img" aria-hidden="true" style={{ fontSize: '1.05rem' }}>
-              {tab.icon}
-            </span>
-            <span>{tab.label}</span>
-          </NavLink>
-        ))}
-      </nav>
+      <MobileBottomNav items={tabs} ariaLabel="Main navigation" />
     </div>
   );
 }
