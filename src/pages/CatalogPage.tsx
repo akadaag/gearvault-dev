@@ -60,6 +60,7 @@ export function CatalogPage() {
   const [showAddItemForm, setShowAddItemForm] = useState(false);
   const [openCategoryMenuId, setOpenCategoryMenuId] = useState<string | null>(null);
   const [error, setError] = useState('');
+  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
   useEffect(() => {
     if (searchParams.get('add') !== '1') return;
@@ -382,7 +383,7 @@ export function CatalogPage() {
                 <div className="catalog-items-surface">
                   <div className="catalog-items-list">
                   {items.map((item) => (
-                    <button key={item.id} className="catalog-item-row" onClick={() => navigate(`/catalog/item/${item.id}`)}>
+                    <button key={item.id} className="catalog-item-row" onClick={() => setSelectedItemId(item.id)}>
                       <div className="catalog-item-icon-wrapper">
                         {item.photo ? (
                           <img src={item.photo} alt={item.name} className="catalog-item-icon-img" />
@@ -411,6 +412,100 @@ export function CatalogPage() {
           );
         })}
       </div>
+
+      {selectedItemId && (() => {
+        const item = gear.find((g) => g.id === selectedItemId);
+        if (!item) return null;
+        
+        const category = categories.find((c) => c.id === item.categoryId);
+
+        return (
+          <>
+            <button className="sheet-overlay" aria-label="Close item details" onClick={() => setSelectedItemId(null)} />
+            <aside className="item-detail-sheet card" aria-label="Item details">
+              <div className="detail-sheet-header">
+                {item.photo && <img src={item.photo} alt={item.name} className="detail-photo" />}
+                <div className="detail-header-content">
+                  <h2>{item.name}</h2>
+                  <div className="row wrap detail-badges">
+                    {category && <span className="pill">{category.name}</span>}
+                    <span className="pill">x{item.quantity}</span>
+                    <span className="pill">{item.condition}</span>
+                    {item.essential && <span className="pill essential">Essential</span>}
+                  </div>
+                </div>
+                <button className="ghost icon-compact-btn" onClick={() => setSelectedItemId(null)} aria-label="Close">✕</button>
+              </div>
+
+              <div className="detail-section">
+                <h3>Details</h3>
+                <div className="detail-grid">
+                  {item.brand && (
+                    <div className="detail-field">
+                      <span className="detail-label">Brand</span>
+                      <span className="detail-value">{item.brand}</span>
+                    </div>
+                  )}
+                  {item.model && (
+                    <div className="detail-field">
+                      <span className="detail-label">Model</span>
+                      <span className="detail-value">{item.model}</span>
+                    </div>
+                  )}
+                  {item.serialNumber && (
+                    <div className="detail-field">
+                      <span className="detail-label">Serial</span>
+                      <span className="detail-value">{item.serialNumber}</span>
+                    </div>
+                  )}
+                  {item.purchaseDate && (
+                    <div className="detail-field">
+                      <span className="detail-label">Purchased</span>
+                      <span className="detail-value">{new Date(item.purchaseDate).toLocaleDateString()}</span>
+                    </div>
+                  )}
+                  {item.purchasePrice && (
+                    <div className="detail-field">
+                      <span className="detail-label">Purchase Price</span>
+                      <span className="detail-value">€{item.purchasePrice.amount}</span>
+                    </div>
+                  )}
+                  {item.currentValue && (
+                    <div className="detail-field">
+                      <span className="detail-label">Current Value</span>
+                      <span className="detail-value">€{item.currentValue.amount}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {item.notes && (
+                <div className="detail-section">
+                  <h3>Notes</h3>
+                  <p className="detail-notes">{item.notes}</p>
+                </div>
+              )}
+
+              {item.tags && item.tags.length > 0 && (
+                <div className="detail-section">
+                  <h3>Tags</h3>
+                  <div className="row wrap">
+                    {item.tags.map((tag) => (
+                      <span key={tag} className="pill">{tag}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div className="detail-actions">
+                <button onClick={() => navigate(`/catalog/item/${item.id}`)} className="ghost">
+                  Full Details →
+                </button>
+              </div>
+            </aside>
+          </>
+        );
+      })()}
     </section>
   );
 }
