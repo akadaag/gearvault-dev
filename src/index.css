@@ -657,6 +657,15 @@ a {
   opacity: 0.96;
 }
 
+.mobile-bottom-nav__item:hover {
+  background: transparent;
+  box-shadow: none;
+}
+
+.mobile-bottom-nav__item.is-active:hover {
+  background: transparent;
+}
+
 .mobile-bottom-nav__item,
 .mobile-bottom-nav__item:focus,
 .mobile-bottom-nav__item:active {
