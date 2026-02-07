@@ -829,7 +829,7 @@ a {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
-  margin-bottom: var(--space-5);
+  margin-bottom: var(--space-3);
 }
 
 .category-header-row {
@@ -934,15 +934,15 @@ a {
   border-bottom: 1px solid var(--border-subtle);
   border-radius: 0;
   display: grid;
-  grid-template-columns: 46px 1fr;
+  grid-template-columns: 56px 1fr auto;
   align-items: center;
-  gap: 0.62rem;
+  gap: 0.7rem;
   width: 100%;
   background: transparent;
   box-shadow: none;
   color: var(--text);
   text-align: left;
-  padding: 0.72rem 0.82rem;
+  padding: 0.65rem 0.82rem;
   min-height: auto;
 }
 
@@ -959,9 +959,15 @@ a {
   background: color-mix(in srgb, var(--accent) 8%, transparent);
 }
 
+.catalog-item-icon-wrapper {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+}
+
 .catalog-item-icon {
-  width: 46px;
-  height: 46px;
+  width: 100%;
+  height: 100%;
   border-radius: 10px;
   border: 1px solid var(--border-subtle);
   background: color-mix(in srgb, var(--accent) 10%, var(--surface-muted));
@@ -969,8 +975,23 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
+  font-size: 1.15rem;
   font-weight: 700;
+}
+
+.catalog-item-icon-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid var(--border-subtle);
+}
+
+.catalog-item-arrow {
+  font-size: 1.5rem;
+  color: var(--text-soft);
+  line-height: 1;
+  padding-left: 0.5rem;
 }
 
 .catalog-item-main {
@@ -996,8 +1017,50 @@ a {
 }
 
 .catalog-item-meta-row {
-  margin-top: 0.12rem;
+  margin-top: 0.1rem;
   gap: 0.35rem;
+}
+
+/* Add item sheet styles */
+.add-item-sheet {
+  /* Inherits from filter-sheet */
+}
+
+.compact-file-input {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.compact-file-input input[type="file"] {
+  font-size: 0.875rem;
+  padding: 0.5rem 0.75rem;
+  min-height: auto;
+}
+
+.compact-form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+}
+
+@media (min-width: 640px) {
+  .compact-form-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.compact-form-grid input,
+.compact-form-grid select {
+  font-size: 0.9375rem;
+  padding: 0.65rem 0.85rem;
+  min-height: 42px;
+}
+
+.compact-textarea {
+  min-height: 80px !important;
+  font-size: 0.9375rem;
+  padding: 0.65rem 0.85rem;
 }
 
 .gear-card:hover {

@@ -296,36 +296,45 @@ export function CatalogPage() {
       )}
 
       {showAddItemForm && (
-        <div className="card stack-md catalog-add-form">
-          <div className="row between wrap">
-            <h3>Add Item</h3>
-            <button className="ghost" onClick={() => setShowAddItemForm(false)}>Close</button>
-          </div>
-          <div className="grid two">
-            <input placeholder="Name*" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
-            <select value={draft.categoryId} onChange={(e) => setDraft({ ...draft, categoryId: e.target.value })}>
-              <option value="">Category*</option>
-              {categories.map((c) => (<option key={c.id} value={c.id}>{c.name}</option>))}
-            </select>
-            <input placeholder="Brand" value={draft.brand} onChange={(e) => setDraft({ ...draft, brand: e.target.value })} />
-            <input placeholder="Model" value={draft.model} onChange={(e) => setDraft({ ...draft, model: e.target.value })} />
-            <input placeholder="Serial number" value={draft.serialNumber} onChange={(e) => setDraft({ ...draft, serialNumber: e.target.value })} />
-            <input type="date" value={draft.purchaseDate} onChange={(e) => setDraft({ ...draft, purchaseDate: e.target.value })} />
-            <input type="number" placeholder="Purchase price" value={draft.purchasePrice} onChange={(e) => setDraft({ ...draft, purchasePrice: e.target.value })} />
-            <input type="number" placeholder="Current value" value={draft.currentValue} onChange={(e) => setDraft({ ...draft, currentValue: e.target.value })} />
-            <select value={draft.condition} onChange={(e) => setDraft({ ...draft, condition: e.target.value as Condition })}>
-              <option value="new">New</option><option value="good">Good</option><option value="worn">Worn</option>
-            </select>
-            <input type="number" min={1} placeholder="Quantity" value={draft.quantity} onChange={(e) => setDraft({ ...draft, quantity: Number(e.target.value || 1) })} />
-          </div>
-          <textarea placeholder="Notes" value={draft.notes} onChange={(e) => setDraft({ ...draft, notes: e.target.value })} />
-          <input placeholder="Tags (comma separated)" value={draft.tagsText} onChange={(e) => setDraft({ ...draft, tagsText: e.target.value })} />
-          <textarea placeholder="Custom fields (key:value one per line)" value={draft.customFieldsText} onChange={(e) => setDraft({ ...draft, customFieldsText: e.target.value })} />
-          <label className="form-file-label">Photo<input type="file" accept="image/*" onChange={(e) => void handlePhotoUpload(e.target.files?.[0])} /></label>
-          <label className="checkbox-inline"><input type="checkbox" checked={draft.essential} onChange={(e) => setDraft({ ...draft, essential: e.target.checked })} /> Mark as essential</label>
-          {error && <p className="error">{error}</p>}
-          <button onClick={() => void addItem()}>Save item</button>
-        </div>
+        <>
+          <button className="sheet-overlay" aria-label="Close add item" onClick={() => setShowAddItemForm(false)} />
+          <aside className="filter-sheet card stack-md add-item-sheet" aria-label="Add new item">
+            <div className="row between">
+              <h3>Add Item</h3>
+              <button className="ghost" onClick={() => setShowAddItemForm(false)}>Done</button>
+            </div>
+
+            <label className="form-file-label compact-file-input">
+              <strong>Photo</strong>
+              <input type="file" accept="image/*" onChange={(e) => void handlePhotoUpload(e.target.files?.[0])} />
+              {draft.photo && <small className="success">✓ Photo added</small>}
+            </label>
+
+            <div className="compact-form-grid">
+              <input placeholder="Name*" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
+              <select value={draft.categoryId} onChange={(e) => setDraft({ ...draft, categoryId: e.target.value })}>
+                <option value="">Category*</option>
+                {categories.map((c) => (<option key={c.id} value={c.id}>{c.name}</option>))}
+              </select>
+              <input placeholder="Brand" value={draft.brand} onChange={(e) => setDraft({ ...draft, brand: e.target.value })} />
+              <input placeholder="Model" value={draft.model} onChange={(e) => setDraft({ ...draft, model: e.target.value })} />
+              <input placeholder="Serial number" value={draft.serialNumber} onChange={(e) => setDraft({ ...draft, serialNumber: e.target.value })} />
+              <input type="date" placeholder="Purchase date" value={draft.purchaseDate} onChange={(e) => setDraft({ ...draft, purchaseDate: e.target.value })} />
+              <input type="number" placeholder="Purchase price" value={draft.purchasePrice} onChange={(e) => setDraft({ ...draft, purchasePrice: e.target.value })} />
+              <input type="number" placeholder="Current value" value={draft.currentValue} onChange={(e) => setDraft({ ...draft, currentValue: e.target.value })} />
+              <select value={draft.condition} onChange={(e) => setDraft({ ...draft, condition: e.target.value as Condition })}>
+                <option value="new">New</option><option value="good">Good</option><option value="worn">Worn</option>
+              </select>
+              <input type="number" min={1} placeholder="Quantity" value={draft.quantity} onChange={(e) => setDraft({ ...draft, quantity: Number(e.target.value || 1) })} />
+            </div>
+            <textarea className="compact-textarea" placeholder="Notes" rows={3} value={draft.notes} onChange={(e) => setDraft({ ...draft, notes: e.target.value })} />
+            <input placeholder="Tags (comma separated)" value={draft.tagsText} onChange={(e) => setDraft({ ...draft, tagsText: e.target.value })} />
+            <textarea className="compact-textarea" placeholder="Custom fields (key:value, one per line)" rows={3} value={draft.customFieldsText} onChange={(e) => setDraft({ ...draft, customFieldsText: e.target.value })} />
+            <label className="checkbox-inline"><input type="checkbox" checked={draft.essential} onChange={(e) => setDraft({ ...draft, essential: e.target.checked })} /> Mark as essential</label>
+            {error && <p className="error">{error}</p>}
+            <button onClick={() => void addItem()}>Save item</button>
+          </aside>
+        </>
       )}
 
       {gear.length === 0 && (
@@ -374,7 +383,13 @@ export function CatalogPage() {
                   <div className="catalog-items-list">
                   {items.map((item) => (
                     <button key={item.id} className="catalog-item-row" onClick={() => navigate(`/catalog/item/${item.id}`)}>
-                      <div className="catalog-item-icon" aria-hidden="true">{item.name.charAt(0).toUpperCase()}</div>
+                      <div className="catalog-item-icon-wrapper">
+                        {item.photo ? (
+                          <img src={item.photo} alt={item.name} className="catalog-item-icon-img" />
+                        ) : (
+                          <div className="catalog-item-icon" aria-hidden="true">{item.name.charAt(0).toUpperCase()}</div>
+                        )}
+                      </div>
                       <div className="catalog-item-main">
                         <strong className="catalog-item-title">{item.name}</strong>
                         {(item.brand || item.model) && (
@@ -386,6 +401,7 @@ export function CatalogPage() {
                           {item.essential && <span className="pill essential">Essential</span>}
                         </div>
                       </div>
+                      <div className="catalog-item-arrow" aria-hidden="true">›</div>
                     </button>
                   ))}
                   </div>
