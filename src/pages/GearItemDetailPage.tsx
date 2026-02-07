@@ -4,7 +4,26 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
 import { formatMoney } from '../lib/format';
 import { makeId } from '../lib/ids';
+import { GearItemFormSheet, type GearFormDraft } from '../components/GearItemFormSheet';
 import type { GearItem } from '../types/models';
+
+const emptyDraft: GearFormDraft = {
+  name: '',
+  categoryId: '',
+  brand: '',
+  model: '',
+  serialNumber: '',
+  purchaseDate: '',
+  purchasePrice: '',
+  currentValue: '',
+  notes: '',
+  customFieldsText: '',
+  condition: 'good',
+  quantity: 1,
+  tagsText: '',
+  essential: false,
+  photo: '',
+};
 
 export function GearItemDetailPage() {
   const { id } = useParams();
@@ -15,6 +34,9 @@ export function GearItemDetailPage() {
   const allItems = useLiveQuery(() => db.gearItems.toArray(), [], []);
   const [eventTarget, setEventTarget] = useState('');
   const [showAddToEvent, setShowAddToEvent] = useState(false);
+  const [showEditSheet, setShowEditSheet] = useState(false);
+  const [editError, setEditError] = useState('');
+  const [draft, setDraft] = useState<GearFormDraft>(emptyDraft);
 
   const related = useMemo(
     () => allItems.filter((g) => item?.relatedItemIds?.includes(g.id)),
@@ -23,9 +45,42 @@ export function GearItemDetailPage() {
 
   if (!item) return <div className="card">Item not found.</div>;
   const currentItem = item;
+  const editDraft = toDraft(currentItem);
 
   async function save(patch: Partial<GearItem>) {
     await db.gearItems.update(currentItem.id, { ...patch, updatedAt: new Date().toISOString() });
+  }
+
+  async function saveEdit() {
+    if (!draft.name.trim()) {
+      setEditError('Name is required');
+      return;
+    }
+    if (!draft.categoryId) {
+      setEditError('Category is required');
+      return;
+    }
+
+    await save({
+      name: draft.name.trim(),
+      categoryId: draft.categoryId,
+      brand: draft.brand.trim() || undefined,
+      model: draft.model.trim() || undefined,
+      serialNumber: draft.serialNumber.trim() || undefined,
+      purchaseDate: draft.purchaseDate || undefined,
+      purchasePrice: parseMoney(draft.purchasePrice),
+      currentValue: parseMoney(draft.currentValue),
+      notes: draft.notes.trim() || undefined,
+      customFields: parseCustomFields(draft.customFieldsText),
+      condition: draft.condition,
+      quantity: Math.max(1, Number(draft.quantity) || 1),
+      tags: draft.tagsText.split(',').map((t) => t.trim()).filter(Boolean),
+      essential: draft.essential,
+      photo: draft.photo || undefined,
+    });
+
+    setShowEditSheet(false);
+    setEditError('');
   }
 
   async function deleteItem() {
@@ -61,83 +116,102 @@ export function GearItemDetailPage() {
 
   return (
     <section className="detail-page">
-      <div className="detail-page-header">
-        <button onClick={() => navigate('/catalog')} className="ghost icon-compact-btn" aria-label="Back">←</button>
-        {currentItem.photo && <img src={currentItem.photo} alt={currentItem.name} className="detail-page-photo" />}
-        <div className="detail-page-header-content">
-          <h2>{currentItem.name}</h2>
-          <div className="row wrap detail-badges">
-            <span className="pill">{categories.find((c) => c.id === currentItem.categoryId)?.name}</span>
-            <span className="pill">x{currentItem.quantity}</span>
-            <span className="pill">{currentItem.condition}</span>
-            {currentItem.essential && <span className="pill essential">Essential</span>}
-          </div>
+      <div className="detail-page-topbar">
+        <button onClick={() => navigate('/catalog')} className="detail-back-link" aria-label="Back to catalog">‹ Catalog</button>
+        <div className="row">
+          <button className="ghost icon-compact-btn" onClick={() => { setDraft(editDraft); setShowEditSheet(true); }} aria-label="Edit">✎</button>
+          <button className="danger icon-compact-btn" onClick={() => void deleteItem()} aria-label="Delete">🗑</button>
         </div>
-        <button className="danger icon-compact-btn" onClick={() => void deleteItem()} aria-label="Delete">🗑</button>
       </div>
+
+      <div className="detail-hero-card">
+        {currentItem.photo ? (
+          <img src={currentItem.photo} alt={currentItem.name} className="detail-hero-photo" />
+        ) : (
+          <div className="detail-hero-photo detail-hero-placeholder" aria-hidden="true">
+            {currentItem.name.charAt(0).toUpperCase()}
+          </div>
+        )}
+      </div>
+
+      <section className="detail-page-section detail-page-main-info">
+        <h2>{currentItem.name}</h2>
+        <p className="subtle detail-main-subtitle">{[currentItem.brand, currentItem.model].filter(Boolean).join(' ') || 'No brand/model yet'}</p>
+        <div className="row wrap detail-badges">
+          <span className="pill">{categories.find((c) => c.id === currentItem.categoryId)?.name}</span>
+          <span className="pill">{currentItem.condition}</span>
+          <span className="pill">×{currentItem.quantity} units</span>
+          {currentItem.essential && <span className="pill essential">Essential</span>}
+        </div>
+      </section>
+
+      <section className="detail-preview-card detail-page-section">
+        <div className="detail-preview-icon" aria-hidden="true">$</div>
+        <div>
+          <span className="detail-label">Purchase Price</span>
+          <p className="detail-preview-value">{currentItem.purchasePrice ? formatMoney(currentItem.purchasePrice.amount, currentItem.purchasePrice.currency) : 'Not set'}</p>
+        </div>
+      </section>
+
+      <section className="detail-quick-grid">
+        <article className="detail-quick-card">
+          <div className="detail-quick-icon blue" aria-hidden="true">🔧</div>
+          <div>
+            <strong>Maintenance</strong>
+            <p className="subtle">{currentItem.maintenanceHistory?.length ?? 0} records</p>
+          </div>
+        </article>
+        <article className="detail-quick-card">
+          <div className="detail-quick-icon purple" aria-hidden="true">🔗</div>
+          <div>
+            <strong>Accessories</strong>
+            <p className="subtle">{currentItem.relatedItemIds?.length ?? 0} linked</p>
+          </div>
+        </article>
+      </section>
 
       <div className="detail-page-section">
-        <h3>Basic Information</h3>
+        <h3>Item Information</h3>
         <div className="detail-grid">
+          {currentItem.serialNumber && (
+            <div className="detail-field">
+              <span className="detail-label">Serial Number</span>
+              <span className="detail-value">{currentItem.serialNumber}</span>
+            </div>
+          )}
+          {currentItem.purchaseDate && (
+            <div className="detail-field">
+              <span className="detail-label">Purchase Date</span>
+              <span className="detail-value">{new Date(currentItem.purchaseDate).toLocaleDateString()}</span>
+            </div>
+          )}
+          {currentItem.currentValue && (
+            <div className="detail-field">
+              <span className="detail-label">Current Value</span>
+              <span className="detail-value">{formatMoney(currentItem.currentValue.amount, currentItem.currentValue.currency)}</span>
+            </div>
+          )}
           <div className="detail-field">
-            <label className="detail-label">Name</label>
-            <input value={currentItem.name} onChange={(e) => void save({ name: e.target.value })} className="detail-input" />
-          </div>
-          <div className="detail-field">
-            <label className="detail-label">Category</label>
-            <select value={currentItem.categoryId} onChange={(e) => void save({ categoryId: e.target.value })} className="detail-input">
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>{c.name}</option>
-              ))}
-            </select>
-          </div>
-          <div className="detail-field">
-            <label className="detail-label">Brand</label>
-            <input value={currentItem.brand ?? ''} onChange={(e) => void save({ brand: e.target.value })} placeholder="Optional" className="detail-input" />
-          </div>
-          <div className="detail-field">
-            <label className="detail-label">Model</label>
-            <input value={currentItem.model ?? ''} onChange={(e) => void save({ model: e.target.value })} placeholder="Optional" className="detail-input" />
-          </div>
-          <div className="detail-field">
-            <label className="detail-label">Quantity</label>
-            <input type="number" min={1} value={currentItem.quantity} onChange={(e) => void save({ quantity: Number(e.target.value || 1) })} className="detail-input" />
-          </div>
-          <div className="detail-field">
-            <label className="detail-label">Condition</label>
-            <select value={currentItem.condition} onChange={(e) => void save({ condition: e.target.value as GearItem['condition'] })} className="detail-input">
-              <option value="new">New</option>
-              <option value="good">Good</option>
-              <option value="worn">Worn</option>
-            </select>
+            <span className="detail-label">Last Updated</span>
+            <span className="detail-value">{new Date(currentItem.updatedAt).toLocaleDateString()}</span>
           </div>
         </div>
-        <div className="detail-field detail-field-full">
-          <label className="detail-label">Notes</label>
-          <textarea value={currentItem.notes ?? ''} onChange={(e) => void save({ notes: e.target.value })} placeholder="Add notes..." className="detail-textarea" rows={3} />
-        </div>
-        <label className="checkbox-inline">
-          <input type="checkbox" checked={currentItem.essential} onChange={(e) => void save({ essential: e.target.checked })} />
-          <span>Mark as essential</span>
-        </label>
       </div>
 
-      {(currentItem.purchasePrice || currentItem.currentValue) && (
+      {currentItem.notes && (
         <div className="detail-page-section">
-          <h3>Financial</h3>
-          <div className="detail-grid">
-            {currentItem.purchasePrice && (
-              <div className="detail-field">
-                <span className="detail-label">Purchase Price</span>
-                <span className="detail-value">{formatMoney(currentItem.purchasePrice.amount, currentItem.purchasePrice.currency)}</span>
-              </div>
-            )}
-            {currentItem.currentValue && (
-              <div className="detail-field">
-                <span className="detail-label">Current Value</span>
-                <span className="detail-value">{formatMoney(currentItem.currentValue.amount, currentItem.currentValue.currency)}</span>
-              </div>
-            )}
+          <h3>Notes</h3>
+          <p className="detail-notes">{currentItem.notes}</p>
+        </div>
+      )}
+
+      {currentItem.tags.length > 0 && (
+        <div className="detail-page-section">
+          <h3>Tags</h3>
+          <div className="row wrap">
+            {currentItem.tags.map((tag) => (
+              <span key={tag} className="pill">{tag}</span>
+            ))}
           </div>
         </div>
       )}
@@ -210,6 +284,61 @@ export function GearItemDetailPage() {
           <button className="ghost" onClick={() => setShowAddToEvent(true)}>Add to Event Packing List</button>
         )}
       </div>
+
+      <GearItemFormSheet
+        open={showEditSheet}
+        title="Edit Gear"
+        submitLabel="Save Changes"
+        categories={categories}
+        draft={draft}
+        error={editError}
+        onDraftChange={(nextDraft) => {
+          setEditError('');
+          setDraft(nextDraft);
+        }}
+        onErrorChange={setEditError}
+        onClose={() => {
+          setShowEditSheet(false);
+          setEditError('');
+          setDraft(editDraft);
+        }}
+        onSubmit={() => void saveEdit()}
+      />
     </section>
   );
+}
+
+function parseMoney(raw: string) {
+  const amount = Number(raw);
+  if (!raw || Number.isNaN(amount)) return undefined;
+  return { amount, currency: 'EUR' };
+}
+
+function toDraft(item: GearItem): GearFormDraft {
+  return {
+    name: item.name,
+    categoryId: item.categoryId,
+    brand: item.brand ?? '',
+    model: item.model ?? '',
+    serialNumber: item.serialNumber ?? '',
+    purchaseDate: item.purchaseDate ?? '',
+    purchasePrice: item.purchasePrice?.amount?.toString() ?? '',
+    currentValue: item.currentValue?.amount?.toString() ?? '',
+    notes: item.notes ?? '',
+    customFieldsText: Object.entries(item.customFields ?? {}).map(([k, v]) => `${k}: ${v}`).join('\n'),
+    condition: item.condition,
+    quantity: item.quantity,
+    tagsText: (item.tags ?? []).join(', '),
+    essential: item.essential,
+    photo: item.photo ?? '',
+  };
+}
+
+function parseCustomFields(text: string) {
+  const out: Record<string, string> = {};
+  text.split('\n').map((row) => row.trim()).filter(Boolean).forEach((row) => {
+    const [k, ...rest] = row.split(':');
+    if (k && rest.length) out[k.trim()] = rest.join(':').trim();
+  });
+  return Object.keys(out).length ? out : undefined;
 }

@@ -2,30 +2,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
+import { GearItemFormSheet, type GearFormDraft } from '../components/GearItemFormSheet';
+import { formatMoney } from '../lib/format';
 import { makeId } from '../lib/ids';
 import { fuzzyIncludes } from '../lib/search';
 import { gearItemSchema } from '../lib/validators';
 import type { Category, Condition, GearItem } from '../types/models';
 
-interface GearDraft {
-  name: string;
-  categoryId: string;
-  brand: string;
-  model: string;
-  serialNumber: string;
-  purchaseDate: string;
-  purchasePrice: string;
-  currentValue: string;
-  notes: string;
-  customFieldsText: string;
-  condition: Condition;
-  quantity: number;
-  tagsText: string;
-  essential: boolean;
-  photo: string;
-}
-
-const initialDraft: GearDraft = {
+const initialDraft: GearFormDraft = {
   name: '',
   categoryId: '',
   brand: '',
@@ -56,7 +40,7 @@ export function CatalogPage() {
   const [essentialOnly, setEssentialOnly] = useState(false);
   const [conditionFilter, setConditionFilter] = useState<'all' | Condition>('all');
   const [sortBy, setSortBy] = useState<'name' | 'brand' | 'newest' | 'value'>('name');
-  const [draft, setDraft] = useState<GearDraft>(initialDraft);
+  const [draft, setDraft] = useState<GearFormDraft>(initialDraft);
   const [showAddItemForm, setShowAddItemForm] = useState(false);
   const [openCategoryMenuId, setOpenCategoryMenuId] = useState<string | null>(null);
   const [error, setError] = useState('');
@@ -115,20 +99,6 @@ export function CatalogPage() {
     }
     return map;
   }, [categories, filtered]);
-
-  async function handlePhotoUpload(file: File | undefined) {
-    if (!file) return;
-    if (file.size > 1_800_000) {
-      setError('Photo too large. Keep under 1.8MB.');
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      setDraft((prev) => ({ ...prev, photo: String(reader.result ?? '') }));
-    };
-    reader.readAsDataURL(file);
-  }
 
   async function addItem() {
     setError('');
@@ -296,47 +266,24 @@ export function CatalogPage() {
         </>
       )}
 
-      {showAddItemForm && (
-        <>
-          <button className="sheet-overlay" aria-label="Close add item" onClick={() => setShowAddItemForm(false)} />
-          <aside className="filter-sheet card stack-md add-item-sheet" aria-label="Add new item">
-            <div className="row between">
-              <h3>Add Item</h3>
-              <button className="ghost" onClick={() => setShowAddItemForm(false)}>Done</button>
-            </div>
-
-            <label className="form-file-label compact-file-input">
-              <strong>Photo</strong>
-              <input type="file" accept="image/*" onChange={(e) => void handlePhotoUpload(e.target.files?.[0])} />
-              {draft.photo && <small className="success">✓ Photo added</small>}
-            </label>
-
-            <div className="compact-form-grid">
-              <input placeholder="Name*" value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
-              <select value={draft.categoryId} onChange={(e) => setDraft({ ...draft, categoryId: e.target.value })}>
-                <option value="">Category*</option>
-                {categories.map((c) => (<option key={c.id} value={c.id}>{c.name}</option>))}
-              </select>
-              <input placeholder="Brand" value={draft.brand} onChange={(e) => setDraft({ ...draft, brand: e.target.value })} />
-              <input placeholder="Model" value={draft.model} onChange={(e) => setDraft({ ...draft, model: e.target.value })} />
-              <input placeholder="Serial number" value={draft.serialNumber} onChange={(e) => setDraft({ ...draft, serialNumber: e.target.value })} />
-              <input type="date" placeholder="Purchase date" value={draft.purchaseDate} onChange={(e) => setDraft({ ...draft, purchaseDate: e.target.value })} />
-              <input type="number" placeholder="Purchase price" value={draft.purchasePrice} onChange={(e) => setDraft({ ...draft, purchasePrice: e.target.value })} />
-              <input type="number" placeholder="Current value" value={draft.currentValue} onChange={(e) => setDraft({ ...draft, currentValue: e.target.value })} />
-              <select value={draft.condition} onChange={(e) => setDraft({ ...draft, condition: e.target.value as Condition })}>
-                <option value="new">New</option><option value="good">Good</option><option value="worn">Worn</option>
-              </select>
-              <input type="number" min={1} placeholder="Quantity" value={draft.quantity} onChange={(e) => setDraft({ ...draft, quantity: Number(e.target.value || 1) })} />
-            </div>
-            <textarea className="compact-textarea" placeholder="Notes" rows={3} value={draft.notes} onChange={(e) => setDraft({ ...draft, notes: e.target.value })} />
-            <input placeholder="Tags (comma separated)" value={draft.tagsText} onChange={(e) => setDraft({ ...draft, tagsText: e.target.value })} />
-            <textarea className="compact-textarea" placeholder="Custom fields (key:value, one per line)" rows={3} value={draft.customFieldsText} onChange={(e) => setDraft({ ...draft, customFieldsText: e.target.value })} />
-            <label className="checkbox-inline"><input type="checkbox" checked={draft.essential} onChange={(e) => setDraft({ ...draft, essential: e.target.checked })} /> Mark as essential</label>
-            {error && <p className="error">{error}</p>}
-            <button onClick={() => void addItem()}>Save item</button>
-          </aside>
-        </>
-      )}
+      <GearItemFormSheet
+        open={showAddItemForm}
+        title="Add Gear"
+        submitLabel="Save Item"
+        categories={categories}
+        draft={draft}
+        error={error}
+        onDraftChange={(nextDraft) => {
+          setError('');
+          setDraft(nextDraft);
+        }}
+        onErrorChange={setError}
+        onClose={() => {
+          setShowAddItemForm(false);
+          setError('');
+        }}
+        onSubmit={() => void addItem()}
+      />
 
       {gear.length === 0 && (
         <div className="card empty">
@@ -427,79 +374,45 @@ export function CatalogPage() {
                 {item.photo && <img src={item.photo} alt={item.name} className="detail-photo" />}
                 <div className="detail-header-content">
                   <h2>{item.name}</h2>
+                  <p className="subtle detail-subtitle">{[item.brand, item.model].filter(Boolean).join(' ') || 'No brand/model yet'}</p>
                   <div className="row wrap detail-badges">
                     {category && <span className="pill">{category.name}</span>}
-                    <span className="pill">x{item.quantity}</span>
                     <span className="pill">{item.condition}</span>
+                    <span className="pill">×{item.quantity} units</span>
                     {item.essential && <span className="pill essential">Essential</span>}
                   </div>
                 </div>
                 <button className="ghost icon-compact-btn" onClick={() => setSelectedItemId(null)} aria-label="Close">✕</button>
               </div>
 
-              <div className="detail-section">
-                <h3>Details</h3>
-                <div className="detail-grid">
-                  {item.brand && (
-                    <div className="detail-field">
-                      <span className="detail-label">Brand</span>
-                      <span className="detail-value">{item.brand}</span>
-                    </div>
-                  )}
-                  {item.model && (
-                    <div className="detail-field">
-                      <span className="detail-label">Model</span>
-                      <span className="detail-value">{item.model}</span>
-                    </div>
-                  )}
-                  {item.serialNumber && (
-                    <div className="detail-field">
-                      <span className="detail-label">Serial</span>
-                      <span className="detail-value">{item.serialNumber}</span>
-                    </div>
-                  )}
-                  {item.purchaseDate && (
-                    <div className="detail-field">
-                      <span className="detail-label">Purchased</span>
-                      <span className="detail-value">{new Date(item.purchaseDate).toLocaleDateString()}</span>
-                    </div>
-                  )}
-                  {item.purchasePrice && (
-                    <div className="detail-field">
-                      <span className="detail-label">Purchase Price</span>
-                      <span className="detail-value">€{item.purchasePrice.amount}</span>
-                    </div>
-                  )}
-                  {item.currentValue && (
-                    <div className="detail-field">
-                      <span className="detail-label">Current Value</span>
-                      <span className="detail-value">€{item.currentValue.amount}</span>
-                    </div>
-                  )}
+              <div className="detail-preview-card">
+                <div className="detail-preview-icon" aria-hidden="true">$</div>
+                <div>
+                  <span className="detail-label">Purchase Price</span>
+                  <p className="detail-preview-value">{item.purchasePrice ? formatMoney(item.purchasePrice.amount, item.purchasePrice.currency) : 'Not set'}</p>
                 </div>
               </div>
 
-              {item.notes && (
-                <div className="detail-section">
-                  <h3>Notes</h3>
-                  <p className="detail-notes">{item.notes}</p>
-                </div>
-              )}
-
-              {item.tags && item.tags.length > 0 && (
-                <div className="detail-section">
-                  <h3>Tags</h3>
-                  <div className="row wrap">
-                    {item.tags.map((tag) => (
-                      <span key={tag} className="pill">{tag}</span>
-                    ))}
+              <div className="detail-quick-grid">
+                <article className="detail-quick-card">
+                  <div className="detail-quick-icon blue" aria-hidden="true">🔧</div>
+                  <div>
+                    <strong>Maintenance</strong>
+                    <p className="subtle">{item.maintenanceHistory?.length ?? 0} records</p>
                   </div>
-                </div>
-              )}
+                </article>
+                <article className="detail-quick-card">
+                  <div className="detail-quick-icon purple" aria-hidden="true">🔗</div>
+                  <div>
+                    <strong>Accessories</strong>
+                    <p className="subtle">{item.relatedItemIds?.length ?? 0} linked</p>
+                  </div>
+                </article>
+              </div>
 
               <div className="detail-actions">
                 <button onClick={() => navigate(`/catalog/item/${item.id}`)} className="ghost">
-                  Full Details →
+                  More Details
                 </button>
               </div>
             </aside>
