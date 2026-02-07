@@ -583,6 +583,7 @@ a {
 .mobile-bottom-nav__item {
   appearance: none;
   -webkit-appearance: none;
+  -webkit-touch-callout: none;
   border: 0;
   background: transparent;
   box-shadow: none;
@@ -616,8 +617,8 @@ a {
 }
 
 .mobile-bottom-nav__icon {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.68rem;
+  height: 1.68rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -625,8 +626,8 @@ a {
 }
 
 .mobile-bottom-nav__icon svg {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 1.68rem;
+  height: 1.68rem;
   stroke: currentColor;
   fill: none;
   stroke-width: 1.9;
@@ -662,6 +663,7 @@ a {
   color: var(--mobile-nav-inactive);
   background: transparent;
   box-shadow: none;
+  outline: none;
 }
 
 .mobile-bottom-nav__item.is-active,
@@ -673,6 +675,12 @@ a {
 .mobile-bottom-nav__item:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--mobile-nav-active) 45%, transparent);
   outline-offset: 2px;
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .mobile-bottom-nav__item:focus-visible {
+    outline: none;
+  }
 }
 
 @media (hover: hover) {

@@ -32,6 +32,11 @@ export function MobileBottomNav({ items, ariaLabel = 'Main navigation' }: Mobile
             type="button"
             className={active ? 'mobile-bottom-nav__item is-active' : 'mobile-bottom-nav__item'}
             onClick={() => navigate(item.to)}
+            onPointerUp={(event) => {
+              if (event.pointerType !== 'mouse') {
+                event.currentTarget.blur();
+              }
+            }}
             aria-label={item.label}
             aria-current={active ? 'page' : undefined}
           >
