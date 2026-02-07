@@ -548,7 +548,7 @@ a {
 /* Mobile-first bottom navigation (CodePen-inspired) */
 .mobile-bottom-nav {
   --mobile-nav-inactive: #8f949f;
-  --mobile-nav-active: #7835ff;
+  --mobile-nav-active: #2562eb;
   position: fixed;
   left: 0;
   right: 0;
@@ -648,7 +648,7 @@ a {
   width: 4px;
   height: 10px;
   border-radius: 999px;
-  background: #7835ff;
+  background: var(--mobile-nav-active);
 }
 
 .mobile-bottom-nav__item:active {
