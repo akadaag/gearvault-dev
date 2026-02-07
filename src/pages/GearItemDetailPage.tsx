@@ -115,12 +115,31 @@ export function GearItemDetailPage() {
   }
 
   return (
-    <section className="detail-page">
+    <section className="detail-page detail-page-immersive">
       <div className="detail-page-topbar">
         <button onClick={() => navigate('/catalog')} className="detail-back-link" aria-label="Back to catalog">‹ Catalog</button>
         <div className="row">
-          <button className="ghost icon-compact-btn" onClick={() => { setDraft(editDraft); setShowEditSheet(true); }} aria-label="Edit">✎</button>
-          <button className="danger icon-compact-btn" onClick={() => void deleteItem()} aria-label="Delete">🗑</button>
+          <button
+            className="detail-topbar-icon-btn"
+            onClick={() => {
+              setDraft(editDraft);
+              setShowEditSheet(true);
+            }}
+            aria-label="Edit"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M12 20h9" />
+              <path d="M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4Z" />
+            </svg>
+          </button>
+          <button className="detail-topbar-icon-btn danger" onClick={() => void deleteItem()} aria-label="Delete">
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="M3 6h18" />
+              <path d="M8 6V4h8v2" />
+              <path d="M19 6l-1 14H6L5 6" />
+              <path d="M10 11v6M14 11v6" />
+            </svg>
+          </button>
         </div>
       </div>
 

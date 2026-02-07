@@ -429,6 +429,12 @@ a {
   padding: var(--space-4) var(--space-4) calc(var(--space-12) + env(safe-area-inset-bottom));
 }
 
+.content-immersive {
+  padding-top: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
 .auth-shell {
   min-height: 100vh;
   display: grid;
@@ -1328,7 +1334,7 @@ a {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.7rem;
+  padding: 0.55rem 0.7rem 0.4rem;
 }
 
 .detail-back-link {
@@ -1345,6 +1351,44 @@ a {
 .detail-back-link:hover {
   background: none;
   color: #2e5ec8;
+}
+
+.detail-topbar-icon-btn {
+  min-height: auto;
+  width: auto;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.detail-topbar-icon-btn:hover {
+  background: transparent;
+  color: var(--text);
+  box-shadow: none;
+}
+
+.detail-topbar-icon-btn.danger {
+  color: #d84a52;
+}
+
+.detail-topbar-icon-btn.danger:hover {
+  background: transparent;
+  color: #c73a43;
+}
+
+.detail-topbar-icon-btn svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .detail-hero-card {
@@ -1444,6 +1488,7 @@ a {
 
 .detail-title-block .detail-badges {
   justify-content: flex-start;
+  margin-top: 0.38rem;
 }
 
 .detail-subtitle {

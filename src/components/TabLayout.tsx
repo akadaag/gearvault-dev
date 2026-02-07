@@ -20,6 +20,8 @@ export function TabLayout() {
   const [searchParams] = useSearchParams();
   const gearCount = useLiveQuery(() => db.gearItems.count(), [], 0);
   const isCatalogRoute = location.pathname === '/catalog';
+  const isSettingsRoute = location.pathname === '/settings';
+  const isGearDetailRoute = /^\/catalog\/item\/[^/]+$/.test(location.pathname);
   const catalogQuery = searchParams.get('q') ?? '';
 
   const pageTitle =
@@ -58,40 +60,42 @@ export function TabLayout() {
 
   return (
     <div className="app-shell">
-      <header className="topbar">
-        <div className="topbar-inner">
-          <div className="topbar-primary-row">
-            <div className="topbar-title">
-              <h1>{pageTitle}</h1>
-              {isCatalogRoute && <p className="subtle">{gearCount} items</p>}
-              {!isCatalogRoute && syncMessage && <p className="subtle topbar-sync">{syncMessage}</p>}
+      {!isGearDetailRoute && (
+        <header className="topbar">
+          <div className="topbar-inner">
+            <div className="topbar-primary-row">
+              <div className="topbar-title">
+                <h1>{pageTitle}</h1>
+                {isCatalogRoute && <p className="subtle">{gearCount} items</p>}
+                {isSettingsRoute && syncMessage && <p className="subtle topbar-sync">{syncMessage}</p>}
+              </div>
+              <div className="topbar-actions">
+                {isCatalogRoute && (
+                  <button className="icon-circle-btn topbar-add-btn" aria-label="Add new item" onClick={openCatalogAdd}>
+                    +
+                  </button>
+                )}
+              </div>
             </div>
-            <div className="topbar-actions">
-              {isCatalogRoute && (
-                <button className="icon-circle-btn topbar-add-btn" aria-label="Add new item" onClick={openCatalogAdd}>
-                  +
+            {isCatalogRoute && (
+              <div className="topbar-search-row">
+                <input
+                  className="topbar-search-input"
+                  aria-label="Search catalog items"
+                  placeholder="Search gear..."
+                  value={catalogQuery}
+                  onChange={(event) => handleCatalogSearch(event.target.value)}
+                />
+                <button className="ghost topbar-filter-btn" aria-label="Open filters" onClick={openCatalogFilters}>
+                  ⚙
                 </button>
-              )}
-            </div>
+              </div>
+            )}
           </div>
-          {isCatalogRoute && (
-            <div className="topbar-search-row">
-              <input
-                className="topbar-search-input"
-                aria-label="Search catalog items"
-                placeholder="Search gear..."
-                value={catalogQuery}
-                onChange={(event) => handleCatalogSearch(event.target.value)}
-              />
-              <button className="ghost topbar-filter-btn" aria-label="Open filters" onClick={openCatalogFilters}>
-                ⚙
-              </button>
-            </div>
-          )}
-        </div>
-      </header>
+        </header>
+      )}
 
-      <main className="content">
+      <main className={isGearDetailRoute ? 'content content-immersive' : 'content'}>
         <Outlet />
       </main>
 
