@@ -58,6 +58,24 @@ export function TabLayout() {
     navigate({ pathname: '/catalog', search: params.toString() ? `?${params.toString()}` : '' });
   }
 
+  const searchIcon = (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="11" cy="11" r="7" />
+      <path d="M20 20l-4-4" />
+    </svg>
+  );
+
+  const filterIcon = (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <line x1="4" y1="6" x2="20" y2="6" />
+      <circle cx="10" cy="6" r="2" />
+      <line x1="4" y1="12" x2="20" y2="12" />
+      <circle cx="15" cy="12" r="2" />
+      <line x1="4" y1="18" x2="20" y2="18" />
+      <circle cx="8" cy="18" r="2" />
+    </svg>
+  );
+
   return (
     <div className="app-shell">
       {!isGearDetailRoute && (
@@ -65,8 +83,8 @@ export function TabLayout() {
           <div className="topbar-inner">
             <div className="topbar-primary-row">
               <div className="topbar-title">
-                <h1>{pageTitle}</h1>
-                {isCatalogRoute && <p className="subtle">{gearCount} items</p>}
+                <h1 className={isCatalogRoute ? 'catalog-page-title' : undefined}>{pageTitle}</h1>
+                {isCatalogRoute && <p className="subtle topbar-item-count">{gearCount} items</p>}
                 {isSettingsRoute && syncMessage && <p className="subtle topbar-sync">{syncMessage}</p>}
               </div>
               <div className="topbar-actions">
@@ -79,15 +97,18 @@ export function TabLayout() {
             </div>
             {isCatalogRoute && (
               <div className="topbar-search-row">
-                <input
-                  className="topbar-search-input"
-                  aria-label="Search catalog items"
-                  placeholder="Search gear..."
-                  value={catalogQuery}
-                  onChange={(event) => handleCatalogSearch(event.target.value)}
-                />
+                <div className="topbar-search-field">
+                  <span className="topbar-search-icon">{searchIcon}</span>
+                  <input
+                    className="topbar-search-input"
+                    aria-label="Search catalog items"
+                    placeholder="Search gear..."
+                    value={catalogQuery}
+                    onChange={(event) => handleCatalogSearch(event.target.value)}
+                  />
+                </div>
                 <button className="ghost topbar-filter-btn" aria-label="Open filters" onClick={openCatalogFilters}>
-                  ⚙
+                  {filterIcon}
                 </button>
               </div>
             )}
