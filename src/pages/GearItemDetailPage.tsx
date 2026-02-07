@@ -48,10 +48,14 @@ export function GearItemDetailPage() {
   const editDraft = toDraft(currentItem);
   const maintenanceCount = currentItem.maintenanceHistory?.length ?? 0;
   const accessoriesCount = currentItem.relatedItemIds?.length ?? 0;
+  const isInAnyEvent = events.some((ev) => ev.packingChecklist.some((entry) => entry.gearItemId === currentItem.id));
+  const selectedEventHasItem = Boolean(
+    eventTarget
+    && events.find((ev) => ev.id === eventTarget)?.packingChecklist.some((entry) => entry.gearItemId === currentItem.id),
+  );
   const hasItemInfo = Boolean(currentItem.serialNumber || currentItem.purchaseDate || currentItem.currentValue);
   const hasWarrantyInfo = Boolean(currentItem.warranty?.provider || currentItem.warranty?.expirationDate || currentItem.warranty?.notes);
   const hasMaintenanceHistory = maintenanceCount > 0;
-  const hasQuickCards = maintenanceCount > 0 || accessoriesCount > 0;
 
   async function save(patch: Partial<GearItem>) {
     await db.gearItems.update(currentItem.id, { ...patch, updatedAt: new Date().toISOString() });
@@ -100,6 +104,13 @@ export function GearItemDetailPage() {
     const event = await db.events.get(eventTarget);
     if (!event) return;
 
+    const alreadyLinked = event.packingChecklist.some((entry) => entry.gearItemId === currentItem.id);
+    if (alreadyLinked) {
+      setShowAddToEvent(false);
+      setEventTarget('');
+      return;
+    }
+
     event.packingChecklist.push({
       id: makeId(),
       eventId: event.id,
@@ -126,6 +137,16 @@ export function GearItemDetailPage() {
         <button onClick={() => navigate('/catalog')} className="detail-back-link" aria-label="Back to catalog">‹ Catalog</button>
         <div className="row detail-topbar-actions">
           <button
+            className={`detail-topbar-icon-btn detail-event-btn ${isInAnyEvent ? 'active' : ''}`}
+            onClick={() => setShowAddToEvent(true)}
+            aria-label="Add to event packing list"
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <circle cx="12" cy="12" r="9" />
+              <path d="m8.7 12.2 2.1 2.2 4.6-4.6" />
+            </svg>
+          </button>
+          <button
             className="detail-topbar-icon-btn"
             onClick={() => {
               setDraft(editDraft);
@@ -136,8 +157,7 @@ export function GearItemDetailPage() {
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
               <path d="M14 2v6h6" />
-              <path d="m10.4 12.6 2.9 2.9" />
-              <path d="m9.2 16.8-1.2 3.2 3.2-1.2 5.1-5.1a1.9 1.9 0 0 0-2.7-2.7z" />
+              <path d="m9 16 4.4-4.4a1.5 1.5 0 0 1 2.1 2.1L11.1 18.1 8 19z" />
             </svg>
           </button>
           <button className="detail-topbar-icon-btn detail-delete-btn" onClick={() => void deleteItem()} aria-label="Delete">
@@ -182,28 +202,22 @@ export function GearItemDetailPage() {
         </section>
       )}
 
-      {hasQuickCards && (
-        <section className="detail-quick-grid">
-          {maintenanceCount > 0 && (
-            <article className="detail-quick-card">
-              <div className="detail-quick-icon blue" aria-hidden="true">🔧</div>
-              <div>
-                <strong>Maintenance</strong>
-                <p className="subtle">{maintenanceCount} records</p>
-              </div>
-            </article>
-          )}
-          {accessoriesCount > 0 && (
-            <article className="detail-quick-card">
-              <div className="detail-quick-icon purple" aria-hidden="true">🔗</div>
-              <div>
-                <strong>Accessories</strong>
-                <p className="subtle">{accessoriesCount} linked</p>
-              </div>
-            </article>
-          )}
-        </section>
-      )}
+      <section className="detail-quick-grid">
+        <article className="detail-quick-card">
+          <div className="detail-quick-icon blue" aria-hidden="true">🔧</div>
+          <div>
+            <strong>Maintenance</strong>
+            <p className="subtle">{maintenanceCount} records</p>
+          </div>
+        </article>
+        <article className="detail-quick-card">
+          <div className="detail-quick-icon purple" aria-hidden="true">🔗</div>
+          <div>
+            <strong>Accessories</strong>
+            <p className="subtle">{accessoriesCount} linked</p>
+          </div>
+        </article>
+      </section>
 
       {hasItemInfo && (
         <div className="detail-page-section">
@@ -304,25 +318,34 @@ export function GearItemDetailPage() {
         </div>
       )}
 
-      <div className="detail-page-section">
-        <h3>Add to Event</h3>
-        {showAddToEvent ? (
-          <div className="detail-grid">
-            <div className="detail-field detail-field-full">
-              <select value={eventTarget} onChange={(e) => setEventTarget(e.target.value)} className="detail-input">
-                <option value="">Select an event</option>
-                {events.map((ev) => (
-                  <option key={ev.id} value={ev.id}>{ev.title}</option>
-                ))}
-              </select>
+      {showAddToEvent && (
+        <>
+          <button className="sheet-overlay" aria-label="Close add to event" onClick={() => setShowAddToEvent(false)} />
+          <aside className="filter-sheet card event-add-sheet" aria-label="Add to event packing list">
+            <div className="event-add-sheet-header">
+              <h3>Add to Event</h3>
+              <button className="ghost icon-compact-btn" onClick={() => setShowAddToEvent(false)} aria-label="Close">✕</button>
             </div>
-            <button onClick={() => void addToEvent()} disabled={!eventTarget}>Add to Event</button>
-            <button className="ghost" onClick={() => setShowAddToEvent(false)}>Cancel</button>
-          </div>
-        ) : (
-          <button className="ghost" onClick={() => setShowAddToEvent(true)}>Add to Event Packing List</button>
-        )}
-      </div>
+
+            <div className="event-add-sheet-body stack-sm">
+              <label className="gear-field-block">
+                <span>Select Event</span>
+                <select value={eventTarget} onChange={(e) => setEventTarget(e.target.value)}>
+                  <option value="">Select an event</option>
+                  {events.map((ev) => (
+                    <option key={ev.id} value={ev.id}>{ev.title}</option>
+                  ))}
+                </select>
+              </label>
+              {selectedEventHasItem && <p className="subtle">Item already added to this event.</p>}
+            </div>
+
+            <div className="event-add-sheet-footer">
+              <button onClick={() => void addToEvent()} disabled={!eventTarget || selectedEventHasItem}>Add to Packing List</button>
+            </div>
+          </aside>
+        </>
+      )}
 
       <GearItemFormSheet
         open={showEditSheet}

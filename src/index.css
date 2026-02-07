@@ -1392,6 +1392,14 @@ a {
   background: transparent;
 }
 
+.detail-event-btn {
+  color: var(--text);
+}
+
+.detail-event-btn.active {
+  color: #22a861;
+}
+
 .detail-topbar-icon-btn svg {
   width: 21px;
   height: 21px;
@@ -1400,6 +1408,55 @@ a {
   stroke-width: 1.9;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+.event-add-sheet {
+  max-height: min(84vh, 760px);
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.event-add-sheet-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding: 0.95rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.event-add-sheet-header h3 {
+  font-size: 1.45rem;
+}
+
+.event-add-sheet-header .icon-compact-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 0.5rem;
+}
+
+.event-add-sheet-body {
+  padding: 0.7rem 0.9rem;
+  overflow-y: auto;
+}
+
+.event-add-sheet-footer {
+  padding: 0.7rem 0.9rem calc(0.8rem + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border-subtle);
+  background: var(--surface-raised);
+}
+
+.event-add-sheet-footer button {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 14px;
+  background: #11131a;
+}
+
+.event-add-sheet-footer button:hover {
+  background: #1a1d26;
 }
 
 .detail-hero-card {
