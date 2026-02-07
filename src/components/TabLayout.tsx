@@ -89,7 +89,7 @@ export function TabLayout() {
               </div>
               <div className="topbar-actions">
                 {isCatalogRoute && (
-                  <button className="icon-circle-btn topbar-add-btn" aria-label="Add new item" onClick={openCatalogAdd}>
+                  <button className="topbar-add-btn" aria-label="Add new item" onClick={openCatalogAdd}>
                     +
                   </button>
                 )}
