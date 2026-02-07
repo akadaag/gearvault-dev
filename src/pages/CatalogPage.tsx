@@ -245,7 +245,7 @@ export function CatalogPage() {
   }
 
   return (
-    <section className="stack-lg">
+    <section className="stack-lg catalog-page">
       {showFilterSheet && (
         <>
           <button className="sheet-overlay" aria-label="Close filters" onClick={closeFilterSheet} />
@@ -370,10 +370,11 @@ export function CatalogPage() {
                 </div>
               </div>
               {!category.collapsed && (
-                <div className="catalog-items-list">
+                <div className="catalog-items-surface">
+                  <div className="catalog-items-list">
                   {items.map((item) => (
-                    <button key={item.id} className="gear-card catalog-item-card" onClick={() => navigate(`/catalog/item/${item.id}`)}>
-                      <div className="catalog-item-avatar" aria-hidden="true">{item.name.charAt(0).toUpperCase()}</div>
+                    <button key={item.id} className="catalog-item-row" onClick={() => navigate(`/catalog/item/${item.id}`)}>
+                      <div className="catalog-item-icon" aria-hidden="true">{item.name.charAt(0).toUpperCase()}</div>
                       <div className="catalog-item-main">
                         <strong className="catalog-item-title">{item.name}</strong>
                         {(item.brand || item.model) && (
@@ -382,12 +383,12 @@ export function CatalogPage() {
                         <div className="row wrap catalog-item-meta-row">
                           <span className="pill">x{item.quantity}</span>
                           <span className="pill">{item.condition}</span>
-                          {item.essential && <span className="pill">⭐ Essential</span>}
+                          {item.essential && <span className="pill essential">Essential</span>}
                         </div>
                       </div>
-                      <span className="catalog-item-arrow" aria-hidden="true">›</span>
                     </button>
                   ))}
+                  </div>
                 </div>
               )}
             </article>
