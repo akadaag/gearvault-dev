@@ -124,7 +124,7 @@ export function GearItemDetailPage() {
         </div>
       </div>
 
-      <div className="detail-hero-card">
+      <div className="detail-hero-card detail-hero-fullbleed">
         {currentItem.photo ? (
           <img src={currentItem.photo} alt={currentItem.name} className="detail-hero-photo" />
         ) : (
@@ -134,7 +134,7 @@ export function GearItemDetailPage() {
         )}
       </div>
 
-      <section className="detail-page-section detail-page-main-info">
+      <section className="detail-page-section detail-page-main-info detail-title-block">
         <h2>{currentItem.name}</h2>
         <p className="subtle detail-main-subtitle">{[currentItem.brand, currentItem.model].filter(Boolean).join(' ') || 'No brand/model yet'}</p>
         <div className="row wrap detail-badges">
@@ -145,13 +145,15 @@ export function GearItemDetailPage() {
         </div>
       </section>
 
-      <section className="detail-preview-card detail-page-section">
-        <div className="detail-preview-icon" aria-hidden="true">$</div>
-        <div>
-          <span className="detail-label">Purchase Price</span>
-          <p className="detail-preview-value">{currentItem.purchasePrice ? formatMoney(currentItem.purchasePrice.amount, currentItem.purchasePrice.currency) : 'Not set'}</p>
-        </div>
-      </section>
+      {currentItem.purchasePrice && (
+        <section className="detail-preview-card detail-page-section">
+          <div className="detail-preview-icon" aria-hidden="true">$</div>
+          <div>
+            <span className="detail-label">Purchase Price</span>
+            <p className="detail-preview-value">{formatMoney(currentItem.purchasePrice.amount, currentItem.purchasePrice.currency)}</p>
+          </div>
+        </section>
+      )}
 
       <section className="detail-quick-grid">
         <article className="detail-quick-card">

@@ -385,13 +385,15 @@ export function CatalogPage() {
                 <button className="ghost icon-compact-btn" onClick={() => setSelectedItemId(null)} aria-label="Close">✕</button>
               </div>
 
-              <div className="detail-preview-card">
-                <div className="detail-preview-icon" aria-hidden="true">$</div>
-                <div>
-                  <span className="detail-label">Purchase Price</span>
-                  <p className="detail-preview-value">{item.purchasePrice ? formatMoney(item.purchasePrice.amount, item.purchasePrice.currency) : 'Not set'}</p>
-                </div>
-              </div>
+              {item.purchasePrice && (
+                <section className="detail-preview-card detail-sheet-preview-card">
+                  <div className="detail-preview-icon" aria-hidden="true">$</div>
+                  <div>
+                    <span className="detail-label">Purchase Price</span>
+                    <p className="detail-preview-value">{formatMoney(item.purchasePrice.amount, item.purchasePrice.currency)}</p>
+                  </div>
+                </section>
+              )}
 
               <div className="detail-quick-grid">
                 <article className="detail-quick-card">
