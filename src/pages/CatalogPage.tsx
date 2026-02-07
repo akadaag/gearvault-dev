@@ -276,11 +276,11 @@ export function CatalogPage() {
                   {category.name} <span className="category-count-pill">{items.length}</span>
                 </button>
                 <button
-                  className={`ghost icon-compact-btn category-toggle-btn${category.collapsed ? ' is-collapsed' : ''}`}
+                  className={`category-toggle-btn${category.collapsed ? ' is-collapsed' : ''}`}
                   aria-label={category.collapsed ? `Expand ${category.name}` : `Collapse ${category.name}`}
                   onClick={() => void toggleCollapse(category)}
                 >
-                  ›
+                  {category.collapsed ? '▴' : '▾'}
                 </button>
               </div>
               {!category.collapsed && (
