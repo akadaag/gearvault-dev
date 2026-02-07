@@ -116,7 +116,7 @@ export function TabLayout() {
         </header>
       )}
 
-      <main className={isGearDetailRoute ? 'content content-immersive' : 'content'}>
+      <main className={`${isGearDetailRoute ? 'content content-immersive' : 'content'}${isCatalogRoute ? ' content-catalog' : ''}`}>
         <Outlet />
       </main>
 
