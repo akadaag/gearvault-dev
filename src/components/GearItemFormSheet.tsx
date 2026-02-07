@@ -72,21 +72,21 @@ export function GearItemFormSheet({
           <button className="ghost icon-compact-btn" onClick={onClose} aria-label="Close">✕</button>
         </div>
 
-        <div className="gear-photo-upload-wrap">
-          <label className="gear-photo-upload-tile">
-            <input type="file" accept="image/*" onChange={(e) => handlePhotoUpload(e.target.files?.[0])} />
-            {draft.photo ? (
-              <img src={draft.photo} alt="Selected" className="gear-photo-preview" />
-            ) : (
-              <>
-                <span className="gear-photo-icon" aria-hidden="true">📷</span>
-                <span>Add Photo</span>
-              </>
-            )}
-          </label>
-        </div>
-
         <div className="gear-form-stack">
+          <div className="gear-photo-upload-wrap">
+            <label className="gear-photo-upload-tile">
+              <input type="file" accept="image/*" onChange={(e) => handlePhotoUpload(e.target.files?.[0])} />
+              {draft.photo ? (
+                <img src={draft.photo} alt="Selected" className="gear-photo-preview" />
+              ) : (
+                <>
+                  <span className="gear-photo-icon" aria-hidden="true">📷</span>
+                  <span>Add Photo</span>
+                </>
+              )}
+            </label>
+          </div>
+
           <label className="gear-field-block">
             <span>Name *</span>
             <input placeholder="Sony FX30" value={draft.name} onChange={(e) => update('name', e.target.value)} />

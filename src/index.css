@@ -1099,7 +1099,7 @@ a {
 }
 
 .gear-form-stack {
-  padding: 0.5rem 0.9rem 1rem;
+  padding: 0.35rem 0.9rem 1rem;
   overflow-y: auto;
   display: grid;
   gap: 0.65rem;
@@ -1341,16 +1341,20 @@ a {
   background: none;
   border: 0;
   box-shadow: none;
-  color: #3d6edc;
+  color: var(--text);
   min-height: auto;
   padding: 0.2rem 0;
-  font-size: 1.65rem;
-  font-weight: 500;
+  font-size: 1.15rem;
+  font-weight: 600;
 }
 
 .detail-back-link:hover {
   background: none;
-  color: #2e5ec8;
+  color: var(--text);
+}
+
+.detail-topbar-actions {
+  gap: 0.95rem;
 }
 
 .detail-topbar-icon-btn {
@@ -1364,6 +1368,7 @@ a {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transform: none;
 }
 
 .detail-topbar-icon-btn:hover {
@@ -1372,13 +1377,19 @@ a {
   box-shadow: none;
 }
 
-.detail-topbar-icon-btn.danger {
+.detail-delete-btn {
   color: #d84a52;
 }
 
-.detail-topbar-icon-btn.danger:hover {
+.detail-delete-btn:hover {
   background: transparent;
   color: #c73a43;
+}
+
+.detail-delete-btn:active,
+.detail-topbar-icon-btn:active {
+  transform: none;
+  background: transparent;
 }
 
 .detail-topbar-icon-btn svg {

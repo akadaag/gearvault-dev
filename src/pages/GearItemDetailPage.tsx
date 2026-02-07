@@ -46,6 +46,12 @@ export function GearItemDetailPage() {
   if (!item) return <div className="card">Item not found.</div>;
   const currentItem = item;
   const editDraft = toDraft(currentItem);
+  const maintenanceCount = currentItem.maintenanceHistory?.length ?? 0;
+  const accessoriesCount = currentItem.relatedItemIds?.length ?? 0;
+  const hasItemInfo = Boolean(currentItem.serialNumber || currentItem.purchaseDate || currentItem.currentValue);
+  const hasWarrantyInfo = Boolean(currentItem.warranty?.provider || currentItem.warranty?.expirationDate || currentItem.warranty?.notes);
+  const hasMaintenanceHistory = maintenanceCount > 0;
+  const hasQuickCards = maintenanceCount > 0 || accessoriesCount > 0;
 
   async function save(patch: Partial<GearItem>) {
     await db.gearItems.update(currentItem.id, { ...patch, updatedAt: new Date().toISOString() });
@@ -118,7 +124,7 @@ export function GearItemDetailPage() {
     <section className="detail-page detail-page-immersive">
       <div className="detail-page-topbar">
         <button onClick={() => navigate('/catalog')} className="detail-back-link" aria-label="Back to catalog">‹ Catalog</button>
-        <div className="row">
+        <div className="row detail-topbar-actions">
           <button
             className="detail-topbar-icon-btn"
             onClick={() => {
@@ -128,11 +134,13 @@ export function GearItemDetailPage() {
             aria-label="Edit"
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="M12 20h9" />
-              <path d="M16.5 3.5a2.1 2.1 0 1 1 3 3L7 19l-4 1 1-4Z" />
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+              <path d="M14 2v6h6" />
+              <path d="m10.4 12.6 2.9 2.9" />
+              <path d="m9.2 16.8-1.2 3.2 3.2-1.2 5.1-5.1a1.9 1.9 0 0 0-2.7-2.7z" />
             </svg>
           </button>
-          <button className="detail-topbar-icon-btn danger" onClick={() => void deleteItem()} aria-label="Delete">
+          <button className="detail-topbar-icon-btn detail-delete-btn" onClick={() => void deleteItem()} aria-label="Delete">
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M3 6h18" />
               <path d="M8 6V4h8v2" />
@@ -174,50 +182,54 @@ export function GearItemDetailPage() {
         </section>
       )}
 
-      <section className="detail-quick-grid">
-        <article className="detail-quick-card">
-          <div className="detail-quick-icon blue" aria-hidden="true">🔧</div>
-          <div>
-            <strong>Maintenance</strong>
-            <p className="subtle">{currentItem.maintenanceHistory?.length ?? 0} records</p>
-          </div>
-        </article>
-        <article className="detail-quick-card">
-          <div className="detail-quick-icon purple" aria-hidden="true">🔗</div>
-          <div>
-            <strong>Accessories</strong>
-            <p className="subtle">{currentItem.relatedItemIds?.length ?? 0} linked</p>
-          </div>
-        </article>
-      </section>
+      {hasQuickCards && (
+        <section className="detail-quick-grid">
+          {maintenanceCount > 0 && (
+            <article className="detail-quick-card">
+              <div className="detail-quick-icon blue" aria-hidden="true">🔧</div>
+              <div>
+                <strong>Maintenance</strong>
+                <p className="subtle">{maintenanceCount} records</p>
+              </div>
+            </article>
+          )}
+          {accessoriesCount > 0 && (
+            <article className="detail-quick-card">
+              <div className="detail-quick-icon purple" aria-hidden="true">🔗</div>
+              <div>
+                <strong>Accessories</strong>
+                <p className="subtle">{accessoriesCount} linked</p>
+              </div>
+            </article>
+          )}
+        </section>
+      )}
 
-      <div className="detail-page-section">
-        <h3>Item Information</h3>
-        <div className="detail-grid">
-          {currentItem.serialNumber && (
-            <div className="detail-field">
-              <span className="detail-label">Serial Number</span>
-              <span className="detail-value">{currentItem.serialNumber}</span>
-            </div>
-          )}
-          {currentItem.purchaseDate && (
-            <div className="detail-field">
-              <span className="detail-label">Purchase Date</span>
-              <span className="detail-value">{new Date(currentItem.purchaseDate).toLocaleDateString()}</span>
-            </div>
-          )}
-          {currentItem.currentValue && (
-            <div className="detail-field">
-              <span className="detail-label">Current Value</span>
-              <span className="detail-value">{formatMoney(currentItem.currentValue.amount, currentItem.currentValue.currency)}</span>
-            </div>
-          )}
-          <div className="detail-field">
-            <span className="detail-label">Last Updated</span>
-            <span className="detail-value">{new Date(currentItem.updatedAt).toLocaleDateString()}</span>
+      {hasItemInfo && (
+        <div className="detail-page-section">
+          <h3>Item Information</h3>
+          <div className="detail-grid">
+            {currentItem.serialNumber && (
+              <div className="detail-field">
+                <span className="detail-label">Serial Number</span>
+                <span className="detail-value">{currentItem.serialNumber}</span>
+              </div>
+            )}
+            {currentItem.purchaseDate && (
+              <div className="detail-field">
+                <span className="detail-label">Purchase Date</span>
+                <span className="detail-value">{new Date(currentItem.purchaseDate).toLocaleDateString()}</span>
+              </div>
+            )}
+            {currentItem.currentValue && (
+              <div className="detail-field">
+                <span className="detail-label">Current Value</span>
+                <span className="detail-value">{formatMoney(currentItem.currentValue.amount, currentItem.currentValue.currency)}</span>
+              </div>
+            )}
           </div>
         </div>
-      </div>
+      )}
 
       {currentItem.notes && (
         <div className="detail-page-section">
@@ -237,14 +249,12 @@ export function GearItemDetailPage() {
         </div>
       )}
 
-      <div className="detail-page-section">
-        <div className="row between">
-          <h3>Maintenance History</h3>
-          <button className="ghost" onClick={() => void save({ maintenanceHistory: [...(currentItem.maintenanceHistory ?? []), { id: makeId(), date: new Date().toISOString().slice(0, 10), note: 'Routine check' }] })}>+ Add</button>
-        </div>
-        {(currentItem.maintenanceHistory ?? []).length === 0 ? (
-          <p className="subtle">No maintenance records yet</p>
-        ) : (
+      {hasMaintenanceHistory && (
+        <div className="detail-page-section">
+          <div className="row between">
+            <h3>Maintenance History</h3>
+            <button className="ghost" onClick={() => void save({ maintenanceHistory: [...(currentItem.maintenanceHistory ?? []), { id: makeId(), date: new Date().toISOString().slice(0, 10), note: 'Routine check' }] })}>+ Add</button>
+          </div>
           <div className="detail-grid">
             {(currentItem.maintenanceHistory ?? []).map((m) => (
               <div key={m.id} className="detail-field">
@@ -254,26 +264,34 @@ export function GearItemDetailPage() {
               </div>
             ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      <div className="detail-page-section">
-        <h3>Warranty</h3>
-        <div className="detail-grid">
-          <div className="detail-field">
-            <label className="detail-label">Provider</label>
-            <input value={currentItem.warranty?.provider ?? ''} onChange={(e) => void save({ warranty: { ...currentItem.warranty, provider: e.target.value } })} placeholder="Provider" className="detail-input" />
-          </div>
-          <div className="detail-field">
-            <label className="detail-label">Expires</label>
-            <input type="date" value={currentItem.warranty?.expirationDate ?? ''} onChange={(e) => void save({ warranty: { ...currentItem.warranty, expirationDate: e.target.value } })} className="detail-input" />
+      {hasWarrantyInfo && (
+        <div className="detail-page-section">
+          <h3>Warranty</h3>
+          <div className="detail-grid">
+            {currentItem.warranty?.provider && (
+              <div className="detail-field">
+                <span className="detail-label">Provider</span>
+                <span className="detail-value">{currentItem.warranty.provider}</span>
+              </div>
+            )}
+            {currentItem.warranty?.expirationDate && (
+              <div className="detail-field">
+                <span className="detail-label">Expires</span>
+                <span className="detail-value">{new Date(currentItem.warranty.expirationDate).toLocaleDateString()}</span>
+              </div>
+            )}
+            {currentItem.warranty?.notes && (
+              <div className="detail-field detail-field-full">
+                <span className="detail-label">Warranty Notes</span>
+                <span className="detail-value">{currentItem.warranty.notes}</span>
+              </div>
+            )}
           </div>
         </div>
-        <div className="detail-field detail-field-full">
-          <label className="detail-label">Warranty Notes</label>
-          <textarea value={currentItem.warranty?.notes ?? ''} onChange={(e) => void save({ warranty: { ...currentItem.warranty, notes: e.target.value } })} placeholder="Add warranty details..." className="detail-textarea" rows={2} />
-        </div>
-      </div>
+      )}
 
       {related.length > 0 && (
         <div className="detail-page-section">
