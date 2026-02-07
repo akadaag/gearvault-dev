@@ -60,222 +60,154 @@ export function GearItemDetailPage() {
   }
 
   return (
-    <section className="stack-lg">
-      <div className="card stack-md">
-        <div className="page-header">
-          <div className="page-title-section">
-            <h2>{currentItem.name}</h2>
-            <div className="row wrap">
-              <span className="pill">{categories.find((c) => c.id === currentItem.categoryId)?.name}</span>
-              {currentItem.essential && <span className="pill">⭐ Essential</span>}
-            </div>
-          </div>
-          <div className="page-actions">
-            <button onClick={() => navigate('/catalog')} className="ghost">← Back</button>
-            <button className="danger" onClick={() => void deleteItem()}>
-              Delete
-            </button>
+    <section className="detail-page">
+      <div className="detail-page-header">
+        <button onClick={() => navigate('/catalog')} className="ghost icon-compact-btn" aria-label="Back">←</button>
+        {currentItem.photo && <img src={currentItem.photo} alt={currentItem.name} className="detail-page-photo" />}
+        <div className="detail-page-header-content">
+          <h2>{currentItem.name}</h2>
+          <div className="row wrap detail-badges">
+            <span className="pill">{categories.find((c) => c.id === currentItem.categoryId)?.name}</span>
+            <span className="pill">x{currentItem.quantity}</span>
+            <span className="pill">{currentItem.condition}</span>
+            {currentItem.essential && <span className="pill essential">Essential</span>}
           </div>
         </div>
-
-        {currentItem.photo && <img src={currentItem.photo} alt={currentItem.name} className="photo" />}
+        <button className="danger icon-compact-btn" onClick={() => void deleteItem()} aria-label="Delete">🗑</button>
       </div>
 
-      <div className="card stack-md">
+      <div className="detail-page-section">
         <h3>Basic Information</h3>
-        <div className="grid two">
-          <label className="stack-sm">
-            <strong>Name</strong>
-            <input value={currentItem.name} onChange={(e) => void save({ name: e.target.value })} />
-          </label>
-          <label className="stack-sm">
-            <strong>Category</strong>
-            <select value={currentItem.categoryId} onChange={(e) => void save({ categoryId: e.target.value })}>
+        <div className="detail-grid">
+          <div className="detail-field">
+            <label className="detail-label">Name</label>
+            <input value={currentItem.name} onChange={(e) => void save({ name: e.target.value })} className="detail-input" />
+          </div>
+          <div className="detail-field">
+            <label className="detail-label">Category</label>
+            <select value={currentItem.categoryId} onChange={(e) => void save({ categoryId: e.target.value })} className="detail-input">
               {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
+                <option key={c.id} value={c.id}>{c.name}</option>
               ))}
             </select>
-          </label>
-          <label className="stack-sm">
-            <strong>Brand</strong>
-            <input value={currentItem.brand ?? ''} onChange={(e) => void save({ brand: e.target.value })} placeholder="Optional" />
-          </label>
-          <label className="stack-sm">
-            <strong>Model</strong>
-            <input value={currentItem.model ?? ''} onChange={(e) => void save({ model: e.target.value })} placeholder="Optional" />
-          </label>
-          <label className="stack-sm">
-            <strong>Quantity</strong>
-            <input
-              type="number"
-              min={1}
-              value={currentItem.quantity}
-              onChange={(e) => void save({ quantity: Number(e.target.value || 1) })}
-            />
-          </label>
-          <label className="stack-sm">
-            <strong>Condition</strong>
-            <select
-              value={currentItem.condition}
-              onChange={(e) => void save({ condition: e.target.value as GearItem['condition'] })}
-            >
+          </div>
+          <div className="detail-field">
+            <label className="detail-label">Brand</label>
+            <input value={currentItem.brand ?? ''} onChange={(e) => void save({ brand: e.target.value })} placeholder="Optional" className="detail-input" />
+          </div>
+          <div className="detail-field">
+            <label className="detail-label">Model</label>
+            <input value={currentItem.model ?? ''} onChange={(e) => void save({ model: e.target.value })} placeholder="Optional" className="detail-input" />
+          </div>
+          <div className="detail-field">
+            <label className="detail-label">Quantity</label>
+            <input type="number" min={1} value={currentItem.quantity} onChange={(e) => void save({ quantity: Number(e.target.value || 1) })} className="detail-input" />
+          </div>
+          <div className="detail-field">
+            <label className="detail-label">Condition</label>
+            <select value={currentItem.condition} onChange={(e) => void save({ condition: e.target.value as GearItem['condition'] })} className="detail-input">
               <option value="new">New</option>
               <option value="good">Good</option>
               <option value="worn">Worn</option>
             </select>
-          </label>
+          </div>
         </div>
-
-        <label className="stack-sm">
-          <strong>Notes</strong>
-          <textarea value={currentItem.notes ?? ''} onChange={(e) => void save({ notes: e.target.value })} placeholder="Add notes about this item..." />
-        </label>
-
+        <div className="detail-field detail-field-full">
+          <label className="detail-label">Notes</label>
+          <textarea value={currentItem.notes ?? ''} onChange={(e) => void save({ notes: e.target.value })} placeholder="Add notes..." className="detail-textarea" rows={3} />
+        </div>
         <label className="checkbox-inline">
           <input type="checkbox" checked={currentItem.essential} onChange={(e) => void save({ essential: e.target.checked })} />
           <span>Mark as essential</span>
         </label>
       </div>
 
-      <div className="card stack-md">
-        <h3>Financial</h3>
-        <div className="row wrap">
-          {currentItem.purchasePrice && (
-            <span className="pill">
-              Purchase: {formatMoney(currentItem.purchasePrice.amount, currentItem.purchasePrice.currency)}
-            </span>
-          )}
-          {currentItem.currentValue && (
-            <span className="pill">
-              Current: {formatMoney(currentItem.currentValue.amount, currentItem.currentValue.currency)}
-            </span>
-          )}
+      {(currentItem.purchasePrice || currentItem.currentValue) && (
+        <div className="detail-page-section">
+          <h3>Financial</h3>
+          <div className="detail-grid">
+            {currentItem.purchasePrice && (
+              <div className="detail-field">
+                <span className="detail-label">Purchase Price</span>
+                <span className="detail-value">{formatMoney(currentItem.purchasePrice.amount, currentItem.purchasePrice.currency)}</span>
+              </div>
+            )}
+            {currentItem.currentValue && (
+              <div className="detail-field">
+                <span className="detail-label">Current Value</span>
+                <span className="detail-value">{formatMoney(currentItem.currentValue.amount, currentItem.currentValue.currency)}</span>
+              </div>
+            )}
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="card stack-md">
-        <div className="row between wrap">
+      <div className="detail-page-section">
+        <div className="row between">
           <h3>Maintenance History</h3>
-          <button
-            className="ghost"
-            onClick={() =>
-              void save({
-                maintenanceHistory: [
-                  ...(currentItem.maintenanceHistory ?? []),
-                  { id: makeId(), date: new Date().toISOString().slice(0, 10), note: 'Routine check' },
-                ],
-              })
-            }
-          >
-            + Add Entry
-          </button>
+          <button className="ghost" onClick={() => void save({ maintenanceHistory: [...(currentItem.maintenanceHistory ?? []), { id: makeId(), date: new Date().toISOString().slice(0, 10), note: 'Routine check' }] })}>+ Add</button>
         </div>
         {(currentItem.maintenanceHistory ?? []).length === 0 ? (
           <p className="subtle">No maintenance records yet</p>
         ) : (
-          <div className="stack-sm">
+          <div className="detail-grid">
             {(currentItem.maintenanceHistory ?? []).map((m) => (
-              <div key={m.id} className="checklist-row">
-                <strong>{new Date(m.date).toLocaleDateString()}</strong>
-                <p>{m.note}</p>
-                {m.cost && <span className="pill">Cost: €{m.cost}</span>}
+              <div key={m.id} className="detail-field">
+                <span className="detail-label">{new Date(m.date).toLocaleDateString()}</span>
+                <span className="detail-value">{m.note}</span>
+                {m.cost && <span className="pill">€{m.cost}</span>}
               </div>
             ))}
           </div>
         )}
       </div>
 
-      <div className="card stack-md">
+      <div className="detail-page-section">
         <h3>Warranty</h3>
-        <div className="grid two">
-          <label className="stack-sm">
-            <strong>Provider</strong>
-            <input
-              value={currentItem.warranty?.provider ?? ''}
-              onChange={(e) => void save({ warranty: { ...currentItem.warranty, provider: e.target.value } })}
-              placeholder="Warranty provider"
-            />
-          </label>
-          <label className="stack-sm">
-            <strong>Expires</strong>
-            <input
-              type="date"
-              value={currentItem.warranty?.expirationDate ?? ''}
-              onChange={(e) =>
-                void save({ warranty: { ...currentItem.warranty, expirationDate: e.target.value } })
-              }
-            />
-          </label>
+        <div className="detail-grid">
+          <div className="detail-field">
+            <label className="detail-label">Provider</label>
+            <input value={currentItem.warranty?.provider ?? ''} onChange={(e) => void save({ warranty: { ...currentItem.warranty, provider: e.target.value } })} placeholder="Provider" className="detail-input" />
+          </div>
+          <div className="detail-field">
+            <label className="detail-label">Expires</label>
+            <input type="date" value={currentItem.warranty?.expirationDate ?? ''} onChange={(e) => void save({ warranty: { ...currentItem.warranty, expirationDate: e.target.value } })} className="detail-input" />
+          </div>
         </div>
-        <label className="stack-sm">
-          <strong>Warranty Notes</strong>
-          <textarea
-            value={currentItem.warranty?.notes ?? ''}
-            onChange={(e) => void save({ warranty: { ...currentItem.warranty, notes: e.target.value } })}
-            placeholder="Add warranty details..."
-          />
-        </label>
+        <div className="detail-field detail-field-full">
+          <label className="detail-label">Warranty Notes</label>
+          <textarea value={currentItem.warranty?.notes ?? ''} onChange={(e) => void save({ warranty: { ...currentItem.warranty, notes: e.target.value } })} placeholder="Add warranty details..." className="detail-textarea" rows={2} />
+        </div>
       </div>
 
-      <div className="card stack-md">
-        <h3>Related Items</h3>
-        {related.length === 0 ? (
-          <p className="subtle">No related items linked</p>
-        ) : (
+      {related.length > 0 && (
+        <div className="detail-page-section">
+          <h3>Related Items</h3>
           <div className="row wrap">
             {related.map((r) => (
-              <span key={r.id} className="pill">
-                {r.name}
-              </span>
+              <span key={r.id} className="pill">{r.name}</span>
             ))}
           </div>
-        )}
-        <label className="stack-sm">
-          <strong>Link Related Item</strong>
-          <select
-            onChange={(e) => {
-              const value = e.target.value;
-              if (!value) return;
-              const next = new Set(currentItem.relatedItemIds ?? []);
-              next.add(value);
-              void save({ relatedItemIds: Array.from(next) });
-            }}
-          >
-            <option value="">Choose item to link</option>
-            {allItems
-              .filter((g) => g.id !== currentItem.id && !related.some((r) => r.id === g.id))
-              .map((g) => (
-                <option key={g.id} value={g.id}>
-                  {g.name}
-                </option>
-              ))}
-          </select>
-        </label>
-      </div>
+        </div>
+      )}
 
-      <div className="card stack-md">
+      <div className="detail-page-section">
         <h3>Add to Event</h3>
         {showAddToEvent ? (
-          <div className="stack-sm">
-            <select value={eventTarget} onChange={(e) => setEventTarget(e.target.value)}>
-              <option value="">Select an event</option>
-              {events.map((ev) => (
-                <option key={ev.id} value={ev.id}>
-                  {ev.title}
-                </option>
-              ))}
-            </select>
-            <div className="row wrap">
-              <button onClick={() => void addToEvent()} disabled={!eventTarget}>Add to Event</button>
-              <button className="ghost" onClick={() => setShowAddToEvent(false)}>Cancel</button>
+          <div className="detail-grid">
+            <div className="detail-field detail-field-full">
+              <select value={eventTarget} onChange={(e) => setEventTarget(e.target.value)} className="detail-input">
+                <option value="">Select an event</option>
+                {events.map((ev) => (
+                  <option key={ev.id} value={ev.id}>{ev.title}</option>
+                ))}
+              </select>
             </div>
+            <button onClick={() => void addToEvent()} disabled={!eventTarget}>Add to Event</button>
+            <button className="ghost" onClick={() => setShowAddToEvent(false)}>Cancel</button>
           </div>
         ) : (
-          <button className="ghost" onClick={() => setShowAddToEvent(true)}>
-            Add to Event Packing List
-          </button>
+          <button className="ghost" onClick={() => setShowAddToEvent(true)}>Add to Event Packing List</button>
         )}
       </div>
     </section>
