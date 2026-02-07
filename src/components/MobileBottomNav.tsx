@@ -33,9 +33,8 @@ export function MobileBottomNav({ items, ariaLabel = 'Main navigation' }: Mobile
             className={active ? 'mobile-bottom-nav__item is-active' : 'mobile-bottom-nav__item'}
             onClick={() => navigate(item.to)}
             onPointerUp={(event) => {
-              if (event.pointerType !== 'mouse') {
-                event.currentTarget.blur();
-              }
+              // Prevent persistent focus ring after pointer interactions.
+              event.currentTarget.blur();
             }}
             aria-label={item.label}
             aria-current={active ? 'page' : undefined}
