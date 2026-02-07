@@ -8,7 +8,7 @@ import { syncNow } from '../services/sync';
 import type { AppSettings, ExportBundle } from '../types/models';
 
 export function SettingsPage() {
-  const { user, syncMessage } = useAuth();
+  const { user, signOut, syncMessage } = useAuth();
   const settings = useLiveQuery(() => db.settings.get('app-settings'), []);
   const categories = useLiveQuery(() => db.categories.toArray(), [], defaultCategories);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -97,6 +97,16 @@ export function SettingsPage() {
       <div className="card stack-md">
         <h2>Settings</h2>
         <p className="subtle">Customize your GearVault experience</p>
+      </div>
+
+      <div className="card stack-md">
+        <h3>Account</h3>
+        <p><strong>Email:</strong> {user?.email ?? 'Not available'}</p>
+        <div className="row wrap">
+          <button className="ghost" onClick={() => void signOut()}>
+            Logout
+          </button>
+        </div>
       </div>
 
       <div className="card stack-md">

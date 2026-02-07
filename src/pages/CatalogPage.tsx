@@ -253,11 +253,7 @@ export function CatalogPage() {
 
   return (
     <section className="stack-lg">
-      <div className="catalog-header-row">
-        <div>
-          <h2>Catalog</h2>
-          <p className="subtle">{filtered.length} of {gear.length} items</p>
-        </div>
+      <div className="catalog-header-actions">
         <div className="catalog-add-actions">
           <button className="icon-circle-btn" aria-label="Open add options" onClick={() => setShowAddActions((prev) => !prev)}>+</button>
           {showAddActions && (

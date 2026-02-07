@@ -1,6 +1,7 @@
 import { NavLink, Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { useEffect, useState } from 'react';
-import { ensureBaseData } from '../db';
+import { useLiveQuery } from 'dexie-react-hooks';
+import { db, ensureBaseData } from '../db';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
 
@@ -19,10 +20,11 @@ const tabs = [
 
 export function TabLayout() {
   useTheme();
-  const { user, signOut, syncMessage } = useAuth();
+  const { syncMessage } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const gearCount = useLiveQuery(() => db.gearItems.count(), [], 0);
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
   const [isInstalled, setIsInstalled] = useState<boolean>(() =>
     window.matchMedia('(display-mode: standalone)').matches,
@@ -30,6 +32,17 @@ export function TabLayout() {
   const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine);
   const isCatalogRoute = location.pathname === '/catalog';
   const catalogQuery = searchParams.get('q') ?? '';
+
+  const pageTitle =
+    location.pathname === '/catalog'
+      ? 'Catalog'
+      : location.pathname === '/events'
+        ? 'Events'
+        : location.pathname === '/assistant'
+          ? 'AI Assistant'
+          : location.pathname === '/settings'
+            ? 'Settings'
+            : 'Catalog';
 
   useEffect(() => {
     void ensureBaseData();
@@ -88,10 +101,12 @@ export function TabLayout() {
     <div className="app-shell">
       <header className="topbar">
         <div className="topbar-inner">
-          <div className="topbar-title">
-            <h1>GearVault</h1>
-            <p className="subtle topbar-user">{user?.email}</p>
-            {syncMessage && <p className="subtle topbar-sync">{syncMessage}</p>}
+          <div className="topbar-primary-row">
+            <div className="topbar-title">
+              <h1>{pageTitle}</h1>
+              {isCatalogRoute && <p className="subtle">{gearCount} items</p>}
+              {!isCatalogRoute && syncMessage && <p className="subtle topbar-sync">{syncMessage}</p>}
+            </div>
             <div className="topbar-actions">
               <span className={`status-chip ${isOnline ? 'online' : 'offline'}`}>
                 <span className="status-dot" aria-hidden="true" />
@@ -103,25 +118,22 @@ export function TabLayout() {
                 </button>
               )}
               {isInstalled && <span className="pill">Installed</span>}
-              <button className="ghost" onClick={() => void signOut()}>
-                Logout
+            </div>
+          </div>
+          {isCatalogRoute && (
+            <div className="topbar-search-row">
+              <input
+                className="topbar-search-input"
+                aria-label="Search catalog items"
+                placeholder="Search gear..."
+                value={catalogQuery}
+                onChange={(event) => handleCatalogSearch(event.target.value)}
+              />
+              <button className="ghost topbar-filter-btn" aria-label="Open filters" onClick={openCatalogFilters}>
+                Filters
               </button>
             </div>
-            {isCatalogRoute && (
-              <div className="topbar-search-row">
-                <input
-                  className="topbar-search-input"
-                  aria-label="Search catalog items"
-                  placeholder="Search gear..."
-                  value={catalogQuery}
-                  onChange={(event) => handleCatalogSearch(event.target.value)}
-                />
-                <button className="ghost topbar-filter-btn" aria-label="Open filters" onClick={openCatalogFilters}>
-                  Filters
-                </button>
-              </div>
-            )}
-          </div>
+          )}
         </div>
       </header>
 
