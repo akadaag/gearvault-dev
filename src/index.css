@@ -1,8 +1,8 @@
 :root {
   /* Claude-inspired color palette - Light mode */
-  --bg: #fafaf8;
+  --bg: #f1f4f8;
   --bg-elevated: #ffffff;
-  --bg-soft: #f9f9f7;
+  --bg-soft: #e9eef4;
   --card: #ffffff;
   --card-muted: #fafaf8;
   --text: #2e2e2e;
