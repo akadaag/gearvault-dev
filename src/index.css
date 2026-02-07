@@ -1,6 +1,6 @@
 :root {
   /* Claude-inspired color palette - Light mode */
-  --bg: #f7f7f5;
+  --bg: #fafaf8;
   --bg-elevated: #ffffff;
   --bg-soft: #f9f9f7;
   --card: #ffffff;
@@ -929,7 +929,7 @@ a {
 }
 
 .category-title-btn {
-  font-weight: 700;
+  font-weight: 800;
   text-align: left;
   flex: 1;
   display: inline-flex;
