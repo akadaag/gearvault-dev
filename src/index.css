@@ -1929,6 +1929,8 @@ button.category-title-btn {
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  top: auto;
+  touch-action: none;
 }
 
 .maintenance-history-sheet {
@@ -1937,6 +1939,8 @@ button.category-title-btn {
 
 .maintenance-add-sheet {
   z-index: 90;
+  height: min(62dvh, 520px);
+  max-height: min(62dvh, 520px);
 }
 
 .maintenance-add-overlay {
@@ -1998,8 +2002,13 @@ button.category-title-btn {
 @media (max-height: 760px) {
   .maintenance-history-sheet,
   .maintenance-add-sheet {
-    height: calc(100dvh - env(safe-area-inset-bottom));
-    max-height: calc(100dvh - env(safe-area-inset-bottom));
+    height: min(92dvh, calc(100dvh - env(safe-area-inset-bottom)));
+    max-height: min(92dvh, calc(100dvh - env(safe-area-inset-bottom)));
+  }
+
+  .maintenance-add-sheet {
+    height: min(72dvh, calc(100dvh - env(safe-area-inset-bottom)));
+    max-height: min(72dvh, calc(100dvh - env(safe-area-inset-bottom)));
   }
 }
 

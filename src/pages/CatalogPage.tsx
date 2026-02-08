@@ -334,6 +334,7 @@ export function CatalogPage() {
         if (!item) return null;
         
         const category = categories.find((c) => c.id === item.categoryId);
+        const maintenanceSummary = getMaintenanceSummary(item);
 
         return (
           <>
@@ -346,7 +347,7 @@ export function CatalogPage() {
                   <p className="subtle detail-subtitle">{[item.brand, item.model].filter(Boolean).join(' ') || 'No brand/model yet'}</p>
                   <div className="row wrap detail-badges">
                     {category && <span className="pill">{category.name}</span>}
-                    <span className="pill">{item.condition}</span>
+                    <span className={`pill pill-condition pill-condition-${item.condition}`}>{item.condition}</span>
                     <span className="pill">×{item.quantity} units</span>
                     {item.essential && <span className="pill essential">Essential</span>}
                   </div>
@@ -378,7 +379,10 @@ export function CatalogPage() {
                   <div>
                     <strong>Maintenance</strong>
                     <p className="subtle">{item.maintenanceHistory?.length ?? 0} records</p>
-                    <p className="subtle detail-quick-summary">{getMaintenanceSummary(item)}</p>
+                    <p className="subtle detail-quick-summary">{maintenanceSummary.last}</p>
+                    {maintenanceSummary.type && (
+                      <p className="subtle detail-quick-summary">{maintenanceSummary.type}</p>
+                    )}
                   </div>
                 </button>
                 <article className="detail-quick-card">
@@ -429,10 +433,10 @@ function getMaintenanceSummary(item: GearItem) {
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   )[0];
 
-  if (!latest) return 'No maintenance';
+  if (!latest) return { last: 'No maintenance', type: undefined as string | undefined };
 
   const dateText = new Date(latest.date).toLocaleDateString();
-  return `Last: ${dateText}${latest.type ? ` · ${latest.type}` : ''}`;
+  return { last: `Last: ${dateText}`, type: latest.type };
 }
 
 function parseMoney(raw: string) {

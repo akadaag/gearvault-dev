@@ -57,6 +57,7 @@ export function GearItemDetailPage() {
   );
   const hasItemInfo = Boolean(currentItem.serialNumber || currentItem.purchaseDate || currentItem.currentValue);
   const hasWarrantyInfo = Boolean(currentItem.warranty?.provider || currentItem.warranty?.expirationDate || currentItem.warranty?.notes);
+  const maintenanceSummary = getMaintenanceSummary(currentItem);
 
   async function save(patch: Partial<GearItem>) {
     await db.gearItems.update(currentItem.id, { ...patch, updatedAt: new Date().toISOString() });
@@ -219,7 +220,8 @@ export function GearItemDetailPage() {
           <div>
             <strong>Maintenance</strong>
             <p className="subtle">{maintenanceCount} records</p>
-            <p className="subtle detail-quick-summary">{getMaintenanceSummary(currentItem)}</p>
+            <p className="subtle detail-quick-summary">{maintenanceSummary.last}</p>
+            {maintenanceSummary.type && <p className="subtle detail-quick-summary">{maintenanceSummary.type}</p>}
           </div>
         </button>
         <article className="detail-quick-card">
@@ -383,10 +385,10 @@ function getMaintenanceSummary(item: GearItem) {
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   )[0];
 
-  if (!latest) return 'No maintenance';
+  if (!latest) return { last: 'No maintenance', type: undefined as string | undefined };
 
   const dateText = new Date(latest.date).toLocaleDateString();
-  return `Last: ${dateText}${latest.type ? ` · ${latest.type}` : ''}`;
+  return { last: `Last: ${dateText}`, type: latest.type };
 }
 
 function parseMoney(raw: string) {
