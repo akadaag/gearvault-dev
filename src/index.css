@@ -598,12 +598,13 @@ a {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  transition: transform 0.14s ease, opacity 0.14s ease, color 0.18s ease;
+  transition: transform 0.16s ease, opacity 0.14s ease, color 0.18s ease, box-shadow 0.2s ease;
   cursor: pointer;
   gap: 0;
   position: relative;
   transform: none;
   opacity: 1;
+  box-shadow: inset 0 0 0 1px transparent;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
@@ -637,13 +638,15 @@ a {
 
 .mobile-bottom-nav__item.is-active {
   color: var(--mobile-nav-active);
+  transform: scale(1.03);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--mobile-nav-active) 55%, transparent);
 }
 
 .mobile-bottom-nav__item.is-active::after {
   content: '';
   position: absolute;
   left: 50%;
-  bottom: -0.08rem;
+  bottom: -0.14rem;
   transform: translateX(-50%);
   width: 4px;
   height: 10px;
@@ -653,8 +656,10 @@ a {
 
 .mobile-bottom-nav__item:active {
   background: transparent;
-  transform: scale(0.98);
-  opacity: 0.96;
+  color: var(--mobile-nav-active);
+  transform: scale(1.03);
+  opacity: 1;
+  box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--mobile-nav-active) 72%, transparent);
 }
 
 .mobile-bottom-nav__item:hover {
@@ -667,11 +672,10 @@ a {
 }
 
 .mobile-bottom-nav__item,
-.mobile-bottom-nav__item:focus,
-.mobile-bottom-nav__item:active {
+.mobile-bottom-nav__item:focus {
   color: var(--mobile-nav-inactive);
   background: transparent;
-  box-shadow: none;
+  box-shadow: inset 0 0 0 1px transparent;
   outline: none;
 }
 
@@ -679,6 +683,7 @@ a {
 .mobile-bottom-nav__item.is-active:focus,
 .mobile-bottom-nav__item.is-active:active {
   color: var(--mobile-nav-active);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--mobile-nav-active) 55%, transparent);
 }
 
 .mobile-bottom-nav__item:focus-visible {
