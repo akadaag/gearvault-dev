@@ -1397,6 +1397,7 @@ button.category-title-btn {
 .gear-field-block {
   display: grid;
   gap: 0.35rem;
+  min-width: 0;
 }
 
 .gear-field-block > span {
@@ -2039,7 +2040,9 @@ button.category-title-btn {
   padding: 0.7rem 0.9rem;
   flex: 1;
   min-height: 0;
+  min-width: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   overscroll-behavior: contain;
 }
 
@@ -2077,9 +2080,11 @@ button.category-title-btn {
 .maintenance-add-sheet .gear-field-block input[type='date'] {
   width: 100%;
   max-width: 100%;
+  min-width: 0;
   box-sizing: border-box;
   min-height: 42px;
   padding-right: 0.75rem;
+  overflow: hidden;
 }
 
 @media (max-height: 760px) {
