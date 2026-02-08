@@ -1439,9 +1439,13 @@ button.category-title-btn {
   font-size: 0.875rem;
 }
 
-.gear-form-two-col .gear-field-block input[type='date'] {
-  -webkit-appearance: none;
-  appearance: none;
+.maintenance-add-sheet .gear-form-two-col .gear-field-block input,
+.maintenance-add-sheet .gear-form-two-col .gear-field-block select {
+  min-height: 44px;
+  height: 44px;
+  border-radius: 15px;
+  padding: 0.5rem 0.65rem;
+  line-height: 1.2;
 }
 
 .gear-checkbox-row {
@@ -2099,9 +2103,17 @@ button.category-title-btn {
   max-width: 100%;
   min-width: 0;
   box-sizing: border-box;
-  min-height: 42px;
-  padding-right: 0.75rem;
   overflow: hidden;
+  background-clip: padding-box;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.maintenance-add-sheet .gear-field-block input[type='date']::-webkit-date-and-time-value {
+  text-align: left;
+}
+
+.maintenance-add-sheet .gear-field-block input[type='date']::-webkit-calendar-picker-indicator {
+  margin: 0;
 }
 
 @media (max-height: 760px) {
