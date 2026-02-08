@@ -429,7 +429,7 @@ function getMaintenanceSummary(item: GearItem) {
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   )[0];
 
-  if (!latest) return 'No maintenance yet';
+  if (!latest) return 'No maintenance';
 
   const dateText = new Date(latest.date).toLocaleDateString();
   return `Last: ${dateText}${latest.type ? ` · ${latest.type}` : ''}`;

@@ -10,9 +10,20 @@ interface MaintenanceSheetProps {
   onSaveEntry: (entry: MaintenanceEntry) => Promise<void> | void;
 }
 
+const maintenanceTypeOptions = [
+  'Routine Check',
+  'Cleaning',
+  'Firmware Update',
+  'Repair',
+  'Parts Replacement',
+  'Calibration',
+  'Battery Service',
+  'Inspection/Test',
+];
+
 const initialDraft = {
   date: new Date().toISOString().slice(0, 10),
-  type: '',
+  type: maintenanceTypeOptions[0],
   description: '',
 };
 
@@ -39,11 +50,10 @@ export function MaintenanceSheet({ open, itemName, history, onClose, onSaveEntry
       setError('Description is required.');
       return;
     }
-
     await onSaveEntry({
       id: makeId(),
       date,
-      type: type.trim() || undefined,
+      type,
       note: description.trim(),
     });
 
@@ -109,8 +119,12 @@ export function MaintenanceSheet({ open, itemName, history, onClose, onSaveEntry
               </label>
 
               <label className="gear-field-block">
-                <span>Maintenance Type</span>
-                <input value={type} onChange={(e) => setType(e.target.value)} placeholder="Lens cleaning" />
+                <span>Type</span>
+                <select value={type} onChange={(e) => setType(e.target.value)}>
+                  {maintenanceTypeOptions.map((option) => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
               </label>
 
               <label className="gear-field-block">

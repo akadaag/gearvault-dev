@@ -1923,7 +1923,8 @@ button.category-title-btn {
 
 .maintenance-history-sheet,
 .maintenance-add-sheet {
-  max-height: min(84vh, 760px);
+  height: min(84dvh, 760px);
+  max-height: min(84dvh, 760px);
   padding: 0;
   overflow: hidden;
   display: flex;
@@ -1963,6 +1964,8 @@ button.category-title-btn {
 
 .maintenance-sheet-body {
   padding: 0.7rem 0.9rem;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -1986,9 +1989,18 @@ button.category-title-btn {
 }
 
 .maintenance-sheet-footer {
+  flex-shrink: 0;
   padding: 0.7rem 0.9rem calc(0.8rem + env(safe-area-inset-bottom));
   border-top: 1px solid var(--border-subtle);
   background: var(--surface-raised);
+}
+
+@media (max-height: 760px) {
+  .maintenance-history-sheet,
+  .maintenance-add-sheet {
+    height: calc(100dvh - env(safe-area-inset-bottom));
+    max-height: calc(100dvh - env(safe-area-inset-bottom));
+  }
 }
 
 .maintenance-sheet-footer button {

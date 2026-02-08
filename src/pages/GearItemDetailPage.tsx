@@ -50,10 +50,6 @@ export function GearItemDetailPage() {
   const editDraft = toDraft(currentItem);
   const maintenanceCount = currentItem.maintenanceHistory?.length ?? 0;
   const accessoriesCount = currentItem.relatedItemIds?.length ?? 0;
-  const sortedMaintenance = [...(currentItem.maintenanceHistory ?? [])].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-  );
-  const maintenancePreview = sortedMaintenance.slice(0, 3);
   const isInAnyEvent = events.some((ev) => ev.packingChecklist.some((entry) => entry.gearItemId === currentItem.id));
   const selectedEventHasItem = Boolean(
     eventTarget
@@ -285,26 +281,6 @@ export function GearItemDetailPage() {
         </div>
       )}
 
-      <div className="detail-page-section">
-        <div className="row between">
-          <h3>Maintenance History</h3>
-          <button className="ghost" onClick={() => setShowMaintenanceSheet(true)}>Manage</button>
-        </div>
-        {maintenancePreview.length === 0 ? (
-          <p className="subtle">No history yet</p>
-        ) : (
-          <div className="detail-grid">
-            {maintenancePreview.map((m) => (
-              <div key={m.id} className="detail-field">
-                <span className="detail-label">{new Date(m.date).toLocaleDateString()}</span>
-                <span className="detail-value">{m.note}</span>
-                {m.type && <span className="pill">{m.type}</span>}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
       {hasWarrantyInfo && (
         <div className="detail-page-section">
           <h3>Warranty</h3>
@@ -407,7 +383,7 @@ function getMaintenanceSummary(item: GearItem) {
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
   )[0];
 
-  if (!latest) return 'No maintenance yet';
+  if (!latest) return 'No maintenance';
 
   const dateText = new Date(latest.date).toLocaleDateString();
   return `Last: ${dateText}${latest.type ? ` · ${latest.type}` : ''}`;
