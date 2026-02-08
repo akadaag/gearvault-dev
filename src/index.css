@@ -460,20 +460,31 @@ a {
 }
 
 .topbar-add-btn {
-  width: 44px;
-  min-width: 44px;
-  height: 44px;
-  min-height: 44px;
-  border-radius: 10px;
-  border: 1px solid #0f1219;
-  background: #12151c;
-  color: #ffffff;
-  font-size: 1.1rem;
-  padding: 0;
+  width: auto;
+  min-width: auto;
+  height: auto;
+  min-height: auto;
+  border-radius: 0;
+  border: 0;
+  background: transparent;
+  color: #11131a;
+  font-size: 1.35rem;
+  font-weight: 500;
+  line-height: 1;
+  padding: 0.1rem 0.2rem;
+  box-shadow: none;
 }
 
 .topbar-add-btn:hover {
-  background: #1a1f29;
+  background: transparent;
+  color: #11131a;
+  box-shadow: none;
+}
+
+.topbar-add-btn:active {
+  background: transparent;
+  color: #11131a;
+  transform: none;
 }
 
 @media (min-width: 768px) {
@@ -971,7 +982,7 @@ a {
 .sheet-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.28);
+  background: rgba(0, 0, 0, 0.14);
   z-index: 70;
 }
 
