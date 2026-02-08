@@ -1427,6 +1427,12 @@ button.category-title-btn {
   gap: 0.6rem;
 }
 
+.gear-form-two-col .gear-field-block input,
+.gear-form-two-col .gear-field-block select {
+  min-width: 0;
+  overflow: hidden;
+}
+
 .gear-checkbox-row {
   margin-top: 0.2rem;
 }

@@ -122,24 +122,26 @@ export function MaintenanceSheet({ open, itemName, history, onClose, onSaveEntry
             </div>
 
             <div className="maintenance-sheet-body stack-sm">
-              <label className="gear-field-block">
-                <span>Date</span>
-                <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-              </label>
+              <div className="gear-form-two-col">
+                <label className="gear-field-block">
+                  <span>Date</span>
+                  <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+                </label>
 
-              <label className="gear-field-block">
-                <span>Type</span>
-                <select value={type} onChange={(e) => setType(e.target.value)}>
-                  {maintenanceTypeOptions.map((option) => (
-                    <option key={option} value={option}>{option}</option>
-                  ))}
-                </select>
-              </label>
+                <label className="gear-field-block">
+                  <span>Type</span>
+                  <select value={type} onChange={(e) => setType(e.target.value)}>
+                    {maintenanceTypeOptions.map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
 
               <label className="gear-field-block">
                 <span>Description</span>
                 <textarea
-                  rows={2}
+                  rows={3}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Describe what was done"
