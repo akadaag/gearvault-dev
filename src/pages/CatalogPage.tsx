@@ -3,11 +3,12 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
 import { GearItemFormSheet, type GearFormDraft } from '../components/GearItemFormSheet';
+import { MaintenanceSheet } from '../components/MaintenanceSheet';
 import { formatMoney } from '../lib/format';
 import { makeId } from '../lib/ids';
 import { fuzzyIncludes } from '../lib/search';
 import { gearItemSchema } from '../lib/validators';
-import type { Category, Condition, GearItem } from '../types/models';
+import type { Category, Condition, GearItem, MaintenanceEntry } from '../types/models';
 
 const initialDraft: GearFormDraft = {
   name: '',
@@ -44,6 +45,7 @@ export function CatalogPage() {
   const [showAddItemForm, setShowAddItemForm] = useState(false);
   const [error, setError] = useState('');
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+  const [maintenanceSheetItemId, setMaintenanceSheetItemId] = useState<string | null>(null);
 
   useEffect(() => {
     if (searchParams.get('add') !== '1') return;
@@ -179,6 +181,16 @@ export function CatalogPage() {
     setConditionFilter('all');
     setEssentialOnly(false);
     setSortBy('name');
+  }
+
+  async function saveMaintenanceEntry(itemId: string, entry: MaintenanceEntry) {
+    const target = gear.find((g) => g.id === itemId);
+    if (!target) return;
+
+    await db.gearItems.update(itemId, {
+      maintenanceHistory: [...(target.maintenanceHistory ?? []), entry],
+      updatedAt: new Date().toISOString(),
+    });
   }
 
   return (
@@ -353,15 +365,30 @@ export function CatalogPage() {
               )}
 
               <div className="detail-quick-grid">
-                <article className="detail-quick-card">
-                  <div className="detail-quick-icon blue" aria-hidden="true">🔧</div>
+                <button
+                  type="button"
+                  className="detail-quick-card detail-quick-card-btn"
+                  onClick={() => setMaintenanceSheetItemId(item.id)}
+                >
+                  <div className="detail-quick-icon blue" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <path d="M14.7 6.3a4.5 4.5 0 0 0-5.4 5.4L4 17l3 3 5.3-5.3a4.5 4.5 0 0 0 5.4-5.4l-2.4 2.4-2.2-2.2z" />
+                    </svg>
+                  </div>
                   <div>
                     <strong>Maintenance</strong>
                     <p className="subtle">{item.maintenanceHistory?.length ?? 0} records</p>
+                    <p className="subtle detail-quick-summary">{getMaintenanceSummary(item)}</p>
                   </div>
-                </article>
+                </button>
                 <article className="detail-quick-card">
-                  <div className="detail-quick-icon purple" aria-hidden="true">🔗</div>
+                  <div className="detail-quick-icon purple" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" focusable="false">
+                      <path d="M10.6 13.4 8.5 15.5a3 3 0 1 1-4.2-4.2l3.2-3.2a3 3 0 0 1 4.2 0" />
+                      <path d="m13.4 10.6 2.1-2.1a3 3 0 0 1 4.2 4.2l-3.2 3.2a3 3 0 0 1-4.2 0" />
+                      <path d="m9 15 6-6" />
+                    </svg>
+                  </div>
                   <div>
                     <strong>Accessories</strong>
                     <p className="subtle">{item.relatedItemIds?.length ?? 0} linked</p>
@@ -378,8 +405,34 @@ export function CatalogPage() {
           </>
         );
       })()}
+
+      {maintenanceSheetItemId && (() => {
+        const selected = gear.find((g) => g.id === maintenanceSheetItemId);
+        if (!selected) return null;
+
+        return (
+          <MaintenanceSheet
+            open={Boolean(selected)}
+            itemName={selected.name}
+            history={selected.maintenanceHistory ?? []}
+            onClose={() => setMaintenanceSheetItemId(null)}
+            onSaveEntry={(entry) => saveMaintenanceEntry(selected.id, entry)}
+          />
+        );
+      })()}
     </section>
   );
+}
+
+function getMaintenanceSummary(item: GearItem) {
+  const latest = [...(item.maintenanceHistory ?? [])].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  )[0];
+
+  if (!latest) return 'No maintenance yet';
+
+  const dateText = new Date(latest.date).toLocaleDateString();
+  return `Last: ${dateText}${latest.type ? ` · ${latest.type}` : ''}`;
 }
 
 function parseMoney(raw: string) {

@@ -5,7 +5,8 @@ import { db } from '../db';
 import { formatMoney } from '../lib/format';
 import { makeId } from '../lib/ids';
 import { GearItemFormSheet, type GearFormDraft } from '../components/GearItemFormSheet';
-import type { GearItem } from '../types/models';
+import { MaintenanceSheet } from '../components/MaintenanceSheet';
+import type { GearItem, MaintenanceEntry } from '../types/models';
 
 const emptyDraft: GearFormDraft = {
   name: '',
@@ -35,6 +36,7 @@ export function GearItemDetailPage() {
   const [eventTarget, setEventTarget] = useState('');
   const [showAddToEvent, setShowAddToEvent] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
+  const [showMaintenanceSheet, setShowMaintenanceSheet] = useState(false);
   const [editError, setEditError] = useState('');
   const [draft, setDraft] = useState<GearFormDraft>(emptyDraft);
 
@@ -48,6 +50,10 @@ export function GearItemDetailPage() {
   const editDraft = toDraft(currentItem);
   const maintenanceCount = currentItem.maintenanceHistory?.length ?? 0;
   const accessoriesCount = currentItem.relatedItemIds?.length ?? 0;
+  const sortedMaintenance = [...(currentItem.maintenanceHistory ?? [])].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  );
+  const maintenancePreview = sortedMaintenance.slice(0, 3);
   const isInAnyEvent = events.some((ev) => ev.packingChecklist.some((entry) => entry.gearItemId === currentItem.id));
   const selectedEventHasItem = Boolean(
     eventTarget
@@ -55,10 +61,15 @@ export function GearItemDetailPage() {
   );
   const hasItemInfo = Boolean(currentItem.serialNumber || currentItem.purchaseDate || currentItem.currentValue);
   const hasWarrantyInfo = Boolean(currentItem.warranty?.provider || currentItem.warranty?.expirationDate || currentItem.warranty?.notes);
-  const hasMaintenanceHistory = maintenanceCount > 0;
 
   async function save(patch: Partial<GearItem>) {
     await db.gearItems.update(currentItem.id, { ...patch, updatedAt: new Date().toISOString() });
+  }
+
+  async function saveMaintenanceEntry(entry: MaintenanceEntry) {
+    await save({
+      maintenanceHistory: [...(currentItem.maintenanceHistory ?? []), entry],
+    });
   }
 
   async function saveEdit() {
@@ -203,15 +214,26 @@ export function GearItemDetailPage() {
       )}
 
       <section className="detail-quick-grid">
-        <article className="detail-quick-card">
-          <div className="detail-quick-icon blue" aria-hidden="true">🔧</div>
+        <button type="button" className="detail-quick-card detail-quick-card-btn" onClick={() => setShowMaintenanceSheet(true)}>
+          <div className="detail-quick-icon blue" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path d="M14.7 6.3a4.5 4.5 0 0 0-5.4 5.4L4 17l3 3 5.3-5.3a4.5 4.5 0 0 0 5.4-5.4l-2.4 2.4-2.2-2.2z" />
+            </svg>
+          </div>
           <div>
             <strong>Maintenance</strong>
             <p className="subtle">{maintenanceCount} records</p>
+            <p className="subtle detail-quick-summary">{getMaintenanceSummary(currentItem)}</p>
           </div>
-        </article>
+        </button>
         <article className="detail-quick-card">
-          <div className="detail-quick-icon purple" aria-hidden="true">🔗</div>
+          <div className="detail-quick-icon purple" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path d="M10.6 13.4 8.5 15.5a3 3 0 1 1-4.2-4.2l3.2-3.2a3 3 0 0 1 4.2 0" />
+              <path d="m13.4 10.6 2.1-2.1a3 3 0 0 1 4.2 4.2l-3.2 3.2a3 3 0 0 1-4.2 0" />
+              <path d="m9 15 6-6" />
+            </svg>
+          </div>
           <div>
             <strong>Accessories</strong>
             <p className="subtle">{accessoriesCount} linked</p>
@@ -263,23 +285,25 @@ export function GearItemDetailPage() {
         </div>
       )}
 
-      {hasMaintenanceHistory && (
-        <div className="detail-page-section">
-          <div className="row between">
-            <h3>Maintenance History</h3>
-            <button className="ghost" onClick={() => void save({ maintenanceHistory: [...(currentItem.maintenanceHistory ?? []), { id: makeId(), date: new Date().toISOString().slice(0, 10), note: 'Routine check' }] })}>+ Add</button>
-          </div>
+      <div className="detail-page-section">
+        <div className="row between">
+          <h3>Maintenance History</h3>
+          <button className="ghost" onClick={() => setShowMaintenanceSheet(true)}>Manage</button>
+        </div>
+        {maintenancePreview.length === 0 ? (
+          <p className="subtle">No history yet</p>
+        ) : (
           <div className="detail-grid">
-            {(currentItem.maintenanceHistory ?? []).map((m) => (
+            {maintenancePreview.map((m) => (
               <div key={m.id} className="detail-field">
                 <span className="detail-label">{new Date(m.date).toLocaleDateString()}</span>
                 <span className="detail-value">{m.note}</span>
-                {m.cost && <span className="pill">€{m.cost}</span>}
+                {m.type && <span className="pill">{m.type}</span>}
               </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {hasWarrantyInfo && (
         <div className="detail-page-section">
@@ -366,8 +390,27 @@ export function GearItemDetailPage() {
         }}
         onSubmit={() => void saveEdit()}
       />
+
+      <MaintenanceSheet
+        open={showMaintenanceSheet}
+        itemName={currentItem.name}
+        history={currentItem.maintenanceHistory ?? []}
+        onClose={() => setShowMaintenanceSheet(false)}
+        onSaveEntry={saveMaintenanceEntry}
+      />
     </section>
   );
+}
+
+function getMaintenanceSummary(item: GearItem) {
+  const latest = [...(item.maintenanceHistory ?? [])].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  )[0];
+
+  if (!latest) return 'No maintenance yet';
+
+  const dateText = new Date(latest.date).toLocaleDateString();
+  return `Last: ${dateText}${latest.type ? ` · ${latest.type}` : ''}`;
 }
 
 function parseMoney(raw: string) {

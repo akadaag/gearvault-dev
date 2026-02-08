@@ -1852,9 +1852,26 @@ button.category-title-btn {
   background: var(--surface-raised);
   padding: 0.62rem;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 0.5rem;
   min-height: 74px;
+}
+
+.detail-quick-card-btn {
+  width: 100%;
+  text-align: left;
+  color: var(--text);
+  min-height: 74px;
+  box-shadow: none;
+}
+
+.detail-quick-card-btn:hover {
+  background: color-mix(in srgb, var(--accent) 4%, var(--surface-raised));
+  box-shadow: none;
+}
+
+.detail-quick-card-btn:active {
+  transform: scale(0.99);
 }
 
 .detail-quick-card p {
@@ -1868,22 +1885,131 @@ button.category-title-btn {
 }
 
 .detail-quick-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  font-size: 1rem;
+  align-self: flex-start;
+  margin-top: 0.1rem;
+}
+
+.detail-quick-icon svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .detail-quick-icon.blue {
   background: #dfeaff;
+  color: #2f5ecf;
 }
 
 .detail-quick-icon.purple {
   background: #ece3ff;
+  color: #6b46c1;
+}
+
+.detail-quick-summary {
+  font-size: 0.78rem;
+  line-height: 1.3;
+}
+
+.maintenance-history-sheet,
+.maintenance-add-sheet {
+  max-height: min(84vh, 760px);
+  padding: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.maintenance-history-sheet {
+  z-index: 82;
+}
+
+.maintenance-add-sheet {
+  z-index: 90;
+}
+
+.maintenance-add-overlay {
+  z-index: 89;
+}
+
+.maintenance-sheet-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  padding: 0.95rem 1rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.maintenance-sheet-header h3 {
+  font-size: 1.45rem;
+}
+
+.maintenance-sheet-header .icon-compact-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 0.5rem;
+}
+
+.maintenance-sheet-body {
+  padding: 0.7rem 0.9rem;
+  overflow-y: auto;
+}
+
+.maintenance-sheet-subtitle {
+  margin-bottom: 0.3rem;
+}
+
+.maintenance-empty {
+  text-align: center;
+  border: 1px dashed var(--border-strong);
+  background: var(--surface-muted);
+}
+
+.maintenance-entry {
+  padding: 0.75rem;
+  background: var(--surface-raised);
+}
+
+.maintenance-note {
+  margin-top: 0.4rem;
+}
+
+.maintenance-sheet-footer {
+  padding: 0.7rem 0.9rem calc(0.8rem + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border-subtle);
+  background: var(--surface-raised);
+}
+
+.maintenance-sheet-footer button {
+  width: 100%;
+  min-height: 48px;
+  border-radius: 14px;
+  background: #11131a;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.maintenance-sheet-footer button:hover {
+  background: #1a1d26;
+}
+
+.maintenance-plus {
+  font-size: 1.1rem;
+  line-height: 1;
+  margin-top: -0.05rem;
 }
 
 .item-detail-sheet .detail-sheet-header {
