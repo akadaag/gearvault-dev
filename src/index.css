@@ -643,7 +643,7 @@ a {
   content: '';
   position: absolute;
   left: 50%;
-  bottom: 0.08rem;
+  bottom: 0.16rem;
   transform: translateX(-50%);
   width: 4px;
   height: 10px;
