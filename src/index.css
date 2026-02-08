@@ -467,9 +467,9 @@ a {
   border-radius: 0;
   border: 0;
   background: transparent;
-  color: #11131a;
-  font-size: 1.35rem;
-  font-weight: 500;
+  color: var(--text);
+  font-size: 1.85rem;
+  font-weight: 400;
   line-height: 1;
   padding: 0.1rem 0.2rem;
   box-shadow: none;
@@ -477,13 +477,13 @@ a {
 
 .topbar-add-btn:hover {
   background: transparent;
-  color: #11131a;
+  color: var(--text);
   box-shadow: none;
 }
 
 .topbar-add-btn:active {
   background: transparent;
-  color: #11131a;
+  color: var(--text);
   transform: none;
 }
 
@@ -982,7 +982,9 @@ a {
 .sheet-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.14);
+  background: rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
   z-index: 70;
 }
 
@@ -1042,14 +1044,14 @@ a {
   border-bottom: 0;
 }
 
-.category-title-btn {
+button.category-title-btn {
   font-weight: 800;
   text-align: left;
   flex: 1;
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  font-size: var(--text-base);
+  font-size: 1.05rem;
   letter-spacing: -0.02em;
 }
 
