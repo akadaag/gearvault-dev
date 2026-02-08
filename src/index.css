@@ -675,11 +675,12 @@ a {
 }
 
 .mobile-bottom-nav__item,
-.mobile-bottom-nav__item:focus {
+.mobile-bottom-nav__item:focus,
+.mobile-bottom-nav__item:focus-visible {
   color: var(--mobile-nav-inactive);
   background: transparent;
   box-shadow: none;
-  outline: none;
+  outline: none !important;
 }
 
 .mobile-bottom-nav__item.is-active,
@@ -688,16 +689,6 @@ a {
   color: var(--mobile-nav-active);
 }
 
-.mobile-bottom-nav__item:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--mobile-nav-active) 45%, transparent);
-  outline-offset: 2px;
-}
-
-@media (hover: none) and (pointer: coarse) {
-  .mobile-bottom-nav__item:focus-visible {
-    outline: none;
-  }
-}
 
 @media (hover: hover) {
   .mobile-bottom-nav__item:hover {
