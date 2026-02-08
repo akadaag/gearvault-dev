@@ -109,6 +109,13 @@ export function TabLayout() {
     </svg>
   );
 
+  const addIcon = (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <path d="M12 5v14" />
+      <path d="M5 12h14" />
+    </svg>
+  );
+
   return (
     <div className="app-shell">
       {!isGearDetailRoute && (
@@ -123,7 +130,7 @@ export function TabLayout() {
               <div className="topbar-actions">
                 {isCatalogRoute && (
                   <button className="topbar-add-btn" aria-label="Add new item" onClick={openCatalogAdd}>
-                    +
+                    {addIcon}
                   </button>
                 )}
               </div>

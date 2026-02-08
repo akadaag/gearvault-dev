@@ -460,19 +460,17 @@ a {
 }
 
 .topbar-add-btn {
-  width: auto;
-  min-width: auto;
-  height: auto;
   min-height: auto;
-  border-radius: 0;
+  width: auto;
+  padding: 0;
   border: 0;
   background: transparent;
-  color: var(--text);
-  font-size: 1.85rem;
-  font-weight: 400;
-  line-height: 1;
-  padding: 0.1rem 0.2rem;
   box-shadow: none;
+  color: var(--text);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: none;
 }
 
 .topbar-add-btn:hover {
@@ -485,6 +483,16 @@ a {
   background: transparent;
   color: var(--text);
   transform: none;
+}
+
+.topbar-add-btn svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 @media (min-width: 768px) {
@@ -986,6 +994,19 @@ a {
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
   z-index: 70;
+}
+
+.sheet-overlay:hover,
+.sheet-overlay:active,
+.sheet-overlay:focus,
+.sheet-overlay:focus-visible {
+  background: rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  box-shadow: none;
+  transform: none;
+  border: 0;
+  outline: none;
 }
 
 .filter-sheet {
