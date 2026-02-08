@@ -598,13 +598,12 @@ a {
   flex-direction: row;
   align-items: center;
   justify-content: center;
-  transition: transform 0.16s ease, opacity 0.14s ease, color 0.18s ease, box-shadow 0.2s ease;
+  transition: transform 0.16s ease, opacity 0.14s ease, color 0.18s ease;
   cursor: pointer;
   gap: 0;
   position: relative;
   transform: none;
   opacity: 1;
-  box-shadow: inset 0 0 0 1px transparent;
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
@@ -634,12 +633,15 @@ a {
   stroke-width: 1.9;
   stroke-linecap: round;
   stroke-linejoin: round;
+  transition: stroke-width 0.18s ease;
 }
 
 .mobile-bottom-nav__item.is-active {
   color: var(--mobile-nav-active);
-  transform: scale(1.03);
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--mobile-nav-active) 55%, transparent);
+}
+
+.mobile-bottom-nav__item.is-active .mobile-bottom-nav__icon svg {
+  stroke-width: 2.6;
 }
 
 .mobile-bottom-nav__item.is-active::after {
@@ -656,15 +658,16 @@ a {
 
 .mobile-bottom-nav__item:active {
   background: transparent;
-  color: var(--mobile-nav-active);
-  transform: scale(1.03);
+  transform: scale(0.97);
   opacity: 1;
-  box-shadow: inset 0 0 0 3px color-mix(in srgb, var(--mobile-nav-active) 72%, transparent);
+}
+
+.mobile-bottom-nav__item:active .mobile-bottom-nav__icon svg {
+  stroke-width: 2.8;
 }
 
 .mobile-bottom-nav__item:hover {
   background: transparent;
-  box-shadow: none;
 }
 
 .mobile-bottom-nav__item.is-active:hover {
@@ -675,7 +678,7 @@ a {
 .mobile-bottom-nav__item:focus {
   color: var(--mobile-nav-inactive);
   background: transparent;
-  box-shadow: inset 0 0 0 1px transparent;
+  box-shadow: none;
   outline: none;
 }
 
@@ -683,7 +686,6 @@ a {
 .mobile-bottom-nav__item.is-active:focus,
 .mobile-bottom-nav__item.is-active:active {
   color: var(--mobile-nav-active);
-  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--mobile-nav-active) 55%, transparent);
 }
 
 .mobile-bottom-nav__item:focus-visible {
