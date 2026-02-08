@@ -41,6 +41,12 @@ export function GearItemDetailPage() {
   const [editError, setEditError] = useState('');
   const [draft, setDraft] = useState<GearFormDraft>(emptyDraft);
 
+  useEffect(() => {
+    if (!showAddToEvent) return;
+    lockSheetScroll();
+    return () => unlockSheetScroll();
+  }, [showAddToEvent]);
+
   const related = useMemo(
     () => allItems.filter((g) => item?.relatedItemIds?.includes(g.id)),
     [allItems, item],
@@ -59,12 +65,6 @@ export function GearItemDetailPage() {
   const hasItemInfo = Boolean(currentItem.serialNumber || currentItem.purchaseDate || currentItem.currentValue);
   const hasWarrantyInfo = Boolean(currentItem.warranty?.provider || currentItem.warranty?.expirationDate || currentItem.warranty?.notes);
   const maintenanceSummary = getMaintenanceSummary(currentItem);
-
-  useEffect(() => {
-    if (!showAddToEvent) return;
-    lockSheetScroll();
-    return () => unlockSheetScroll();
-  }, [showAddToEvent]);
 
   async function save(patch: Partial<GearItem>) {
     await db.gearItems.update(currentItem.id, { ...patch, updatedAt: new Date().toISOString() });

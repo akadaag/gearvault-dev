@@ -1034,7 +1034,7 @@ a {
 }
 
 @media (min-width: 768px) {
-  .filter-sheet {
+  .filter-sheet:not(.maintenance-history-sheet):not(.maintenance-add-sheet) {
     left: 50%;
     transform: translateX(-50%);
     width: min(720px, calc(100% - 2rem));
@@ -1974,6 +1974,7 @@ button.category-title-btn {
   right: 0;
   bottom: 0;
   width: 100%;
+  max-width: 100vw;
   height: min(84dvh, 760px);
   max-height: min(84dvh, 760px);
   padding: 0;
@@ -1983,6 +1984,19 @@ button.category-title-btn {
   transform: none;
   top: auto;
   touch-action: pan-y;
+}
+
+@media (min-width: 768px) {
+  .maintenance-history-sheet,
+  .maintenance-add-sheet {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    width: min(720px, calc(100% - 2rem));
+    border-bottom-left-radius: var(--radius-md);
+    border-bottom-right-radius: var(--radius-md);
+    bottom: 1rem;
+  }
 }
 
 .maintenance-history-sheet {
