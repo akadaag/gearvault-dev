@@ -8,6 +8,7 @@ import { formatMoney } from '../lib/format';
 import { makeId } from '../lib/ids';
 import { fuzzyIncludes } from '../lib/search';
 import { gearItemSchema } from '../lib/validators';
+import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
 import type { Category, Condition, GearItem, MaintenanceEntry } from '../types/models';
 
 const initialDraft: GearFormDraft = {
@@ -55,6 +56,13 @@ export function CatalogPage() {
     params.delete('add');
     setSearchParams(params, { replace: true });
   }, [searchParams, setSearchParams]);
+
+  useEffect(() => {
+    const anySheetOpen = showFilterSheet || Boolean(selectedItemId);
+    if (!anySheetOpen) return;
+    lockSheetScroll();
+    return () => unlockSheetScroll();
+  }, [showFilterSheet, selectedItemId]);
 
   const tags = useMemo(() => {
     const set = new Set<string>();
@@ -352,7 +360,7 @@ export function CatalogPage() {
                     {item.essential && <span className="pill essential">Essential</span>}
                   </div>
                 </div>
-                <button className="ghost icon-compact-btn" onClick={() => setSelectedItemId(null)} aria-label="Close">✕</button>
+                <button className="sheet-close-btn" onClick={() => setSelectedItemId(null)} aria-label="Close">✕</button>
               </div>
 
               {item.purchasePrice && (

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
@@ -6,6 +6,7 @@ import { formatMoney } from '../lib/format';
 import { makeId } from '../lib/ids';
 import { GearItemFormSheet, type GearFormDraft } from '../components/GearItemFormSheet';
 import { MaintenanceSheet } from '../components/MaintenanceSheet';
+import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
 import type { GearItem, MaintenanceEntry } from '../types/models';
 
 const emptyDraft: GearFormDraft = {
@@ -58,6 +59,12 @@ export function GearItemDetailPage() {
   const hasItemInfo = Boolean(currentItem.serialNumber || currentItem.purchaseDate || currentItem.currentValue);
   const hasWarrantyInfo = Boolean(currentItem.warranty?.provider || currentItem.warranty?.expirationDate || currentItem.warranty?.notes);
   const maintenanceSummary = getMaintenanceSummary(currentItem);
+
+  useEffect(() => {
+    if (!showAddToEvent) return;
+    lockSheetScroll();
+    return () => unlockSheetScroll();
+  }, [showAddToEvent]);
 
   async function save(patch: Partial<GearItem>) {
     await db.gearItems.update(currentItem.id, { ...patch, updatedAt: new Date().toISOString() });
@@ -326,7 +333,7 @@ export function GearItemDetailPage() {
           <aside className="filter-sheet card event-add-sheet" aria-label="Add to event packing list">
             <div className="event-add-sheet-header">
               <h3>Add to Event</h3>
-              <button className="ghost icon-compact-btn" onClick={() => setShowAddToEvent(false)} aria-label="Close">✕</button>
+              <button className="sheet-close-btn" onClick={() => setShowAddToEvent(false)} aria-label="Close">✕</button>
             </div>
 
             <div className="event-add-sheet-body stack-sm">

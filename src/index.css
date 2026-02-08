@@ -99,6 +99,11 @@ body {
   overflow-x: hidden;
 }
 
+body.sheet-open {
+  overflow: hidden;
+  touch-action: none;
+}
+
 #root {
   min-height: 100vh;
 }
@@ -1135,6 +1140,35 @@ button.category-title-btn {
   justify-content: center;
 }
 
+.sheet-close-btn {
+  width: 38px;
+  min-width: 38px;
+  min-height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-xs);
+  background: transparent;
+  box-shadow: none;
+  color: #d84a52;
+  font-size: 1.3rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transform: none;
+}
+
+.sheet-close-btn:hover,
+.sheet-close-btn:focus,
+.sheet-close-btn:focus-visible,
+.sheet-close-btn:active {
+  background: transparent;
+  color: #c53f47;
+  box-shadow: none;
+  transform: none;
+  outline: none;
+}
+
 .category-menu {
   position: absolute;
   top: calc(100% + 0.5rem);
@@ -1303,6 +1337,12 @@ button.category-title-btn {
 }
 
 .gear-form-header .icon-compact-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 0.5rem;
+}
+
+.gear-form-header .sheet-close-btn {
   position: absolute;
   right: 0.75rem;
   top: 0.5rem;
@@ -1686,6 +1726,12 @@ button.category-title-btn {
   top: 0.5rem;
 }
 
+.event-add-sheet-header .sheet-close-btn {
+  position: absolute;
+  right: 0.75rem;
+  top: 0.5rem;
+}
+
 .event-add-sheet-body {
   padding: 0.7rem 0.9rem;
   overflow-y: auto;
@@ -1923,14 +1969,20 @@ button.category-title-btn {
 
 .maintenance-history-sheet,
 .maintenance-add-sheet {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
   height: min(84dvh, 760px);
   max-height: min(84dvh, 760px);
   padding: 0;
   overflow: hidden;
   display: flex;
   flex-direction: column;
+  transform: none;
   top: auto;
-  touch-action: none;
+  touch-action: pan-y;
 }
 
 .maintenance-history-sheet {
@@ -1939,8 +1991,8 @@ button.category-title-btn {
 
 .maintenance-add-sheet {
   z-index: 90;
-  height: min(62dvh, 520px);
-  max-height: min(62dvh, 520px);
+  height: min(72dvh, 580px);
+  max-height: min(72dvh, 580px);
 }
 
 .maintenance-add-overlay {
@@ -1960,7 +2012,8 @@ button.category-title-btn {
   font-size: 1.45rem;
 }
 
-.maintenance-sheet-header .icon-compact-btn {
+.maintenance-sheet-header .icon-compact-btn,
+.maintenance-sheet-header .sheet-close-btn {
   position: absolute;
   right: 0.75rem;
   top: 0.5rem;
@@ -1971,6 +2024,7 @@ button.category-title-btn {
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .maintenance-sheet-subtitle {

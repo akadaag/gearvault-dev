@@ -1,5 +1,6 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { makeId } from '../lib/ids';
+import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
 import type { MaintenanceEntry } from '../types/models';
 
 interface MaintenanceSheetProps {
@@ -39,15 +40,23 @@ export function MaintenanceSheet({ open, itemName, history, onClose, onSaveEntry
     [history],
   );
 
+  useEffect(() => {
+    if (!open) return;
+    lockSheetScroll();
+    return () => unlockSheetScroll();
+  }, [open]);
+
+  useEffect(() => {
+    if (!showAddSheet) return;
+    lockSheetScroll();
+    return () => unlockSheetScroll();
+  }, [showAddSheet]);
+
   if (!open) return null;
 
   async function saveEntry() {
     if (!date) {
       setError('Date is required.');
-      return;
-    }
-    if (!description.trim()) {
-      setError('Description is required.');
       return;
     }
     await onSaveEntry({
@@ -58,7 +67,7 @@ export function MaintenanceSheet({ open, itemName, history, onClose, onSaveEntry
     });
 
     setDate(new Date().toISOString().slice(0, 10));
-    setType('');
+    setType(initialDraft.type);
     setDescription('');
     setError('');
     setShowAddSheet(false);
@@ -70,7 +79,7 @@ export function MaintenanceSheet({ open, itemName, history, onClose, onSaveEntry
       <aside className="filter-sheet card maintenance-history-sheet" aria-label="Maintenance history">
         <div className="maintenance-sheet-header">
           <h3>Maintenance</h3>
-          <button className="ghost icon-compact-btn" onClick={onClose} aria-label="Close">✕</button>
+          <button className="sheet-close-btn" onClick={onClose} aria-label="Close">✕</button>
         </div>
 
         <div className="maintenance-sheet-body stack-sm">
@@ -88,7 +97,7 @@ export function MaintenanceSheet({ open, itemName, history, onClose, onSaveEntry
                     <strong>{new Date(entry.date).toLocaleDateString()}</strong>
                     {entry.type && <span className="pill">{entry.type}</span>}
                   </div>
-                  <p className="subtle maintenance-note">{entry.note}</p>
+                  {entry.note && <p className="subtle maintenance-note">{entry.note}</p>}
                 </article>
               ))}
             </div>
@@ -109,7 +118,7 @@ export function MaintenanceSheet({ open, itemName, history, onClose, onSaveEntry
           <aside className="filter-sheet card maintenance-add-sheet" aria-label="Add maintenance record">
             <div className="maintenance-sheet-header">
               <h3>Add Maintenance</h3>
-              <button className="ghost icon-compact-btn" onClick={() => setShowAddSheet(false)} aria-label="Close">✕</button>
+              <button className="sheet-close-btn" onClick={() => setShowAddSheet(false)} aria-label="Close">✕</button>
             </div>
 
             <div className="maintenance-sheet-body stack-sm">

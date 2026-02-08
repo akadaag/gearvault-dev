@@ -1,4 +1,6 @@
+import { useEffect } from 'react';
 import type { Category, Condition } from '../types/models';
+import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
 
 export interface GearFormDraft {
   name: string;
@@ -43,6 +45,12 @@ export function GearItemFormSheet({
   onClose,
   onSubmit,
 }: GearItemFormSheetProps) {
+  useEffect(() => {
+    if (!open) return;
+    lockSheetScroll();
+    return () => unlockSheetScroll();
+  }, [open]);
+
   if (!open) return null;
 
   function update<K extends keyof GearFormDraft>(key: K, value: GearFormDraft[K]) {
@@ -69,7 +77,7 @@ export function GearItemFormSheet({
       <aside className="filter-sheet card gear-form-sheet" aria-label={title}>
         <div className="gear-form-header">
           <h3>{title}</h3>
-          <button className="ghost icon-compact-btn" onClick={onClose} aria-label="Close">✕</button>
+          <button className="sheet-close-btn" onClick={onClose} aria-label="Close">✕</button>
         </div>
 
         <div className="gear-form-stack">
