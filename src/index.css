@@ -275,7 +275,7 @@ a {
 .app-shell {
   width: 100%;
   margin: 0 auto;
-  padding: 0 0 calc(5.5rem + env(safe-area-inset-bottom)) 0;
+  padding: 0 0 calc(5rem + env(safe-area-inset-bottom)) 0;
 }
 
 @media (min-width: 768px) {
@@ -558,7 +558,7 @@ a {
   gap: 0.2rem;
   background: color-mix(in srgb, var(--bg-elevated) 96%, transparent);
   border-top: 1px solid var(--border-subtle);
-  padding: 0.45rem 0.5rem calc(0.3rem + env(safe-area-inset-bottom));
+  padding: 0.3rem 0.45rem calc(0.2rem + env(safe-area-inset-bottom));
   box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.07);
   z-index: 45;
 }
@@ -588,8 +588,8 @@ a {
   background: transparent;
   box-shadow: none;
   border-radius: 999px;
-  min-height: 48px;
-  padding: 0.35rem 0.4rem;
+  min-height: 44px;
+  padding: 0.2rem 0.35rem;
   text-align: center;
   color: var(--mobile-nav-inactive);
   font-weight: 500;
