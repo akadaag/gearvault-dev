@@ -1427,10 +1427,21 @@ button.category-title-btn {
   gap: 0.6rem;
 }
 
+.gear-form-two-col .gear-field-block {
+  overflow: hidden;
+}
+
 .gear-form-two-col .gear-field-block input,
 .gear-form-two-col .gear-field-block select {
   min-width: 0;
   overflow: hidden;
+  padding: 0.5rem 0.6rem;
+  font-size: 0.875rem;
+}
+
+.gear-form-two-col .gear-field-block input[type='date'] {
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 .gear-checkbox-row {

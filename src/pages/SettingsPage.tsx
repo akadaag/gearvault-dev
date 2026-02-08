@@ -91,6 +91,25 @@ export function SettingsPage() {
     setStatus('Database imported successfully.');
   }
 
+  async function clearCacheAndReload() {
+    try {
+      // Unregister all service workers
+      if ('serviceWorker' in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        await Promise.all(registrations.map((r) => r.unregister()));
+      }
+      // Delete all caches
+      if ('caches' in window) {
+        const cacheNames = await caches.keys();
+        await Promise.all(cacheNames.map((name) => caches.delete(name)));
+      }
+      // Hard reload
+      window.location.reload();
+    } catch {
+      window.location.reload();
+    }
+  }
+
   async function handleSyncNow() {
     if (!user) return;
     setSyncing(true);
@@ -209,6 +228,14 @@ export function SettingsPage() {
         </label>
         <button className="ghost" onClick={() => void seedDemoData(categories)}>Load Demo Data Now</button>
         <p className="subtle">Load sample gear items and events to explore features</p>
+      </div>
+
+      <div className="card stack-md">
+        <h3>App Updates</h3>
+        <p className="subtle">If the app feels outdated or a new version isn't loading, clear the cache to force an update.</p>
+        <button className="ghost" onClick={() => void clearCacheAndReload()}>
+          Clear Cache & Reload
+        </button>
       </div>
 
       <div className="card stack-md">
