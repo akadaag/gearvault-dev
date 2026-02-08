@@ -139,7 +139,7 @@ export function MaintenanceSheet({ open, itemName, history, onClose, onSaveEntry
               <label className="gear-field-block">
                 <span>Description</span>
                 <textarea
-                  rows={4}
+                  rows={2}
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Describe what was done"
