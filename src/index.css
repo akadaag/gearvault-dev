@@ -644,17 +644,6 @@ a {
   stroke-width: 2.6;
 }
 
-.mobile-bottom-nav__item.is-active::after {
-  content: '';
-  position: absolute;
-  left: 50%;
-  bottom: -0.14rem;
-  transform: translateX(-50%);
-  width: 4px;
-  height: 10px;
-  border-radius: 999px;
-  background: var(--mobile-nav-active);
-}
 
 .mobile-bottom-nav__item:active {
   background: transparent;
@@ -668,10 +657,12 @@ a {
 
 .mobile-bottom-nav__item:hover {
   background: transparent;
+  box-shadow: none;
 }
 
 .mobile-bottom-nav__item.is-active:hover {
   background: transparent;
+  box-shadow: none;
 }
 
 .mobile-bottom-nav__item,
@@ -694,11 +685,13 @@ a {
   .mobile-bottom-nav__item:hover {
     color: #2562eb;
     background: transparent;
+    box-shadow: none;
   }
 
   .mobile-bottom-nav__item.is-active:hover {
     color: #2562eb;
     background: transparent;
+    box-shadow: none;
   }
 }
 
