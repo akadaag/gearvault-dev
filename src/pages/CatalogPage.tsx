@@ -302,7 +302,7 @@ export function CatalogPage() {
                         )}
                         <div className="row wrap catalog-item-meta-row">
                           <span className="pill">x{item.quantity}</span>
-                          <span className="pill">{item.condition}</span>
+                          <span className={`pill pill-condition pill-condition-${item.condition}`}>{item.condition}</span>
                           {item.essential && <span className="pill essential">Essential</span>}
                         </div>
                       </div>
