@@ -215,7 +215,7 @@ export function GearItemDetailPage() {
         <p className="subtle detail-main-subtitle">{[currentItem.brand, currentItem.model].filter(Boolean).join(' ') || 'No brand/model yet'}</p>
         <div className="row wrap detail-badges">
           <span className="pill">{categories.find((c) => c.id === currentItem.categoryId)?.name}</span>
-          <span className="pill">{currentItem.condition}</span>
+          <span className={`pill pill-condition pill-condition-${currentItem.condition}`}>{currentItem.condition}</span>
           <span className="pill">×{currentItem.quantity} units</span>
           {currentItem.essential && <span className="pill essential">Essential</span>}
         </div>
