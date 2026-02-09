@@ -1429,6 +1429,7 @@ button.category-title-btn {
 
 .gear-form-two-col .gear-field-block {
   overflow: hidden;
+  min-width: 0;
 }
 
 .gear-form-two-col .gear-field-block input,
@@ -2099,13 +2100,18 @@ button.category-title-btn {
 }
 
 .maintenance-add-sheet .gear-field-block input[type='date'] {
+  display: block;
   width: 100%;
+  inline-size: 100%;
   max-width: 100%;
+  max-inline-size: 100%;
   min-width: 0;
+  min-inline-size: 0;
   box-sizing: border-box;
   overflow: hidden;
   background-clip: padding-box;
   -webkit-tap-highlight-color: transparent;
+  padding-right: 0.5rem;
 }
 
 .maintenance-add-sheet .gear-field-block input[type='date']::-webkit-date-and-time-value {
