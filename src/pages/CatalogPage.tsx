@@ -42,6 +42,7 @@ export function CatalogPage() {
   const gear = useLiveQuery(() => db.gearItems.toArray(), [], []);
 
   const query = searchParams.get('q')?.trim() ?? '';
+  const quickFilter = searchParams.get('qf') ?? 'all';
   const selectedCategoryIds = (searchParams.get('cats') ?? '').split(',').filter(Boolean);
   const showFilterSheet = searchParams.get('filters') === '1';
   const [tagFilter, setTagFilter] = useState('');
@@ -90,6 +91,8 @@ export function CatalogPage() {
       if (!fuzzyIncludes(text, query)) return false;
       if (selectedCategoryIds.length > 0 && !selectedCategoryIds.includes(item.categoryId)) return false;
       if (tagFilter && !item.tags.includes(tagFilter)) return false;
+      if (quickFilter === 'essential' && !item.essential) return false;
+      if (quickFilter === 'maintenance' && !isNeedsMaintenance(item)) return false;
       if (essentialOnly && !item.essential) return false;
       if (conditionFilter !== 'all' && item.condition !== conditionFilter) return false;
       return true;
@@ -103,7 +106,7 @@ export function CatalogPage() {
     });
 
     return items;
-  }, [categories, conditionFilter, essentialOnly, gear, query, selectedCategoryIds, sortBy, tagFilter]);
+  }, [categories, conditionFilter, essentialOnly, gear, query, quickFilter, selectedCategoryIds, sortBy, tagFilter]);
 
   const grouped = useMemo(() => {
     const map = new Map<string, GearItem[]>();
@@ -513,4 +516,14 @@ function parseCustomFields(text: string) {
     if (k && rest.length) out[k.trim()] = rest.join(':').trim();
   });
   return Object.keys(out).length ? out : undefined;
+}
+
+function isNeedsMaintenance(item: GearItem) {
+  if (item.condition === 'worn') return true;
+  const latest = [...(item.maintenanceHistory ?? [])].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  )[0];
+  if (!latest) return true;
+  const daysSinceLast = (Date.now() - new Date(latest.date).getTime()) / (1000 * 60 * 60 * 24);
+  return daysSinceLast > 180;
 }

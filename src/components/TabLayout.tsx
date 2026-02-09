@@ -51,11 +51,15 @@ export function TabLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const gearCount = useLiveQuery(() => db.gearItems.count(), [], 0);
+  const gear = useLiveQuery(() => db.gearItems.toArray(), [], []);
+  const gearCount = gear.length;
+  const essentialCount = gear.filter((item) => item.essential).length;
+  const maintenanceCount = gear.filter(isNeedsMaintenance).length;
   const isCatalogRoute = location.pathname === '/catalog';
   const isSettingsRoute = location.pathname === '/settings';
   const isGearDetailRoute = /^\/catalog\/item\/[^/]+$/.test(location.pathname);
   const catalogQuery = searchParams.get('q') ?? '';
+  const quickFilter = searchParams.get('qf') ?? 'all';
 
   const pageTitle =
     location.pathname === '/catalog'
@@ -82,6 +86,13 @@ export function TabLayout() {
   function openCatalogFilters() {
     const params = new URLSearchParams(searchParams);
     params.set('filters', '1');
+    navigate({ pathname: '/catalog', search: params.toString() ? `?${params.toString()}` : '' });
+  }
+
+  function setQuickFilter(value: 'all' | 'essential' | 'maintenance') {
+    const params = new URLSearchParams(searchParams);
+    if (value === 'all') params.delete('qf');
+    else params.set('qf', value);
     navigate({ pathname: '/catalog', search: params.toString() ? `?${params.toString()}` : '' });
   }
 
@@ -136,21 +147,46 @@ export function TabLayout() {
               </div>
             </div>
             {isCatalogRoute && (
-              <div className="topbar-search-row">
-                <div className="topbar-search-field">
-                  <span className="topbar-search-icon">{searchIcon}</span>
-                  <input
-                    className="topbar-search-input"
-                    aria-label="Search catalog items"
-                    placeholder="Search gear..."
-                    value={catalogQuery}
-                    onChange={(event) => handleCatalogSearch(event.target.value)}
-                  />
+              <>
+                <div className="topbar-search-row">
+                  <div className="topbar-search-field">
+                    <span className="topbar-search-icon">{searchIcon}</span>
+                    <input
+                      className="topbar-search-input"
+                      aria-label="Search catalog items"
+                      placeholder="Search gear..."
+                      value={catalogQuery}
+                      onChange={(event) => handleCatalogSearch(event.target.value)}
+                    />
+                  </div>
+                  <button className="ghost topbar-filter-btn" aria-label="Open filters" onClick={openCatalogFilters}>
+                    {filterIcon}
+                  </button>
                 </div>
-                <button className="ghost topbar-filter-btn" aria-label="Open filters" onClick={openCatalogFilters}>
-                  {filterIcon}
-                </button>
-              </div>
+                <div className="catalog-quick-filters" role="group" aria-label="Quick catalog filters">
+                  <button
+                    className={`catalog-quick-pill${quickFilter === 'all' ? ' is-active' : ''}`}
+                    onClick={() => setQuickFilter('all')}
+                  >
+                    All
+                    <span className="catalog-quick-pill-count">{gearCount}</span>
+                  </button>
+                  <button
+                    className={`catalog-quick-pill${quickFilter === 'essential' ? ' is-active' : ''}`}
+                    onClick={() => setQuickFilter('essential')}
+                  >
+                    Essential
+                    <span className="catalog-quick-pill-count">{essentialCount}</span>
+                  </button>
+                  <button
+                    className={`catalog-quick-pill${quickFilter === 'maintenance' ? ' is-active' : ''}`}
+                    onClick={() => setQuickFilter('maintenance')}
+                  >
+                    Needs Maintenance
+                    <span className="catalog-quick-pill-count">{maintenanceCount}</span>
+                  </button>
+                </div>
+              </>
             )}
           </div>
         </header>
@@ -163,4 +199,14 @@ export function TabLayout() {
       <MobileBottomNav items={tabs} ariaLabel="Main navigation" />
     </div>
   );
+}
+
+function isNeedsMaintenance(item: { condition: string; maintenanceHistory?: Array<{ date: string }> }) {
+  if (item.condition === 'worn') return true;
+  const latest = [...(item.maintenanceHistory ?? [])].sort(
+    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+  )[0];
+  if (!latest) return true;
+  const daysSinceLast = (Date.now() - new Date(latest.date).getTime()) / (1000 * 60 * 60 * 24);
+  return daysSinceLast > 180;
 }
