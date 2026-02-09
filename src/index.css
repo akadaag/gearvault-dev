@@ -2123,6 +2123,24 @@ button.category-title-btn {
   margin: 0;
 }
 
+/* Normalize date vs select height in maintenance add sheet */
+.maintenance-add-sheet .gear-form-two-col .gear-field-block input[type='date'],
+.maintenance-add-sheet .gear-form-two-col .gear-field-block select {
+  height: 44px;
+  min-height: 44px;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.maintenance-add-sheet .gear-form-two-col .gear-field-block select {
+  background-image: none;
+  padding-right: 2rem;
+}
+
 @media (max-height: 760px) {
   .maintenance-history-sheet,
   .maintenance-add-sheet {
