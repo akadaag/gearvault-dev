@@ -2141,6 +2141,32 @@ button.category-title-btn {
   padding-right: 2rem;
 }
 
+/* iOS Safari alignment + indicator reset for date input */
+.maintenance-add-sheet .gear-form-two-col .gear-field-block input[type='date'] {
+  display: inline-flex;
+  align-items: center;
+}
+
+.maintenance-add-sheet .gear-form-two-col .gear-field-block input[type='date']::-webkit-datetime-edit {
+  display: inline-flex;
+  align-items: center;
+}
+
+.maintenance-add-sheet .gear-form-two-col .gear-field-block input[type='date']::-webkit-calendar-picker-indicator {
+  background: transparent;
+  color: inherit;
+  opacity: 0.85;
+  padding: 0.35rem 0.4rem;
+  margin: 0;
+  border-radius: 8px;
+}
+
+.maintenance-add-sheet .gear-form-two-col .gear-field-block input[type='date']:focus::-webkit-calendar-picker-indicator {
+  opacity: 1;
+  background: transparent;
+  box-shadow: none;
+}
+
 @media (max-height: 760px) {
   .maintenance-history-sheet,
   .maintenance-add-sheet {
