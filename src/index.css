@@ -2170,6 +2170,8 @@ button.category-title-btn {
 /* Keep maintenance add fields clean on tap (no grey focus ring/border) */
 .maintenance-add-sheet .gear-field-block input[type='date']:focus,
 .maintenance-add-sheet .gear-field-block input[type='date']:focus-visible,
+.maintenance-add-sheet .gear-field-block select:focus,
+.maintenance-add-sheet .gear-field-block select:focus-visible,
 .maintenance-add-sheet .gear-field-block textarea:focus,
 .maintenance-add-sheet .gear-field-block textarea:focus-visible {
   border-color: var(--border);
