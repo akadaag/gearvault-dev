@@ -1449,15 +1449,6 @@ button.category-title-btn {
   line-height: 1.2;
 }
 
-@media (max-width: 420px) {
-  .maintenance-add-sheet .gear-form-two-col {
-    grid-template-columns: 1fr;
-  }
-
-  .maintenance-add-sheet .gear-form-two-col .gear-field-block {
-    width: 100%;
-  }
-}
 
 .gear-checkbox-row {
   margin-top: 0.2rem;
