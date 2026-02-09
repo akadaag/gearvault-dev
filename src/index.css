@@ -501,7 +501,7 @@ a {
 }
 
 .topbar-catalog-controls {
-  padding-bottom: 0.16rem;
+  padding-bottom: 0.18rem;
 }
 
 .topbar-filter-btn {
@@ -589,7 +589,7 @@ a {
 }
 
 .content.content-catalog {
-  padding-top: 0;
+  padding-top: calc(0.7rem + 0.48rem);
 }
 
 .content-immersive {
