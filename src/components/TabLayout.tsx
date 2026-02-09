@@ -130,7 +130,7 @@ export function TabLayout() {
   return (
     <div className="app-shell">
       {!isGearDetailRoute && (
-        <header className="topbar">
+        <header className={`topbar${isCatalogRoute ? ' topbar-catalog' : ''}`}>
           <div className="topbar-inner">
             <div className="topbar-primary-row">
               <div className="topbar-title">
@@ -147,7 +147,7 @@ export function TabLayout() {
               </div>
             </div>
             {isCatalogRoute && (
-              <>
+              <div className="topbar-catalog-controls">
                 <div className="topbar-search-row">
                   <div className="topbar-search-field">
                     <span className="topbar-search-icon">{searchIcon}</span>
@@ -186,7 +186,7 @@ export function TabLayout() {
                     <span className="catalog-quick-pill-count">{maintenanceCount}</span>
                   </button>
                 </div>
-              </>
+              </div>
             )}
           </div>
         </header>
