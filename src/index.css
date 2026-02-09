@@ -2167,6 +2167,15 @@ button.category-title-btn {
   box-shadow: none;
 }
 
+/* Keep maintenance add fields clean on tap (no grey focus ring/border) */
+.maintenance-add-sheet .gear-field-block input[type='date']:focus,
+.maintenance-add-sheet .gear-field-block input[type='date']:focus-visible,
+.maintenance-add-sheet .gear-field-block textarea:focus,
+.maintenance-add-sheet .gear-field-block textarea:focus-visible {
+  border-color: var(--border);
+  box-shadow: none;
+}
+
 @media (max-height: 760px) {
   .maintenance-history-sheet,
   .maintenance-add-sheet {
