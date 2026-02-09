@@ -2084,8 +2084,128 @@ button.category-title-btn {
   background: var(--surface-raised);
 }
 
+.maintenance-swipe-row {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
+
+.maintenance-swipe-actions {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: flex-end;
+  align-items: stretch;
+  gap: 0;
+  border-radius: inherit;
+  overflow: hidden;
+}
+
+.maintenance-action-btn {
+  width: 58px;
+  min-width: 58px;
+  min-height: 100%;
+  border-radius: 0;
+  border: 0;
+  box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.maintenance-action-btn svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.maintenance-action-edit {
+  background: color-mix(in srgb, #2562eb 88%, #000);
+  color: #fff;
+}
+
+.maintenance-action-delete {
+  background: var(--danger);
+  color: #fff;
+}
+
+.maintenance-action-edit:hover,
+.maintenance-action-delete:hover,
+.maintenance-action-edit:active,
+.maintenance-action-delete:active {
+  transform: none;
+  box-shadow: none;
+}
+
+.maintenance-swipe-foreground {
+  position: relative;
+  z-index: 1;
+  transition: transform 160ms ease;
+}
+
+.maintenance-swipe-row.is-open .maintenance-swipe-foreground {
+  transform: translateX(-116px);
+}
+
+.maintenance-entry-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.maintenance-entry-mainline {
+  flex: 1;
+  min-width: 0;
+}
+
+.maintenance-more-btn {
+  display: none;
+  min-height: 32px;
+  min-width: 32px;
+  width: 32px;
+  padding: 0;
+  border-radius: 8px;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  color: var(--text-soft);
+  flex-shrink: 0;
+}
+
+.maintenance-more-btn svg {
+  width: 16px;
+  height: 16px;
+  fill: currentColor;
+  stroke: none;
+}
+
+.maintenance-more-btn:hover,
+.maintenance-more-btn:active {
+  background: transparent;
+  color: var(--text);
+  transform: none;
+}
+
 .maintenance-note {
   margin-top: 0.4rem;
+}
+
+@media (min-width: 768px) {
+  .maintenance-swipe-row.is-open .maintenance-swipe-foreground {
+    transform: none;
+  }
+
+  .maintenance-more-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 .maintenance-sheet-footer {

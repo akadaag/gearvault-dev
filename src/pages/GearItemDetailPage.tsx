@@ -76,6 +76,20 @@ export function GearItemDetailPage() {
     });
   }
 
+  async function updateMaintenanceEntry(entry: MaintenanceEntry) {
+    await save({
+      maintenanceHistory: (currentItem.maintenanceHistory ?? []).map((existing) => (
+        existing.id === entry.id ? { ...existing, ...entry } : existing
+      )),
+    });
+  }
+
+  async function deleteMaintenanceEntry(entryId: string) {
+    await save({
+      maintenanceHistory: (currentItem.maintenanceHistory ?? []).filter((existing) => existing.id !== entryId),
+    });
+  }
+
   async function saveEdit() {
     if (!draft.name.trim()) {
       setEditError('Name is required');
@@ -382,6 +396,8 @@ export function GearItemDetailPage() {
         history={currentItem.maintenanceHistory ?? []}
         onClose={() => setShowMaintenanceSheet(false)}
         onSaveEntry={saveMaintenanceEntry}
+        onUpdateEntry={updateMaintenanceEntry}
+        onDeleteEntry={deleteMaintenanceEntry}
       />
     </section>
   );

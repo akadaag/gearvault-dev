@@ -201,6 +201,28 @@ export function CatalogPage() {
     });
   }
 
+  async function updateMaintenanceEntry(itemId: string, entry: MaintenanceEntry) {
+    const target = gear.find((g) => g.id === itemId);
+    if (!target) return;
+
+    await db.gearItems.update(itemId, {
+      maintenanceHistory: (target.maintenanceHistory ?? []).map((existing) => (
+        existing.id === entry.id ? { ...existing, ...entry } : existing
+      )),
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
+  async function deleteMaintenanceEntry(itemId: string, entryId: string) {
+    const target = gear.find((g) => g.id === itemId);
+    if (!target) return;
+
+    await db.gearItems.update(itemId, {
+      maintenanceHistory: (target.maintenanceHistory ?? []).filter((existing) => existing.id !== entryId),
+      updatedAt: new Date().toISOString(),
+    });
+  }
+
   return (
     <section className="stack-lg catalog-page">
       {showFilterSheet && (
@@ -429,6 +451,8 @@ export function CatalogPage() {
             history={selected.maintenanceHistory ?? []}
             onClose={() => setMaintenanceSheetItemId(null)}
             onSaveEntry={(entry) => saveMaintenanceEntry(selected.id, entry)}
+            onUpdateEntry={(entry) => updateMaintenanceEntry(selected.id, entry)}
+            onDeleteEntry={(entryId) => deleteMaintenanceEntry(selected.id, entryId)}
           />
         );
       })()}
