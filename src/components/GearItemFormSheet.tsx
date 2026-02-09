@@ -105,7 +105,21 @@ export function GearItemFormSheet({
             <label className="gear-photo-upload-tile">
               <input type="file" accept="image/*" onChange={(e) => handlePhotoUpload(e.target.files?.[0])} />
               {draft.photoPreview || draft.photo ? (
-                <img src={draft.photoPreview || draft.photo} alt="Selected" className="gear-photo-preview" />
+                <>
+                  <img src={draft.photoPreview || draft.photo} alt="Selected" className="gear-photo-preview" />
+                  <button
+                    type="button"
+                    className="gear-photo-remove-btn"
+                    aria-label="Remove photo"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      clearPhoto();
+                    }}
+                  >
+                    ✕
+                  </button>
+                </>
               ) : (
                 <>
                   <span className="gear-photo-icon" aria-hidden="true">📷</span>
@@ -114,11 +128,6 @@ export function GearItemFormSheet({
               )}
             </label>
           </div>
-          {(draft.photoPreview || draft.photo) && (
-            <div className="row" style={{ justifyContent: 'center' }}>
-              <button type="button" className="ghost" onClick={clearPhoto}>Remove photo</button>
-            </div>
-          )}
 
           <label className="gear-field-block">
             <span>Name *</span>
@@ -177,7 +186,7 @@ export function GearItemFormSheet({
 
           <label className="gear-field-block">
             <span>Purchase Date</span>
-            <input type="date" value={draft.purchaseDate} onChange={(e) => update('purchaseDate', e.target.value)} />
+            <input className="gear-date-input" type="date" value={draft.purchaseDate} onChange={(e) => update('purchaseDate', e.target.value)} />
           </label>
 
           <label className="gear-field-block">
@@ -204,7 +213,7 @@ export function GearItemFormSheet({
         </div>
 
         <div className="gear-form-footer">
-          <button onClick={onSubmit}>{submitLabel}</button>
+          <button type="button" onClick={onSubmit}>{submitLabel}</button>
         </div>
       </aside>
     </>

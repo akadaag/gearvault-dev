@@ -1387,6 +1387,38 @@ button.category-title-btn {
   object-fit: cover;
 }
 
+.gear-photo-remove-btn {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  width: 28px;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.62);
+  color: #fff;
+  box-shadow: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  line-height: 1;
+  z-index: 2;
+}
+
+.gear-photo-remove-btn:hover,
+.gear-photo-remove-btn:focus,
+.gear-photo-remove-btn:focus-visible,
+.gear-photo-remove-btn:active {
+  background: rgba(0, 0, 0, 0.72);
+  color: #fff;
+  box-shadow: none;
+  transform: none;
+  outline: none;
+}
+
 .gear-form-stack {
   padding: 0.35rem 0.9rem 1rem;
   overflow-y: auto;
@@ -1438,6 +1470,53 @@ button.category-title-btn {
   overflow: hidden;
   padding: 0.5rem 0.6rem;
   font-size: 0.875rem;
+}
+
+.gear-form-sheet .gear-date-input {
+  display: block;
+  width: 100%;
+  inline-size: 100%;
+  max-width: 100%;
+  max-inline-size: 100%;
+  min-width: 0;
+  min-inline-size: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  background-clip: padding-box;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 44px;
+  height: 44px;
+  border-radius: 15px;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+.gear-form-sheet .gear-date-input::-webkit-date-and-time-value {
+  text-align: left;
+}
+
+.gear-form-sheet .gear-date-input::-webkit-datetime-edit {
+  display: inline-flex;
+  align-items: center;
+}
+
+.gear-form-sheet .gear-date-input::-webkit-calendar-picker-indicator {
+  background: transparent;
+  color: inherit;
+  opacity: 0.85;
+  padding: 0.35rem 0.4rem;
+  margin: 0;
+  border-radius: 8px;
+}
+
+.gear-form-sheet .gear-date-input:focus::-webkit-calendar-picker-indicator {
+  opacity: 1;
+  background: transparent;
+  box-shadow: none;
 }
 
 .maintenance-add-sheet .gear-form-two-col .gear-field-block input,
