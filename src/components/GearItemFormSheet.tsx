@@ -18,6 +18,9 @@ export interface GearFormDraft {
   tagsText: string;
   essential: boolean;
   photo: string;
+  photoPreview: string;
+  photoFile: File | null;
+  removePhoto: boolean;
 }
 
 interface GearItemFormSheetProps {
@@ -59,16 +62,33 @@ export function GearItemFormSheet({
 
   function handlePhotoUpload(file: File | undefined) {
     if (!file) return;
-    if (file.size > 1_800_000) {
-      onErrorChange('Photo too large. Keep under 1.8MB.');
+    if (file.size > 15_000_000) {
+      onErrorChange('Photo too large. Keep under 15MB.');
       return;
     }
 
     const reader = new FileReader();
     reader.onload = () => {
-      update('photo', String(reader.result ?? ''));
+      onDraftChange({
+        ...draft,
+        photoFile: file,
+        photoPreview: String(reader.result ?? ''),
+        removePhoto: false,
+      });
+      onErrorChange('');
     };
     reader.readAsDataURL(file);
+  }
+
+  function clearPhoto() {
+    onDraftChange({
+      ...draft,
+      photo: '',
+      photoPreview: '',
+      photoFile: null,
+      removePhoto: true,
+    });
+    onErrorChange('');
   }
 
   return (
@@ -84,8 +104,8 @@ export function GearItemFormSheet({
           <div className="gear-photo-upload-wrap">
             <label className="gear-photo-upload-tile">
               <input type="file" accept="image/*" onChange={(e) => handlePhotoUpload(e.target.files?.[0])} />
-              {draft.photo ? (
-                <img src={draft.photo} alt="Selected" className="gear-photo-preview" />
+              {draft.photoPreview || draft.photo ? (
+                <img src={draft.photoPreview || draft.photo} alt="Selected" className="gear-photo-preview" />
               ) : (
                 <>
                   <span className="gear-photo-icon" aria-hidden="true">📷</span>
@@ -94,6 +114,11 @@ export function GearItemFormSheet({
               )}
             </label>
           </div>
+          {(draft.photoPreview || draft.photo) && (
+            <div className="row" style={{ justifyContent: 'center' }}>
+              <button type="button" className="ghost" onClick={clearPhoto}>Remove photo</button>
+            </div>
+          )}
 
           <label className="gear-field-block">
             <span>Name *</span>

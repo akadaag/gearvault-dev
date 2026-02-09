@@ -7,6 +7,8 @@ import { makeId } from '../lib/ids';
 import { GearItemFormSheet, type GearFormDraft } from '../components/GearItemFormSheet';
 import { MaintenanceSheet } from '../components/MaintenanceSheet';
 import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
+import { compressedImageToDataUrl, removeGearPhotoByUrl, uploadCompressedGearPhoto } from '../lib/gearPhotos';
+import { useAuth } from '../hooks/useAuth';
 import type { GearItem, MaintenanceEntry } from '../types/models';
 
 const emptyDraft: GearFormDraft = {
@@ -25,9 +27,13 @@ const emptyDraft: GearFormDraft = {
   tagsText: '',
   essential: false,
   photo: '',
+  photoPreview: '',
+  photoFile: null,
+  removePhoto: false,
 };
 
 export function GearItemDetailPage() {
+  const { user, isConfigured } = useAuth();
   const { id } = useParams();
   const navigate = useNavigate();
   const item = useLiveQuery(() => (id ? db.gearItems.get(id) : undefined), [id]);
@@ -100,6 +106,32 @@ export function GearItemDetailPage() {
       return;
     }
 
+    let photo: string | undefined = currentItem.photo;
+
+    try {
+      if (draft.removePhoto) {
+        if (user && isConfigured) {
+          await removeGearPhotoByUrl(currentItem.photo);
+        }
+        photo = undefined;
+      } else if (draft.photoFile) {
+        if (user && isConfigured) {
+          const uploaded = await uploadCompressedGearPhoto({
+            file: draft.photoFile,
+            userId: user.id,
+            itemId: currentItem.id,
+          });
+          await removeGearPhotoByUrl(currentItem.photo);
+          photo = uploaded.url;
+        } else {
+          photo = await compressedImageToDataUrl(draft.photoFile);
+        }
+      }
+    } catch (photoError: unknown) {
+      setEditError(photoError instanceof Error ? photoError.message : 'Could not process photo.');
+      return;
+    }
+
     await save({
       name: draft.name.trim(),
       categoryId: draft.categoryId,
@@ -115,7 +147,7 @@ export function GearItemDetailPage() {
       quantity: Math.max(1, Number(draft.quantity) || 1),
       tags: draft.tagsText.split(',').map((t) => t.trim()).filter(Boolean),
       essential: draft.essential,
-      photo: draft.photo || undefined,
+      photo,
     });
 
     setShowEditSheet(false);
@@ -124,6 +156,9 @@ export function GearItemDetailPage() {
 
   async function deleteItem() {
     if (!window.confirm(`Delete ${currentItem.name}?`)) return;
+    if (user && isConfigured) {
+      await removeGearPhotoByUrl(currentItem.photo);
+    }
     await db.gearItems.delete(currentItem.id);
     navigate('/catalog');
   }
@@ -437,6 +472,9 @@ function toDraft(item: GearItem): GearFormDraft {
     tagsText: (item.tags ?? []).join(', '),
     essential: item.essential,
     photo: item.photo ?? '',
+    photoPreview: '',
+    photoFile: null,
+    removePhoto: false,
   };
 }
 

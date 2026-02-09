@@ -157,6 +157,48 @@ for update
 to authenticated
 using (auth.uid() = user_id)
 with check (auth.uid() = user_id);
+
+-- Optional but recommended: storage bucket for gear photos
+insert into storage.buckets (id, name, public)
+values ('gear-item-photos', 'gear-item-photos', true)
+on conflict (id) do nothing;
+
+create policy "Users can upload own gear photos"
+on storage.objects
+for insert
+to authenticated
+with check (
+  bucket_id = 'gear-item-photos'
+  and split_part(name, '/', 1) = auth.uid()::text
+);
+
+create policy "Public can view gear photos"
+on storage.objects
+for select
+to public
+using (bucket_id = 'gear-item-photos');
+
+create policy "Users can update own gear photos"
+on storage.objects
+for update
+to authenticated
+using (
+  bucket_id = 'gear-item-photos'
+  and split_part(name, '/', 1) = auth.uid()::text
+)
+with check (
+  bucket_id = 'gear-item-photos'
+  and split_part(name, '/', 1) = auth.uid()::text
+);
+
+create policy "Users can delete own gear photos"
+on storage.objects
+for delete
+to authenticated
+using (
+  bucket_id = 'gear-item-photos'
+  and split_part(name, '/', 1) = auth.uid()::text
+);
 ```
 
 4. Go to **Project Settings → API** and copy:

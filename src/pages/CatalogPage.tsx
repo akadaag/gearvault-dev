@@ -9,6 +9,8 @@ import { makeId } from '../lib/ids';
 import { fuzzyIncludes } from '../lib/search';
 import { gearItemSchema } from '../lib/validators';
 import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
+import { compressedImageToDataUrl, uploadCompressedGearPhoto } from '../lib/gearPhotos';
+import { useAuth } from '../hooks/useAuth';
 import type { Category, Condition, GearItem, MaintenanceEntry } from '../types/models';
 
 const initialDraft: GearFormDraft = {
@@ -27,9 +29,13 @@ const initialDraft: GearFormDraft = {
   tagsText: '',
   essential: false,
   photo: '',
+  photoPreview: '',
+  photoFile: null,
+  removePhoto: false,
 };
 
 export function CatalogPage() {
+  const { user, isConfigured } = useAuth();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const categories = useLiveQuery(() => db.categories.orderBy('sortOrder').toArray(), [], []);
@@ -124,8 +130,31 @@ export function CatalogPage() {
     }
 
     const now = new Date().toISOString();
+    const itemId = makeId();
+    let photo: string | undefined = draft.photo || undefined;
+
+    try {
+      if (draft.removePhoto) {
+        photo = undefined;
+      } else if (draft.photoFile) {
+        if (user && isConfigured) {
+          const uploaded = await uploadCompressedGearPhoto({
+            file: draft.photoFile,
+            userId: user.id,
+            itemId,
+          });
+          photo = uploaded.url;
+        } else {
+          photo = await compressedImageToDataUrl(draft.photoFile);
+        }
+      }
+    } catch (uploadError: unknown) {
+      setError(uploadError instanceof Error ? uploadError.message : 'Could not process photo.');
+      return;
+    }
+
     const item: GearItem = {
-      id: makeId(),
+      id: itemId,
       name: draft.name.trim(),
       categoryId: draft.categoryId,
       brand: draft.brand || undefined,
@@ -138,7 +167,7 @@ export function CatalogPage() {
       customFields: parseCustomFields(draft.customFieldsText),
       condition: draft.condition,
       quantity: draft.quantity,
-      photo: draft.photo || undefined,
+      photo,
       tags: draft.tagsText.split(',').map((t) => t.trim()).filter(Boolean),
       essential: draft.essential,
       relatedItemIds: [],
