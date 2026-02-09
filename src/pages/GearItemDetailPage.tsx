@@ -44,6 +44,7 @@ export function GearItemDetailPage() {
   const [showAddToEvent, setShowAddToEvent] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
   const [showMaintenanceSheet, setShowMaintenanceSheet] = useState(false);
+  const [showImageViewer, setShowImageViewer] = useState(false);
   const [editError, setEditError] = useState('');
   const [draft, setDraft] = useState<GearFormDraft>(emptyDraft);
 
@@ -52,6 +53,23 @@ export function GearItemDetailPage() {
     lockSheetScroll();
     return () => unlockSheetScroll();
   }, [showAddToEvent]);
+
+  useEffect(() => {
+    if (!showImageViewer) return;
+    lockSheetScroll();
+
+    const handleEsc = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setShowImageViewer(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleEsc);
+    return () => {
+      window.removeEventListener('keydown', handleEsc);
+      unlockSheetScroll();
+    };
+  }, [showImageViewer]);
 
   const related = useMemo(
     () => allItems.filter((g) => item?.relatedItemIds?.includes(g.id)),
@@ -237,13 +255,40 @@ export function GearItemDetailPage() {
 
       <div className="detail-hero-card detail-hero-fullbleed">
         {currentItem.photo ? (
-          <img src={currentItem.photo} alt={currentItem.name} className="detail-hero-photo" />
+          <img
+            src={currentItem.photo}
+            alt={currentItem.name}
+            className="detail-hero-photo detail-hero-photo-clickable"
+            onClick={() => setShowImageViewer(true)}
+          />
         ) : (
           <div className="detail-hero-photo detail-hero-placeholder" aria-hidden="true">
             {currentItem.name.charAt(0).toUpperCase()}
           </div>
         )}
       </div>
+
+      {showImageViewer && currentItem.photo && (
+        <div
+          className="image-viewer-overlay"
+          role="button"
+          tabIndex={0}
+          aria-label="Close image preview"
+          onClick={() => setShowImageViewer(false)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter' || event.key === ' ') {
+              setShowImageViewer(false);
+            }
+          }}
+        >
+          <img
+            src={currentItem.photo}
+            alt={currentItem.name}
+            className="image-viewer-image"
+            onClick={(event) => event.stopPropagation()}
+          />
+        </div>
+      )}
 
       <section className="detail-page-section detail-page-main-info detail-title-block">
         <h2>{currentItem.name}</h2>
