@@ -1219,11 +1219,22 @@ button.category-title-btn {
   margin: 0;
 }
 
+/* Align category headers with catalog item rows */
+.category-header-row {
+  padding-left: 0.74rem;
+  padding-right: 0.74rem;
+}
+
+.category-header-row .category-title-btn {
+  padding-left: 0;
+  margin-left: 0;
+}
+
 /* Mobile-specific fix for category title alignment */
 @media (max-width: 767px) {
   button.category-title-btn {
     padding-left: 0;
-    margin-left: -2px;
+    margin-left: 0;
   }
 }
 
