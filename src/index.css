@@ -596,7 +596,8 @@ a {
   flex-direction: column;
   gap: 0;
   min-height: calc(100dvh - var(--topbar-height) - var(--bottom-nav-clearance));
-  padding: calc(var(--topbar-height) + var(--space-4)) var(--space-4) calc(var(--bottom-nav-clearance) + var(--space-4));
+  /* Keep enough clearance for fixed topbar and bottom nav without leaving extra grey gutter above nav */
+  padding: calc(var(--topbar-height) + var(--space-4)) var(--space-4) var(--bottom-nav-clearance);
 }
 
 .content.content-catalog {
