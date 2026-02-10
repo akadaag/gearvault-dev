@@ -1232,10 +1232,12 @@ button.category-title-btn {
 /* Mobile-specific fix for category title alignment - align with filter pills */
 @media (max-width: 767px) {
   .category-header-row {
-    margin-left: -0.22rem;
-    margin-right: -0.22rem;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding: 0.12rem 0.74rem 0;
+  }
+  
+  .category-header-row {
+    padding-left: 0.78rem;
+    padding-right: 0.78rem;
   }
   
   button.category-title-btn {
