@@ -61,6 +61,8 @@ export function TabLayout() {
   const isGearDetailRoute = /^\/catalog\/item\/[^/]+$/.test(location.pathname);
   const catalogQuery = searchParams.get('q') ?? '';
   const quickFilter = searchParams.get('qf') ?? 'all';
+  const hasCategoryFilters = (searchParams.get('cats') ?? '').split(',').filter(Boolean).length > 0;
+  const isTopFilterActive = quickFilter !== 'all' || hasCategoryFilters;
 
   const pageTitle =
     location.pathname === '/catalog'
@@ -145,9 +147,21 @@ export function TabLayout() {
               </div>
               <div className="topbar-actions">
                 {isCatalogRoute && (
-                  <button className="topbar-add-btn" aria-label="Add new item" onClick={openCatalogAdd}>
-                    {addIcon}
-                  </button>
+                  <>
+                    <button
+                      className={`topbar-filter-pill${isTopFilterActive ? ' is-active' : ''}`}
+                      aria-label="Open filters"
+                      aria-pressed={isTopFilterActive}
+                      onClick={openCatalogFilters}
+                    >
+                      <span className="catalog-filter-pill-icon" aria-hidden="true">{filterIcon}</span>
+                      Filters
+                      {isTopFilterActive && <span className="topbar-filter-pill-dot" aria-hidden="true" />}
+                    </button>
+                    <button className="topbar-add-btn" aria-label="Add new item" onClick={openCatalogAdd}>
+                      {addIcon}
+                    </button>
+                  </>
                 )}
               </div>
             </div>
@@ -186,14 +200,6 @@ export function TabLayout() {
                   >
                     Needs Maintenance
                     <span className="catalog-quick-pill-count">{maintenanceCount}</span>
-                  </button>
-                  <button
-                    className="catalog-quick-pill catalog-filter-pill"
-                    aria-label="Open filters"
-                    onClick={openCatalogFilters}
-                  >
-                    <span className="catalog-filter-pill-icon" aria-hidden="true">{filterIcon}</span>
-                    Filters
                   </button>
                 </div>
               </div>

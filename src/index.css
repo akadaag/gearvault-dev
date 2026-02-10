@@ -382,6 +382,41 @@ a {
   align-items: center;
 }
 
+.topbar-filter-pill {
+  min-height: 28px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: #f4f4f5;
+  color: #4b5563;
+  padding: 0.24rem 0.64rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.34rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  box-shadow: none;
+}
+
+.topbar-filter-pill:hover {
+  background: #ececef;
+  box-shadow: none;
+}
+
+.topbar-filter-pill.is-active {
+  background: #171a21;
+  color: #fff;
+  border-color: #171a21;
+}
+
+.topbar-filter-pill-dot {
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: #f2c94c;
+  display: inline-block;
+  flex: 0 0 auto;
+}
+
 .topbar-search {
   margin-top: 0.35rem;
 }
