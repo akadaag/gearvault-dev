@@ -1221,8 +1221,7 @@ button.category-title-btn {
 
 /* Align category headers with catalog item rows */
 .category-header-row {
-  padding-left: 0.74rem;
-  padding-right: 0.74rem;
+  padding: 0.12rem 0.74rem 0;
 }
 
 .category-header-row .category-title-btn {
@@ -1230,8 +1229,13 @@ button.category-title-btn {
   margin-left: 0;
 }
 
-/* Mobile-specific fix for category title alignment */
+/* Mobile-specific fix for category title alignment - align with filter pills */
 @media (max-width: 767px) {
+  .category-header-row {
+    padding-left: 0.78rem;
+    padding-right: 0.78rem;
+  }
+  
   button.category-title-btn {
     padding-left: 0;
     margin-left: 0;
