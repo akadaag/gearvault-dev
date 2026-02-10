@@ -164,9 +164,6 @@ export function TabLayout() {
                       onChange={(event) => handleCatalogSearch(event.target.value)}
                     />
                   </div>
-                  <button className="ghost topbar-filter-btn" aria-label="Open filters" onClick={openCatalogFilters}>
-                    {filterIcon}
-                  </button>
                 </div>
                 <div className="catalog-quick-filters" role="group" aria-label="Quick catalog filters">
                   <button
@@ -189,6 +186,14 @@ export function TabLayout() {
                   >
                     Needs Maintenance
                     <span className="catalog-quick-pill-count">{maintenanceCount}</span>
+                  </button>
+                  <button
+                    className="catalog-quick-pill catalog-filter-pill"
+                    aria-label="Open filters"
+                    onClick={openCatalogFilters}
+                  >
+                    <span className="catalog-filter-pill-icon" aria-hidden="true">{filterIcon}</span>
+                    Filters
                   </button>
                 </div>
               </div>
