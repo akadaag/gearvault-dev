@@ -1216,6 +1216,15 @@ button.category-title-btn {
   padding: 0;
   text-align: left;
   justify-content: flex-start;
+  margin: 0;
+}
+
+/* Mobile-specific fix for category title alignment */
+@media (max-width: 767px) {
+  button.category-title-btn {
+    padding-left: 0;
+    margin-left: -2px;
+  }
 }
 
 .category-count-pill {
