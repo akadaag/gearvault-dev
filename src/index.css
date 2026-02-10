@@ -1190,7 +1190,7 @@ a {
 .catalog-group {
   display: flex;
   flex-direction: column;
-  gap: var(--space-3);
+  gap: 0.40rem;
   margin-bottom: 0;
 }
 
