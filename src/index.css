@@ -1233,11 +1233,8 @@ button.category-title-btn {
 @media (max-width: 767px) {
   .category-header-row {
     padding: 0.12rem 0.74rem 0;
-  }
-  
-  .category-header-row {
-    padding-left: 0.78rem;
-    padding-right: 0.78rem;
+    margin-left: calc(0.78rem - 1rem); /* Move left to align with filter pills */
+    margin-right: calc(0.78rem - 1rem);
   }
   
   button.category-title-btn {
