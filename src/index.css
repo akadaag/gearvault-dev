@@ -1059,9 +1059,9 @@ a {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.06);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
-  z-index: 70;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 90;
 }
 
 .sheet-overlay:hover,
@@ -1069,8 +1069,8 @@ a {
 .sheet-overlay:focus,
 .sheet-overlay:focus-visible {
   background: rgba(0, 0, 0, 0.06);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
   box-shadow: none;
   transform: none;
   border: 0;
@@ -1082,7 +1082,7 @@ a {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 80;
+  z-index: 100;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
   max-height: min(72vh, 620px);
@@ -1656,7 +1656,7 @@ button.category-title-btn {
   left: 0;
   right: 0;
   bottom: 0;
-  z-index: 80;
+  z-index: 100;
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
   max-height: min(80vh, 700px);
@@ -2213,17 +2213,17 @@ button.category-title-btn {
 }
 
 .maintenance-history-sheet {
-  z-index: 82;
+  z-index: 102;
 }
 
 .maintenance-add-sheet {
-  z-index: 90;
+  z-index: 110;
   height: auto;
   max-height: min(60dvh, 460px);
 }
 
 .maintenance-add-overlay {
-  z-index: 89;
+  z-index: 109;
 }
 
 .maintenance-sheet-header {

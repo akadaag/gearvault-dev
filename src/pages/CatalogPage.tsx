@@ -65,11 +65,11 @@ export function CatalogPage() {
   }, [searchParams, setSearchParams]);
 
   useEffect(() => {
-    const anySheetOpen = showFilterSheet || Boolean(selectedItemId);
+    const anySheetOpen = showFilterSheet || showAddItemForm || Boolean(selectedItemId) || Boolean(maintenanceSheetItemId);
     if (!anySheetOpen) return;
     lockSheetScroll();
     return () => unlockSheetScroll();
-  }, [showFilterSheet, selectedItemId]);
+  }, [showFilterSheet, showAddItemForm, selectedItemId, maintenanceSheetItemId]);
 
   const tags = useMemo(() => {
     const set = new Set<string>();
@@ -256,7 +256,75 @@ export function CatalogPage() {
   }
 
   return (
-    <section className="stack-lg catalog-page">
+    <>
+      <section className="stack-lg catalog-page">
+      {gear.length === 0 && (
+        <div className="card empty">
+          <h3>No gear yet</h3>
+          <p>Add your first item to get started</p>
+        </div>
+      )}
+
+      {filtered.length === 0 && gear.length > 0 && (
+        <div className="card empty">
+          <h3>No results found</h3>
+          <p>Try adjusting your filters or search query</p>
+        </div>
+      )}
+
+      <div className="stack-md">
+        {categories.map((category) => {
+          const items = grouped.get(category.id) ?? [];
+          if (!items.length) return null;
+          return (
+            <article className="catalog-group stack-sm" key={category.id}>
+              <div className="category-header-row">
+                <button className="text-btn category-title-btn" onClick={() => void toggleCollapse(category)}>
+                  {category.name} <span className="category-count-pill">{items.length}</span>
+                </button>
+                <button
+                  className={`category-toggle-btn${category.collapsed ? ' is-collapsed' : ''}`}
+                  aria-label={category.collapsed ? `Expand ${category.name}` : `Collapse ${category.name}`}
+                  onClick={() => void toggleCollapse(category)}
+                >
+                  <span className="catalog-item-arrow" aria-hidden="true">›</span>
+                </button>
+              </div>
+              {!category.collapsed && (
+                <div className="catalog-items-surface">
+                  <div className="catalog-items-list">
+                  {items.map((item) => (
+                    <button key={item.id} className="catalog-item-row" onClick={() => setSelectedItemId(item.id)}>
+                      <div className="catalog-item-icon-wrapper">
+                        {item.photo ? (
+                          <img src={item.photo} alt={item.name} className="catalog-item-icon-img" />
+                        ) : (
+                          <div className="catalog-item-icon" aria-hidden="true">{item.name.charAt(0).toUpperCase()}</div>
+                        )}
+                      </div>
+                      <div className="catalog-item-main">
+                        <strong className="catalog-item-title">{item.name}</strong>
+                        {(item.brand || item.model) && (
+                          <span className="subtle catalog-item-subtitle">{item.brand} {item.model}</span>
+                        )}
+                        <div className="row wrap catalog-item-meta-row">
+                          <span className="pill">x{item.quantity}</span>
+                          <span className={`pill pill-condition pill-condition-${item.condition}`}>{item.condition}</span>
+                          {item.essential && <span className="pill essential">Essential</span>}
+                        </div>
+                      </div>
+                      <div className="catalog-item-arrow" aria-hidden="true">›</div>
+                    </button>
+                  ))}
+                  </div>
+                </div>
+              )}
+            </article>
+          );
+        })}
+      </div>
+      </section>
+
       {showFilterSheet && (
         <>
           <button className="sheet-overlay" aria-label="Close filters" onClick={closeFilterSheet} />
@@ -324,72 +392,6 @@ export function CatalogPage() {
         }}
         onSubmit={() => void addItem()}
       />
-
-      {gear.length === 0 && (
-        <div className="card empty">
-          <h3>No gear yet</h3>
-          <p>Add your first item to get started</p>
-        </div>
-      )}
-
-      {filtered.length === 0 && gear.length > 0 && (
-        <div className="card empty">
-          <h3>No results found</h3>
-          <p>Try adjusting your filters or search query</p>
-        </div>
-      )}
-
-      <div className="stack-md">
-        {categories.map((category) => {
-          const items = grouped.get(category.id) ?? [];
-          if (!items.length) return null;
-          return (
-            <article className="catalog-group stack-sm" key={category.id}>
-              <div className="category-header-row">
-                <button className="text-btn category-title-btn" onClick={() => void toggleCollapse(category)}>
-                  {category.name} <span className="category-count-pill">{items.length}</span>
-                </button>
-                <button
-                  className={`category-toggle-btn${category.collapsed ? ' is-collapsed' : ''}`}
-                  aria-label={category.collapsed ? `Expand ${category.name}` : `Collapse ${category.name}`}
-                  onClick={() => void toggleCollapse(category)}
-                >
-                  <span className="catalog-item-arrow" aria-hidden="true">›</span>
-                </button>
-              </div>
-              {!category.collapsed && (
-                <div className="catalog-items-surface">
-                  <div className="catalog-items-list">
-                  {items.map((item) => (
-                    <button key={item.id} className="catalog-item-row" onClick={() => setSelectedItemId(item.id)}>
-                      <div className="catalog-item-icon-wrapper">
-                        {item.photo ? (
-                          <img src={item.photo} alt={item.name} className="catalog-item-icon-img" />
-                        ) : (
-                          <div className="catalog-item-icon" aria-hidden="true">{item.name.charAt(0).toUpperCase()}</div>
-                        )}
-                      </div>
-                      <div className="catalog-item-main">
-                        <strong className="catalog-item-title">{item.name}</strong>
-                        {(item.brand || item.model) && (
-                          <span className="subtle catalog-item-subtitle">{item.brand} {item.model}</span>
-                        )}
-                        <div className="row wrap catalog-item-meta-row">
-                          <span className="pill">x{item.quantity}</span>
-                          <span className={`pill pill-condition pill-condition-${item.condition}`}>{item.condition}</span>
-                          {item.essential && <span className="pill essential">Essential</span>}
-                        </div>
-                      </div>
-                      <div className="catalog-item-arrow" aria-hidden="true">›</div>
-                    </button>
-                  ))}
-                  </div>
-                </div>
-              )}
-            </article>
-          );
-        })}
-      </div>
 
       {selectedItemId && (() => {
         const item = gear.find((g) => g.id === selectedItemId);
@@ -488,7 +490,7 @@ export function CatalogPage() {
           />
         );
       })()}
-    </section>
+    </>
   );
 }
 
