@@ -1200,7 +1200,7 @@ a {
   justify-content: space-between;
   align-items: center;
   gap: var(--space-2);
-  padding: 0.12rem 0.74rem 0;
+  padding: 0.12rem 0.74rem 0 0;
   border-bottom: 0;
 }
 
@@ -1220,27 +1220,9 @@ button.category-title-btn {
 }
 
 /* Align category headers with catalog item rows */
-.category-header-row {
-  padding: 0.12rem 0.74rem 0;
-}
-
 .category-header-row .category-title-btn {
   padding-left: 0;
   margin-left: 0;
-}
-
-/* Mobile-specific fix for category title alignment - align with filter pills */
-@media (max-width: 767px) {
-  .category-header-row {
-    padding: 0.12rem 0.74rem 0;
-    margin-left: calc(0.78rem - 1rem); /* Move left to align with filter pills */
-    margin-right: calc(0.78rem - 1rem);
-  }
-  
-  button.category-title-btn {
-    padding-left: 0;
-    margin-left: 0;
-  }
 }
 
 .category-count-pill {
