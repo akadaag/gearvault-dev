@@ -1214,6 +1214,8 @@ button.category-title-btn {
   font-size: 1.05rem;
   letter-spacing: -0.02em;
   padding: 0;
+  text-align: left;
+  justify-content: flex-start;
 }
 
 .category-count-pill {
