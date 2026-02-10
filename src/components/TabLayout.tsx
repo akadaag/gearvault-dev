@@ -4,6 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, ensureBaseData } from '../db';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
+import { resetSheetScrollLock } from '../lib/sheetLock';
 import { MobileBottomNav } from './MobileBottomNav';
 
 const catalogIcon = (
@@ -75,6 +76,10 @@ export function TabLayout() {
   useEffect(() => {
     void ensureBaseData();
   }, []);
+
+  useEffect(() => {
+    resetSheetScrollLock();
+  }, [location.pathname]);
 
   function handleCatalogSearch(value: string) {
     const params = new URLSearchParams(searchParams);

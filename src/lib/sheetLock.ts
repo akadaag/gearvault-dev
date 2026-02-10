@@ -13,3 +13,9 @@ export function unlockSheetScroll() {
     document.body.classList.remove('sheet-open');
   }
 }
+
+export function resetSheetScrollLock() {
+  if (typeof document === 'undefined') return;
+  lockCount = 0;
+  document.body.classList.remove('sheet-open');
+}
