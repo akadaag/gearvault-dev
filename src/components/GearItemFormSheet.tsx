@@ -94,13 +94,13 @@ export function GearItemFormSheet({
   return (
     <>
       <button className="sheet-overlay" aria-label={`Close ${title}`} onClick={onClose} />
-      <aside className="filter-sheet card gear-form-sheet" aria-label={title}>
+      <aside className="filter-sheet card gear-form-sheet" aria-label={title} style={{ display: 'flex', flexDirection: 'column', maxHeight: 'min(90dvh, 800px)', height: '100%' }}>
         <div className="gear-form-header">
           <h3>{title}</h3>
           <button className="sheet-close-btn" onClick={onClose} aria-label="Close">✕</button>
         </div>
 
-        <div className="gear-form-stack">
+        <div className="gear-form-stack" style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
           <div className="gear-photo-upload-wrap">
             <label className="gear-photo-upload-tile">
               <input type="file" accept="image/*" onChange={(e) => handlePhotoUpload(e.target.files?.[0])} />

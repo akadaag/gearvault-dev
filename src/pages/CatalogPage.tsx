@@ -403,7 +403,7 @@ export function CatalogPage() {
         return (
           <>
             <button className="sheet-overlay" aria-label="Close item details" onClick={() => setSelectedItemId(null)} />
-            <aside className="item-detail-sheet card" aria-label="Item details">
+            <aside className="item-detail-sheet card" aria-label="Item details" style={{ display: 'flex', flexDirection: 'column', maxHeight: 'min(80vh, 700px)', height: '100%' }}>
               <div className="detail-sheet-header">
                 {item.photo && <img src={item.photo} alt={item.name} className="detail-photo" />}
                 <div className="detail-header-content">
@@ -429,7 +429,7 @@ export function CatalogPage() {
                 </section>
               )}
 
-              <div className="detail-quick-grid">
+              <div className="detail-quick-grid" style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
                 <button
                   type="button"
                   className="detail-quick-card detail-quick-card-btn"
