@@ -102,7 +102,7 @@ body {
   background: var(--bg);
   -webkit-tap-highlight-color: transparent;
   overflow-x: hidden;
-  overflow-y: hidden;
+ overflow-y: hidden;
 }
 
 body.sheet-open {
@@ -648,11 +648,9 @@ a {
 }
 
 .content {
-  position: fixed;
-  top: calc(var(--topbar-height) + var(--space-4));
-  bottom: var(--bottom-nav-clearance);
-  left: 0;
-  right: 0;
+  position: relative;
+  margin-top: var(--topbar-height);
+  height: calc(100dvh - var(--topbar-height) - var(--bottom-nav-clearance));
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -663,11 +661,13 @@ a {
 }
 
 .content.content-catalog {
-  top: calc(var(--topbar-catalog-height) + var(--space-2));
+  margin-top: var(--topbar-catalog-height);
+  height: calc(100dvh - var(--topbar-catalog-height) - var(--bottom-nav-clearance));
 }
 
 .content-immersive {
-  top: 0;
+  margin-top: 0;
+  height: 100dvh;
   padding: 0;
 }
 
@@ -689,10 +689,8 @@ a {
 
   .content {
     position: static;
-    top: auto;
-    bottom: auto;
-    left: auto;
-    right: auto;
+    margin-top: 0;
+    height: auto;
     overflow-y: visible;
     overscroll-behavior: auto;
     -webkit-overflow-scrolling: auto;
