@@ -1729,6 +1729,7 @@ button.category-title-btn {
   min-height: 48px;
   border-radius: 14px;
   background: #11131a;
+  padding: 0.5rem 1.25rem;
 }
 
 .gear-form-footer button:hover {
@@ -2067,6 +2068,7 @@ button.category-title-btn {
   min-height: 48px;
   border-radius: 14px;
   background: #11131a;
+  padding: 0.5rem 1.25rem;
 }
 
 .event-add-sheet-footer button:hover {
@@ -2658,6 +2660,7 @@ button.category-title-btn {
   align-items: center;
   justify-content: center;
   gap: 0.4rem;
+  padding: 0.5rem 1.25rem;
 }
 
 .maintenance-sheet-footer button:hover {
