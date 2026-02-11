@@ -1716,13 +1716,13 @@ button.category-title-btn {
 
 .gear-form-footer {
   flex-shrink: 0;
-  padding: 0.7rem 0.9rem;
+  padding: 0.5rem 0.9rem;
   border-top: 1px solid var(--border-subtle);
   background: var(--surface-raised);
   position: sticky;
   bottom: 0;
   z-index: 1;
-  padding-bottom: calc(0.6rem + env(safe-area-inset-bottom));
+  padding-bottom: calc(0.4rem + env(safe-area-inset-bottom));
 }
 
 .gear-form-footer button {
