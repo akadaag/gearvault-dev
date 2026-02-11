@@ -1815,8 +1815,7 @@ button.category-title-btn {
 
 @media (max-width: 767px) {
   .detail-sheet-header {
-    /* revert flex-direction: column; keep default flex-direction: row */
-    /* remove align-items: center and text-align: center */
+    /* align-items: flex-start; (default, so remove center override) */
   }
   .detail-header-content {
     flex: 1;
