@@ -405,7 +405,13 @@ export function CatalogPage() {
             <button className="sheet-overlay" aria-label="Close item details" onClick={() => setSelectedItemId(null)} />
             <aside className="item-detail-sheet card" aria-label="Item details" style={{ display: 'flex', flexDirection: 'column', maxHeight: 'min(80vh, 700px)', height: '100%' }}>
               <div className="detail-sheet-header">
-                {item.photo && <img src={item.photo} alt={item.name} className="detail-photo" />}
+                {item.photo ? (
+                  <img src={item.photo} alt={item.name} className="detail-photo" />
+                ) : (
+                  <div className="detail-photo detail-photo-placeholder" aria-label="No photo available">
+                    <span className="detail-photo-initial">{item.name.charAt(0).toUpperCase()}</span>
+                  </div>
+                )}
                 <div className="detail-header-content">
                   <h2>{item.name}</h2>
                   <p className="subtle detail-subtitle">{[item.brand, item.model].filter(Boolean).join(' ') || 'No brand/model yet'}</p>
@@ -429,7 +435,7 @@ export function CatalogPage() {
                 </section>
               )}
 
-              <div className="detail-quick-grid" style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
+              <div className="detail-quick-grid" style={{ overflowY: 'auto', minHeight: 0 }}>
                 <button
                   type="button"
                   className="detail-quick-card detail-quick-card-btn"
