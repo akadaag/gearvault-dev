@@ -94,7 +94,7 @@ export function GearItemFormSheet({
   return (
     <>
       <button className="sheet-overlay" aria-label={`Close ${title}`} onClick={onClose} />
-      <aside className="filter-sheet card gear-form-sheet" aria-label={title} style={{ display: 'flex', flexDirection: 'column', maxHeight: 'min(90dvh, 800px)', height: '100%' }}>
+      <aside className="filter-sheet card gear-form-sheet" aria-label={title}>
         <div className="gear-form-header">
           <h3>{title}</h3>
           <button className="sheet-close-btn" onClick={onClose} aria-label="Close">✕</button>
