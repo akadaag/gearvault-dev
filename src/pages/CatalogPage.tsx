@@ -415,12 +415,12 @@ export function CatalogPage() {
                 <div className="detail-header-content">
                   <h2>{item.name}</h2>
                   <p className="subtle detail-subtitle">{[item.brand, item.model].filter(Boolean).join(' ') || 'No brand/model yet'}</p>
-                  <div className="row wrap detail-badges">
-                    {category && <span className="pill">{category.name}</span>}
-                    <span className={`pill pill-condition pill-condition-${item.condition}`}>{item.condition}</span>
-                    <span className="pill">×{item.quantity} units</span>
-                    {item.essential && <span className="pill essential">Essential</span>}
-                  </div>
+                </div>
+                <div className="detail-badges">
+                  {category && <span className="pill">{category.name}</span>}
+                  <span className={`pill pill-condition pill-condition-${item.condition}`}>{item.condition}</span>
+                  <span className="pill">×{item.quantity} units</span>
+                  {item.essential && <span className="pill essential">Essential</span>}
                 </div>
                 <button className="sheet-close-btn" onClick={() => setSelectedItemId(null)} aria-label="Close">✕</button>
               </div>
