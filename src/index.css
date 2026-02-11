@@ -102,6 +102,7 @@ body {
   background: var(--bg);
   -webkit-tap-highlight-color: transparent;
   overflow-x: hidden;
+  overflow-y: hidden;
 }
 
 body.sheet-open {
@@ -647,22 +648,27 @@ a {
 }
 
 .content {
+  position: fixed;
+  top: calc(var(--topbar-height) + var(--space-4));
+  bottom: var(--bottom-nav-clearance);
+  left: 0;
+  right: 0;
   display: flex;
   flex-direction: column;
   gap: 0;
-  min-height: calc(100dvh - var(--topbar-height) - var(--bottom-nav-clearance));
-  padding: calc(var(--topbar-height) + var(--space-4)) var(--space-4) calc(var(--bottom-nav-clearance) + var(--space-4));
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 var(--space-4) var(--space-4);
 }
 
 .content.content-catalog {
-  padding-top: calc(var(--topbar-catalog-height) + var(--space-2));
-  min-height: calc(100dvh - var(--topbar-catalog-height) - var(--bottom-nav-clearance));
+  top: calc(var(--topbar-catalog-height) + var(--space-2));
 }
 
 .content-immersive {
-  padding-top: 0;
-  padding-left: 0;
-  padding-right: 0;
+  top: 0;
+  padding: 0;
 }
 
 .auth-shell {
@@ -677,7 +683,19 @@ a {
 }
 
 @media (min-width: 768px) {
+  body {
+    overflow-y: visible;
+  }
+
   .content {
+    position: static;
+    top: auto;
+    bottom: auto;
+    left: auto;
+    right: auto;
+    overflow-y: visible;
+    overscroll-behavior: auto;
+    -webkit-overflow-scrolling: auto;
     gap: 1.25rem;
     padding: var(--topbar-height) 0 0;
   }
