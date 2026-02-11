@@ -1815,11 +1815,12 @@ button.category-title-btn {
 
 @media (max-width: 767px) {
   .detail-sheet-header {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+    /* revert flex-direction: column; keep default flex-direction: row */
+    /* remove align-items: center and text-align: center */
   }
   .detail-header-content {
+    flex: 1;
+    min-width: 0;
     width: 100%;
   }
 }
