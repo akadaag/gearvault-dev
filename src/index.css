@@ -3022,6 +3022,10 @@ html {
   animation: sheet-slide-up 180ms ease-out;
 }
 
+.filter-sheet.gear-form-sheet {
+  padding-bottom: 0;
+}
+
 .loading {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 }
