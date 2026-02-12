@@ -652,10 +652,12 @@ a {
 
 .content.content-catalog {
   padding-top: var(--topbar-catalog-height);
+  background: var(--bg);
 }
 
 .content.content-events {
   padding-top: var(--topbar-catalog-height);
+  background: var(--bg);
 }
 
 .content-immersive {
@@ -1374,7 +1376,7 @@ button.category-title-btn {
   gap: 0.5rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  background: var(--bg);
+  background: var(--card);
   padding: 1rem;
   min-height: var(--tap);
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
@@ -1404,7 +1406,7 @@ button.category-title-btn {
   align-items: center;
   gap: 0.6rem;
   width: 100%;
-  background: transparent;
+  background: var(--card);
   box-shadow: none;
   color: var(--text);
   text-align: left;
