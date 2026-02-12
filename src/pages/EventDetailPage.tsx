@@ -266,34 +266,36 @@ export function EventDetailPage() {
         {/* Event title */}
         <h1 className="detail-event-title">{currentEvent.title}</h1>
 
-        {/* Type pill */}
-        <div className="detail-event-meta-row">
-          <span className="pill">{currentEvent.type}</span>
-        </div>
+        {/* Type — plain text, no pill */}
+        <span className="detail-event-type">{currentEvent.type}</span>
 
-        {/* Date/Time pill */}
-        {currentEvent.dateTime && (
+        {/* Date/Time + Location + Client — one row, SVG icons, no emojis */}
+        {(currentEvent.dateTime || currentEvent.location || currentEvent.client) && (
           <div className="detail-event-meta-row">
-            <span className="pill">
-              📅 {formattedDate} • {formattedTime}
-            </span>
-          </div>
-        )}
-
-        {/* Location & Client pills */}
-        {(currentEvent.location || currentEvent.client) && (
-          <div className="detail-event-meta-row">
+            {currentEvent.dateTime && (
+              <span className="pill detail-event-meta-pill">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="detail-event-meta-icon">
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <path d="M16 2v4M8 2v4M3 10h18" />
+                </svg>
+                {formattedDate} • {formattedTime}
+              </span>
+            )}
             {currentEvent.location && (
               <button
-                className="pill detail-event-location-pill"
+                className="pill detail-event-meta-pill detail-event-location-pill"
                 onClick={() => {/* TODO: Open map/navigate */}}
                 aria-label={`Location: ${currentEvent.location}`}
               >
-                📍 {currentEvent.location}
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="detail-event-meta-icon">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" />
+                  <circle cx="12" cy="9" r="2.5" />
+                </svg>
+                {currentEvent.location}
               </button>
             )}
             {currentEvent.client && (
-              <span className="pill">Client: {currentEvent.client}</span>
+              <span className="pill detail-event-meta-pill">Client: {currentEvent.client}</span>
             )}
           </div>
         )}
@@ -302,13 +304,10 @@ export function EventDetailPage() {
       {/* ── CONTENT CARDS ── */}
       <div className="detail-event-body">
 
-        {/* Notes Card - only if notes exist */}
+        {/* Notes Card - only if notes exist, read-only, no label */}
         {currentEvent.notes && (
           <div className="card detail-event-notes-card">
-            <strong>Event Notes</strong>
-            <div className="detail-event-notes-text">
-              {currentEvent.notes}
-            </div>
+            {currentEvent.notes}
           </div>
         )}
 

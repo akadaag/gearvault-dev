@@ -2105,23 +2105,44 @@ button.category-title-btn {
 }
 
 .detail-event-title {
-  font-size: 2rem;
+  font-size: 1.65rem;
   font-weight: 700;
-  margin: 0 0 0.75rem 0;
+  margin: 0 0 0.3rem 0;
   padding-right: 5.5rem; /* space for days pill */
   line-height: 1.2;
   color: var(--text);
+}
+
+.detail-event-type {
+  display: block;
+  font-size: 0.9rem;
+  color: var(--text-soft);
+  font-weight: 500;
+  margin-bottom: 0.65rem;
 }
 
 .detail-event-meta-row {
   display: flex;
   flex-wrap: wrap;
   gap: 0.5rem;
-  margin-bottom: 0.5rem;
+  align-items: center;
 }
 
-.detail-event-meta-row:last-child {
-  margin-bottom: 0;
+.detail-event-meta-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.detail-event-meta-icon {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
 .detail-event-location-pill {
@@ -2143,21 +2164,13 @@ button.category-title-btn {
   background: #ffffff;
 }
 
-/* Notes card styling */
+/* Notes card styling — just the card, no inner box */
 .detail-event-notes-card {
   background: #ffffff !important;
-}
-
-.detail-event-notes-text {
-  background: #ffffff;
-  padding: 0.75rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-subtle);
-  color: var(--text);
-  font-size: 0.95rem;
-  line-height: 1.5;
+  font-size: 0.88rem;
+  line-height: 1.55;
   white-space: pre-wrap;
-  margin-top: 0.5rem;
+  color: var(--text);
 }
 
 /* Share sheet */
