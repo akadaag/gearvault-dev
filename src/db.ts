@@ -20,19 +20,27 @@ class GearVaultDB extends Dexie {
     });
 
     // v2: strip parenthetical hints from default category names
-    this.version(2).upgrade(async tx => {
-      const renames: Record<string, string> = {
-        'default-4': 'Lighting',
-        'default-5': 'Modifiers',
-        'default-6': 'Audio',
-        'default-7': 'Monitoring',
-        'default-8': 'Power',
-        'default-9': 'Media',
-      };
-      for (const [id, name] of Object.entries(renames)) {
-        await tx.table('categories').update(id, { name });
-      }
-    });
+    this.version(2)
+      .stores({
+        gearItems: 'id, name, categoryId, essential, condition, updatedAt, *tags',
+        categories: 'id, sortOrder, name',
+        events: 'id, title, type, dateTime, client, updatedAt, createdBy',
+        settings: 'id',
+        aiFeedback: 'id, eventType, useful, createdAt',
+      })
+      .upgrade(async tx => {
+        const renames: Record<string, string> = {
+          'default-4': 'Lighting',
+          'default-5': 'Modifiers',
+          'default-6': 'Audio',
+          'default-7': 'Monitoring',
+          'default-8': 'Power',
+          'default-9': 'Media',
+        };
+        for (const [id, name] of Object.entries(renames)) {
+          await tx.table('categories').update(id, { name });
+        }
+      });
   }
 }
 
@@ -49,10 +57,35 @@ export const defaultSettings: AppSettings = {
   aiLearningEnabled: true,
 };
 
+// Canonical map of default category IDs to their clean names.
+// Used both by the v2 Dexie upgrade and the ensureBaseData() fallback patch.
+export const defaultCategoryRenames: Record<string, string> = {
+  'default-4': 'Lighting',
+  'default-5': 'Modifiers',
+  'default-6': 'Audio',
+  'default-7': 'Monitoring',
+  'default-8': 'Power',
+  'default-9': 'Media',
+};
+
 export async function ensureBaseData() {
   const count = await db.categories.count();
   if (!count) {
     await db.categories.bulkAdd(defaultCategories);
+  } else {
+    // Fallback patch: fix any default category that still has the old
+    // parenthetical name (e.g. if the Dexie v2 upgrade was skipped due
+    // to a stale service worker serving an old JS bundle).
+    const stale = await db.categories
+      .where('id')
+      .anyOf(Object.keys(defaultCategoryRenames))
+      .toArray();
+    for (const cat of stale) {
+      const cleanName = defaultCategoryRenames[cat.id];
+      if (cleanName && cat.name !== cleanName) {
+        await db.categories.update(cat.id, { name: cleanName });
+      }
+    }
   }
 
   const settings = await db.settings.get('app-settings');

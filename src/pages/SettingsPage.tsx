@@ -93,18 +93,19 @@ export function SettingsPage() {
 
   async function clearCacheAndReload() {
     try {
-      // Unregister all service workers
+      // Unregister all service workers first so the new bundle is served
+      // directly from the network on the next load, not from SW cache.
       if ('serviceWorker' in navigator) {
         const registrations = await navigator.serviceWorker.getRegistrations();
         await Promise.all(registrations.map((r) => r.unregister()));
       }
-      // Delete all caches
+      // Delete every cache storage entry (SW precache, runtime cache, etc.)
       if ('caches' in window) {
         const cacheNames = await caches.keys();
         await Promise.all(cacheNames.map((name) => caches.delete(name)));
       }
-      // Hard reload
-      window.location.reload();
+      // Hard reload — bypasses any remaining HTTP cache
+      window.location.href = window.location.href;
     } catch {
       window.location.reload();
     }
