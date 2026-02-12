@@ -42,7 +42,7 @@ const calendarIcon = (
 );
 
 const magnifyingGlassIcon = (
-  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <circle cx="11" cy="11" r="7" />
     <path d="M20 20l-4-4" />
   </svg>
@@ -63,6 +63,42 @@ const EVENT_TYPE_OPTIONS = [
 export function EventsPage() {
   const events = useLiveQuery(() => db.events.orderBy('updatedAt').reverse().toArray(), [], []);
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // Helper function to calculate days until event
+  function getDaysUntilEvent(dateTime: string): {
+    days: number;
+    text: string;
+    colorClass: string;
+  } {
+    const eventDate = new Date(dateTime);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const diffTime = eventDate.getTime() - today.getTime();
+    const days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    let text: string;
+    let colorClass: string;
+    
+    if (days < 0) {
+      text = `${Math.abs(days)}d ago`;
+      colorClass = 'overdue';
+    } else if (days === 0) {
+      text = 'Today';
+      colorClass = 'today';
+    } else if (days === 1) {
+      text = '1 day';
+      colorClass = 'urgent';      // Yellow
+    } else if (days <= 5) {
+      text = `${days} days`;
+      colorClass = 'upcoming';    // Blue
+    } else {
+      text = `${days} days`;
+      colorClass = 'later';       // Green
+    }
+    
+    return { days, text, colorClass };
+  }
 
   // URL-based state
   const query = searchParams.get('q')?.trim() ?? '';
@@ -555,7 +591,7 @@ export function EventsPage() {
       {/* Empty states */}
       {sorted.length === 0 && events.length === 0 && (
         <div className="card empty">
-          <div style={{ fontSize: '3rem', color: 'var(--subtle)', marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ fontSize: '3.5rem', color: 'var(--border-strong)', marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
             {magnifyingGlassIcon}
           </div>
           <h3>No events added</h3>
@@ -564,7 +600,7 @@ export function EventsPage() {
       )}
       {sorted.length === 0 && events.length > 0 && (
         <div className="card empty">
-          <div style={{ fontSize: '3rem', color: 'var(--subtle)', marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ fontSize: '3.5rem', color: 'var(--border-strong)', marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
             {magnifyingGlassIcon}
           </div>
           <h3>No events match</h3>
@@ -572,42 +608,68 @@ export function EventsPage() {
         </div>
       )}
       {/* Event Cards */}
-      {sorted.length > 0 && (
+       {sorted.length > 0 && (
         <div className="grid cards">
           {sorted.map((event) => {
             const packed = event.packingChecklist.filter((i) => i.packed).length;
             const total = event.packingChecklist.length;
             const ratio = total > 0 ? Math.round((packed / total) * 100) : 0;
-            const status = total === 0 ? 'Draft' : packed === total ? 'Ready' : 'Packing';
+            const daysInfo = event.dateTime ? getDaysUntilEvent(event.dateTime) : null;
+            const formattedDate = event.dateTime
+              ? new Date(event.dateTime).toLocaleDateString(undefined, {
+                  month: 'short',
+                  day: 'numeric',
+                  year: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })
+              : '';
+            
             return (
               <Link key={event.id} to={`/events/${event.id}`} className="gear-card event-card">
-                <div className="event-card-head">
-                  <strong>{event.title}</strong>
-                  <span className={`pill event-status ${status.toLowerCase()}`}>{status}</span>
+                {/* Header with title and days pill */}
+                <div className="event-card-header">
+                  <strong className="event-card-title">{event.title}</strong>
+                  {daysInfo && (
+                    <span className={`pill event-days ${daysInfo.colorClass}`}>
+                      {daysInfo.text}
+                    </span>
+                  )}
                 </div>
-                <span className="pill">{event.type}</span>
+                
+                {/* Subtitle: event type */}
+                <span className="event-card-type">{event.type}</span>
+                
+                {/* Date with calendar icon */}
                 {event.dateTime && (
-                  <span className="subtle">
-                    {new Date(event.dateTime).toLocaleDateString(undefined, {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </span>
+                  <div className="event-card-date">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                      <line x1="16" y1="2" x2="16" y2="6" />
+                      <line x1="8" y1="2" x2="8" y2="6" />
+                      <line x1="3" y1="10" x2="21" y2="10" />
+                    </svg>
+                    <span>{formattedDate}</span>
+                  </div>
                 )}
-                <div className="stack-sm" style={{ width: '100%' }}>
-                  {event.client && <span className="subtle">Client: {event.client}</span>}
-                  {event.location && <span className="subtle">📍 {event.location}</span>}
-                </div>
+                
+                {/* Packing info with checkmark icon */}
                 {total > 0 && (
                   <>
-                    <span className="subtle">
-                      {packed}/{total} items packed
-                    </span>
+                    <div className="event-card-packed">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <circle cx="12" cy="12" r="10" />
+                        <polyline points="16 12 12 8 8 12" />
+                      </svg>
+                      <span>{packed}/{total} packed</span>
+                    </div>
+                    
+                    {/* Progress bar */}
                     <div className="progress-track" aria-hidden="true">
-                      <span style={{ width: `${ratio}%` }} />
+                      <span 
+                        className={packed === total ? 'complete' : ''}
+                        style={{ width: `${ratio}%` }} 
+                      />
                     </div>
                   </>
                 )}
