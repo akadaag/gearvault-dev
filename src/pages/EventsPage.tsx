@@ -1,17 +1,51 @@
-import { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useMemo, useState, useEffect } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
 import { eventSchema } from '../lib/validators';
 import { makeId } from '../lib/ids';
 import type { EventItem } from '../types/models';
 
+// SVG Icons for UI consistency
+const searchIcon = (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <circle cx="11" cy="11" r="7" />
+    <path d="M20 20l-4-4" />
+  </svg>
+);
+
+const filterIcon = (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <line x1="4" y1="6" x2="20" y2="6" />
+    <circle cx="10" cy="6" r="2" />
+    <line x1="4" y1="12" x2="20" y2="12" />
+    <circle cx="15" cy="12" r="2" />
+    <line x1="4" y1="18" x2="20" y2="18" />
+    <circle cx="8" cy="18" r="2" />
+  </svg>
+);
+
+const addIcon = (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M12 5v14" />
+    <path d="M5 12h14" />
+  </svg>
+);
+
 export function EventsPage() {
   const events = useLiveQuery(() => db.events.orderBy('updatedAt').reverse().toArray(), [], []);
-  const [query, setQuery] = useState('');
-  const [type, setType] = useState('');
-  const [calendarMode, setCalendarMode] = useState<'month' | 'week'>('month');
-  const [showCalendar, setShowCalendar] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  // URL-based state
+  const query = searchParams.get('q')?.trim() ?? '';
+  const quickFilter = searchParams.get('qf') ?? 'upcoming';
+  const showFilterSheet = searchParams.get('filters') === '1';
+
+  // Filter state is now sourced from URL params, not useState
+  const selectedEventTypes = (searchParams.get('types') ?? '').split(',').filter(Boolean);
+  const clientFilter = searchParams.get('client') ?? '';
+  const locationFilter = searchParams.get('location') ?? '';
+  const sortBy = (searchParams.get('sort') as 'date' | 'title' | 'client' | 'newest') || 'date';
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [draft, setDraft] = useState({
     title: '',
@@ -23,17 +57,114 @@ export function EventsPage() {
   });
   const [error, setError] = useState('');
 
-  const filtered = useMemo(
-    () =>
-      events.filter((e) => {
-        const text = [e.title, e.type, e.client, e.location, e.notes].join(' ').toLowerCase();
-        return text.includes(query.toLowerCase()) && (!type || e.type === type);
-      }),
-    [events, query, type],
-  );
-
+  // URL param helpers
+  function updateSearchParams(updater: (params: URLSearchParams) => void) {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev);
+      updater(next);
+      return next;
+    });
+  }
+  function openFilterSheet() {
+    updateSearchParams(params => params.set('filters', '1'));
+  }
+  function closeFilterSheet() {
+    updateSearchParams(params => params.delete('filters'));
+  }
+  function setQuickFilterParam(filter: 'upcoming' | 'past' | 'all') {
+    updateSearchParams(params => params.set('qf', filter));
+  }
+  function handleSearch(value: string) {
+    updateSearchParams(params => {
+      if (value.trim()) {
+        params.set('q', value.trim());
+      } else {
+        params.delete('q');
+      }
+    });
+  }
+  function toggleEventTypeFilter(eventType: string) {
+    const current = (searchParams.get('types') ?? '').split(',').filter(Boolean);
+    const next = current.includes(eventType)
+      ? current.filter(t => t !== eventType)
+      : [...current, eventType];
+    updateSearchParams(params => {
+      if (next.length > 0) params.set('types', next.join(','));
+      else params.delete('types');
+    });
+  }
+  function clearAllFilters() {
+    updateSearchParams(params => {
+      params.delete('types');
+      params.delete('client');
+      params.delete('location');
+      params.delete('sort');
+    });
+  }
+  // For disabling scroll when sheet is open (matching catalog implementation)
+  function lockSheetScroll() { document.body.classList.add('sheet-open'); }
+  function unlockSheetScroll() { document.body.classList.remove('sheet-open'); }
+  useEffect(() => {
+    const anySheetOpen = showFilterSheet || showCreateForm;
+    if (!anySheetOpen) return;
+    lockSheetScroll();
+    return () => unlockSheetScroll();
+  }, [showFilterSheet, showCreateForm]);
+  // List, counts, and helper values
+  const now = new Date();
   const eventTypes = Array.from(new Set(events.map((e) => e.type))).sort();
-
+  const clients = Array.from(new Set(events.map((e) => e.client).filter(Boolean))).sort();
+  const locations = Array.from(new Set(events.map((e) => e.location).filter(Boolean))).sort();
+  const upcomingCount = events.filter(e => e.dateTime && new Date(e.dateTime) >= now).length;
+  const pastCount = events.filter(e => e.dateTime && new Date(e.dateTime) < now).length;
+  const hasTypeFilters = selectedEventTypes.length > 0;
+  const isFilterActive = hasTypeFilters || clientFilter || locationFilter;
+  function getCounterText() {
+    const count = sorted.length;
+    if (quickFilter === 'upcoming') return `${count} upcoming event${count === 1 ? '' : 's'}`;
+    if (quickFilter === 'past') return `${count} past event${count === 1 ? '' : 's'}`;
+    return `${count} event${count === 1 ? '' : 's'}`;
+  }
+  // Filtering logic with quick filter, event type, client/location, and search
+  const filtered = useMemo(() => {
+    const now = new Date();
+    return events.filter(e => {
+      // Text search filter
+      const text = [e.title, e.type, e.client, e.location, e.notes].join(' ').toLowerCase();
+      if (query && !text.includes(query.toLowerCase())) return false;
+      // Event type filter
+      if (selectedEventTypes.length > 0 && !selectedEventTypes.includes(e.type)) return false;
+      if (clientFilter && e.client !== clientFilter) return false;
+      if (locationFilter && e.location !== locationFilter) return false;
+      // Quick filter logic
+      if (quickFilter === 'upcoming') {
+        return e.dateTime ? new Date(e.dateTime) >= now : false;
+      } else if (quickFilter === 'past') {
+        return e.dateTime ? new Date(e.dateTime) < now : false;
+      }
+      // quickFilter === 'all'
+      return true;
+    });
+  }, [events, query, selectedEventTypes, clientFilter, locationFilter, quickFilter]);
+  // Sorted list based on sortBy
+  const sorted = useMemo(() => {
+    const items = [...filtered];
+    if (sortBy === 'title') {
+      items.sort((a, b) => a.title.localeCompare(b.title));
+    } else if (sortBy === 'client') {
+      items.sort((a, b) => (a.client ?? '').localeCompare(b.client ?? ''));
+    } else if (sortBy === 'newest') {
+      items.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    } else { // sortBy === 'date'
+      items.sort((a, b) => {
+        if (!a.dateTime && !b.dateTime) return 0;
+        if (!a.dateTime) return 1;
+        if (!b.dateTime) return -1;
+        return new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime();
+      });
+    }
+    return items;
+  }, [filtered, sortBy]);
   async function createEvent() {
     setError('');
     const parsed = eventSchema.safeParse({ title: draft.title, type: draft.type });
@@ -41,7 +172,6 @@ export function EventsPage() {
       setError(parsed.error.issues[0]?.message ?? 'Invalid event');
       return;
     }
-
     const now = new Date().toISOString();
     const row: EventItem = {
       id: makeId(),
@@ -57,62 +187,153 @@ export function EventsPage() {
       createdAt: now,
       updatedAt: now,
     };
-
     await db.events.add(row);
     setDraft({ title: '', type: '', dateTime: '', location: '', client: '', notes: '' });
     setShowCreateForm(false);
   }
-
   return (
     <section className="stack-lg">
-      <div className="card stack-md">
-        <div className="page-header">
-          <div className="page-title-section">
-            <h2>Events</h2>
-            <p className="subtle">{filtered.length} of {events.length} events</p>
+      {/* New Topbar Header for Events */}
+      <header className="topbar topbar-events">
+        <div className="topbar-inner">
+          <div className="topbar-primary-row">
+            <div className="topbar-title">
+              <h1 className="catalog-page-title">Events</h1>
+              <p className="subtle topbar-item-count">{getCounterText()}</p>
+            </div>
+            <div className="topbar-actions">
+              {/* Filter Button */}
+              <button
+                className={`topbar-filter-pill${isFilterActive ? ' is-active' : ''}`}
+                aria-label="Open filters"
+                aria-pressed={!!isFilterActive}
+                onClick={openFilterSheet}
+              >
+                <span className="catalog-filter-pill-icon" aria-hidden="true">{filterIcon}</span>
+                Filters
+                {isFilterActive && <span className="topbar-filter-pill-dot" aria-hidden="true" />}
+              </button>
+              {/* Add Event Button */}
+              <button 
+                className="topbar-add-btn" 
+                aria-label="Create new event" 
+                onClick={() => setShowCreateForm((prev) => !prev)}
+              >
+                {addIcon}
+              </button>
+            </div>
           </div>
-          <div className="page-actions">
-            <button className="ghost" onClick={() => setShowCalendar((prev) => !prev)}>
-              {showCalendar ? 'Hide' : 'Show'} Calendar
-            </button>
-            <button onClick={() => setShowCreateForm((prev) => !prev)}>
-              {showCreateForm ? 'Hide' : 'New Event'}
-            </button>
+          {/* Search and Quick Filters */}
+          <div className="topbar-catalog-controls">
+            <div className="topbar-search-row">
+              <div className="topbar-search-field">
+                <span className="topbar-search-icon">{searchIcon}</span>
+                <input
+                  className="topbar-search-input"
+                  aria-label="Search events"
+                  placeholder="Search events..."
+                  value={query}
+                  onChange={(e) => handleSearch(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="catalog-quick-filters" role="group" aria-label="Quick event filters">
+              <button
+                className={`catalog-quick-pill${quickFilter === 'upcoming' ? ' is-active' : ''}`}
+                onClick={() => setQuickFilterParam('upcoming')}
+              >
+                Upcoming
+                <span className="catalog-quick-pill-count">{upcomingCount}</span>
+              </button>
+              <button
+                className={`catalog-quick-pill${quickFilter === 'past' ? ' is-active' : ''}`}
+                onClick={() => setQuickFilterParam('past')}
+              >
+                Past
+                <span className="catalog-quick-pill-count">{pastCount}</span>
+              </button>
+              <button
+                className={`catalog-quick-pill${quickFilter === 'all' ? ' is-active' : ''}`}
+                onClick={() => setQuickFilterParam('all')}
+              >
+                All
+                <span className="catalog-quick-pill-count">{events.length}</span>
+              </button>
+            </div>
           </div>
         </div>
+      </header>
 
-        <input
-          placeholder="Search events..."
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-        />
-
-        <div className="row wrap">
-          <select value={type} onChange={(e) => setType(e.target.value)}>
-            <option value="">All types</option>
-            {eventTypes.map((t) => (
-              <option key={t}>{t}</option>
-            ))}
-          </select>
-          {showCalendar && (
-            <select
-              value={calendarMode}
-              onChange={(e) => setCalendarMode(e.target.value as 'month' | 'week')}
-            >
-              <option value="month">Month view</option>
-              <option value="week">Week view</option>
-            </select>
-          )}
-        </div>
-      </div>
-
-      {showCalendar &&
-        (calendarMode === 'month' ? (
-          <MonthCalendar events={filtered} />
-        ) : (
-          <WeekCalendar events={filtered} />
-        ))}
-
+      {/* Filter Sheet Modal */}
+      {showFilterSheet && (
+        <>
+          <button className="sheet-overlay" aria-label="Close filters" onClick={closeFilterSheet} />
+          <aside className="filter-sheet card stack-md" aria-label="Event filters">
+            <div className="row between">
+              <h3>Filters</h3>
+              <button className="ghost" onClick={closeFilterSheet}>Done</button>
+            </div>
+            {/* Event Type Checkboxes */}
+            <div className="stack-sm">
+              <strong>Event Types</strong>
+              <div className="catalog-filter-checklist">
+                {eventTypes.map((eventType) => {
+                  const checked = selectedEventTypes.includes(eventType);
+                  return (
+                    <label className="checkbox-inline" key={eventType}>
+                      <input 
+                        type="checkbox" 
+                        checked={checked} 
+                        onChange={() => toggleEventTypeFilter(eventType)} 
+                      />
+                      {eventType}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+            {/* Additional Filters */}
+            <div className="grid filters">
+              {/* Client Filter */}
+              <select 
+                value={clientFilter} 
+                onChange={(e) => updateSearchParams(params => { e.target.value ? params.set('client', e.target.value) : params.delete('client') })} 
+                aria-label="Filter by client"
+              >
+                <option value="">All clients</option>
+                {clients.map((client) => (
+                  <option key={client} value={client}>{client}</option>
+                ))}
+              </select>
+              {/* Location Filter */}
+              <select 
+                value={locationFilter} 
+                onChange={(e) => updateSearchParams(params => { e.target.value ? params.set('location', e.target.value) : params.delete('location') })} 
+                aria-label="Filter by location"
+              >
+                <option value="">All locations</option>
+                {locations.map((location) => (
+                  <option key={location} value={location}>{location}</option>
+                ))}
+              </select>
+              {/* Sort By */}
+              <select 
+                value={sortBy} 
+                onChange={(e) => updateSearchParams(params => { params.set('sort', e.target.value) })} 
+                aria-label="Sort events"
+              >
+                <option value="date">Sort: Date</option>
+                <option value="title">Sort: Title</option>
+                <option value="client">Sort: Client</option>
+                <option value="newest">Sort: Recently Updated</option>
+              </select>
+            </div>
+            {/* Clear Filters Button */}
+            <button className="ghost" onClick={clearAllFilters}>Clear all filters</button>
+          </aside>
+        </>
+      )}
+      {/* Create Event Sheet/Modal*/}
       {showCreateForm && (
         <div className="card stack-md">
           <div className="row between wrap">
@@ -155,24 +376,23 @@ export function EventsPage() {
           <button onClick={() => void createEvent()}>Create event</button>
         </div>
       )}
-
-      {filtered.length === 0 && events.length === 0 && (
+      {/* Empty states */}
+      {sorted.length === 0 && events.length === 0 && (
         <div className="card empty">
           <h3>No events yet</h3>
           <p>Create your first event to get started</p>
         </div>
       )}
-
-      {filtered.length === 0 && events.length > 0 && (
+      {sorted.length === 0 && events.length > 0 && (
         <div className="card empty">
           <h3>No results found</h3>
           <p>Try adjusting your search or filters</p>
         </div>
       )}
-
-      {filtered.length > 0 && (
+      {/* Event Cards */}
+      {sorted.length > 0 && (
         <div className="grid cards">
-          {filtered.map((event) => {
+          {sorted.map((event) => {
             const packed = event.packingChecklist.filter((i) => i.packed).length;
             const total = event.packingChecklist.length;
             const ratio = total > 0 ? Math.round((packed / total) * 100) : 0;
@@ -215,81 +435,5 @@ export function EventsPage() {
         </div>
       )}
     </section>
-  );
-}
-
-function MonthCalendar({ events }: { events: EventItem[] }) {
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = now.getMonth();
-  const first = new Date(y, m, 1);
-  const startDay = first.getDay();
-  const days = new Date(y, m + 1, 0).getDate();
-
-  const cells = Array.from({ length: 42 }, (_, idx) => {
-    const dayNum = idx - startDay + 1;
-    const date = dayNum > 0 && dayNum <= days ? new Date(y, m, dayNum) : null;
-    const dateKey = date ? date.toISOString().slice(0, 10) : '';
-    const dayEvents = date ? events.filter((e) => e.dateTime?.slice(0, 10) === dateKey) : [];
-    return { dayNum, dayEvents };
-  });
-
-  return (
-    <div className="card stack-sm">
-      <h3>
-        {first.toLocaleString(undefined, { month: 'long', year: 'numeric' })}
-      </h3>
-      <div className="calendar-grid">
-        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((label) => (
-          <strong key={label} style={{ fontSize: '0.8125rem' }}>{label}</strong>
-        ))}
-        {cells.map((cell, i) => (
-          <div key={i} className="calendar-cell">
-            {cell.dayNum > 0 && cell.dayNum <= days && (
-              <>
-                <span style={{ fontWeight: 600 }}>{cell.dayNum}</span>
-                {cell.dayEvents.slice(0, 2).map((ev) => (
-                  <small key={ev.id} className="subtle" style={{ fontSize: '0.7rem' }}>{ev.title}</small>
-                ))}
-                {cell.dayEvents.length > 2 && (
-                  <small className="subtle" style={{ fontSize: '0.7rem' }}>+{cell.dayEvents.length - 2} more</small>
-                )}
-              </>
-            )}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function WeekCalendar({ events }: { events: EventItem[] }) {
-  const now = new Date();
-  const start = new Date(now);
-  start.setDate(now.getDate() - now.getDay());
-  const week = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(start);
-    d.setDate(start.getDate() + i);
-    const key = d.toISOString().slice(0, 10);
-    return {
-      label: d.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }),
-      events: events.filter((e) => e.dateTime?.slice(0, 10) === key),
-    };
-  });
-
-  return (
-    <div className="card stack-sm">
-      <h3>Week view</h3>
-      {week.map((d) => (
-        <div key={d.label} className="checklist-row stack-sm">
-          <strong>{d.label}</strong>
-          {d.events.length === 0 ? (
-            <p className="subtle">No events</p>
-          ) : (
-            d.events.map((ev) => <p key={ev.id}>{ev.title}</p>)
-          )}
-        </div>
-      ))}
-    </div>
   );
 }
