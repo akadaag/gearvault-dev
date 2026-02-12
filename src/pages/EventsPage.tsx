@@ -223,7 +223,7 @@ export function EventsPage() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <section className="stack-lg">
+    <section className="stack-lg main-page catalog-page">
 
       {/* Calendar – rendered below header when toggled */}
       {showCalendar && <MonthCalendar />}

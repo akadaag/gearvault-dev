@@ -257,7 +257,7 @@ export function CatalogPage() {
 
   return (
     <>
-      <section className="stack-lg catalog-page">
+      <section className="stack-lg main-page catalog-page">
       {gear.length === 0 && (
         <div className="card empty">
           <h3>No gear yet</h3>

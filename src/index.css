@@ -480,7 +480,7 @@ a {
 }
 
 .catalog-quick-filters {
-  margin-top: 0.62rem;
+  margin-top: 0.5rem;
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
@@ -559,7 +559,7 @@ a {
 }
 
 .topbar-catalog-controls {
-  padding-bottom: 0.4rem;
+  padding-bottom: 0.5rem;
 }
 
 .topbar-filter-btn {
@@ -1200,6 +1200,17 @@ a {
 
 .catalog-page {
   gap: 0.55rem;
+}
+
+/* Shared top spacing for main pages with extended headers (catalog, events) */
+.main-page {
+  margin-top: 0.85rem;
+}
+
+@media (min-width: 768px) {
+  .main-page {
+    margin-top: 1rem;
+  }
 }
 
 .catalog-group {
