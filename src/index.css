@@ -1374,7 +1374,7 @@ button.category-title-btn {
   gap: 0.5rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  background: var(--card);
+  background: var(--bg);
   padding: 1rem;
   min-height: var(--tap);
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
@@ -1383,7 +1383,7 @@ button.category-title-btn {
 }
 
 .catalog-items-surface {
-  background: var(--surface-raised);
+  background: var(--bg);
   border: 1px solid var(--border-subtle);
   border-radius: 14px;
   box-shadow: var(--shadow-xs);
