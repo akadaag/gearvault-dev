@@ -1213,6 +1213,17 @@ a {
   }
 }
 
+/* Reduced spacing specifically for catalog page */
+.content-catalog .catalog-page {
+  margin-top: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .content-catalog .catalog-page {
+    margin-top: 0.9rem;
+  }
+}
+
 .catalog-group {
   display: flex;
   flex-direction: column;
