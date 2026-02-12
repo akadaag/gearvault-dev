@@ -18,6 +18,21 @@ class GearVaultDB extends Dexie {
       settings: 'id',
       aiFeedback: 'id, eventType, useful, createdAt',
     });
+
+    // v2: strip parenthetical hints from default category names
+    this.version(2).upgrade(async tx => {
+      const renames: Record<string, string> = {
+        'default-4': 'Lighting',
+        'default-5': 'Modifiers',
+        'default-6': 'Audio',
+        'default-7': 'Monitoring',
+        'default-8': 'Power',
+        'default-9': 'Media',
+      };
+      for (const [id, name] of Object.entries(renames)) {
+        await tx.table('categories').update(id, { name });
+      }
+    });
   }
 }
 
