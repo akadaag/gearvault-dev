@@ -2076,6 +2076,14 @@ button.category-title-btn {
   stroke-linejoin: round;
 }
 
+/* Event detail page content wrapper */
+.detail-event-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0 0.7rem;
+}
+
 .event-add-sheet {
   position: fixed;
   left: 0;

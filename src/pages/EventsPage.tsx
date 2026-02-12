@@ -1,10 +1,8 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
-import { eventSchema } from '../lib/validators';
-import { makeId } from '../lib/ids';
-import type { EventItem } from '../types/models';
+import { EventFormSheet } from '../components/EventFormSheet';
 
 const magnifyingGlassIcon = (
   <svg
@@ -21,17 +19,6 @@ const magnifyingGlassIcon = (
     <path d="M20 20l-4-4" />
   </svg>
 );
-
-const EVENT_TYPE_OPTIONS = [
-  'Wedding',
-  'Corporate Event',
-  'Engagement',
-  'Tourist portrait',
-  'Sport event',
-  'Studio session',
-  'Documentary',
-  'Commercial shoot',
-];
 
 function getDaysUntilEvent(dateTime: string): { text: string; colorClass: string } {
   const eventDate = new Date(dateTime);
@@ -63,19 +50,12 @@ export function EventsPage() {
   const locationFilter = searchParams.get('location') ?? '';
   const sortBy = (searchParams.get('sort') as 'date' | 'title' | 'client' | 'newest') || 'date';
 
-  // ── Local form state ───────────────────────────────────────────────────────
-  const [draft, setDraft] = useState({
-    title: '', type: EVENT_TYPE_OPTIONS[0], dateTime: '', location: '', client: '', notes: '',
-  });
-  const [error, setError] = useState('');
-
   // ── Sheet scroll lock ──────────────────────────────────────────────────────
   useEffect(() => {
-    const anyOpen = showFilterSheet || showCreateForm;
-    if (!anyOpen) return;
+    if (!showFilterSheet) return;
     document.body.classList.add('sheet-open');
     return () => document.body.classList.remove('sheet-open');
-  }, [showFilterSheet, showCreateForm]);
+  }, [showFilterSheet]);
 
   // ── URL helpers ────────────────────────────────────────────────────────────
   function setParam(key: string, value: string | null) {
@@ -134,34 +114,6 @@ export function EventsPage() {
     });
     return items;
   }, [filtered, sortBy]);
-
-  // ── Create event ───────────────────────────────────────────────────────────
-  async function createEvent() {
-    setError('');
-    const parsed = eventSchema.safeParse({ title: draft.title, type: draft.type });
-    if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Invalid event');
-      return;
-    }
-    const now = new Date().toISOString();
-    const row: EventItem = {
-      id: makeId(),
-      title: draft.title,
-      type: draft.type,
-      dateTime: draft.dateTime || undefined,
-      location: draft.location || undefined,
-      client: draft.client || undefined,
-      notes: draft.notes || undefined,
-      packingChecklist: [],
-      missingItems: [],
-      createdBy: 'manual',
-      createdAt: now,
-      updatedAt: now,
-    };
-    await db.events.add(row);
-    setDraft({ title: '', type: EVENT_TYPE_OPTIONS[0], dateTime: '', location: '', client: '', notes: '' });
-    closeCreateForm();
-  }
 
   // ── Month calendar ─────────────────────────────────────────────────────────
   function MonthCalendar() {
@@ -287,75 +239,7 @@ export function EventsPage() {
 
       {/* Create Event Sheet */}
       {showCreateForm && (
-        <>
-          <button className="sheet-overlay" aria-label="Close create event" onClick={closeCreateForm} />
-          <aside className="filter-sheet card maintenance-add-sheet event-create-sheet" aria-label="Create new event">
-            <div className="maintenance-sheet-header">
-              <h3>New Event</h3>
-              <button className="sheet-close-btn" onClick={closeCreateForm} aria-label="Close">✕</button>
-            </div>
-            <div className="maintenance-sheet-body stack-sm">
-              <label className="gear-field-block">
-                <span>Event Title*</span>
-                <input
-                  type="text"
-                  placeholder="e.g., Smith Wedding"
-                  value={draft.title}
-                  onChange={e => setDraft({ ...draft, title: e.target.value })}
-                />
-              </label>
-              <div className="gear-form-two-col">
-                <label className="gear-field-block">
-                  <span>Event Type*</span>
-                  <select value={draft.type} onChange={e => setDraft({ ...draft, type: e.target.value })}>
-                    {EVENT_TYPE_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
-                  </select>
-                </label>
-                <label className="gear-field-block">
-                  <span>Date & Time</span>
-                  <input
-                    type="datetime-local"
-                    value={draft.dateTime}
-                    onChange={e => setDraft({ ...draft, dateTime: e.target.value })}
-                  />
-                </label>
-              </div>
-              <div className="gear-form-two-col">
-                <label className="gear-field-block">
-                  <span>Location</span>
-                  <input
-                    type="text"
-                    placeholder="e.g., Central Park, NYC"
-                    value={draft.location}
-                    onChange={e => setDraft({ ...draft, location: e.target.value })}
-                  />
-                </label>
-                <label className="gear-field-block">
-                  <span>Client Name</span>
-                  <input
-                    type="text"
-                    placeholder="e.g., John Smith"
-                    value={draft.client}
-                    onChange={e => setDraft({ ...draft, client: e.target.value })}
-                  />
-                </label>
-              </div>
-              <label className="gear-field-block">
-                <span>Notes & Special Requirements</span>
-                <textarea
-                  rows={3}
-                  value={draft.notes}
-                  onChange={e => setDraft({ ...draft, notes: e.target.value })}
-                  placeholder="Any special requirements, equipment needed, or important details..."
-                />
-              </label>
-              {error && <p className="error">{error}</p>}
-            </div>
-            <div className="maintenance-sheet-footer">
-              <button onClick={() => void createEvent()}>Create Event</button>
-            </div>
-          </aside>
-        </>
+        <EventFormSheet mode="create" onClose={closeCreateForm} />
       )}
 
       {/* Empty states */}
