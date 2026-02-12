@@ -654,6 +654,10 @@ a {
   padding-top: var(--topbar-catalog-height);
 }
 
+.content.content-events {
+  padding-top: var(--topbar-catalog-height);
+}
+
 .content-immersive {
   margin-top: 0;
   height: 100dvh;
@@ -680,6 +684,10 @@ a {
   }
 
   .content.content-catalog {
+    padding-top: var(--topbar-catalog-height);
+  }
+
+  .content.content-events {
     padding-top: var(--topbar-catalog-height);
   }
 }
@@ -2847,161 +2855,162 @@ button.category-title-btn {
   border-color: var(--border-strong);
 }
 
+/* ── Event Card ─────────────────────────────────────────────────────────── */
 .event-card {
-  gap: 0.625rem;
+  gap: 0.35rem;
+  position: relative;  /* needed for absolute-positioned days pill */
 }
 
+/* Title row: title on the left, days pill on the right */
 .event-card-header {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: flex-start;
   gap: 0.5rem;
-  flex-wrap: wrap-reverse;
+  flex-wrap: nowrap;
 }
 
+/* Title – matches catalog-item-title */
 .event-card-title {
   flex: 1;
   min-width: 0;
+  font-size: var(--text-base);
+  line-height: 1.25;
+  letter-spacing: -0.015em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.event-card-type {
-  font-size: 0.875rem;
-  color: var(--text-soft);
-  margin-top: -0.25rem;
-}
-
-.event-card-date {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9375rem;
-  color: var(--text-soft);
-  margin-top: 0.5rem;
-}
-
-.event-card-date svg {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  color: var(--accent);
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2;
-}
-
-.event-card-packed {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9375rem;
-  margin-top: 0.75rem;
-}
-
-.event-card-packed svg {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  color: var(--accent);
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2;
-}
-
+/* Days pill – rounded, fixed to top-right of header */
 .pill.event-days {
-  padding: 0.25rem 0.75rem;
-  font-size: 0.8125rem;
+  flex-shrink: 0;
+  padding: 0.18rem 0.65rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  border-radius: 6px;
+  border-radius: 999px;   /* fully rounded, matches other pills */
   border: 1px solid;
   white-space: nowrap;
-  flex-shrink: 0;
+  line-height: 1.4;
 }
 
 .pill.event-days.urgent {
-  /* Yellow - 1 day */
   background: color-mix(in srgb, var(--warning) 12%, transparent);
   border-color: color-mix(in srgb, var(--warning) 30%, var(--border));
   color: var(--warning);
 }
 
 .pill.event-days.upcoming {
-  /* Blue - 2-5 days */
   background: color-mix(in srgb, #2562eb 12%, transparent);
   border-color: color-mix(in srgb, #2562eb 30%, var(--border));
   color: #2562eb;
 }
 
 .pill.event-days.later {
-  /* Green - 6+ days */
   background: color-mix(in srgb, var(--success) 12%, transparent);
   border-color: color-mix(in srgb, var(--success) 30%, var(--border));
   color: var(--success);
 }
 
 .pill.event-days.today {
-  /* Today */
   background: color-mix(in srgb, #2562eb 12%, transparent);
   border-color: color-mix(in srgb, #2562eb 30%, var(--border));
   color: #2562eb;
 }
 
 .pill.event-days.overdue {
-  /* Overdue */
   background: color-mix(in srgb, var(--danger) 12%, transparent);
   border-color: color-mix(in srgb, var(--danger) 30%, var(--border));
   color: var(--danger);
 }
 
-.event-card-head {
-  width: 100%;
+/* Type subtitle – matches catalog-item-subtitle */
+.event-card-type {
+  font-size: 0.8rem;
+  color: var(--text-soft);
+  line-height: 1.35;
+}
+
+/* Date + time pill row – matches catalog-item-meta-row */
+.event-card-meta-row {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 0.5rem;
   flex-wrap: wrap;
+  gap: 0.3rem;
+  margin-top: 0.2rem;
 }
 
-.event-status {
-  font-weight: 600;
-  color: var(--text);
+.event-card-meta-row .pill {
+  padding: 0.14rem 0.5rem;
+  font-size: 0.72rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
 }
 
-.event-status.ready {
-  background: color-mix(in srgb, var(--success) 12%, transparent);
-  border-color: color-mix(in srgb, var(--success) 30%, var(--border));
-  color: var(--success);
+.event-card-meta-row .pill svg {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
 }
 
-.event-status.packing {
-  background: color-mix(in srgb, var(--warning) 12%, transparent);
-  border-color: color-mix(in srgb, var(--warning) 30%, var(--border));
-  color: var(--warning);
+/* Packed row */
+.event-card-packed {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.875rem;
+  margin-top: 0.45rem;
 }
 
-.event-status.draft {
-  background: var(--card-muted);
+.event-card-packed svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  color: var(--accent);
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
 }
 
-/* Progress bar */
+/* ── Progress bar ────────────────────────────────────────────────────────── */
 .progress-track {
   width: 100%;
-  height: 8px;
+  height: 6px;
   border-radius: 999px;
   background: var(--bg-soft);
   border: 1px solid var(--border);
   overflow: hidden;
+  margin-top: 0.35rem;
 }
 
 .progress-track > span {
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: linear-gradient(90deg, #2562eb, var(--accent-strong));
+  background: #3b82f6;          /* solid blue */
   transition: width 0.3s ease, background 0.4s ease;
 }
 
 .progress-track > span.complete {
-  background: linear-gradient(90deg, var(--success), #1ab470);
+  background: var(--success);   /* solid green */
+}
+
+/* Empty state icon sizing */
+.empty-icon {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+  color: var(--border-strong);
+}
+
+.empty-icon svg {
+  width: 52px;
+  height: 52px;
 }
 
 /* AI Assistant */

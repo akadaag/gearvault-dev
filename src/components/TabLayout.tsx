@@ -52,17 +52,45 @@ export function TabLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+
+  // ── Catalog data ──────────────────────────────────────────────────────────
   const gear = useLiveQuery(() => db.gearItems.toArray(), [], []);
   const gearCount = gear.length;
   const essentialCount = gear.filter((item) => item.essential).length;
   const maintenanceCount = gear.filter(isNeedsMaintenance).length;
+
+  // ── Events data ───────────────────────────────────────────────────────────
+  const eventsAll = useLiveQuery(() => db.events.toArray(), [], []);
+  const eventsNow = new Date();
+  const eventsCount = eventsAll.length;
+  const upcomingCount = eventsAll.filter(e => e.dateTime && new Date(e.dateTime) >= eventsNow).length;
+  const pastCount = eventsAll.filter(e => e.dateTime && new Date(e.dateTime) < eventsNow).length;
+
+  // ── Route flags ───────────────────────────────────────────────────────────
   const isCatalogRoute = location.pathname === '/catalog';
   const isSettingsRoute = location.pathname === '/settings';
+  const isEventsRoute = location.pathname === '/events';
   const isGearDetailRoute = /^\/catalog\/item\/[^/]+$/.test(location.pathname);
+  const isEventDetailRoute = /^\/events\/[^/]+$/.test(location.pathname);
+
+  // ── Catalog search params ─────────────────────────────────────────────────
   const catalogQuery = searchParams.get('q') ?? '';
   const quickFilter = searchParams.get('qf') ?? 'all';
   const hasCategoryFilters = (searchParams.get('cats') ?? '').split(',').filter(Boolean).length > 0;
   const isTopFilterActive = quickFilter !== 'all' || hasCategoryFilters;
+
+  // ── Events search params ──────────────────────────────────────────────────
+  const eventsQuery = searchParams.get('q') ?? '';
+  const eventsQuickFilter = searchParams.get('qf') ?? 'upcoming';
+  const hasEventsTypeFilters = (searchParams.get('types') ?? '').split(',').filter(Boolean).length > 0;
+  const hasEventsClientFilter = !!searchParams.get('client');
+  const hasEventsLocationFilter = !!searchParams.get('location');
+  const isEventsFilterActive =
+    eventsQuickFilter !== 'upcoming' ||
+    hasEventsTypeFilters ||
+    hasEventsClientFilter ||
+    hasEventsLocationFilter;
+  const showEventsCalendar = searchParams.get('calendar') === '1';
 
   const pageTitle =
     location.pathname === '/catalog'
@@ -83,6 +111,7 @@ export function TabLayout() {
     resetSheetScrollLock();
   }, [location.pathname]);
 
+  // ── Catalog handlers ──────────────────────────────────────────────────────
   function handleCatalogSearch(value: string) {
     const params = new URLSearchParams(searchParams);
     if (value.trim()) params.set('q', value);
@@ -109,6 +138,46 @@ export function TabLayout() {
     navigate({ pathname: '/catalog', search: params.toString() ? `?${params.toString()}` : '' });
   }
 
+  // ── Events handlers ───────────────────────────────────────────────────────
+  function handleEventsSearch(value: string) {
+    const params = new URLSearchParams(searchParams);
+    if (value.trim()) params.set('q', value);
+    else params.delete('q');
+    navigate({ pathname: '/events', search: params.toString() ? `?${params.toString()}` : '' });
+  }
+
+  function openEventsFilters() {
+    const params = new URLSearchParams(searchParams);
+    params.set('filters', '1');
+    navigate({ pathname: '/events', search: params.toString() ? `?${params.toString()}` : '' });
+  }
+
+  function setEventsQuickFilter(value: 'upcoming' | 'past' | 'all') {
+    const params = new URLSearchParams(searchParams);
+    params.set('qf', value);
+    navigate({ pathname: '/events', search: params.toString() ? `?${params.toString()}` : '' });
+  }
+
+  function openEventsAdd() {
+    const params = new URLSearchParams(searchParams);
+    params.set('add', '1');
+    navigate({ pathname: '/events', search: params.toString() ? `?${params.toString()}` : '' });
+  }
+
+  function toggleEventsCalendar() {
+    const params = new URLSearchParams(searchParams);
+    if (showEventsCalendar) params.delete('calendar');
+    else params.set('calendar', '1');
+    navigate({ pathname: '/events', search: params.toString() ? `?${params.toString()}` : '' });
+  }
+
+  function getEventsCounterText() {
+    if (eventsQuickFilter === 'upcoming') return `${upcomingCount} upcoming event${upcomingCount === 1 ? '' : 's'}`;
+    if (eventsQuickFilter === 'past') return `${pastCount} past event${pastCount === 1 ? '' : 's'}`;
+    return `${eventsCount} event${eventsCount === 1 ? '' : 's'}`;
+  }
+
+  // ── SVG icons (defined inside function to avoid JSX hoisting issues) ──────
   const searchIcon = (
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
       <circle cx="11" cy="11" r="7" />
@@ -134,15 +203,27 @@ export function TabLayout() {
     </svg>
   );
 
+  const calendarBtnIcon = (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+  );
+
   return (
     <div className="app-shell">
-      {!isGearDetailRoute && (
-        <header className={`topbar${isCatalogRoute ? ' topbar-catalog' : ''}`}>
+      {!isGearDetailRoute && !isEventDetailRoute && (
+        <header className={`topbar${isCatalogRoute || isEventsRoute ? ' topbar-catalog' : ''}`}>
           <div className="topbar-inner">
             <div className="topbar-primary-row">
               <div className="topbar-title">
-                <h1 className={isCatalogRoute ? 'catalog-page-title' : undefined}>{pageTitle}</h1>
+                <h1 className={isCatalogRoute || isEventsRoute ? 'catalog-page-title' : undefined}>
+                  {pageTitle}
+                </h1>
                 {isCatalogRoute && <p className="subtle topbar-item-count">{gearCount} items</p>}
+                {isEventsRoute && <p className="subtle topbar-item-count">{getEventsCounterText()}</p>}
                 {isSettingsRoute && syncMessage && <p className="subtle topbar-sync">{syncMessage}</p>}
               </div>
               <div className="topbar-actions">
@@ -163,8 +244,33 @@ export function TabLayout() {
                     </button>
                   </>
                 )}
+                {isEventsRoute && (
+                  <>
+                    <button
+                      className={`topbar-filter-pill${isEventsFilterActive ? ' is-active' : ''}`}
+                      aria-label="Open event filters"
+                      aria-pressed={isEventsFilterActive}
+                      onClick={openEventsFilters}
+                    >
+                      <span className="catalog-filter-pill-icon" aria-hidden="true">{filterIcon}</span>
+                      Filters
+                      {isEventsFilterActive && <span className="topbar-filter-pill-dot" aria-hidden="true" />}
+                    </button>
+                    <button
+                      className={`topbar-add-btn${showEventsCalendar ? ' is-active' : ''}`}
+                      aria-label="Toggle calendar view"
+                      onClick={toggleEventsCalendar}
+                    >
+                      {calendarBtnIcon}
+                    </button>
+                    <button className="topbar-add-btn" aria-label="Create new event" onClick={openEventsAdd}>
+                      {addIcon}
+                    </button>
+                  </>
+                )}
               </div>
             </div>
+
             {isCatalogRoute && (
               <div className="topbar-catalog-controls">
                 <div className="topbar-search-row">
@@ -204,11 +310,51 @@ export function TabLayout() {
                 </div>
               </div>
             )}
+
+            {isEventsRoute && (
+              <div className="topbar-catalog-controls">
+                <div className="topbar-search-row">
+                  <div className="topbar-search-field">
+                    <span className="topbar-search-icon">{searchIcon}</span>
+                    <input
+                      className="topbar-search-input"
+                      aria-label="Search events"
+                      placeholder="Search events..."
+                      value={eventsQuery}
+                      onChange={(event) => handleEventsSearch(event.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="catalog-quick-filters" role="group" aria-label="Quick event filters">
+                  <button
+                    className={`catalog-quick-pill${eventsQuickFilter === 'upcoming' ? ' is-active' : ''}`}
+                    onClick={() => setEventsQuickFilter('upcoming')}
+                  >
+                    Upcoming
+                    <span className="catalog-quick-pill-count">{upcomingCount}</span>
+                  </button>
+                  <button
+                    className={`catalog-quick-pill${eventsQuickFilter === 'past' ? ' is-active' : ''}`}
+                    onClick={() => setEventsQuickFilter('past')}
+                  >
+                    Past
+                    <span className="catalog-quick-pill-count">{pastCount}</span>
+                  </button>
+                  <button
+                    className={`catalog-quick-pill${eventsQuickFilter === 'all' ? ' is-active' : ''}`}
+                    onClick={() => setEventsQuickFilter('all')}
+                  >
+                    All
+                    <span className="catalog-quick-pill-count">{eventsCount}</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </header>
       )}
 
-      <main className={`${isGearDetailRoute ? 'content content-immersive' : 'content'}${isCatalogRoute ? ' content-catalog' : ''}`}>
+      <main className={`${isGearDetailRoute || isEventDetailRoute ? 'content content-immersive' : 'content'}${isCatalogRoute ? ' content-catalog' : ''}${isEventsRoute ? ' content-events' : ''}`}>
         <Outlet />
       </main>
 
