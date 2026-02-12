@@ -50,7 +50,7 @@
   --border-interactive: color-mix(in srgb, var(--accent) 55%, var(--border));
 
   --topbar-height: 68px;
-  --topbar-catalog-height: 160px;
+  --topbar-catalog-height: 168px;
   --detail-topbar-height: 56px;
   --bottom-nav-clearance: calc(78px + env(safe-area-inset-bottom));
 
@@ -480,8 +480,7 @@ a {
 }
 
 .catalog-quick-filters {
-  margin-top: 0.55rem;
-  margin-bottom: 0.1rem;
+  margin-top: 0.62rem;
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
@@ -560,7 +559,7 @@ a {
 }
 
 .topbar-catalog-controls {
-  padding-bottom: 0.18rem;
+  padding-bottom: 0.4rem;
 }
 
 .topbar-filter-btn {
@@ -2770,7 +2769,7 @@ button.category-title-btn {
 @media (min-width: 768px) {
   :root {
     --topbar-height: 96px;
-    --topbar-catalog-height: 116px;
+    --topbar-catalog-height: 124px;
     --detail-topbar-height: 58px;
     --bottom-nav-clearance: calc(104px + env(safe-area-inset-bottom));
   }
