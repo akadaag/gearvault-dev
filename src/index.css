@@ -652,10 +652,12 @@ a {
 
 .content.content-catalog {
   padding-top: var(--topbar-catalog-height);
+  background: var(--bg);
 }
 
 .content.content-events {
   padding-top: var(--topbar-catalog-height);
+  background: var(--bg);
 }
 
 .content-immersive {
@@ -1016,6 +1018,7 @@ a {
 
 .grid.cards {
   grid-template-columns: 1fr;
+  background: var(--bg);
 }
 
 @media (min-width: 640px) {
@@ -1374,7 +1377,7 @@ button.category-title-btn {
   gap: 0.5rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  background: var(--bg);
+  background: var(--card);
   padding: 1rem;
   min-height: var(--tap);
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
