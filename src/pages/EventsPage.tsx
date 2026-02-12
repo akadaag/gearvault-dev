@@ -41,6 +41,13 @@ const calendarIcon = (
   </svg>
 );
 
+const magnifyingGlassIcon = (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <circle cx="11" cy="11" r="7" />
+    <path d="M20 20l-4-4" />
+  </svg>
+);
+
 // Event type options matching user requirements
 const EVENT_TYPE_OPTIONS = [
   'Wedding',
@@ -140,7 +147,7 @@ export function EventsPage() {
   const upcomingCount = events.filter(e => e.dateTime && new Date(e.dateTime) >= now).length;
   const pastCount = events.filter(e => e.dateTime && new Date(e.dateTime) < now).length;
   const hasTypeFilters = selectedEventTypes.length > 0;
-  const isFilterActive = hasTypeFilters || clientFilter || locationFilter;
+  const isFilterActive = hasTypeFilters || clientFilter || locationFilter || quickFilter !== 'upcoming';
   function getCounterText() {
     const count = sorted.length;
     if (quickFilter === 'upcoming') return `${count} upcoming event${count === 1 ? '' : 's'}`;
@@ -212,6 +219,94 @@ export function EventsPage() {
     await db.events.add(row);
     setDraft({ title: '', type: EVENT_TYPE_OPTIONS[0], dateTime: '', location: '', client: '', notes: '' });
     setShowCreateForm(false);
+  }
+
+  // Month calendar component with event indicators
+  function MonthCalendar() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const startDayOfWeek = firstDay.getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+    // Create a map of dates to event count for quick lookup
+    const eventsByDate = new Map<string, number>();
+    events.forEach((event) => {
+      if (event.dateTime) {
+        const dateKey = event.dateTime.slice(0, 10);
+        eventsByDate.set(dateKey, (eventsByDate.get(dateKey) ?? 0) + 1);
+      }
+    });
+
+    // Generate calendar cells
+    const cells = [];
+
+    // Previous month's trailing days
+    for (let i = startDayOfWeek - 1; i >= 0; i--) {
+      const day = daysInPrevMonth - i;
+      cells.push({
+        day,
+        dateKey: null,
+        isCurrentMonth: false,
+        eventCount: 0,
+      });
+    }
+
+    // Current month's days
+    for (let day = 1; day <= daysInMonth; day++) {
+      const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+      const eventCount = eventsByDate.get(dateKey) ?? 0;
+      cells.push({
+        day,
+        dateKey,
+        isCurrentMonth: true,
+        eventCount,
+      });
+    }
+
+    // Next month's leading days
+    const remainingCells = 42 - cells.length;
+    for (let day = 1; day <= remainingCells; day++) {
+      cells.push({
+        day,
+        dateKey: null,
+        isCurrentMonth: false,
+        eventCount: 0,
+      });
+    }
+
+    const monthName = firstDay.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+    return (
+      <div className="card stack-sm">
+        <h3>{monthName}</h3>
+        <div className="calendar-grid">
+          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map((label) => (
+            <strong key={label} style={{ fontSize: '0.8125rem', textAlign: 'center', padding: '0.375rem 0' }}>
+              {label}
+            </strong>
+          ))}
+          {cells.map((cell, idx) => (
+            <div key={idx} className="calendar-cell">
+              {cell.isCurrentMonth ? (
+                <>
+                  <strong style={{ display: 'block', textAlign: 'center' }}>{cell.day}</strong>
+                  {cell.eventCount > 0 && (
+                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.25rem' }}>
+                      <div className="calendar-event-dot" />
+                    </div>
+                  )}
+                </>
+              ) : (
+                <span style={{ color: 'var(--border)' }}>{cell.day}</span>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   }
   return (
     <section className="stack-lg">
@@ -367,7 +462,7 @@ export function EventsPage() {
       {showCreateForm && (
         <>
           <button className="sheet-overlay" aria-label="Close create event" onClick={() => setShowCreateForm(false)} />
-          <aside className="filter-sheet card maintenance-add-sheet" aria-label="Create new event">
+          <aside className="filter-sheet card maintenance-add-sheet event-create-sheet" aria-label="Create new event">
             <div className="maintenance-sheet-header">
               <h3>New Event</h3>
               <button
@@ -455,16 +550,24 @@ export function EventsPage() {
           </aside>
         </>
       )}
+      {/* Calendar View */}
+      {showCalendar && <MonthCalendar />}
       {/* Empty states */}
       {sorted.length === 0 && events.length === 0 && (
         <div className="card empty">
-          <h3>No events yet</h3>
-          <p>Create your first event to get started</p>
+          <div style={{ fontSize: '3rem', color: 'var(--subtle)', marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
+            {magnifyingGlassIcon}
+          </div>
+          <h3>No events added</h3>
+          <p>Tap the + button to create your first event</p>
         </div>
       )}
       {sorted.length === 0 && events.length > 0 && (
         <div className="card empty">
-          <h3>No results found</h3>
+          <div style={{ fontSize: '3rem', color: 'var(--subtle)', marginBottom: '1rem', display: 'flex', justifyContent: 'center' }}>
+            {magnifyingGlassIcon}
+          </div>
+          <h3>No events match</h3>
           <p>Try adjusting your search or filters</p>
         </div>
       )}

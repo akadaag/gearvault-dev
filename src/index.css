@@ -2676,6 +2676,32 @@ button.category-title-btn {
   box-shadow: none;
 }
 
+/* Normalize datetime-local inputs in two-col layout */
+.maintenance-add-sheet .gear-form-two-col .gear-field-block input[type='datetime-local'] {
+  height: 44px;
+  min-height: 44px;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.875rem;
+  line-height: 1.2;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+}
+
+/* Event create sheet: make taller for better form visibility */
+.event-create-sheet {
+  max-height: min(80dvh, 680px) !important;
+}
+
+/* Yellow dot indicator for calendar events */
+.calendar-event-dot {
+  width: 0.38rem;
+  height: 0.38rem;
+  border-radius: 999px;
+  background: #f2c94c;
+  margin: 0 auto;
+}
+
 @media (max-height: 760px) {
   .maintenance-history-sheet,
   .maintenance-add-sheet {
