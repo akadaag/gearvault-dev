@@ -256,15 +256,16 @@ export function EventDetailPage() {
 
       {/* ── HERO SECTION ── */}
       <div className="detail-event-hero">
-        {/* Days pill - absolutely positioned top-right */}
-        {daysInfo && (
-          <span className={`pill event-days ${daysInfo.colorClass}`}>
-            {daysInfo.text}
-          </span>
-        )}
-
-        {/* Event title */}
-        <h1 className="detail-event-title">{currentEvent.title}</h1>
+        {/* Event title row with days pill */}
+        <div className="detail-event-title-row">
+          <h1 className="detail-event-title">{currentEvent.title}</h1>
+          {/* Days pill - inline with title, vertically centered */}
+          {daysInfo && (
+            <span className={`pill event-days ${daysInfo.colorClass}`}>
+              {daysInfo.text}
+            </span>
+          )}
+        </div>
 
         {/* Type — plain text, no pill */}
         <span className="detail-event-type">{currentEvent.type}</span>
@@ -273,13 +274,10 @@ export function EventDetailPage() {
         {(currentEvent.dateTime || currentEvent.location || currentEvent.client) && (
           <div className="detail-event-meta-row">
             {currentEvent.dateTime && (
-              <span className="pill detail-event-meta-pill">
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="detail-event-meta-icon">
-                  <rect x="3" y="4" width="18" height="18" rx="2" />
-                  <path d="M16 2v4M8 2v4M3 10h18" />
-                </svg>
-                {formattedDate} • {formattedTime}
-              </span>
+              <>
+                <span className="pill detail-event-meta-pill">{formattedDate}</span>
+                <span className="pill detail-event-meta-pill">{formattedTime}</span>
+              </>
             )}
             {currentEvent.location && (
               <button

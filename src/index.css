@@ -2100,17 +2100,31 @@ button.category-title-btn {
 /* Hero section */
 .detail-event-hero {
   position: relative;
-  padding: 1.5rem 1rem 1rem;
+  padding: 0.9rem 1rem 1rem;
   background: #fafafa;
+}
+
+.detail-event-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.3rem;
 }
 
 .detail-event-title {
   font-size: 1.65rem;
   font-weight: 700;
-  margin: 0 0 0.3rem 0;
-  padding-right: 5.5rem; /* space for days pill */
+  margin: 0;
   line-height: 1.2;
   color: var(--text);
+  flex: 1;
+}
+
+/* Days pill when in title row — inline positioning */
+.detail-event-title-row .pill.event-days {
+  position: static;
+  flex-shrink: 0;
+  align-self: center;
 }
 
 .detail-event-type {
@@ -2148,6 +2162,11 @@ button.category-title-btn {
 .detail-event-location-pill {
   cursor: pointer;
   transition: transform 0.15s ease, background 0.15s ease;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: inherit;
+  padding: 0.24rem 0.7rem;
+  height: auto;
 }
 
 .detail-event-location-pill:hover {
@@ -2159,17 +2178,21 @@ button.category-title-btn {
   transform: translateY(0);
 }
 
-/* White cards in event detail body */
+/* White cards in event detail body — no shadow */
 .detail-event-body .card {
   background: #ffffff;
+  box-shadow: none;
 }
 
-/* Notes card styling — just the card, no inner box */
+/* Notes card styling — just the card, no inner box, no shadow */
 .detail-event-notes-card {
   background: #ffffff !important;
+  box-shadow: none;
   font-size: 0.88rem;
   line-height: 1.55;
   white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
   color: var(--text);
 }
 
