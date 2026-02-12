@@ -396,14 +396,16 @@ export function EventsPage() {
 
             return (
               <Link key={event.id} to={`/events/${event.id}`} className="gear-card event-card">
-                {/* Title row + days pill fixed top-right */}
+                {/* Days pill fixed top-right */}
+                {daysInfo && (
+                  <span className={`pill event-days ${daysInfo.colorClass}`}>
+                    {daysInfo.text}
+                  </span>
+                )}
+
+                {/* Title row */}
                 <div className="event-card-header">
                   <strong className="event-card-title">{event.title}</strong>
-                  {daysInfo && (
-                    <span className={`pill event-days ${daysInfo.colorClass}`}>
-                      {daysInfo.text}
-                    </span>
-                  )}
                 </div>
 
                 {/* Event type subtitle */}
@@ -443,6 +445,9 @@ export function EventsPage() {
                     </div>
                   </>
                 )}
+
+                {/* Right-side arrow */}
+                <div className="event-card-arrow" aria-hidden="true">›</div>
               </Link>
             );
           })}

@@ -2882,13 +2882,14 @@ button.category-title-btn {
 /* ── Event Card ─────────────────────────────────────────────────────────── */
 .event-card {
   gap: 0.35rem;
-  position: relative;  /* needed for absolute-positioned days pill */
+  position: relative;  /* needed for absolute-positioned days pill and arrow */
+  padding-right: 2.5rem;  /* ensure content doesn't hide behind pill/arrow */
 }
 
-/* Title row: title on the left, days pill on the right */
+/* Title row: just the title */
 .event-card-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: flex-start;
   gap: 0.5rem;
   flex-wrap: nowrap;
@@ -2906,8 +2907,11 @@ button.category-title-btn {
   white-space: nowrap;
 }
 
-/* Days pill – rounded, fixed to top-right of header */
+/* Days pill – absolutely positioned top-right corner */
 .pill.event-days {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
   flex-shrink: 0;
   padding: 0.18rem 0.65rem;
   font-size: 0.78rem;
@@ -3022,6 +3026,18 @@ button.category-title-btn {
 
 .progress-track > span.complete {
   background: var(--success);   /* solid green */
+}
+
+/* Event card right arrow – middle-right position */
+.event-card-arrow {
+  position: absolute;
+  right: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 1.5rem;
+  color: var(--text-soft);
+  line-height: 1;
+  pointer-events: none;
 }
 
 /* Empty state icon sizing */
