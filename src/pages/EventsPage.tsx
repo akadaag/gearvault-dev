@@ -32,6 +32,27 @@ const addIcon = (
   </svg>
 );
 
+const calendarIcon = (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+    <line x1="16" y1="2" x2="16" y2="6" />
+    <line x1="8" y1="2" x2="8" y2="6" />
+    <line x1="3" y1="10" x2="21" y2="10" />
+  </svg>
+);
+
+// Event type options matching user requirements
+const EVENT_TYPE_OPTIONS = [
+  'Wedding',
+  'Corporate Event',
+  'Engagement',
+  'Tourist portrait',
+  'Sport event',
+  'Studio session',
+  'Documentary',
+  'Commercial shoot',
+];
+
 export function EventsPage() {
   const events = useLiveQuery(() => db.events.orderBy('updatedAt').reverse().toArray(), [], []);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -47,9 +68,10 @@ export function EventsPage() {
   const locationFilter = searchParams.get('location') ?? '';
   const sortBy = (searchParams.get('sort') as 'date' | 'title' | 'client' | 'newest') || 'date';
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
   const [draft, setDraft] = useState({
     title: '',
-    type: '',
+    type: EVENT_TYPE_OPTIONS[0],
     dateTime: '',
     location: '',
     client: '',
@@ -105,11 +127,11 @@ export function EventsPage() {
   function lockSheetScroll() { document.body.classList.add('sheet-open'); }
   function unlockSheetScroll() { document.body.classList.remove('sheet-open'); }
   useEffect(() => {
-    const anySheetOpen = showFilterSheet || showCreateForm;
+    const anySheetOpen = showFilterSheet || showCreateForm || showCalendar;
     if (!anySheetOpen) return;
     lockSheetScroll();
     return () => unlockSheetScroll();
-  }, [showFilterSheet, showCreateForm]);
+  }, [showFilterSheet, showCreateForm, showCalendar]);
   // List, counts, and helper values
   const now = new Date();
   const eventTypes = Array.from(new Set(events.map((e) => e.type))).sort();
@@ -188,7 +210,7 @@ export function EventsPage() {
       updatedAt: now,
     };
     await db.events.add(row);
-    setDraft({ title: '', type: '', dateTime: '', location: '', client: '', notes: '' });
+    setDraft({ title: '', type: EVENT_TYPE_OPTIONS[0], dateTime: '', location: '', client: '', notes: '' });
     setShowCreateForm(false);
   }
   return (
@@ -212,6 +234,14 @@ export function EventsPage() {
                 <span className="catalog-filter-pill-icon" aria-hidden="true">{filterIcon}</span>
                 Filters
                 {isFilterActive && <span className="topbar-filter-pill-dot" aria-hidden="true" />}
+              </button>
+              {/* Calendar Button */}
+              <button 
+                className="topbar-add-btn" 
+                aria-label="Toggle calendar view" 
+                onClick={() => setShowCalendar((prev) => !prev)}
+              >
+                {calendarIcon}
               </button>
               {/* Add Event Button */}
               <button 
@@ -335,46 +365,95 @@ export function EventsPage() {
       )}
       {/* Create Event Sheet/Modal*/}
       {showCreateForm && (
-        <div className="card stack-md">
-          <div className="row between wrap">
-            <h3>Create Event</h3>
-            <button className="ghost" onClick={() => setShowCreateForm(false)}>Close</button>
-          </div>
-          <div className="grid two">
-            <input
-              placeholder="Title*"
-              value={draft.title}
-              onChange={(e) => setDraft({ ...draft, title: e.target.value })}
-            />
-            <input
-              placeholder="Type* (e.g., Wedding, Portrait)"
-              value={draft.type}
-              onChange={(e) => setDraft({ ...draft, type: e.target.value })}
-            />
-            <input
-              type="datetime-local"
-              value={draft.dateTime}
-              onChange={(e) => setDraft({ ...draft, dateTime: e.target.value })}
-            />
-            <input
-              placeholder="Location"
-              value={draft.location}
-              onChange={(e) => setDraft({ ...draft, location: e.target.value })}
-            />
-            <input
-              placeholder="Client"
-              value={draft.client}
-              onChange={(e) => setDraft({ ...draft, client: e.target.value })}
-            />
-          </div>
-          <textarea
-            placeholder="Notes / requirements"
-            value={draft.notes}
-            onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
-          />
-          {error && <p className="error">{error}</p>}
-          <button onClick={() => void createEvent()}>Create event</button>
-        </div>
+        <>
+          <button className="sheet-overlay" aria-label="Close create event" onClick={() => setShowCreateForm(false)} />
+          <aside className="filter-sheet card maintenance-add-sheet" aria-label="Create new event">
+            <div className="maintenance-sheet-header">
+              <h3>New Event</h3>
+              <button
+                className="sheet-close-btn"
+                onClick={() => setShowCreateForm(false)}
+                aria-label="Close"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="maintenance-sheet-body stack-sm">
+              {/* Title */}
+              <label className="gear-field-block">
+                <span>Event Title*</span>
+                <input
+                  type="text"
+                  placeholder="e.g., Smith Wedding"
+                  value={draft.title}
+                  onChange={(e) => setDraft({ ...draft, title: e.target.value })}
+                />
+              </label>
+
+              {/* Event Type & Date in two-column layout */}
+              <div className="gear-form-two-col">
+                <label className="gear-field-block">
+                  <span>Event Type*</span>
+                  <select value={draft.type} onChange={(e) => setDraft({ ...draft, type: e.target.value })}>
+                    {EVENT_TYPE_OPTIONS.map((option) => (
+                      <option key={option} value={option}>{option}</option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="gear-field-block">
+                  <span>Date & Time</span>
+                  <input
+                    type="datetime-local"
+                    value={draft.dateTime}
+                    onChange={(e) => setDraft({ ...draft, dateTime: e.target.value })}
+                  />
+                </label>
+              </div>
+
+              {/* Location & Client in two-column layout */}
+              <div className="gear-form-two-col">
+                <label className="gear-field-block">
+                  <span>Location</span>
+                  <input
+                    type="text"
+                    placeholder="e.g., Central Park, NYC"
+                    value={draft.location}
+                    onChange={(e) => setDraft({ ...draft, location: e.target.value })}
+                  />
+                </label>
+
+                <label className="gear-field-block">
+                  <span>Client Name</span>
+                  <input
+                    type="text"
+                    placeholder="e.g., John Smith"
+                    value={draft.client}
+                    onChange={(e) => setDraft({ ...draft, client: e.target.value })}
+                  />
+                </label>
+              </div>
+
+              {/* Notes & Special Requirements */}
+              <label className="gear-field-block">
+                <span>Notes & Special Requirements</span>
+                <textarea
+                  rows={3}
+                  value={draft.notes}
+                  onChange={(e) => setDraft({ ...draft, notes: e.target.value })}
+                  placeholder="Any special requirements, equipment needed, or important details..."
+                />
+              </label>
+
+              {error && <p className="error">{error}</p>}
+            </div>
+
+            <div className="maintenance-sheet-footer">
+              <button onClick={() => void createEvent()}>Create Event</button>
+            </div>
+          </aside>
+        </>
       )}
       {/* Empty states */}
       {sorted.length === 0 && events.length === 0 && (
