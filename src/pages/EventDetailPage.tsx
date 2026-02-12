@@ -5,6 +5,7 @@ import { db } from '../db';
 import { makeId } from '../lib/ids';
 import { exportEventToPdf } from '../lib/pdf';
 import { EventFormSheet } from '../components/EventFormSheet';
+import { getDaysUntilEvent } from '../lib/eventHelpers';
 import type { PackingChecklistItem } from '../types/models';
 
 export function EventDetailPage() {
@@ -16,6 +17,7 @@ export function EventDetailPage() {
   const [catalogItemId, setCatalogItemId] = useState('');
   const [showAddItem, setShowAddItem] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
+  const [showShareSheet, setShowShareSheet] = useState(false);
 
   if (!event) return <div className="card">Event not found.</div>;
   const currentEvent = event;
@@ -23,6 +25,26 @@ export function EventDetailPage() {
   const packed = currentEvent.packingChecklist.filter((i) => i.packed).length;
   const total = currentEvent.packingChecklist.length;
   const ratio = total > 0 ? Math.round((packed / total) * 100) : 0;
+
+  // Calculate days until event
+  const daysInfo = currentEvent.dateTime ? getDaysUntilEvent(currentEvent.dateTime) : null;
+
+  // Format date and time
+  const formattedDate = currentEvent.dateTime
+    ? new Date(currentEvent.dateTime).toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      })
+    : '';
+
+  const formattedTime = currentEvent.dateTime
+    ? new Date(currentEvent.dateTime).toLocaleTimeString('en-GB', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      })
+    : '';
 
   async function setChecklist(nextChecklist: typeof currentEvent.packingChecklist) {
     await db.events.update(currentEvent.id, {
@@ -103,10 +125,10 @@ export function EventDetailPage() {
   }
 
   return (
-    <section className="detail-page detail-page-immersive">
+    <section className="detail-page detail-page-immersive detail-page-event">
 
-      {/* ── TOPBAR ── */}
-      <div className="detail-page-topbar">
+      {/* ── WHITE TOPBAR ── */}
+      <div className="detail-page-topbar detail-page-topbar-white">
         <button
           onClick={() => navigate('/events')}
           className="detail-back-link"
@@ -116,11 +138,11 @@ export function EventDetailPage() {
         </button>
         <div className="row detail-topbar-actions">
 
-          {/* Share button (no-op for now) */}
+          {/* Share button - opens share sheet */}
           <button
             className="detail-topbar-icon-btn"
-            aria-label="Share event"
-            onClick={() => {/* share functionality coming soon */}}
+            aria-label="Share & export event"
+            onClick={() => setShowShareSheet(true)}
           >
             <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
               <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
@@ -167,64 +189,154 @@ export function EventDetailPage() {
         />
       )}
 
-      {/* ── CONTENT ── */}
+      {/* ── SHARE SHEET ── */}
+      {showShareSheet && (
+        <>
+          <button className="sheet-overlay" aria-label="Close share sheet" onClick={() => setShowShareSheet(false)} />
+          <aside className="filter-sheet card detail-share-sheet" aria-label="Share & export">
+            <div className="maintenance-sheet-header">
+              <h3>Share &amp; Export</h3>
+              <button className="sheet-close-btn" onClick={() => setShowShareSheet(false)} aria-label="Close">✕</button>
+            </div>
+            <div className="detail-share-sheet-body">
+              <button
+                className="detail-share-action"
+                onClick={() => {
+                  exportEventToPdf(currentEvent);
+                  setShowShareSheet(false);
+                }}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <path d="M14 2H6a2 2 0 0 0 2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <path d="M14 2v6h6" />
+                </svg>
+                <span>Export PDF</span>
+              </button>
+              <button
+                className="detail-share-action"
+                onClick={() => {
+                  exportEventJson();
+                  setShowShareSheet(false);
+                }}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <path d="M7 7h10M7 12h10M7 17h6" />
+                </svg>
+                <span>Export JSON</span>
+              </button>
+              <button
+                className="detail-share-action"
+                onClick={() => {
+                  window.print();
+                  setShowShareSheet(false);
+                }}
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <polyline points="6 9 6 2 18 2 18 9" />
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+                  <rect x="6" y="14" width="12" height="8" />
+                </svg>
+                <span>Print</span>
+              </button>
+              <button className="detail-share-action" disabled>
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <circle cx="18" cy="5" r="3" />
+                  <circle cx="6" cy="12" r="3" />
+                  <circle cx="18" cy="19" r="3" />
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                </svg>
+                <span>Share Link (Coming Soon)</span>
+              </button>
+            </div>
+          </aside>
+        </>
+      )}
+
+      {/* ── HERO SECTION ── */}
+      <div className="detail-event-hero">
+        {/* Days pill - absolutely positioned top-right */}
+        {daysInfo && (
+          <span className={`pill event-days ${daysInfo.colorClass}`}>
+            {daysInfo.text}
+          </span>
+        )}
+
+        {/* Event title */}
+        <h1 className="detail-event-title">{currentEvent.title}</h1>
+
+        {/* Type pill */}
+        <div className="detail-event-meta-row">
+          <span className="pill">{currentEvent.type}</span>
+        </div>
+
+        {/* Date/Time pill */}
+        {currentEvent.dateTime && (
+          <div className="detail-event-meta-row">
+            <span className="pill">
+              📅 {formattedDate} • {formattedTime}
+            </span>
+          </div>
+        )}
+
+        {/* Location & Client pills */}
+        {(currentEvent.location || currentEvent.client) && (
+          <div className="detail-event-meta-row">
+            {currentEvent.location && (
+              <button
+                className="pill detail-event-location-pill"
+                onClick={() => {/* TODO: Open map/navigate */}}
+                aria-label={`Location: ${currentEvent.location}`}
+              >
+                📍 {currentEvent.location}
+              </button>
+            )}
+            {currentEvent.client && (
+              <span className="pill">Client: {currentEvent.client}</span>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* ── CONTENT CARDS ── */}
       <div className="detail-event-body">
-        <div className="card stack-md">
-          <div className="detail-event-title-block">
-            <h2>{currentEvent.title}</h2>
-            <div className="stack-sm">
-              <div className="row wrap">
-                <span className="pill">{currentEvent.type}</span>
-                {currentEvent.dateTime && (
-                  <span className="subtle">
-                    {new Date(currentEvent.dateTime).toLocaleDateString(undefined, {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                    })}
-                  </span>
-                )}
-              </div>
-              {currentEvent.location && <span className="subtle">📍 {currentEvent.location}</span>}
-              {currentEvent.client && <span className="subtle">Client: {currentEvent.client}</span>}
-            </div>
-          </div>
 
-          <div className="stack-sm">
-            <div className="row between wrap">
-              <strong>Packing Progress</strong>
-              <span>{packed}/{total} items packed</span>
-            </div>
-            <div className="progress-track">
-              <span style={{ width: `${ratio}%` }} />
-            </div>
-          </div>
-
-          <label className="stack-sm">
+        {/* Notes Card - only if notes exist */}
+        {currentEvent.notes && (
+          <div className="card detail-event-notes-card">
             <strong>Event Notes</strong>
-            <textarea
-              value={currentEvent.notes ?? ''}
-              onChange={async (e) => {
-                await db.events.update(currentEvent.id, { notes: e.target.value, updatedAt: new Date().toISOString() });
-              }}
-              placeholder="Add notes about this event..."
-            />
-          </label>
+            <div className="detail-event-notes-text">
+              {currentEvent.notes}
+            </div>
+          </div>
+        )}
 
-          <div className="row wrap">
-            <button className="ghost" onClick={() => exportEventToPdf(currentEvent)}>Export PDF</button>
-            <button className="ghost" onClick={exportEventJson}>Export JSON</button>
-            <button className="ghost" onClick={() => window.print()}>Print</button>
-            <button className="ghost danger" onClick={() => void resetChecklist()}>Reset Checklist</button>
+        {/* Packing Progress Card */}
+        <div className="card stack-md">
+          <div className="row between wrap">
+            <strong>Packing Progress</strong>
+            <span>{packed}/{total} items packed</span>
+          </div>
+          <div className="progress-track">
+            <span style={{ width: `${ratio}%` }} />
           </div>
         </div>
 
+        {/* Packing Checklist Card */}
         <div className="card stack-md">
           <div className="row between wrap">
             <h3>Packing Checklist ({total})</h3>
-            <button onClick={() => setShowAddItem((prev) => !prev)}>
-              {showAddItem ? 'Hide' : '+ Add Item'}
-            </button>
+            <div className="row wrap" style={{ gap: '0.5rem' }}>
+              {total > 0 && (
+                <button className="ghost danger" onClick={() => void resetChecklist()} style={{ fontSize: '0.9rem', padding: '0.35rem 0.75rem' }}>
+                  Reset
+                </button>
+              )}
+              <button onClick={() => setShowAddItem((prev) => !prev)}>
+                {showAddItem ? 'Hide' : '+ Add Item'}
+              </button>
+            </div>
           </div>
 
           {showAddItem && (
@@ -325,6 +437,7 @@ export function EventDetailPage() {
           )}
         </div>
 
+        {/* Missing Items Card (if any) */}
         {currentEvent.missingItems.length > 0 && (
           <div className="card stack-md">
             <h3>Missing Items ({currentEvent.missingItems.length})</h3>

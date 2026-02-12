@@ -3,6 +3,7 @@ import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
 import { EventFormSheet } from '../components/EventFormSheet';
+import { getDaysUntilEvent } from '../lib/eventHelpers';
 
 const magnifyingGlassIcon = (
   <svg
@@ -19,19 +20,6 @@ const magnifyingGlassIcon = (
     <path d="M20 20l-4-4" />
   </svg>
 );
-
-function getDaysUntilEvent(dateTime: string): { text: string; colorClass: string } {
-  const eventDate = new Date(dateTime);
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const days = Math.ceil((eventDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-
-  if (days < 0)  return { text: `${Math.abs(days)}d ago`, colorClass: 'overdue' };
-  if (days === 0) return { text: 'Today',               colorClass: 'today' };
-  if (days === 1) return { text: '1 day',               colorClass: 'urgent' };
-  if (days <= 5)  return { text: `${days} days`,        colorClass: 'upcoming' };
-  return           { text: `${days} days`,              colorClass: 'later' };
-}
 
 export function EventsPage() {
   const events = useLiveQuery(() => db.events.orderBy('updatedAt').reverse().toArray(), [], []);

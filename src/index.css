@@ -2084,6 +2084,135 @@ button.category-title-btn {
   padding: 0 0.7rem;
 }
 
+/* White topbar for event detail */
+.detail-page-topbar.detail-page-topbar-white {
+  background: #ffffff;
+  border-bottom: 1px solid var(--border-subtle);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* #fafafa background for event detail page */
+.detail-page.detail-page-event {
+  background: #fafafa;
+}
+
+/* Hero section */
+.detail-event-hero {
+  position: relative;
+  padding: 1.5rem 1rem 1rem;
+  background: #fafafa;
+}
+
+.detail-event-title {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem 0;
+  padding-right: 5.5rem; /* space for days pill */
+  line-height: 1.2;
+  color: var(--text);
+}
+
+.detail-event-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.detail-event-meta-row:last-child {
+  margin-bottom: 0;
+}
+
+.detail-event-location-pill {
+  cursor: pointer;
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.detail-event-location-pill:hover {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--accent) 15%, var(--surface-raised));
+}
+
+.detail-event-location-pill:active {
+  transform: translateY(0);
+}
+
+/* White cards in event detail body */
+.detail-event-body .card {
+  background: #ffffff;
+}
+
+/* Notes card styling */
+.detail-event-notes-card {
+  background: #ffffff !important;
+}
+
+.detail-event-notes-text {
+  background: #ffffff;
+  padding: 0.75rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-subtle);
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  margin-top: 0.5rem;
+}
+
+/* Share sheet */
+.detail-share-sheet {
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.detail-share-sheet-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+}
+
+.detail-share-action {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: var(--surface-raised);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+.detail-share-action:hover:not(:disabled) {
+  background: var(--surface-muted);
+  transform: translateY(-1px);
+}
+
+.detail-share-action:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.detail-share-action:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.detail-share-action svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .event-add-sheet {
   position: fixed;
   left: 0;
