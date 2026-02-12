@@ -286,7 +286,8 @@ a {
 .app-shell {
   width: 100%;
   margin: 0 auto;
-  min-height: 100dvh;
+  height: 100dvh;
+  overflow: hidden;
   padding: 0;
 }
 
@@ -649,16 +650,15 @@ a {
 
 .content {
   position: relative;
-  min-height: calc(100dvh - var(--topbar-height) - var(--bottom-nav-clearance));
+  height: 100%;
   display: flex;
   flex-direction: column;
   gap: 0;
   padding: var(--topbar-height) var(--space-4) var(--bottom-nav-clearance);
-  overflow-y: visible;
+  overflow-y: auto;
 }
 
 .content.content-catalog {
-  min-height: calc(100dvh - var(--topbar-catalog-height) - var(--bottom-nav-clearance));
   padding-top: var(--topbar-catalog-height);
 }
 
@@ -682,8 +682,7 @@ a {
 @media (min-width: 768px) {
   .content {
     position: static;
-    min-height: auto;
-    overflow-y: visible;
+    overflow-y: auto;
     gap: 1.25rem;
     padding: var(--topbar-height) 0 var(--bottom-nav-clearance);
   }
