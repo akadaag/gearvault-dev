@@ -60,9 +60,9 @@ export function EventDetailPage() {
   }
 
   async function resetChecklist() {
+    if (!window.confirm('Are you sure you want to delete all items?')) return;
     try {
-      const next = currentEvent.packingChecklist.map((i) => ({ ...i, packed: false }));
-      await setChecklist(next);
+      await setChecklist([]);
     } catch (error) {
       console.error('Failed to reset checklist:', error);
       alert('Failed to reset checklist. Please try again.');
