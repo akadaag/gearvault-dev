@@ -723,8 +723,9 @@ a {
 .content-immersive {
   margin-top: 0;
   height: 100dvh;
-  padding: 0;
+  padding: 0 0 var(--bottom-nav-clearance);
   overflow-y: auto;
+  box-sizing: border-box;
 }
 
 .auth-shell {
@@ -2186,7 +2187,7 @@ button.category-title-btn {
   flex-direction: column;
   gap: 0.75rem;
   min-height: calc(100dvh - var(--detail-topbar-height) - var(--bottom-nav-clearance));
-  padding: calc(var(--detail-topbar-height) + env(safe-area-inset-top, 0px)) 0 calc(var(--bottom-nav-clearance) + 1.5rem);
+  padding: calc(var(--detail-topbar-height) + env(safe-area-inset-top, 0px)) 0 calc(var(--bottom-nav-clearance) + 0.75rem);
 }
 
 .detail-page-topbar {
