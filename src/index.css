@@ -539,8 +539,8 @@ a {
 }
 
 .catalog-filter-pill-icon svg {
-  width: 12px;
-  height: 12px;
+  width: 15px;
+  height: 15px;
   stroke: currentColor;
   fill: none;
   stroke-width: 2;
@@ -563,6 +563,10 @@ a {
 .catalog-quick-filter-btn.is-active {
   border-color: #f2c94c;
   background: #171a21;
+}
+
+.catalog-quick-filter-btn.is-active .catalog-filter-pill-icon svg {
+  stroke: #f2c94c;
 }
 
 .topbar-catalog {
@@ -600,7 +604,7 @@ a {
 .topbar-add-btn {
   min-height: 32px;
   width: auto;
-  padding: 0.28rem 0.62rem;
+  padding: 0.32rem 0.72rem;
   border: 0.75px solid var(--border);
   background: #f4f4f5;
   box-shadow: none;
@@ -629,8 +633,8 @@ a {
 }
 
 .topbar-add-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 14px;
+  height: 14px;
   fill: none;
   stroke: currentColor;
   stroke-width: 2;

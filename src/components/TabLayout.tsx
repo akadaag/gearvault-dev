@@ -227,17 +227,17 @@ export function TabLayout() {
                 {isSettingsRoute && syncMessage && <p className="subtle topbar-sync">{syncMessage}</p>}
               </div>
                <div className="topbar-actions">
-                 {isCatalogRoute && (
-                   <>
-                     <button className="topbar-add-btn" aria-label="Add new item" onClick={openCatalogAdd}>
-                       <span className="topbar-add-icon">{addIcon}</span>
-                       Add
-                     </button>
-                   </>
-                 )}
-                {isEventsRoute && (
-                  <>
-                    <button
+                  {isCatalogRoute && (
+                     <>
+                       <button className="topbar-add-btn" aria-label="Add new item" onClick={openCatalogAdd}>
+                         {addIcon}
+                         Add
+                       </button>
+                     </>
+                  )}
+                  {isEventsRoute && (
+                     <>
+                     <button
                       className={`topbar-filter-pill${isEventsFilterActive ? ' is-active' : ''}`}
                       aria-label="Open event filters"
                       aria-pressed={isEventsFilterActive}
