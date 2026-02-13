@@ -17,6 +17,8 @@ export function EventDetailPage() {
   const [showAddSheet, setShowAddSheet] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
   const [showShareSheet, setShowShareSheet] = useState(false);
+  const [selectedCatalogItems, setSelectedCatalogItems] = useState<Set<string>>(new Set());
+  const [searchQuery, setSearchQuery] = useState('');
 
   if (!event) return <div className="card">Event not found.</div>;
   const currentEvent = event;
@@ -59,8 +61,13 @@ export function EventDetailPage() {
 
   async function resetChecklist() {
     if (!window.confirm('Reset all packed statuses?')) return;
-    const next = currentEvent.packingChecklist.map((i) => ({ ...i, packed: false }));
-    await setChecklist(next);
+    try {
+      const next = currentEvent.packingChecklist.map((i) => ({ ...i, packed: false }));
+      await setChecklist(next);
+    } catch (error) {
+      console.error('Failed to reset checklist:', error);
+      alert('Failed to reset checklist. Please try again.');
+    }
   }
 
   async function deleteEvent() {
@@ -99,6 +106,51 @@ export function EventDetailPage() {
     void setChecklist(next);
   }
 
+  function toggleSelection(itemId: string) {
+    const next = new Set(selectedCatalogItems);
+    if (next.has(itemId)) {
+      next.delete(itemId);
+    } else {
+      next.add(itemId);
+    }
+    setSelectedCatalogItems(next);
+  }
+
+  async function addSelectedItems() {
+    try {
+      const itemsToAdd: PackingChecklistItem[] = [];
+      
+      for (const catalogItemId of selectedCatalogItems) {
+        const catalogItem = catalog.find((c) => c.id === catalogItemId);
+        if (!catalogItem) continue;
+        
+        const priority: PackingChecklistItem['priority'] = catalogItem.essential ? 'must-have' : 'nice-to-have';
+        itemsToAdd.push({
+          id: makeId(),
+          eventId: currentEvent.id,
+          gearItemId: catalogItem.id,
+          name: catalogItem.name,
+          quantity: 1,
+          packed: false,
+          priority,
+        });
+      }
+      
+      if (itemsToAdd.length === 0) return;
+      
+      const next = [...currentEvent.packingChecklist, ...itemsToAdd];
+      await setChecklist(next);
+      
+      // Reset selection and close sheet
+      setSelectedCatalogItems(new Set());
+      setSearchQuery('');
+      setShowAddSheet(false);
+    } catch (error) {
+      console.error('Failed to add items:', error);
+      alert('Failed to add items. Please try again.');
+    }
+  }
+
   function exportEventJson() {
     const blob = new Blob([JSON.stringify(currentEvent, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -112,6 +164,11 @@ export function EventDetailPage() {
   // Catalog items not yet in the checklist
   const availableCatalogItems = catalog.filter(
     (c) => !currentEvent.packingChecklist.some((p) => p.gearItemId === c.id),
+  );
+
+  // Filter by search query
+  const filteredAvailableItems = availableCatalogItems.filter((item) =>
+    item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   return (
@@ -245,31 +302,48 @@ export function EventDetailPage() {
               <button className="sheet-close-btn" onClick={() => setShowAddSheet(false)} aria-label="Close">✕</button>
             </div>
             <div className="maintenance-sheet-body stack-sm">
-              {availableCatalogItems.length === 0 ? (
+              {/* Search bar */}
+              <div className="catalog-search-container">
+                <input
+                  type="text"
+                  className="catalog-search-input"
+                  placeholder="Search gear..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+
+              {filteredAvailableItems.length === 0 ? (
                 <p className="subtle" style={{ textAlign: 'center', padding: '1rem 0' }}>
-                  All catalog items are already in this list.
+                  {searchQuery ? 'No items found matching your search.' : 'All catalog items are already in this list.'}
                 </p>
               ) : (
-                <label className="gear-field-block">
-                  <span>Choose from your catalog</span>
-                  <select
-                    value={catalogItemId}
-                    onChange={(e) => setCatalogItemId(e.target.value)}
-                  >
-                    <option value="">Select an item…</option>
-                    {availableCatalogItems.map((item) => (
-                      <option key={item.id} value={item.id}>{item.name}</option>
-                    ))}
-                  </select>
-                </label>
+                <div className="catalog-select-list">
+                  {filteredAvailableItems.map((item) => (
+                    <div key={item.id} className="catalog-select-item">
+                      <button
+                        className={`catalog-select-circle${selectedCatalogItems.has(item.id) ? ' selected' : ''}`}
+                        onClick={() => toggleSelection(item.id)}
+                        aria-label={selectedCatalogItems.has(item.id) ? 'Deselect item' : 'Select item'}
+                      >
+                        {selectedCatalogItems.has(item.id) && (
+                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        )}
+                      </button>
+                      <span className="catalog-select-name">{item.name}</span>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
             <div className="maintenance-sheet-footer">
               <button
-                onClick={() => void addCatalogItem()}
-                disabled={!catalogItemId}
+                onClick={addSelectedItems}
+                disabled={selectedCatalogItems.size === 0}
               >
-                Add to List
+                Add {selectedCatalogItems.size} Item{selectedCatalogItems.size !== 1 ? 's' : ''}
               </button>
             </div>
           </aside>
@@ -357,7 +431,7 @@ export function EventDetailPage() {
             {total > 0 && (
               <button
                 className="pill detail-event-action-pill"
-                onClick={() => void resetChecklist()}
+                onClick={resetChecklist}
                 aria-label="Reset packing list"
               >
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="detail-event-action-icon">

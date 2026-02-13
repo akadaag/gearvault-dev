@@ -1184,6 +1184,87 @@ a {
   gap: 0.45rem;
 }
 
+.catalog-search-container {
+  margin-bottom: 0.5rem;
+}
+
+.catalog-search-input {
+  width: 100%;
+  min-height: 44px;
+  border-radius: 15px;
+  border: 1px solid var(--border);
+  background: var(--surface-raised);
+  padding: 0.7rem 0.9rem;
+  font-size: 0.9rem;
+  outline: none;
+}
+
+.catalog-search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
+}
+
+.catalog-select-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.catalog-select-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.75rem;
+}
+
+.catalog-select-circle {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  min-height: unset;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: #ffffff;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  padding: 0;
+  box-sizing: content-box;
+  line-height: 1;
+}
+
+.catalog-select-circle.selected {
+  background: #2562eb;
+  border-color: #2562eb;
+}
+
+.catalog-select-circle svg {
+  width: 10px;
+  height: 10px;
+  stroke: #ffffff;
+  stroke-width: 2.5;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.catalog-select-name {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--text);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 @media (min-width: 768px) {
   .filter-sheet:not(.maintenance-history-sheet):not(.maintenance-add-sheet) {
     left: 50%;
@@ -2804,7 +2885,7 @@ button.category-title-btn {
 .maintenance-add-sheet {
   z-index: 110;
   height: auto;
-  max-height: min(60dvh, 460px);
+  max-height: min(75dvh, 600px);
 }
 
 .maintenance-add-overlay {
