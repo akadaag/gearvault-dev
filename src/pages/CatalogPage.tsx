@@ -302,15 +302,15 @@ export function CatalogPage() {
                           <div className="catalog-item-icon" aria-hidden="true">{item.name.charAt(0).toUpperCase()}</div>
                         )}
                       </div>
+                      {item.essential ? (
+                        <svg className="catalog-item-essential-star" viewBox="0 0 24 24" aria-label="Essential" focusable="false">
+                          <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
+                        </svg>
+                      ) : (
+                        <span />
+                      )}
                       <div className="catalog-item-main">
-                        <span className="catalog-item-title-row">
-                          <strong className="catalog-item-title">{item.name}</strong>
-                          {item.essential && (
-                            <svg className="catalog-item-essential-star" viewBox="0 0 24 24" aria-label="Essential" focusable="false">
-                              <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
-                            </svg>
-                          )}
-                        </span>
+                        <strong className="catalog-item-title">{item.name}</strong>
                         {(item.brand || item.model) && (
                           <span className="subtle catalog-item-subtitle">{item.brand} {item.model}</span>
                         )}
@@ -418,15 +418,15 @@ export function CatalogPage() {
                     <span className="detail-photo-initial">{item.name.charAt(0).toUpperCase()}</span>
                   </div>
                 )}
+                {item.essential ? (
+                  <svg className="detail-sheet-essential-star" viewBox="0 0 24 24" aria-label="Essential" focusable="false">
+                    <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
+                  </svg>
+                ) : (
+                  <span className="detail-sheet-star-placeholder" />
+                )}
                 <div className="detail-header-content">
-                  <span className="detail-sheet-title-row">
-                    <h2>{item.name}</h2>
-                    {item.essential && (
-                      <svg className="detail-sheet-essential-star" viewBox="0 0 24 24" aria-label="Essential" focusable="false">
-                        <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
-                      </svg>
-                    )}
-                  </span>
+                  <h2>{item.name}</h2>
                   <p className="subtle detail-subtitle">{[item.brand, item.model].filter(Boolean).join(' ') || 'No brand/model yet'}</p>
                 </div>
                 <div className="detail-badges">

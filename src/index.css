@@ -1604,9 +1604,9 @@ button.category-title-btn {
   border-bottom: 1px solid var(--border-subtle);
   border-radius: 0;
   display: grid;
-  grid-template-columns: 52px 1fr auto;
+  grid-template-columns: 52px auto 1fr auto;
   align-items: center;
-  gap: 0.6rem;
+  gap: 0.5rem;
   width: 100%;
   background: var(--card);
   box-shadow: none;
@@ -1681,19 +1681,6 @@ button.category-title-btn {
   white-space: nowrap;
 }
 
-.catalog-item-title-row {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  min-width: 0;
-  max-width: 100%;
-}
-
-.catalog-item-title-row .catalog-item-title {
-  flex: 1;
-  min-width: 0;
-}
-
 .catalog-item-essential-star {
   width: 0.72rem;
   height: 0.72rem;
@@ -1703,6 +1690,8 @@ button.category-title-btn {
   stroke-width: 1.5;
   stroke-linecap: round;
   stroke-linejoin: round;
+  display: block;
+  align-self: center;
 }
 
 .catalog-item-subtitle {
@@ -2054,11 +2043,11 @@ button.category-title-btn {
 
 .detail-sheet-header {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto auto 1fr auto;
   grid-template-rows: auto auto;
   grid-template-areas:
-    "icon content close"
-    "badges badges badges";
+    "icon star content close"
+    "badges badges badges badges";
   align-items: flex-start;
   gap: 0.75rem;
   margin-bottom: var(--space-4);
@@ -2118,19 +2107,6 @@ button.category-title-btn {
   margin-bottom: var(--space-2);
 }
 
-.detail-sheet-title-row {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  min-width: 0;
-}
-
-.detail-sheet-title-row h2 {
-  margin-bottom: var(--space-2);
-  flex: 1;
-  min-width: 0;
-}
-
 .detail-sheet-essential-star {
   width: 0.85rem;
   height: 0.85rem;
@@ -2140,9 +2116,13 @@ button.category-title-btn {
   stroke-width: 1.5;
   stroke-linecap: round;
   stroke-linejoin: round;
-  margin-bottom: var(--space-2);
-  align-self: flex-start;
-  margin-top: 0.25rem;
+  grid-area: star;
+  align-self: center;
+  margin-top: 0.1rem;
+}
+
+.detail-sheet-star-placeholder {
+  grid-area: star;
 }
 
 .detail-badges {
@@ -2950,20 +2930,19 @@ button.category-title-btn {
   stroke-linejoin: round;
 }
 
-.detail-essential-btn:hover {
-  background: color-mix(in srgb, var(--accent) 8%, transparent);
-  color: color-mix(in srgb, var(--text) 70%, #eab308);
-}
-
-.detail-essential-btn:active {
-  transform: none;
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
-}
-
+.detail-essential-btn:hover,
+.detail-essential-btn:active,
 .detail-essential-btn:focus {
   background: transparent;
   box-shadow: none;
   outline: none;
+  transform: none;
+}
+
+@media (hover: hover) {
+  .detail-essential-btn:hover {
+    color: color-mix(in srgb, var(--text) 55%, #eab308);
+  }
 }
 
 .detail-essential-btn:focus-visible {
