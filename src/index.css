@@ -722,8 +722,9 @@ a {
 
 .content-immersive {
   margin-top: 0;
-  height: calc(100dvh - var(--detail-topbar-height));
+  height: 100dvh;
   padding: 0;
+  overflow-y: auto;
 }
 
 .auth-shell {
@@ -2184,8 +2185,8 @@ button.category-title-btn {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  min-height: calc(100dvh - var(--detail-topbar-height));
-  padding: 0 0 calc(var(--bottom-nav-clearance) + 0.75rem);
+  min-height: calc(100dvh - var(--detail-topbar-height) - var(--bottom-nav-clearance));
+  padding: calc(var(--detail-topbar-height) + env(safe-area-inset-top, 0px)) 0 calc(var(--bottom-nav-clearance) + 1.5rem);
 }
 
 .detail-page-topbar {
@@ -2283,10 +2284,6 @@ button.category-title-btn {
   flex-direction: column;
   gap: 0.75rem;
   padding: 0 0.7rem;
-}
-
-/* Checklist items wrapper - no scroll behavior needed */
-.detail-checklist-items-wrapper {
 }
 
 /* White topbar for event detail */
