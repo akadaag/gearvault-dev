@@ -231,32 +231,23 @@ export function TabLayout() {
                      <>
                        <button className="topbar-add-btn" aria-label="Add new item" onClick={openCatalogAdd}>
                          {addIcon}
-                         Add
+                          <span>Add</span>
                        </button>
                      </>
                   )}
                   {isEventsRoute && (
                      <>
-                     <button
-                      className={`topbar-filter-pill${isEventsFilterActive ? ' is-active' : ''}`}
-                      aria-label="Open event filters"
-                      aria-pressed={isEventsFilterActive}
-                      onClick={openEventsFilters}
-                    >
-                      <span className="catalog-filter-pill-icon" aria-hidden="true">{filterIcon}</span>
-                      Filters
-                      {isEventsFilterActive && <span className="topbar-filter-pill-dot" aria-hidden="true" />}
-                    </button>
-                    <button
-                      className={`topbar-add-btn${showEventsCalendar ? ' is-active' : ''}`}
-                      aria-label="Toggle calendar view"
-                      onClick={toggleEventsCalendar}
-                    >
-                      {calendarBtnIcon}
-                    </button>
-                    <button className="topbar-add-btn" aria-label="Create new event" onClick={openEventsAdd}>
-                      {addIcon}
-                    </button>
+
+<button
+                       className={`topbar-icon-btn${showEventsCalendar ? ' is-active' : ''}`}
+                       aria-label="Toggle calendar view"
+                       onClick={toggleEventsCalendar}
+                     >
+                       {calendarBtnIcon}
+                     </button>
+<button className="topbar-icon-btn" aria-label="Create new event" onClick={openEventsAdd}>
+                       {addIcon}
+                     </button>
                   </>
                 )}
               </div>
@@ -324,29 +315,37 @@ export function TabLayout() {
                     />
                   </div>
                 </div>
-                <div className="catalog-quick-filters" role="group" aria-label="Quick event filters">
-                  <button
-                    className={`catalog-quick-pill${eventsQuickFilter === 'upcoming' ? ' is-active' : ''}`}
-                    onClick={() => setEventsQuickFilter('upcoming')}
-                  >
-                    Upcoming
-                    <span className="catalog-quick-pill-count">{upcomingCount}</span>
-                  </button>
-                  <button
-                    className={`catalog-quick-pill${eventsQuickFilter === 'past' ? ' is-active' : ''}`}
-                    onClick={() => setEventsQuickFilter('past')}
-                  >
-                    Past
-                    <span className="catalog-quick-pill-count">{pastCount}</span>
-                  </button>
-                  <button
-                    className={`catalog-quick-pill${eventsQuickFilter === 'all' ? ' is-active' : ''}`}
-                    onClick={() => setEventsQuickFilter('all')}
-                  >
-                    All
-                    <span className="catalog-quick-pill-count">{eventsCount}</span>
-                  </button>
-                </div>
+                 <div className="catalog-quick-filters" role="group" aria-label="Quick event filters">
+                   <button
+                     className={`catalog-quick-pill${eventsQuickFilter === 'upcoming' ? ' is-active' : ''}`}
+                     onClick={() => setEventsQuickFilter('upcoming')}
+                   >
+                     Upcoming
+                     <span className="catalog-quick-pill-count">{upcomingCount}</span>
+                   </button>
+                   <button
+                     className={`catalog-quick-pill${eventsQuickFilter === 'past' ? ' is-active' : ''}`}
+                     onClick={() => setEventsQuickFilter('past')}
+                   >
+                     Past
+                     <span className="catalog-quick-pill-count">{pastCount}</span>
+                   </button>
+                   <button
+                     className={`catalog-quick-pill${eventsQuickFilter === 'all' ? ' is-active' : ''}`}
+                     onClick={() => setEventsQuickFilter('all')}
+                   >
+                     All
+                     <span className="catalog-quick-pill-count">{eventsCount}</span>
+                   </button>
+                   <button
+                     className={`catalog-quick-pill catalog-quick-filter-btn${isEventsFilterActive ? ' is-active' : ''}`}
+                     aria-label="Open event filters"
+                     aria-pressed={isEventsFilterActive}
+                     onClick={openEventsFilters}
+                   >
+                     <span className="catalog-filter-pill-icon" aria-hidden="true">{filterIcon}</span>
+                   </button>
+                 </div>
               </div>
             )}
           </div>

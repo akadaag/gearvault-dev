@@ -554,15 +554,16 @@ a {
 }
 
 .catalog-quick-filter-btn {
-  padding: 0.32rem;
-  min-width: 32px;
-  width: 32px;
-  border: 0.75px solid var(--border);
+   padding: 0;
+   min-width: 32px;
+   width: 32px;
+   height: 32px;
+   border: 0.75px solid var(--border);
+   justify-content: center;
 }
 
 .catalog-quick-filter-btn.is-active {
-  border-color: #f2c94c;
-  background: #171a21;
+   background: #171a21;
 }
 
 .catalog-quick-filter-btn.is-active .catalog-filter-pill-icon svg {
@@ -602,23 +603,61 @@ a {
 }
 
 .topbar-add-btn {
+   min-height: 32px;
+   width: auto;
+   padding: 0.32rem 0.72rem;
+   border: 0.75px solid var(--border);
+   background: #f4f4f5;
+   box-shadow: none;
+   color: #4b5563;
+   display: inline-flex;
+   align-items: center;
+   justify-content: center;
+   gap: 0.34rem;
+   border-radius: 999px;
+   font-size: 0.8rem;
+   font-weight: 600;
+   transform: none;
+   cursor: pointer;
+}
+
+.topbar-icon-btn {
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
   min-height: 32px;
-  width: auto;
-  padding: 0.32rem 0.72rem;
+  padding: 0;
   border: 0.75px solid var(--border);
   background: #f4f4f5;
-  box-shadow: none;
   color: #4b5563;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.34rem;
   border-radius: 999px;
-  font-size: 0.8rem;
-  font-weight: 600;
-  transform: none;
+  box-shadow: none;
   cursor: pointer;
 }
+.topbar-icon-btn:hover {
+  background: #ececef;
+  box-shadow: none;
+}
+.topbar-icon-btn:active,
+.topbar-icon-btn.is-active {
+  background: #171a21;
+  color: #fff;
+  border-color: #171a21;
+  transform: none;
+}
+.topbar-icon-btn svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 
 .topbar-add-btn:hover {
   background: #ececef;
