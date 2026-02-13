@@ -303,14 +303,20 @@ export function CatalogPage() {
                         )}
                       </div>
                       <div className="catalog-item-main">
-                        <strong className="catalog-item-title">{item.name}</strong>
+                        <span className="catalog-item-title-row">
+                          <strong className="catalog-item-title">{item.name}</strong>
+                          {item.essential && (
+                            <svg className="catalog-item-essential-star" viewBox="0 0 24 24" aria-label="Essential" focusable="false">
+                              <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
+                            </svg>
+                          )}
+                        </span>
                         {(item.brand || item.model) && (
                           <span className="subtle catalog-item-subtitle">{item.brand} {item.model}</span>
                         )}
                         <div className="row wrap catalog-item-meta-row">
                           <span className="pill">x{item.quantity}</span>
                           <span className={`pill pill-condition pill-condition-${item.condition}`}>{item.condition}</span>
-                          {item.essential && <span className="pill essential">Essential</span>}
                         </div>
                       </div>
                       <div className="catalog-item-arrow" aria-hidden="true">›</div>
@@ -413,14 +419,20 @@ export function CatalogPage() {
                   </div>
                 )}
                 <div className="detail-header-content">
-                  <h2>{item.name}</h2>
+                  <span className="detail-sheet-title-row">
+                    <h2>{item.name}</h2>
+                    {item.essential && (
+                      <svg className="detail-sheet-essential-star" viewBox="0 0 24 24" aria-label="Essential" focusable="false">
+                        <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
+                      </svg>
+                    )}
+                  </span>
                   <p className="subtle detail-subtitle">{[item.brand, item.model].filter(Boolean).join(' ') || 'No brand/model yet'}</p>
                 </div>
                 <div className="detail-badges">
                   {category && <span className="pill">{category.name}</span>}
                   <span className={`pill pill-condition pill-condition-${item.condition}`}>{item.condition}</span>
                   <span className="pill">×{item.quantity} units</span>
-                  {item.essential && <span className="pill essential">Essential</span>}
                 </div>
                 <button className="sheet-close-btn" onClick={() => setSelectedItemId(null)} aria-label="Close">✕</button>
               </div>

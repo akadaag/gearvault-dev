@@ -1681,6 +1681,30 @@ button.category-title-btn {
   white-space: nowrap;
 }
 
+.catalog-item-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.catalog-item-title-row .catalog-item-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.catalog-item-essential-star {
+  width: 0.72rem;
+  height: 0.72rem;
+  flex-shrink: 0;
+  fill: #e0ac11;
+  stroke: #e0ac11;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
 .catalog-item-subtitle {
   font-size: 0.8rem;
   line-height: 1.35;
@@ -2092,6 +2116,33 @@ button.category-title-btn {
 .detail-header-content h2 {
   font-size: var(--text-xl);
   margin-bottom: var(--space-2);
+}
+
+.detail-sheet-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.detail-sheet-title-row h2 {
+  margin-bottom: var(--space-2);
+  flex: 1;
+  min-width: 0;
+}
+
+.detail-sheet-essential-star {
+  width: 0.85rem;
+  height: 0.85rem;
+  flex-shrink: 0;
+  fill: #e0ac11;
+  stroke: #e0ac11;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  margin-bottom: var(--space-2);
+  align-self: flex-start;
+  margin-top: 0.25rem;
 }
 
 .detail-badges {
@@ -2907,6 +2958,12 @@ button.category-title-btn {
 .detail-essential-btn:active {
   transform: none;
   background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.detail-essential-btn:focus {
+  background: transparent;
+  box-shadow: none;
+  outline: none;
 }
 
 .detail-essential-btn:focus-visible {

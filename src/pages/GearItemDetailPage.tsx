@@ -310,6 +310,7 @@ export function GearItemDetailPage() {
             type="button"
             className={`detail-essential-btn${currentItem.essential ? ' is-active' : ''}`}
             onClick={() => void toggleEssential()}
+            onPointerUp={(e) => e.currentTarget.blur()}
             aria-label={currentItem.essential ? 'Remove from essentials' : 'Add to essentials'}
             aria-pressed={currentItem.essential}
           >
@@ -323,7 +324,6 @@ export function GearItemDetailPage() {
           <span className="pill">{categories.find((c) => c.id === currentItem.categoryId)?.name}</span>
           <span className={`pill pill-condition pill-condition-${currentItem.condition}`}>{currentItem.condition}</span>
           <span className="pill">×{currentItem.quantity} units</span>
-          {currentItem.essential && <span className="pill essential">Essential</span>}
         </div>
       </section>
 
