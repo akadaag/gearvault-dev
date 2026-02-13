@@ -169,7 +169,7 @@ input,
 textarea,
 select {
   width: 100%;
-  border: 1px solid var(--border);
+  border: 0.75px solid var(--border);
   background: var(--bg-elevated);
   color: var(--text);
   border-radius: var(--radius-sm);
@@ -235,7 +235,7 @@ button:disabled {
 
 button.ghost {
   background: transparent;
-  border: 1px solid var(--border);
+  border: 0.75px solid var(--border);
   color: var(--text);
   box-shadow: none;
 }
@@ -378,7 +378,7 @@ a {
 .topbar-filter-pill {
   min-height: 32px;
   border-radius: 999px;
-  border: 1px solid var(--border);
+  border: 0.75px solid var(--border);
   background: #f4f4f5;
   color: #4b5563;
   padding: 0.32rem 0.72rem;
@@ -434,7 +434,7 @@ a {
   align-items: center;
   gap: 0.35rem;
   border-radius: 10px;
-  border: 1px solid transparent;
+  border: 0.75px solid transparent;
   background: #f4f4f5;
   box-shadow: none;
   padding: 0 0.65rem;
@@ -528,7 +528,7 @@ a {
 }
 
 .catalog-filter-pill {
-  border: 1px solid var(--border);
+  border: 0.75px solid var(--border);
 }
 
 .catalog-filter-pill-icon {
@@ -697,7 +697,7 @@ a {
 /* Improved card design */
 .card {
   background: var(--card);
-  border: 1px solid var(--border);
+  border: 0.75px solid var(--border);
   border-radius: var(--radius-md);
   padding: 1rem;
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
@@ -735,7 +735,7 @@ a {
     bottom: calc(1rem + env(safe-area-inset-bottom));
     width: min(720px, calc(100% - 1.75rem));
     background: color-mix(in srgb, var(--bg-elevated) 95%, transparent);
-    border: 1px solid var(--border-subtle);
+    border: 0.75px solid var(--border-subtle);
     box-shadow: var(--shadow-lg);
     padding: 0.55rem;
     border-radius: var(--radius-lg);
@@ -922,7 +922,7 @@ a {
   align-items: center;
   gap: 0.375rem;
   border-radius: 999px;
-  border: 1px solid var(--border);
+  border: 0.75px solid var(--border);
   background: var(--bg-elevated);
   padding: 0.3rem 0.6rem;
   font-size: var(--text-xs);
@@ -943,7 +943,7 @@ a {
 }
 
 .pill {
-  border: 1px solid var(--border-subtle);
+  border: 0.75px solid var(--border-subtle);
   background: var(--surface-raised);
   border-radius: 999px;
   padding: 0.24rem 0.7rem;
@@ -1126,7 +1126,7 @@ a {
   gap: 0.375rem;
   min-width: 200px;
   background: var(--bg-elevated);
-  border: 1px solid var(--border);
+  border: 0.75px solid var(--border);
   border-radius: var(--radius-md);
   padding: 0.5rem;
   box-shadow: var(--shadow-md);
@@ -1206,7 +1206,7 @@ a {
   width: 100%;
   min-height: 44px;
   border-radius: 15px;
-  border: 1px solid var(--border);
+  border: 0.75px solid var(--border);
   background: var(--surface-raised);
   padding: 0.7rem 0.9rem 0.7rem 2.4rem;
   font-size: 0.9rem;
@@ -1237,7 +1237,7 @@ a {
   align-items: center;
   gap: 0.75rem;
   background: #ffffff;
-  border: 1px solid var(--border);
+  border: 0.75px solid var(--border);
   border-radius: var(--radius-md);
   padding: 1rem 1rem;
   min-height: 64px;
@@ -1408,7 +1408,7 @@ button.category-title-btn {
 
 .category-count-pill {
   border-radius: 999px;
-  border: 1px solid var(--border-subtle);
+  border: 0.75px solid var(--border-subtle);
   background: var(--surface-raised);
   color: var(--text-soft);
   font-size: var(--text-xs);
@@ -1505,7 +1505,7 @@ button.category-title-btn {
   min-width: 160px;
   padding: 0.5rem;
   border-radius: var(--radius-md);
-  border: 1px solid var(--border);
+  border: 0.75px solid var(--border);
   background: var(--bg-elevated);
   box-shadow: var(--shadow-md);
 }
@@ -1516,7 +1516,7 @@ button.category-title-btn {
   flex-direction: column;
   align-items: flex-start;
   gap: 0.5rem;
-  border: 1px solid var(--border);
+  border: 0.75px solid var(--border);
   border-radius: var(--radius-md);
   background: var(--card);
   padding: 1rem;
@@ -1528,7 +1528,7 @@ button.category-title-btn {
 
 .catalog-items-surface {
   background: var(--bg);
-  border: 1px solid var(--border-subtle);
+  border: 0.75px solid var(--border-subtle);
   border-radius: 14px;
   overflow: hidden;
 }
@@ -1578,7 +1578,7 @@ button.category-title-btn {
   width: 100%;
   height: 100%;
   border-radius: 12px;
-  border: 1px solid var(--border-subtle);
+  border: 0.75px solid var(--border-subtle);
   background: color-mix(in srgb, var(--text-soft) 14%, var(--surface-muted));
   color: color-mix(in srgb, var(--text) 85%, #000);
   display: flex;
@@ -1593,7 +1593,7 @@ button.category-title-btn {
   height: 100%;
   border-radius: 12px;
   object-fit: cover;
-  border: 1px solid var(--border-subtle);
+  border: 0.75px solid var(--border-subtle);
 }
 
 .catalog-item-arrow {
@@ -1689,7 +1689,7 @@ button.category-title-btn {
   width: 132px;
   height: 132px;
   border-radius: 20px;
-  border: 1px solid var(--border-subtle);
+  border: 0.75px solid var(--border-subtle);
   background: var(--surface-muted);
   display: flex;
   flex-direction: column;
@@ -1776,7 +1776,7 @@ button.category-title-btn {
 .gear-field-block textarea {
   min-height: 44px;
   border-radius: 15px;
-  border: 1px solid var(--border);
+  border: 0.75px solid var(--border);
   background: var(--surface-raised);
   padding: 0.7rem 0.9rem;
 }
@@ -1999,7 +1999,7 @@ button.category-title-btn {
   height: 72px;
   border-radius: var(--radius-sm);
   object-fit: cover;
-  border: 1px solid var(--border);
+  border: 0.75px solid var(--border);
   flex-shrink: 0;
   grid-area: icon;
 }
@@ -2073,7 +2073,7 @@ button.category-title-btn {
   padding: 0.5rem;
   background: var(--surface-muted);
   border-radius: var(--radius-xs);
-  border: 1px solid var(--border-subtle);
+  border: 0.75px solid var(--border-subtle);
 }
 
 .detail-label {
@@ -2098,7 +2098,7 @@ button.category-title-btn {
   padding: 0.75rem;
   background: var(--surface-muted);
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border-subtle);
+  border: 0.75px solid var(--border-subtle);
 }
 
 .detail-actions {
@@ -2457,7 +2457,7 @@ button.category-title-btn {
   align-items: center;
   gap: 0.75rem;
   background: #ffffff;
-  border: 1px solid var(--border);
+  border: 0.75px solid var(--border);
   border-radius: var(--radius-md);
   padding: 0.65rem 0.75rem;
   box-shadow: none;
@@ -2562,7 +2562,7 @@ button.category-title-btn {
   gap: 0.75rem;
   padding: 0.75rem 1rem;
   background: var(--surface-raised);
-  border: 1px solid var(--border-subtle);
+  border: 0.75px solid var(--border-subtle);
   border-radius: 10px;
   font-size: 0.95rem;
   font-weight: 500;
@@ -2665,7 +2665,7 @@ button.category-title-btn {
 }
 
 .detail-hero-card {
-  border: 1px solid var(--border-subtle);
+  border: 0.75px solid var(--border-subtle);
   border-radius: 14px;
   overflow: hidden;
   background: var(--surface-muted);
@@ -2738,7 +2738,7 @@ button.category-title-btn {
   gap: 0.75rem;
   padding: var(--space-4);
   background: var(--surface-raised);
-  border: 1px solid var(--border-subtle);
+  border: 0.75px solid var(--border-subtle);
   border-radius: var(--radius-md);
 }
 
@@ -2747,7 +2747,7 @@ button.category-title-btn {
   height: 80px;
   border-radius: var(--radius-sm);
   object-fit: cover;
-  border: 1px solid var(--border);
+  border: 0.75px solid var(--border);
   flex-shrink: 0;
 }
 
@@ -2764,7 +2764,7 @@ button.category-title-btn {
 .detail-page-section {
   padding: 0.9rem;
   background: var(--surface-raised);
-  border: 1px solid var(--border-subtle);
+  border: 0.75px solid var(--border-subtle);
   border-radius: 15px;
   margin: 0 0.7rem;
 }
@@ -2840,7 +2840,7 @@ button.category-title-btn {
 }
 
 .detail-quick-card {
-  border: 1px solid var(--border-subtle);
+  border: 0.75px solid var(--border-subtle);
   border-radius: 13px;
   background: var(--surface-raised);
   padding: 0.62rem;
@@ -3297,7 +3297,7 @@ button.category-title-btn {
 }
 
 .item-detail-sheet .detail-sheet-preview-card {
-  border: 1px solid var(--border-subtle);
+  border: 0.75px solid var(--border-subtle);
   border-radius: 15px;
   background: var(--surface-raised);
   padding: 0.8rem;
@@ -3363,7 +3363,7 @@ button.category-title-btn {
 .detail-input,
 .detail-textarea {
   width: 100%;
-  border: 1px solid var(--border);
+  border: 0.75px solid var(--border);
   background: var(--bg-elevated);
   border-radius: var(--radius-xs);
   padding: 0.5rem 0.75rem;
@@ -3434,7 +3434,7 @@ button.category-title-btn {
   font-size: 0.78rem;
   font-weight: 600;
   border-radius: 999px;   /* fully rounded, matches other pills */
-  border: 1px solid;
+  border: 0.75px solid;
   white-space: nowrap;
   line-height: 1.4;
 }
@@ -3528,7 +3528,7 @@ button.category-title-btn {
   height: 6px;
   border-radius: 999px;
   background: var(--bg-soft);
-  border: 1px solid var(--border);
+  border: 0.75px solid var(--border);
   overflow: hidden;
   margin-top: 0.35rem;
 }
@@ -3585,7 +3585,7 @@ button.category-title-btn {
 
 /* Checklist */
 .checklist-row {
-  border: 1px solid var(--border);
+  border: 0.75px solid var(--border);
   background: var(--bg-soft);
   border-radius: var(--radius-sm);
   padding: 0.875rem;
@@ -3596,7 +3596,7 @@ button.category-title-btn {
   width: 100%;
   max-width: 100%;
   border-radius: var(--radius-md);
-  border: 1px solid var(--border);
+  border: 0.75px solid var(--border);
 }
 
 @media (min-width: 768px) {
@@ -3620,7 +3620,7 @@ button.category-title-btn {
 
 .calendar-cell {
   min-height: 60px;
-  border: 1px solid var(--border);
+  border: 0.75px solid var(--border);
   background: var(--card);
   border-radius: var(--radius-xs);
   padding: 0.375rem;
@@ -3644,7 +3644,7 @@ button.category-title-btn {
   max-height: 240px;
   overflow: auto;
   background: var(--bg-soft);
-  border: 1px solid var(--border);
+  border: 0.75px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 0.875rem;
   font-size: 0.8125rem;
