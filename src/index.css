@@ -553,6 +553,18 @@ a {
   color: #fff;
 }
 
+.catalog-quick-filter-btn {
+  padding: 0.32rem;
+  min-width: 32px;
+  width: 32px;
+  border: 0.75px solid var(--border);
+}
+
+.catalog-quick-filter-btn.is-active {
+  border-color: #f2c94c;
+  background: #171a21;
+}
+
 .topbar-catalog {
   background: #ffffff;
   border-bottom: 1px solid var(--border-subtle);
@@ -586,37 +598,42 @@ a {
 }
 
 .topbar-add-btn {
-  min-height: auto;
+  min-height: 32px;
   width: auto;
-  padding: 0;
-  border: 0;
-  background: transparent;
+  padding: 0.28rem 0.62rem;
+  border: 0.75px solid var(--border);
+  background: #f4f4f5;
   box-shadow: none;
-  color: var(--text);
+  color: #4b5563;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.34rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
   transform: none;
+  cursor: pointer;
 }
 
 .topbar-add-btn:hover {
-  background: transparent;
-  color: var(--text);
+  background: #ececef;
+  color: #4b5563;
   box-shadow: none;
 }
 
 .topbar-add-btn:active {
-  background: transparent;
-  color: var(--text);
+  background: #f4f4f5;
+  color: #4b5563;
   transform: none;
 }
 
 .topbar-add-btn svg {
-  width: 21px;
-  height: 21px;
+  width: 18px;
+  height: 18px;
   fill: none;
   stroke: currentColor;
-  stroke-width: 2.2;
+  stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }

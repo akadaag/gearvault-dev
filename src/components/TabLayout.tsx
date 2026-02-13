@@ -226,24 +226,15 @@ export function TabLayout() {
                 {isEventsRoute && <p className="subtle topbar-item-count">{getEventsCounterText()}</p>}
                 {isSettingsRoute && syncMessage && <p className="subtle topbar-sync">{syncMessage}</p>}
               </div>
-              <div className="topbar-actions">
-                {isCatalogRoute && (
-                  <>
-                    <button
-                      className={`topbar-filter-pill${isTopFilterActive ? ' is-active' : ''}`}
-                      aria-label="Open filters"
-                      aria-pressed={isTopFilterActive}
-                      onClick={openCatalogFilters}
-                    >
-                      <span className="catalog-filter-pill-icon" aria-hidden="true">{filterIcon}</span>
-                      Filters
-                      {isTopFilterActive && <span className="topbar-filter-pill-dot" aria-hidden="true" />}
-                    </button>
-                    <button className="topbar-add-btn" aria-label="Add new item" onClick={openCatalogAdd}>
-                      {addIcon}
-                    </button>
-                  </>
-                )}
+               <div className="topbar-actions">
+                 {isCatalogRoute && (
+                   <>
+                     <button className="topbar-add-btn" aria-label="Add new item" onClick={openCatalogAdd}>
+                       <span className="topbar-add-icon">{addIcon}</span>
+                       Add
+                     </button>
+                   </>
+                 )}
                 {isEventsRoute && (
                   <>
                     <button
@@ -286,28 +277,36 @@ export function TabLayout() {
                   </div>
                 </div>
                 <div className="catalog-quick-filters" role="group" aria-label="Quick catalog filters">
-                  <button
-                    className={`catalog-quick-pill${quickFilter === 'all' ? ' is-active' : ''}`}
-                    onClick={() => setQuickFilter('all')}
-                  >
-                    All
-                    <span className="catalog-quick-pill-count">{gearCount}</span>
-                  </button>
-                  <button
-                    className={`catalog-quick-pill${quickFilter === 'essential' ? ' is-active' : ''}`}
-                    onClick={() => setQuickFilter('essential')}
-                  >
-                    Essential
-                    <span className="catalog-quick-pill-count">{essentialCount}</span>
-                  </button>
-                  <button
-                    className={`catalog-quick-pill${quickFilter === 'maintenance' ? ' is-active' : ''}`}
-                    onClick={() => setQuickFilter('maintenance')}
-                  >
-                    Needs Maintenance
-                    <span className="catalog-quick-pill-count">{maintenanceCount}</span>
-                  </button>
-                </div>
+                   <button
+                     className={`catalog-quick-pill${quickFilter === 'all' ? ' is-active' : ''}`}
+                     onClick={() => setQuickFilter('all')}
+                   >
+                     All
+                     <span className="catalog-quick-pill-count">{gearCount}</span>
+                   </button>
+                   <button
+                     className={`catalog-quick-pill${quickFilter === 'essential' ? ' is-active' : ''}`}
+                     onClick={() => setQuickFilter('essential')}
+                   >
+                     Essential
+                     <span className="catalog-quick-pill-count">{essentialCount}</span>
+                   </button>
+                   <button
+                     className={`catalog-quick-pill${quickFilter === 'maintenance' ? ' is-active' : ''}`}
+                     onClick={() => setQuickFilter('maintenance')}
+                   >
+                     Maintenance
+                     <span className="catalog-quick-pill-count">{maintenanceCount}</span>
+                   </button>
+                   <button
+                     className={`catalog-quick-pill catalog-quick-filter-btn${isTopFilterActive ? ' is-active' : ''}`}
+                     aria-label="Open filters"
+                     aria-pressed={isTopFilterActive}
+                     onClick={openCatalogFilters}
+                   >
+                     <span className="catalog-filter-pill-icon" aria-hidden="true">{filterIcon}</span>
+                   </button>
+                 </div>
               </div>
             )}
 
