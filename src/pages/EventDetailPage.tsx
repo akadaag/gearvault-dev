@@ -13,7 +13,7 @@ export function EventDetailPage() {
   const navigate = useNavigate();
   const event = useLiveQuery(() => (id ? db.events.get(id) : undefined), [id]);
   const catalog = useLiveQuery(() => db.gearItems.toArray(), [], []);
-  const [catalogItemId, setCatalogItemId] = useState('');
+
   const [showAddSheet, setShowAddSheet] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
   const [showShareSheet, setShowShareSheet] = useState(false);
@@ -76,23 +76,6 @@ export function EventDetailPage() {
     navigate('/events');
   }
 
-  async function addCatalogItem() {
-    const item = catalog.find((c) => c.id === catalogItemId);
-    if (!item) return;
-    const priority: PackingChecklistItem['priority'] = item.essential ? 'must-have' : 'nice-to-have';
-    const next: PackingChecklistItem[] = [...currentEvent.packingChecklist, {
-      id: makeId(),
-      eventId: currentEvent.id,
-      gearItemId: item.id,
-      name: item.name,
-      quantity: 1,
-      packed: false,
-      priority,
-    }];
-    setCatalogItemId('');
-    await setChecklist(next);
-    // sheet stays open for multi-add
-  }
 
   function togglePacked(itemId: string, checked: boolean) {
     const next = currentEvent.packingChecklist.map((row) =>
