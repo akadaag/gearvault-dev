@@ -1186,6 +1186,21 @@ a {
 
 .catalog-search-container {
   margin-bottom: 0.5rem;
+  position: relative;
+}
+
+.catalog-search-icon {
+  position: absolute;
+  left: 0.8rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  stroke: var(--text-soft);
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  pointer-events: none;
 }
 
 .catalog-search-input {
@@ -1194,7 +1209,7 @@ a {
   border-radius: 15px;
   border: 1px solid var(--border);
   background: var(--surface-raised);
-  padding: 0.7rem 0.9rem;
+  padding: 0.7rem 0.9rem 0.7rem 2.4rem;
   font-size: 0.9rem;
   outline: none;
 }
@@ -1217,18 +1232,20 @@ a {
   background: #ffffff;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 0.65rem 0.75rem;
+  padding: 0.85rem 1rem;
+  min-height: 56px;
 }
 
 .catalog-select-circle {
-  width: 18px;
-  height: 18px;
-  min-width: 18px;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
   min-height: unset;
   aspect-ratio: 1;
   border-radius: 50%;
   border: 1.5px solid var(--border);
   background: #ffffff;
+  color: inherit;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -1246,8 +1263,8 @@ a {
 }
 
 .catalog-select-circle svg {
-  width: 10px;
-  height: 10px;
+  width: 13px;
+  height: 13px;
   stroke: #ffffff;
   stroke-width: 2.5;
   fill: none;
@@ -1263,6 +1280,11 @@ a {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.catalog-select-item.selected {
+  border-color: #2562eb;
+  box-shadow: 0 0 0 2px rgba(37, 98, 235, 0.18);
 }
 
 @media (min-width: 768px) {
@@ -2291,12 +2313,6 @@ button.category-title-btn {
   font-size: 0.85rem;
 }
 
-.detail-progress-check-icon {
-  width: 18px;
-  height: 18px;
-  color: var(--border);
-}
-
 .detail-progress-label {
   display: inline-flex;
   align-items: center;
@@ -2307,8 +2323,27 @@ button.category-title-btn {
 }
 
 .detail-progress-label-icon {
-  width: 16px;
-  height: 16px;
+  width: 12px;
+  height: 12px;
+  color: var(--text-soft);
+}
+
+.detail-progress-label-circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.detail-progress-label-circle.complete {
+  border-color: var(--success);
+}
+
+.detail-progress-label-circle.complete .detail-progress-label-icon {
   color: var(--success);
 }
 
@@ -2392,9 +2427,9 @@ button.category-title-btn {
 
 /* Circle checkbox button */
 .detail-checklist-item .detail-checklist-circle {
-  width: 18px;
-  height: 18px;
-  min-width: 18px;
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
   min-height: unset;
   aspect-ratio: 1;
   border-radius: 50%;
@@ -2417,8 +2452,8 @@ button.category-title-btn {
 }
 
 .detail-checklist-item .detail-checklist-circle svg {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   stroke: #ffffff;
   stroke-width: 2.5;
   fill: none;
@@ -2885,7 +2920,7 @@ button.category-title-btn {
 .maintenance-add-sheet {
   z-index: 110;
   height: auto;
-  max-height: min(75dvh, 600px);
+  max-height: min(88dvh, 750px);
 }
 
 .maintenance-add-overlay {

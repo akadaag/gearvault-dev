@@ -60,7 +60,6 @@ export function EventDetailPage() {
   }
 
   async function resetChecklist() {
-    if (!window.confirm('Reset all packed statuses?')) return;
     try {
       const next = currentEvent.packingChecklist.map((i) => ({ ...i, packed: false }));
       await setChecklist(next);
@@ -281,20 +280,24 @@ export function EventDetailPage() {
           <button className="sheet-overlay" aria-label="Close add item sheet" onClick={() => setShowAddSheet(false)} />
           <aside className="filter-sheet card maintenance-add-sheet" aria-label="Add to packing list">
             <div className="maintenance-sheet-header">
-              <h3>Add to Packing List</h3>
+              <h3>Add from catalog</h3>
               <button className="sheet-close-btn" onClick={() => setShowAddSheet(false)} aria-label="Close">✕</button>
             </div>
-            <div className="maintenance-sheet-body stack-sm">
-              {/* Search bar */}
-              <div className="catalog-search-container">
-                <input
-                  type="text"
-                  className="catalog-search-input"
-                  placeholder="Search gear..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
+              <div className="maintenance-sheet-body stack-sm">
+                {/* Search bar */}
+                <div className="catalog-search-container">
+                  <svg className="catalog-search-icon" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="11" cy="11" r="8" />
+                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                  </svg>
+                  <input
+                    type="text"
+                    className="catalog-search-input"
+                    placeholder="Search gear..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
 
               {filteredAvailableItems.length === 0 ? (
                 <p className="subtle" style={{ textAlign: 'center', padding: '1rem 0' }}>
@@ -303,7 +306,7 @@ export function EventDetailPage() {
               ) : (
                 <div className="catalog-select-list">
                   {filteredAvailableItems.map((item) => (
-                    <div key={item.id} className="catalog-select-item">
+                    <div key={item.id} className={`catalog-select-item${selectedCatalogItems.has(item.id) ? ' selected' : ''}`}>
                       <button
                         className={`catalog-select-circle${selectedCatalogItems.has(item.id) ? ' selected' : ''}`}
                         onClick={() => toggleSelection(item.id)}
@@ -389,15 +392,14 @@ export function EventDetailPage() {
           <div className="card detail-progress-card">
             <div className="row between wrap">
               <span className="detail-progress-label">
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="detail-progress-label-icon">
-                  <polyline points="20 6 9 17 4 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
+                <span className={`detail-progress-label-circle${ratio === 100 ? ' complete' : ''}`}>
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="detail-progress-label-icon">
+                    <polyline points="20 6 9 17 4 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
                 Packing Progress
               </span>
               <span className="detail-progress-text">
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="detail-progress-check-icon">
-                  <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.5" />
-                </svg>
                 {packed}/{total}
               </span>
             </div>
