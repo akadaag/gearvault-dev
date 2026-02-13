@@ -1219,6 +1219,14 @@ a {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
 }
 
+.catalog-select-scroll-area {
+  overflow-y: auto;
+  max-height: 424px;
+  overscroll-behavior: contain;
+  flex: 1;
+  min-height: 0;
+}
+
 .catalog-select-list {
   display: flex;
   flex-direction: column;
@@ -1232,14 +1240,14 @@ a {
   background: #ffffff;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
-  padding: 0.85rem 1rem;
-  min-height: 56px;
+  padding: 1rem 1rem;
+  min-height: 64px;
 }
 
 .catalog-select-circle {
-  width: 24px;
-  height: 24px;
-  min-width: 24px;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
   min-height: unset;
   aspect-ratio: 1;
   border-radius: 50%;
@@ -1262,9 +1270,27 @@ a {
   border-color: #2562eb;
 }
 
+.catalog-select-circle:hover,
+.catalog-select-circle:focus,
+.catalog-select-circle:focus-visible,
+.catalog-select-circle:active {
+  background: #f5f5f5;
+  box-shadow: none;
+  transform: none;
+}
+
+.catalog-select-circle.selected:hover,
+.catalog-select-circle.selected:focus,
+.catalog-select-circle.selected:focus-visible,
+.catalog-select-circle.selected:active {
+  background: #2562eb;
+  box-shadow: none;
+  transform: none;
+}
+
 .catalog-select-circle svg {
-  width: 13px;
-  height: 13px;
+  width: 11px;
+  height: 11px;
   stroke: #ffffff;
   stroke-width: 2.5;
   fill: none;
@@ -1272,11 +1298,25 @@ a {
   stroke-linejoin: round;
 }
 
-.catalog-select-name {
+.catalog-select-info {
   flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.catalog-select-name {
   font-size: 0.9rem;
   color: var(--text);
-  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.catalog-select-brand {
+  font-size: 0.75rem;
+  color: var(--text-soft);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2323,8 +2363,8 @@ button.category-title-btn {
 }
 
 .detail-progress-label-icon {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   color: var(--text-soft);
 }
 
@@ -2937,7 +2977,7 @@ button.category-title-btn {
 }
 
 .maintenance-sheet-header h3 {
-  font-size: 1.45rem;
+  font-size: 1.1rem;
 }
 
 .maintenance-sheet-header .icon-compact-btn,

@@ -304,23 +304,28 @@ export function EventDetailPage() {
                   {searchQuery ? 'No items found matching your search.' : 'All catalog items are already in this list.'}
                 </p>
               ) : (
-                <div className="catalog-select-list">
-                  {filteredAvailableItems.map((item) => (
-                    <div key={item.id} className={`catalog-select-item${selectedCatalogItems.has(item.id) ? ' selected' : ''}`}>
-                      <button
-                        className={`catalog-select-circle${selectedCatalogItems.has(item.id) ? ' selected' : ''}`}
-                        onClick={() => toggleSelection(item.id)}
-                        aria-label={selectedCatalogItems.has(item.id) ? 'Deselect item' : 'Select item'}
-                      >
-                        {selectedCatalogItems.has(item.id) && (
-                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <polyline points="20 6 9 17 4 12" />
-                          </svg>
-                        )}
-                      </button>
-                      <span className="catalog-select-name">{item.name}</span>
-                    </div>
-                  ))}
+                <div className="catalog-select-scroll-area">
+                  <div className="catalog-select-list">
+                    {filteredAvailableItems.map((item) => (
+                      <div key={item.id} className={`catalog-select-item${selectedCatalogItems.has(item.id) ? ' selected' : ''}`}>
+                        <button
+                          className={`catalog-select-circle${selectedCatalogItems.has(item.id) ? ' selected' : ''}`}
+                          onClick={() => toggleSelection(item.id)}
+                          aria-label={selectedCatalogItems.has(item.id) ? 'Deselect item' : 'Select item'}
+                        >
+                          {selectedCatalogItems.has(item.id) && (
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                          )}
+                        </button>
+                        <div className="catalog-select-info">
+                          <span className="catalog-select-name">{item.name}</span>
+                          {item.brand && <span className="catalog-select-brand">{item.brand}</span>}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
@@ -413,12 +418,12 @@ export function EventDetailPage() {
         <div className="detail-checklist-header">
           <h3>Packing Checklist</h3>
           <div className="row" style={{ gap: '0.5rem' }}>
-            {total > 0 && (
-              <button
-                className="pill detail-event-action-pill"
-                onClick={resetChecklist}
-                aria-label="Reset packing list"
-              >
+             {total > 0 && (
+               <button
+                 className="pill detail-event-action-pill"
+                 onClick={() => void resetChecklist()}
+                 aria-label="Reset packing list"
+               >
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="detail-event-action-icon">
                   <path d="M1 4v6h6" />
                   <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
