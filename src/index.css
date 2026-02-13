@@ -2184,9 +2184,8 @@ button.category-title-btn {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  height: 100dvh;
-  padding: calc(var(--detail-topbar-height) + env(safe-area-inset-top, 0px)) 0 0;
-  overflow: hidden;
+  min-height: 100dvh;
+  padding: calc(var(--detail-topbar-height) + env(safe-area-inset-top, 0px)) 0 calc(var(--bottom-nav-clearance) + 0.75rem);
 }
 
 .detail-page-topbar {
@@ -2283,17 +2282,11 @@ button.category-title-btn {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  padding: 0 0.7rem calc(var(--bottom-nav-clearance) + 0.75rem);
-  overflow-y: auto;
-  flex: 1;
-  min-height: 0;
+  padding: 0 0.7rem;
 }
 
-/* Checklist items scrollable wrapper */
+/* Checklist items wrapper - no scroll behavior needed */
 .detail-checklist-items-wrapper {
-  overflow-y: auto;
-  flex: 1;
-  min-height: 0;
 }
 
 /* White topbar for event detail */
