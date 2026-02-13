@@ -2241,7 +2241,7 @@ button.category-title-btn {
 
 .detail-checklist-header h3 {
   margin: 0;
-  font-size: 1rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: var(--text-soft);
   text-transform: uppercase;
@@ -2313,6 +2313,8 @@ button.category-title-btn {
   cursor: pointer;
   transition: background 0.15s ease, border-color 0.15s ease;
   padding: 0;
+  box-sizing: content-box;
+  line-height: 1;
 }
 
 .detail-checklist-circle.packed {
