@@ -2201,6 +2201,21 @@ button.category-title-btn {
   box-shadow: none;
 }
 
+.detail-progress-text {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  color: var(--text-soft);
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.detail-progress-check-icon {
+  width: 18px;
+  height: 18px;
+  color: var(--border);
+}
+
 /* ── Checklist header (lives outside any card) ── */
 .detail-checklist-header {
   display: flex;

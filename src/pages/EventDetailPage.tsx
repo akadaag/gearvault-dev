@@ -332,7 +332,12 @@ export function EventDetailPage() {
           <div className="card detail-progress-card">
             <div className="row between wrap">
               <strong>Packing Progress</strong>
-              <span className="subtle">{packed}/{total} packed</span>
+              <span className="detail-progress-text">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="detail-progress-check-icon">
+                  <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.5" />
+                </svg>
+                {packed}/{total}
+              </span>
             </div>
             <div className="progress-track">
               <span style={{ width: `${ratio}%` }} className={ratio === 100 ? 'complete' : ''} />
