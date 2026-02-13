@@ -307,19 +307,17 @@ export function CatalogPage() {
                           <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
                         </svg>
                       ) : (
-                        <span />
+                        <span className="catalog-item-star-slot" />
                       )}
-                      <div className="catalog-item-main">
-                        <strong className="catalog-item-title">{item.name}</strong>
-                        {(item.brand || item.model) && (
-                          <span className="subtle catalog-item-subtitle">{item.brand} {item.model}</span>
-                        )}
-                        <div className="row wrap catalog-item-meta-row">
-                          <span className="pill">x{item.quantity}</span>
-                          <span className={`pill pill-condition pill-condition-${item.condition}`}>{item.condition}</span>
-                        </div>
-                      </div>
+                      <strong className="catalog-item-title">{item.name}</strong>
                       <div className="catalog-item-arrow" aria-hidden="true">›</div>
+                      {(item.brand || item.model) && (
+                        <span className="subtle catalog-item-subtitle">{item.brand} {item.model}</span>
+                      )}
+                      <div className="row wrap catalog-item-meta-row catalog-item-pills">{/* pills row */}
+                        <span className="pill">x{item.quantity}</span>
+                        <span className={`pill pill-condition pill-condition-${item.condition}`}>{item.condition}</span>
+                      </div>
                     </button>
                   ))}
                   </div>
