@@ -2020,7 +2020,7 @@ button.category-title-btn {
 }
 
 .detail-topbar-actions {
-  gap: 0.95rem;
+  gap: 1.25rem;
 }
 
 .detail-topbar-icon-btn {
@@ -2259,6 +2259,17 @@ button.category-title-btn {
   height: auto;
   min-height: unset;
   line-height: inherit;
+}
+
+.detail-event-action-pill:hover {
+  background: var(--surface-raised);
+  box-shadow: none;
+}
+
+.detail-event-action-pill:active {
+  background: var(--surface-raised);
+  box-shadow: none;
+  transform: none;
 }
 
 .detail-event-action-icon {
