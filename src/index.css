@@ -700,7 +700,6 @@ a {
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   padding: 1rem;
-  box-shadow: var(--shadow-sm);
   transition: box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
@@ -1531,7 +1530,6 @@ button.category-title-btn {
   background: var(--bg);
   border: 1px solid var(--border-subtle);
   border-radius: 14px;
-  box-shadow: var(--shadow-xs);
   overflow: hidden;
 }
 
@@ -2742,7 +2740,6 @@ button.category-title-btn {
   background: var(--surface-raised);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  box-shadow: var(--shadow-xs);
 }
 
 .detail-page-photo {
@@ -2769,7 +2766,6 @@ button.category-title-btn {
   background: var(--surface-raised);
   border: 1px solid var(--border-subtle);
   border-radius: 15px;
-  box-shadow: var(--shadow-xs);
   margin: 0 0.7rem;
 }
 
@@ -3391,7 +3387,6 @@ button.category-title-btn {
   border-color: color-mix(in srgb, var(--accent) 35%, var(--border));
   background: var(--card);
   color: var(--text);
-  box-shadow: var(--shadow-md);
   transform: translateY(-2px);
 }
 
@@ -3602,7 +3597,6 @@ button.category-title-btn {
   max-width: 100%;
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
-  box-shadow: var(--shadow-sm);
 }
 
 @media (min-width: 768px) {
