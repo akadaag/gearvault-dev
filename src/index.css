@@ -2299,7 +2299,7 @@ button.category-title-btn {
 }
 
 /* Circle checkbox button */
-.detail-checklist-circle {
+.detail-checklist-item .detail-checklist-circle {
   width: 18px;
   height: 18px;
   min-width: 18px;
@@ -2319,12 +2319,12 @@ button.category-title-btn {
   line-height: 1;
 }
 
-.detail-checklist-circle.packed {
+.detail-checklist-item .detail-checklist-circle.packed {
   background: #22a861;
   border-color: #22a861;
 }
 
-.detail-checklist-circle svg {
+.detail-checklist-item .detail-checklist-circle svg {
   width: 10px;
   height: 10px;
   stroke: #ffffff;
