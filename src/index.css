@@ -722,7 +722,7 @@ a {
 
 .content-immersive {
   margin-top: 0;
-  height: 100dvh;
+  height: calc(100dvh - var(--detail-topbar-height));
   padding: 0;
 }
 
@@ -2184,8 +2184,8 @@ button.category-title-btn {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  min-height: 100dvh;
-  padding: calc(var(--detail-topbar-height) + env(safe-area-inset-top, 0px)) 0 calc(var(--bottom-nav-clearance) + 0.75rem);
+  min-height: calc(100dvh - var(--detail-topbar-height));
+  padding: 0 0 calc(var(--bottom-nav-clearance) + 0.75rem);
 }
 
 .detail-page-topbar {
