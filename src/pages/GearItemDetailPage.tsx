@@ -46,6 +46,7 @@ export function GearItemDetailPage() {
   const [showMaintenanceSheet, setShowMaintenanceSheet] = useState(false);
   const [showImageViewer, setShowImageViewer] = useState(false);
   const [editError, setEditError] = useState('');
+  const [essentialNotice, setEssentialNotice] = useState('');
   const [draft, setDraft] = useState<GearFormDraft>(emptyDraft);
 
   useEffect(() => {
@@ -70,6 +71,12 @@ export function GearItemDetailPage() {
       unlockSheetScroll();
     };
   }, [showImageViewer]);
+
+  useEffect(() => {
+    if (!essentialNotice) return;
+    const timeoutId = window.setTimeout(() => setEssentialNotice(''), 2200);
+    return () => window.clearTimeout(timeoutId);
+  }, [essentialNotice]);
 
   const related = useMemo(
     () => allItems.filter((g) => item?.relatedItemIds?.includes(g.id)),
@@ -213,6 +220,12 @@ export function GearItemDetailPage() {
     setEventTarget('');
   }
 
+  async function toggleEssential() {
+    const nextEssential = !currentItem.essential;
+    await save({ essential: nextEssential });
+    setEssentialNotice(nextEssential ? 'Added to essentials' : 'Removed from essentials');
+  }
+
   return (
     <section className="detail-page detail-page-immersive">
       <div className="detail-page-topbar">
@@ -291,7 +304,20 @@ export function GearItemDetailPage() {
       )}
 
       <section className="detail-page-section detail-page-main-info detail-title-block">
-        <h2>{currentItem.name}</h2>
+        <div className="detail-title-row">
+          <h2>{currentItem.name}</h2>
+          <button
+            type="button"
+            className={`detail-essential-btn${currentItem.essential ? ' is-active' : ''}`}
+            onClick={() => void toggleEssential()}
+            aria-label={currentItem.essential ? 'Remove from essentials' : 'Add to essentials'}
+            aria-pressed={currentItem.essential}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+              <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
+            </svg>
+          </button>
+        </div>
         <p className="subtle detail-main-subtitle">{[currentItem.brand, currentItem.model].filter(Boolean).join(' ') || 'No brand/model yet'}</p>
         <div className="row wrap detail-badges">
           <span className="pill">{categories.find((c) => c.id === currentItem.categoryId)?.name}</span>
@@ -479,6 +505,12 @@ export function GearItemDetailPage() {
         onUpdateEntry={updateMaintenanceEntry}
         onDeleteEntry={deleteMaintenanceEntry}
       />
+
+      {essentialNotice && (
+        <div className="detail-feedback-toast" role="status" aria-live="polite">
+          {essentialNotice}
+        </div>
+      )}
     </section>
   );
 }
