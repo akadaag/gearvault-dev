@@ -450,7 +450,7 @@ export function EventDetailPage() {
 
         {/* Checklist items — each a compact single-line card */}
         {total > 0 && (
-          <div className="stack-sm">
+          <div className="detail-checklist-items-wrapper stack-sm">
             {currentEvent.packingChecklist.map((item) => (
               <div key={item.id} className="detail-checklist-item">
                 {/* Circle checkbox */}
