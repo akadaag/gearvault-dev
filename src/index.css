@@ -2184,7 +2184,7 @@ button.category-title-btn {
   box-shadow: none;
 }
 
-/* Notes card styling — just the card, no inner box, no shadow */
+/* Notes card — read-only, no shadow */
 .detail-event-notes-card {
   background: #ffffff !important;
   box-shadow: none;
@@ -2194,6 +2194,152 @@ button.category-title-btn {
   word-break: break-word;
   overflow-wrap: break-word;
   color: var(--text);
+}
+
+/* Progress card — no shadow */
+.detail-progress-card {
+  box-shadow: none;
+}
+
+/* ── Checklist header (lives outside any card) ── */
+.detail-checklist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 0.1rem;
+}
+
+.detail-checklist-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Pill-style action buttons: Reset + Add */
+.detail-event-action-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+  font-size: 0.84rem;
+  font-weight: 600;
+  padding: 0.24rem 0.7rem;
+  height: auto;
+  line-height: inherit;
+}
+
+.detail-event-action-icon {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+/* Empty checklist card */
+.detail-checklist-empty {
+  text-align: center;
+  padding: 2rem 1rem !important;
+  color: var(--text-soft);
+  font-size: 0.9rem;
+  box-shadow: none;
+  background: #ffffff;
+  min-height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ── Individual checklist item — compact single-line card ── */
+.detail-checklist-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.75rem;
+  box-shadow: none;
+}
+
+/* Circle checkbox button */
+.detail-checklist-circle {
+  width: 22px;
+  height: 22px;
+  min-width: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: #ffffff;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  padding: 0;
+}
+
+.detail-checklist-circle.packed {
+  background: #22a861;
+  border-color: #22a861;
+}
+
+.detail-checklist-circle svg {
+  width: 12px;
+  height: 12px;
+  stroke: #ffffff;
+  stroke-width: 2.8;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Item name */
+.detail-checklist-name {
+  flex: 1;
+  font-size: 0.9rem;
+  color: var(--text-soft);
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Remove × button */
+.detail-checklist-remove {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-soft);
+  padding: 0;
+  opacity: 0.5;
+  transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.detail-checklist-remove:hover {
+  opacity: 1;
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+}
+
+.detail-checklist-remove svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
 }
 
 /* Share sheet */

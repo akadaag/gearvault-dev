@@ -13,9 +13,8 @@ export function EventDetailPage() {
   const navigate = useNavigate();
   const event = useLiveQuery(() => (id ? db.events.get(id) : undefined), [id]);
   const catalog = useLiveQuery(() => db.gearItems.toArray(), [], []);
-  const [newItemName, setNewItemName] = useState('');
   const [catalogItemId, setCatalogItemId] = useState('');
-  const [showAddItem, setShowAddItem] = useState(false);
+  const [showAddSheet, setShowAddSheet] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
   const [showShareSheet, setShowShareSheet] = useState(false);
 
@@ -26,10 +25,8 @@ export function EventDetailPage() {
   const total = currentEvent.packingChecklist.length;
   const ratio = total > 0 ? Math.round((packed / total) * 100) : 0;
 
-  // Calculate days until event
   const daysInfo = currentEvent.dateTime ? getDaysUntilEvent(currentEvent.dateTime) : null;
 
-  // Format date and time
   const formattedDate = currentEvent.dateTime
     ? new Date(currentEvent.dateTime).toLocaleDateString('en-GB', {
         day: '2-digit',
@@ -72,22 +69,6 @@ export function EventDetailPage() {
     navigate('/events');
   }
 
-  async function addManualItem() {
-    if (!newItemName.trim()) return;
-    const next: PackingChecklistItem[] = [...currentEvent.packingChecklist, {
-      id: makeId(),
-      eventId: currentEvent.id,
-      gearItemId: null,
-      name: newItemName.trim(),
-      quantity: 1,
-      packed: false,
-      priority: 'optional' as const,
-    }];
-    setNewItemName('');
-    await setChecklist(next);
-    setShowAddItem(false);
-  }
-
   async function addCatalogItem() {
     const item = catalog.find((c) => c.id === catalogItemId);
     if (!item) return;
@@ -103,15 +84,19 @@ export function EventDetailPage() {
     }];
     setCatalogItemId('');
     await setChecklist(next);
-    setShowAddItem(false);
+    // sheet stays open for multi-add
   }
 
-  function move(index: number, direction: -1 | 1) {
-    const target = index + direction;
-    if (target < 0 || target >= currentEvent.packingChecklist.length) return;
-    const copy = [...currentEvent.packingChecklist];
-    [copy[index], copy[target]] = [copy[target], copy[index]];
-    void setChecklist(copy);
+  function togglePacked(itemId: string, checked: boolean) {
+    const next = currentEvent.packingChecklist.map((row) =>
+      row.id === itemId ? { ...row, packed: checked } : row,
+    );
+    void setChecklist(next);
+  }
+
+  function removeItem(itemId: string) {
+    const next = currentEvent.packingChecklist.filter((i) => i.id !== itemId);
+    void setChecklist(next);
   }
 
   function exportEventJson() {
@@ -123,6 +108,11 @@ export function EventDetailPage() {
     a.click();
     URL.revokeObjectURL(url);
   }
+
+  // Catalog items not yet in the checklist
+  const availableCatalogItems = catalog.filter(
+    (c) => !currentEvent.packingChecklist.some((p) => p.gearItemId === c.id),
+  );
 
   return (
     <section className="detail-page detail-page-immersive detail-page-event">
@@ -138,7 +128,7 @@ export function EventDetailPage() {
         </button>
         <div className="row detail-topbar-actions">
 
-          {/* Share button - opens share sheet */}
+          {/* Share button */}
           <button
             className="detail-topbar-icon-btn"
             aria-label="Share & export event"
@@ -201,23 +191,17 @@ export function EventDetailPage() {
             <div className="detail-share-sheet-body">
               <button
                 className="detail-share-action"
-                onClick={() => {
-                  exportEventToPdf(currentEvent);
-                  setShowShareSheet(false);
-                }}
+                onClick={() => { exportEventToPdf(currentEvent); setShowShareSheet(false); }}
               >
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <path d="M14 2H6a2 2 0 0 0 2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                   <path d="M14 2v6h6" />
                 </svg>
                 <span>Export PDF</span>
               </button>
               <button
                 className="detail-share-action"
-                onClick={() => {
-                  exportEventJson();
-                  setShowShareSheet(false);
-                }}
+                onClick={() => { exportEventJson(); setShowShareSheet(false); }}
               >
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                   <rect x="3" y="3" width="18" height="18" rx="2" />
@@ -227,10 +211,7 @@ export function EventDetailPage() {
               </button>
               <button
                 className="detail-share-action"
-                onClick={() => {
-                  window.print();
-                  setShowShareSheet(false);
-                }}
+                onClick={() => { window.print(); setShowShareSheet(false); }}
               >
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                   <polyline points="6 9 6 2 18 2 18 9" />
@@ -254,12 +235,51 @@ export function EventDetailPage() {
         </>
       )}
 
+      {/* ── ADD ITEM SHEET ── */}
+      {showAddSheet && (
+        <>
+          <button className="sheet-overlay" aria-label="Close add item sheet" onClick={() => setShowAddSheet(false)} />
+          <aside className="filter-sheet card maintenance-add-sheet" aria-label="Add to packing list">
+            <div className="maintenance-sheet-header">
+              <h3>Add to Packing List</h3>
+              <button className="sheet-close-btn" onClick={() => setShowAddSheet(false)} aria-label="Close">✕</button>
+            </div>
+            <div className="maintenance-sheet-body stack-sm">
+              {availableCatalogItems.length === 0 ? (
+                <p className="subtle" style={{ textAlign: 'center', padding: '1rem 0' }}>
+                  All catalog items are already in this list.
+                </p>
+              ) : (
+                <label className="gear-field-block">
+                  <span>Choose from your catalog</span>
+                  <select
+                    value={catalogItemId}
+                    onChange={(e) => setCatalogItemId(e.target.value)}
+                  >
+                    <option value="">Select an item…</option>
+                    {availableCatalogItems.map((item) => (
+                      <option key={item.id} value={item.id}>{item.name}</option>
+                    ))}
+                  </select>
+                </label>
+              )}
+            </div>
+            <div className="maintenance-sheet-footer">
+              <button
+                onClick={() => void addCatalogItem()}
+                disabled={!catalogItemId}
+              >
+                Add to List
+              </button>
+            </div>
+          </aside>
+        </>
+      )}
+
       {/* ── HERO SECTION ── */}
       <div className="detail-event-hero">
-        {/* Event title row with days pill */}
         <div className="detail-event-title-row">
           <h1 className="detail-event-title">{currentEvent.title}</h1>
-          {/* Days pill - inline with title, vertically centered */}
           {daysInfo && (
             <span className={`pill event-days ${daysInfo.colorClass}`}>
               {daysInfo.text}
@@ -267,10 +287,8 @@ export function EventDetailPage() {
           )}
         </div>
 
-        {/* Type — plain text, no pill */}
         <span className="detail-event-type">{currentEvent.type}</span>
 
-        {/* Date/Time + Location + Client — one row, SVG icons, no emojis */}
         {(currentEvent.dateTime || currentEvent.location || currentEvent.client) && (
           <div className="detail-event-meta-row">
             {currentEvent.dateTime && (
@@ -299,142 +317,101 @@ export function EventDetailPage() {
         )}
       </div>
 
-      {/* ── CONTENT CARDS ── */}
+      {/* ── CONTENT ── */}
       <div className="detail-event-body">
 
-        {/* Notes Card - only if notes exist, read-only, no label */}
+        {/* Notes — read-only, only when present */}
         {currentEvent.notes && (
           <div className="card detail-event-notes-card">
             {currentEvent.notes}
           </div>
         )}
 
-        {/* Packing Progress Card */}
-        <div className="card stack-md">
-          <div className="row between wrap">
-            <strong>Packing Progress</strong>
-            <span>{packed}/{total} items packed</span>
+        {/* Packing Progress — only when items exist */}
+        {total > 0 && (
+          <div className="card detail-progress-card">
+            <div className="row between wrap">
+              <strong>Packing Progress</strong>
+              <span className="subtle">{packed}/{total} packed</span>
+            </div>
+            <div className="progress-track">
+              <span style={{ width: `${ratio}%` }} className={ratio === 100 ? 'complete' : ''} />
+            </div>
           </div>
-          <div className="progress-track">
-            <span style={{ width: `${ratio}%` }} />
-          </div>
-        </div>
+        )}
 
-        {/* Packing Checklist Card */}
-        <div className="card stack-md">
-          <div className="row between wrap">
-            <h3>Packing Checklist ({total})</h3>
-            <div className="row wrap" style={{ gap: '0.5rem' }}>
-              {total > 0 && (
-                <button className="ghost danger" onClick={() => void resetChecklist()} style={{ fontSize: '0.9rem', padding: '0.35rem 0.75rem' }}>
-                  Reset
-                </button>
-              )}
-              <button onClick={() => setShowAddItem((prev) => !prev)}>
-                {showAddItem ? 'Hide' : '+ Add Item'}
+        {/* ── CHECKLIST HEADER (outside any card) ── */}
+        <div className="detail-checklist-header">
+          <h3>Packing Checklist</h3>
+          <div className="row" style={{ gap: '0.5rem' }}>
+            {total > 0 && (
+              <button
+                className="pill detail-event-action-pill"
+                onClick={() => void resetChecklist()}
+                aria-label="Reset packing list"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="detail-event-action-icon">
+                  <path d="M1 4v6h6" />
+                  <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" />
+                </svg>
+                Reset
               </button>
-            </div>
+            )}
+            <button
+              className="pill detail-event-action-pill detail-event-add-pill"
+              onClick={() => setShowAddSheet(true)}
+              aria-label="Add item to packing list"
+            >
+              + Add
+            </button>
           </div>
-
-          {showAddItem && (
-            <div className="stack-sm">
-              <label className="stack-sm">
-                <strong>Add from Catalog</strong>
-                <select value={catalogItemId} onChange={(e) => setCatalogItemId(e.target.value)}>
-                  <option value="">Choose an item</option>
-                  {catalog.map((item) => (
-                    <option key={item.id} value={item.id}>
-                      {item.name}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <button onClick={() => void addCatalogItem()} disabled={!catalogItemId}>Add from Catalog</button>
-
-              <hr />
-
-              <label className="stack-sm">
-                <strong>Add Custom Item</strong>
-                <input
-                  value={newItemName}
-                  onChange={(e) => setNewItemName(e.target.value)}
-                  placeholder="Item name"
-                  onKeyDown={(e) => e.key === 'Enter' && void addManualItem()}
-                />
-              </label>
-              <button onClick={() => void addManualItem()} disabled={!newItemName.trim()}>Add Manual Item</button>
-            </div>
-          )}
-
-          {currentEvent.packingChecklist.length === 0 ? (
-            <div className="empty">
-              <h4>No items in checklist</h4>
-              <p>Add items to start packing</p>
-            </div>
-          ) : (
-            <div className="stack-sm">
-              {currentEvent.packingChecklist.map((item, idx) => (
-                <div key={item.id} className="checklist-row stack-sm">
-                  <div className="row between wrap">
-                    <label className="checkbox-inline">
-                      <input
-                        type="checkbox"
-                        checked={item.packed}
-                        onChange={(e) => {
-                          const next = currentEvent.packingChecklist.map((row) =>
-                            row.id === item.id ? { ...row, packed: e.target.checked } : row,
-                          );
-                          void setChecklist(next);
-                        }}
-                      />
-                      <strong>{item.name} × {item.quantity}</strong>
-                    </label>
-                    <div className="row wrap">
-                      <button className="ghost icon-compact-btn" onClick={() => move(idx, -1)} disabled={idx === 0}>
-                        ↑
-                      </button>
-                      <button className="ghost icon-compact-btn" onClick={() => move(idx, 1)} disabled={idx === currentEvent.packingChecklist.length - 1}>
-                        ↓
-                      </button>
-                    </div>
-                  </div>
-
-                  <div className="row wrap">
-                    <select
-                      value={item.priority ?? 'optional'}
-                      onChange={(e) => {
-                        const next = currentEvent.packingChecklist.map((row) =>
-                          row.id === item.id
-                            ? {
-                                ...row,
-                                priority: e.target.value as typeof row.priority,
-                              }
-                            : row,
-                        );
-                        void setChecklist(next);
-                      }}
-                    >
-                      <option value="must-have">Must-have</option>
-                      <option value="nice-to-have">Nice-to-have</option>
-                      <option value="optional">Optional</option>
-                    </select>
-                    <button
-                      className="ghost danger"
-                      onClick={() => {
-                        const next = currentEvent.packingChecklist.filter((i) => i.id !== item.id);
-                        void setChecklist(next);
-                      }}
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
         </div>
 
-        {/* Missing Items Card (if any) */}
+        {/* Empty state */}
+        {total === 0 && (
+          <div className="card detail-checklist-empty">
+            No items in the checklist
+          </div>
+        )}
+
+        {/* Checklist items — each a compact single-line card */}
+        {total > 0 && (
+          <div className="stack-sm">
+            {currentEvent.packingChecklist.map((item) => (
+              <div key={item.id} className="detail-checklist-item">
+                {/* Circle checkbox */}
+                <button
+                  className={`detail-checklist-circle${item.packed ? ' packed' : ''}`}
+                  onClick={() => togglePacked(item.id, !item.packed)}
+                  aria-label={item.packed ? 'Mark as unpacked' : 'Mark as packed'}
+                >
+                  {item.packed && (
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  )}
+                </button>
+
+                {/* Item name */}
+                <span className="detail-checklist-name">{item.name}</span>
+
+                {/* Remove button */}
+                <button
+                  className="detail-checklist-remove"
+                  onClick={() => removeItem(item.id)}
+                  aria-label={`Remove ${item.name}`}
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                  </svg>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Missing Items (AI-suggested) */}
         {currentEvent.missingItems.length > 0 && (
           <div className="card stack-md">
             <h3>Missing Items ({currentEvent.missingItems.length})</h3>
@@ -452,10 +429,7 @@ export function EventDetailPage() {
                       onChange={(e) => {
                         const next = currentEvent.missingItems.map((row) =>
                           row.id === item.id
-                            ? {
-                                ...row,
-                                resolvedStatus: e.target.value as typeof row.resolvedStatus,
-                              }
+                            ? { ...row, resolvedStatus: e.target.value as typeof row.resolvedStatus }
                             : row,
                         );
                         void setMissing(next);
