@@ -2241,7 +2241,7 @@ button.category-title-btn {
 
 .detail-checklist-header h3 {
   margin: 0;
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--text-soft);
   text-transform: uppercase;
@@ -2257,6 +2257,7 @@ button.category-title-btn {
   font-weight: 600;
   padding: 0.24rem 0.7rem;
   height: auto;
+  min-height: unset;
   line-height: inherit;
 }
 
@@ -2302,6 +2303,7 @@ button.category-title-btn {
   width: 18px;
   height: 18px;
   min-width: 18px;
+  min-height: unset;
   aspect-ratio: 1;
   border-radius: 50%;
   border: 1.5px solid var(--border);
@@ -3276,9 +3278,9 @@ button.category-title-btn {
 }
 
 .pill.event-days.urgent {
-  background: color-mix(in srgb, var(--warning) 12%, transparent);
-  border-color: color-mix(in srgb, var(--warning) 30%, var(--border));
-  color: var(--warning);
+  background: color-mix(in srgb, #eab308 15%, transparent);
+  border-color: color-mix(in srgb, #eab308 35%, var(--border));
+  color: #b45309;
 }
 
 .pill.event-days.upcoming {
