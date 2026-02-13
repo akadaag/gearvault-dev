@@ -1605,7 +1605,7 @@ button.category-title-btn {
   border-radius: 0;
   display: grid;
   grid-template-columns: 52px auto 1fr auto;
-  align-items: center;
+  align-items: start;
   gap: 0.5rem;
   width: 100%;
   background: var(--card);
@@ -1633,6 +1633,7 @@ button.category-title-btn {
   width: 52px;
   height: 52px;
   flex-shrink: 0;
+  align-self: center;
 }
 
 .catalog-item-icon {
@@ -1662,6 +1663,7 @@ button.category-title-btn {
   color: var(--text-soft);
   line-height: 1;
   padding-left: 0.5rem;
+  align-self: center;
 }
 
 .catalog-item-main {
@@ -1691,7 +1693,8 @@ button.category-title-btn {
   stroke-linecap: round;
   stroke-linejoin: round;
   display: block;
-  align-self: center;
+  align-self: start;
+  margin-top: 0.28rem;
 }
 
 .catalog-item-subtitle {
@@ -2117,8 +2120,8 @@ button.category-title-btn {
   stroke-linecap: round;
   stroke-linejoin: round;
   grid-area: star;
-  align-self: center;
-  margin-top: 0.1rem;
+  align-self: start;
+  margin-top: 0.32rem;
 }
 
 .detail-sheet-star-placeholder {
