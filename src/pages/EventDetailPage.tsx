@@ -17,7 +17,6 @@ export function EventDetailPage() {
   const [showAddSheet, setShowAddSheet] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
   const [showShareSheet, setShowShareSheet] = useState(false);
-  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [selectedCatalogItems, setSelectedCatalogItems] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -60,14 +59,10 @@ export function EventDetailPage() {
     });
   }
 
-  function requestResetChecklist() {
-    setShowResetConfirm(true);
-  }
-
-  async function confirmResetChecklist() {
+  async function resetChecklist() {
+    if (!window.confirm('Are you sure you want to remove all items?')) return;
     try {
       await setChecklist([]);
-      setShowResetConfirm(false);
     } catch (error) {
       console.error('Failed to reset checklist:', error);
       alert('Failed to reset checklist. Please try again.');
@@ -346,48 +341,6 @@ export function EventDetailPage() {
         </>
       )}
 
-      {/* ── RESET CONFIRM SHEET ── */}
-      {showResetConfirm && (
-        <>
-          <button
-            className="sheet-overlay"
-            aria-label="Close reset confirmation"
-            onClick={() => setShowResetConfirm(false)}
-          />
-          <aside className="filter-sheet card detail-reset-confirm-sheet" aria-label="Confirm reset checklist">
-            <div className="maintenance-sheet-header">
-              <h3>Remove all items?</h3>
-              <button
-                className="sheet-close-btn"
-                onClick={() => setShowResetConfirm(false)}
-                aria-label="Close"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="maintenance-sheet-body stack-sm">
-              <p className="subtle">This will remove all items from the packing checklist. You can add them again anytime.</p>
-            </div>
-            <div className="maintenance-sheet-footer detail-reset-confirm-footer">
-              <button
-                type="button"
-                className="detail-reset-cancel-btn"
-                onClick={() => setShowResetConfirm(false)}
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="detail-reset-delete-btn"
-                onClick={() => void confirmResetChecklist()}
-              >
-                Yes, remove all
-              </button>
-            </div>
-          </aside>
-        </>
-      )}
-
       {/* ── HERO SECTION ── */}
       <div className="detail-event-hero">
         <div className="detail-event-title-row">
@@ -468,7 +421,7 @@ export function EventDetailPage() {
               {total > 0 && (
                 <button
                   className="pill detail-event-action-pill"
-                  onClick={requestResetChecklist}
+                  onClick={() => void resetChecklist()}
                   aria-label="Reset packing list"
                 >
                  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="detail-event-action-icon">

@@ -3821,21 +3821,3 @@ html {
     transform: scale(0.98);
   }
 }
-
-.detail-reset-confirm-footer {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.detail-reset-cancel-btn {
-  background: var(--surface-raised);
-  color: var(--text);
-  border: 0.75px solid var(--border);
-  box-shadow: none;
-}
-
-.detail-reset-delete-btn {
-  background: var(--danger);
-  color: #fff;
-  box-shadow: none;
-}
