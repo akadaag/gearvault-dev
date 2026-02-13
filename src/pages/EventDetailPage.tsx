@@ -331,7 +331,12 @@ export function EventDetailPage() {
         {total > 0 && (
           <div className="card detail-progress-card">
             <div className="row between wrap">
-              <strong>Packing Progress</strong>
+              <span className="detail-progress-label">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="detail-progress-label-icon">
+                  <polyline points="20 6 9 17 4 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+                Packing Progress
+              </span>
               <span className="detail-progress-text">
                 <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" className="detail-progress-check-icon">
                   <circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" strokeWidth="1.5" />
