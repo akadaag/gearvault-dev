@@ -2205,7 +2205,7 @@ button.category-title-btn {
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
-  color: var(--text-soft);
+  color: var(--text);
   margin: 0;
   font-size: 0.85rem;
 }
@@ -2243,7 +2243,8 @@ button.category-title-btn {
   margin: 0;
   font-size: 1rem;
   font-weight: 600;
-  color: var(--text);
+  color: var(--text-soft);
+  text-transform: uppercase;
 }
 
 /* Pill-style action buttons: Reset + Add */
@@ -2298,9 +2299,10 @@ button.category-title-btn {
 
 /* Circle checkbox button */
 .detail-checklist-circle {
-  width: 22px;
-  height: 22px;
-  min-width: 22px;
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  aspect-ratio: 1;
   border-radius: 50%;
   border: 1.5px solid var(--border);
   background: #ffffff;
@@ -2319,10 +2321,10 @@ button.category-title-btn {
 }
 
 .detail-checklist-circle svg {
-  width: 12px;
-  height: 12px;
+  width: 10px;
+  height: 10px;
   stroke: #ffffff;
-  stroke-width: 2.8;
+  stroke-width: 2.5;
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -2332,7 +2334,7 @@ button.category-title-btn {
 .detail-checklist-name {
   flex: 1;
   font-size: 0.9rem;
-  color: var(--text-soft);
+  color: var(--text);
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
