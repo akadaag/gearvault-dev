@@ -50,8 +50,6 @@ export const defaultSettings: AppSettings = {
   id: 'app-settings',
   demoDataEnabled: false,
   defaultCurrency: 'EUR',
-  aiProvider: 'mock',
-  apiKey: '',
   syncEnabled: false,
   theme: 'system',
   aiLearningEnabled: true,

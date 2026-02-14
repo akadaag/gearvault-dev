@@ -21,6 +21,7 @@ export interface ChecklistItemWithSection {
   notes?: string;
   priority: 'must-have' | 'nice-to-have' | 'optional';
   section: string;
+  role?: 'primary' | 'backup' | 'alternative' | 'standard';
 }
 
 /**
@@ -41,9 +42,13 @@ export function groupBySection(
     grouped[section].push(item);
   }
 
-  // Sort each section by priority
+  // Sort each section by priority, then by role
   for (const section of Object.keys(grouped)) {
-    grouped[section].sort((a, b) => priorityRank(a.priority) - priorityRank(b.priority));
+    grouped[section].sort((a, b) => {
+      const priorityDiff = priorityRank(a.priority) - priorityRank(b.priority);
+      if (priorityDiff !== 0) return priorityDiff;
+      return roleRank(a.role) - roleRank(b.role);
+    });
   }
 
   // Return in canonical section order (only sections that have items)
@@ -61,6 +66,13 @@ export function priorityRank(p: string): number {
   if (p === 'must-have') return 0;
   if (p === 'nice-to-have') return 1;
   return 2;
+}
+
+export function roleRank(r: string | undefined): number {
+  if (r === 'primary') return 0;
+  if (r === 'backup') return 1;
+  if (r === 'alternative') return 2;
+  return 3; // 'standard' or undefined
 }
 
 export function priorityLabel(p: string): string {

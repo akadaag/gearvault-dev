@@ -5,6 +5,7 @@ import { defaultCategories } from '../constants/defaultCategories';
 import { useAuth } from '../hooks/useAuth';
 import { seedDemoData, removeDemoData } from '../lib/demoData';
 import { syncNow } from '../services/sync';
+import { classificationQueue } from '../lib/gearClassifier';
 import type { AppSettings, ExportBundle } from '../types/models';
 
 export function SettingsPage() {
@@ -99,6 +100,16 @@ export function SettingsPage() {
     await db.aiFeedback.bulkPut(payload.data.aiFeedback ?? []);
 
     await ensureBaseData();
+    
+    // Classify any unclassified items
+    const unclassified = await db.gearItems
+      .filter(item => !item.classificationStatus || item.classificationStatus !== 'done')
+      .toArray();
+    
+    for (const item of unclassified) {
+      classificationQueue.enqueue(item);
+    }
+    
     setStatus('Database imported successfully.');
   }
 
@@ -206,34 +217,10 @@ export function SettingsPage() {
 
       <div className="card stack-md">
         <h3>AI Assistant</h3>
-        <label className="stack-sm">
-          <strong>AI Provider</strong>
-          <select value={settings.aiProvider} onChange={(e) => void update('aiProvider', e.target.value as typeof settings.aiProvider)}>
-            <option value="mock">Mock (offline testing)</option>
-            <option value="groq">Groq (Free — Recommended)</option>
-            <option value="openai">OpenAI (Paid)</option>
-          </select>
-        </label>
-
-        <label className="stack-sm">
-          <strong>API Key</strong>
-          <input
-            type="password"
-            value={settings.apiKey ?? ''}
-            onChange={(e) => void update('apiKey', e.target.value)}
-            placeholder={settings.aiProvider === 'groq' ? 'gsk_...' : 'sk-...'}
-          />
-          <small className="subtle">Stored locally, never synced</small>
-          {settings.aiProvider === 'groq' && (
-            <small className="subtle">
-              Get a free key at{' '}
-              <a href="https://console.groq.com" target="_blank" rel="noreferrer" style={{ color: 'var(--accent)' }}>
-                console.groq.com
-              </a>
-              {' '}· Free tier: 30 req/min, 12K tokens/min · Model: llama-3.3-70b-versatile
-            </small>
-          )}
-        </label>
+        <p className="subtle">
+          GearVault uses Groq AI (llama-3.3-70b-versatile) for intelligent packing suggestions. 
+          The API key is hardcoded — no configuration needed.
+        </p>
 
         <label className="checkbox-inline">
           <input type="checkbox" checked={settings.aiLearningEnabled} onChange={(e) => void update('aiLearningEnabled', e.target.checked)} />

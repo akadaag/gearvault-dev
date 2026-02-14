@@ -1,11 +1,4 @@
 import { db } from '../db';
-import {
-  aiOutputJsonSchema,
-  aiOutputSchema,
-  followUpPromptTemplate,
-  systemPrompt,
-  userPromptTemplate,
-} from '../lib/aiPrompts';
 import { callGroqForFollowUpQuestions, callGroqForPackingPlan } from '../lib/groqClient';
 import { makeId } from '../lib/ids';
 import type {
@@ -35,6 +28,7 @@ export interface AIPlan {
     notes?: string;
     priority: Priority;
     section?: string; // populated by Groq provider
+    role?: 'primary' | 'backup' | 'alternative' | 'standard';
   }>;
   missingItems: Array<{
     name: string;
@@ -53,199 +47,18 @@ interface AIProvider {
 }
 
 // ---------------------------------------------------------------------------
-// Mock provider — offline, heuristic-based
-// ---------------------------------------------------------------------------
-
-class MockAIProvider implements AIProvider {
-  async getFollowUpQuestions(ctx: AIContext): Promise<string[]> {
-    const d = ctx.eventDescription.toLowerCase();
-    const questions: string[] = [];
-    if (!d.includes('indoor') && !d.includes('outdoor')) {
-      questions.push('Indoor, outdoor, or mixed environment?');
-    }
-    if (!d.includes('photo') && !d.includes('video')) {
-      questions.push('Photo, video, or hybrid coverage?');
-    }
-    if (!d.includes('hour') && !d.includes('day')) {
-      questions.push('Estimated duration of the shoot?');
-    }
-    return questions.slice(0, 3);
-  }
-
-  async generatePlan(ctx: AIContext): Promise<AIPlan> {
-    const d = `${ctx.eventDescription} ${Object.values(ctx.followUpAnswers).join(' ')}`.toLowerCase();
-    const eventType = inferEventType(d);
-    const essentials = ctx.catalog.filter((g) => g.essential);
-    const accessories = ctx.catalog.filter((g) =>
-      /battery|charger|card|ssd|cable|adapter|power/i.test(g.name),
-    );
-
-    const base = [...essentials, ...accessories];
-    const deduped = Array.from(new Map(base.map((g) => [g.id, g])).values());
-
-    const checklist: AIPlan['checklist'] = deduped.map((g) => ({
-      name: g.name,
-      gearItemId: g.id,
-      quantity: recommendQuantity(g, d),
-      priority: g.essential ? 'must-have' : 'nice-to-have',
-      notes: g.essential ? 'Marked essential in your catalog.' : undefined,
-      section: 'Essentials',
-    }));
-
-    const missingItems: AIPlan['missingItems'] = [];
-    const hasItem = (regex: RegExp) =>
-      ctx.catalog.some((g) =>
-        regex.test(`${g.name} ${g.tags.join(' ')} ${g.notes ?? ''}`.toLowerCase()),
-      );
-
-    if (d.includes('interview') && !hasItem(/lav|lavalier/)) {
-      missingItems.push({
-        name: 'Lavalier microphone',
-        reason: 'Interviews benefit from close voice capture and cleaner dialogue.',
-        priority: 'must-have',
-        action: 'rent',
-      });
-    }
-
-    if ((d.includes('dark') || d.includes('church') || d.includes('night')) && !hasItem(/flash|led|light/)) {
-      missingItems.push({
-        name: 'On-camera flash or compact LED',
-        reason: 'Low-light conditions require reliable fill lighting.',
-        priority: 'nice-to-have',
-        action: 'rent',
-      });
-    }
-
-    if ((d.includes('rain') || d.includes('weather')) && !hasItem(/rain|cover|weather seal/)) {
-      missingItems.push({
-        name: 'Rain cover kit',
-        reason: 'Protect body/lens from moisture in outdoor weather.',
-        priority: 'must-have',
-        action: 'buy',
-      });
-    }
-
-    for (const pattern of ctx.patterns) {
-      if (pattern.eventType === eventType) {
-        for (const itemName of pattern.topItems.slice(0, 3)) {
-          if (!checklist.some((c) => c.name === itemName)) {
-            checklist.push({
-              name: itemName,
-              gearItemId: null,
-              quantity: 1,
-              priority: 'nice-to-have',
-              notes: 'Suggested from your local history.',
-              section: 'Misc',
-            });
-          }
-        }
-      }
-    }
-
-    return {
-      eventTitle: `${capitalize(eventType)} Event`,
-      eventType,
-      checklist: checklist.sort((a, b) => priorityRank(a.priority) - priorityRank(b.priority)),
-      missingItems,
-    };
-  }
-}
-
-// ---------------------------------------------------------------------------
-// OpenAI provider (kept for backwards compatibility)
-// ---------------------------------------------------------------------------
-
-class OpenAIProvider implements AIProvider {
-  private apiKey: string;
-
-  constructor(apiKey: string) {
-    this.apiKey = apiKey;
-  }
-
-  async getFollowUpQuestions(ctx: AIContext): Promise<string[]> {
-    const prompt = followUpPromptTemplate
-      .replace('{{eventDescription}}', ctx.eventDescription)
-      .replace('{{knownContextJson}}', JSON.stringify({ answers: ctx.followUpAnswers }));
-
-    const data = await this.callModel(prompt, true);
-    const questions = data.questions;
-    if (!Array.isArray(questions)) return [];
-    return questions.filter((q): q is string => typeof q === 'string').slice(0, 3);
-  }
-
-  async generatePlan(ctx: AIContext): Promise<AIPlan> {
-    const prompt = userPromptTemplate
-      .replace(
-        '{{eventInputJson}}',
-        JSON.stringify({ description: ctx.eventDescription, answers: ctx.followUpAnswers }),
-      )
-      .replace('{{catalogJson}}', JSON.stringify(ctx.catalog))
-      .replace('{{patternsJson}}', JSON.stringify(ctx.patterns));
-
-    const data = await this.callModel(prompt, false);
-    const parsed = aiOutputSchema.safeParse(data);
-    if (!parsed.success) {
-      throw new Error('AI response did not match schema.');
-    }
-    return parsed.data;
-  }
-
-  private async callModel(prompt: string, isFollowUp: boolean): Promise<Record<string, unknown>> {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.apiKey}`,
-      },
-      body: JSON.stringify({
-        model: 'gpt-4o-mini',
-        response_format: { type: 'json_object' },
-        messages: [
-          {
-            role: 'system',
-            content: `${systemPrompt}\nJSON schema: ${JSON.stringify(aiOutputJsonSchema)}`,
-          },
-          { role: 'user', content: prompt },
-          ...(isFollowUp
-            ? [{ role: 'system', content: 'Return only {"questions": string[]} with at most 3 items.' }]
-            : []),
-        ],
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`OpenAI error: ${response.status}`);
-    }
-
-    const json = (await response.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
-    };
-
-    const content = json.choices?.[0]?.message?.content ?? '{}';
-    return JSON.parse(content) as Record<string, unknown>;
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Groq provider — free tier, llama-3.1-8b-instant
+// Groq provider — uses centralized config from groqConfig.ts
 // ---------------------------------------------------------------------------
 
 class GroqProvider implements AIProvider {
-  private apiKey: string;
-
-  constructor(apiKey: string) {
-    this.apiKey = apiKey;
-  }
-
   async getFollowUpQuestions(ctx: AIContext): Promise<string[]> {
-    const questions = await callGroqForFollowUpQuestions(this.apiKey, ctx.eventDescription);
+    const questions = await callGroqForFollowUpQuestions(ctx.eventDescription);
     return questions.map((q) => q.question);
   }
 
   async generatePlan(ctx: AIContext): Promise<AIPlan> {
     const events = await db.events.toArray();
     const result = await callGroqForPackingPlan(
-      this.apiKey,
       ctx.eventDescription,
       ctx.followUpAnswers,
       ctx.catalog,
@@ -262,6 +75,7 @@ class GroqProvider implements AIProvider {
         notes: item.reason,
         priority: mapPriority(item.priority),
         section: item.section,
+        role: item.role,
       })),
       missingItems: result.missing_items.map((item) => ({
         name: item.name,
@@ -311,17 +125,11 @@ export async function buildPatterns(): Promise<{ eventType: string; topItems: st
 }
 
 // ---------------------------------------------------------------------------
-// Provider factory
+// Provider factory — always returns GroqProvider
 // ---------------------------------------------------------------------------
 
-export async function getProvider(settings: AppSettings): Promise<AIProvider> {
-  if (settings.aiProvider === 'groq' && settings.apiKey) {
-    return new GroqProvider(settings.apiKey);
-  }
-  if (settings.aiProvider === 'openai' && settings.apiKey) {
-    return new OpenAIProvider(settings.apiKey);
-  }
-  return new MockAIProvider();
+export async function getProvider(_settings: AppSettings): Promise<AIProvider> {
+  return new GroqProvider();
 }
 
 // ---------------------------------------------------------------------------
@@ -396,32 +204,3 @@ export async function storeSuggestionFeedback(
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
-
-function inferEventType(description: string) {
-  if (description.includes('wedding')) return 'wedding';
-  if (description.includes('interview')) return 'corporate interview';
-  if (description.includes('travel')) return 'travel';
-  if (description.includes('music')) return 'music video';
-  if (description.includes('portrait')) return 'studio portrait';
-  return 'custom shoot';
-}
-
-function recommendQuantity(item: GearItem, description: string) {
-  const lower = item.name.toLowerCase();
-  if (/battery|card|ssd|media|power/.test(lower)) {
-    if (description.includes('long') || description.includes('day'))
-      return Math.max(2, Math.ceil(item.quantity / 2));
-    return Math.max(2, Math.min(item.quantity, 4));
-  }
-  return 1;
-}
-
-function capitalize(value: string) {
-  return value.charAt(0).toUpperCase() + value.slice(1);
-}
-
-function priorityRank(priority: Priority) {
-  if (priority === 'must-have') return 0;
-  if (priority === 'nice-to-have') return 1;
-  return 2;
-}

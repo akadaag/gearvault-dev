@@ -1022,6 +1022,37 @@ a {
   color: var(--accent-strong);
 }
 
+.pill-role {
+  border: 0.75px solid var(--border-subtle);
+  background: var(--surface-raised);
+  border-radius: 999px;
+  padding: 0.24rem 0.7rem;
+  font-size: 0.84rem;
+  color: var(--text-soft);
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.pill-role.primary {
+  background: color-mix(in srgb, #14b8a6 12%, var(--surface-raised));
+  border-color: color-mix(in srgb, #14b8a6 45%, transparent);
+  color: #14b8a6;
+}
+
+.pill-role.backup {
+  background: color-mix(in srgb, #2563eb 12%, var(--surface-raised));
+  border-color: color-mix(in srgb, #2563eb 45%, transparent);
+  color: #2563eb;
+}
+
+.pill-role.alternative {
+  background: color-mix(in srgb, #6b7280 12%, var(--surface-raised));
+  border-color: color-mix(in srgb, #6b7280 45%, transparent);
+  color: #6b7280;
+}
+
 .pill-condition {
   background: var(--surface-raised);
 }

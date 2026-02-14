@@ -9,6 +9,7 @@ import { MaintenanceSheet } from '../components/MaintenanceSheet';
 import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
 import { compressedImageToDataUrl, removeGearPhotoByUrl, uploadCompressedGearPhoto } from '../lib/gearPhotos';
 import { useAuth } from '../hooks/useAuth';
+import { classificationQueue } from '../lib/gearClassifier';
 import type { GearItem, MaintenanceEntry } from '../types/models';
 
 const emptyDraft: GearFormDraft = {
@@ -174,6 +175,18 @@ export function GearItemDetailPage() {
       essential: draft.essential,
       photo,
     });
+
+    // If name/brand/model changed, re-classify
+    const nameChanged = draft.name.trim() !== currentItem.name;
+    const brandChanged = (draft.brand.trim() || undefined) !== currentItem.brand;
+    const modelChanged = (draft.model.trim() || undefined) !== currentItem.model;
+    
+    if (nameChanged || brandChanged || modelChanged) {
+      const updated = await db.gearItems.get(currentItem.id);
+      if (updated) {
+        classificationQueue.enqueue(updated);
+      }
+    }
 
     setShowEditSheet(false);
     setEditError('');

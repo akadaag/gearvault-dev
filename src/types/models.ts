@@ -45,6 +45,10 @@ export interface GearItem {
   relatedItemIds?: string[];
   createdAt: string;
   updatedAt: string;
+  // AI classification fields
+  inferredProfile?: 'video_first' | 'photo_first' | 'hybrid' | 'cinema' | 'audio' | 'lighting' | 'support' | 'power' | 'media' | 'accessory';
+  capabilities?: string[];
+  classificationStatus?: 'pending' | 'done' | 'failed';
 }
 
 export interface Category {
@@ -105,8 +109,6 @@ export interface AppSettings {
   id: 'app-settings';
   demoDataEnabled: boolean;
   defaultCurrency: string;
-  aiProvider: 'mock' | 'openai' | 'groq';
-  apiKey?: string;
   syncEnabled: boolean;
   theme: ThemeMode;
   aiLearningEnabled: boolean;

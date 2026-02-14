@@ -95,9 +95,14 @@ Create `.env.local` in project root:
 ```bash
 VITE_SUPABASE_URL=https://YOUR_PROJECT_ID.supabase.co
 VITE_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
+VITE_GROQ_API_KEY=gsk_your_groq_api_key_here
 ```
 
-Without these variables, the app shows a setup message and login/sync are disabled.
+**Notes:**
+- Without Supabase variables, the app shows a setup message and login/sync are disabled.
+- Without Groq API key, AI features (Pack Assistant, gear classification) won't work.
+- Get your Groq API key from: https://console.groq.com/keys (free tier available)
+- See `.env.example` for reference.
 
 ### Install as App (PWA)
 
@@ -216,6 +221,7 @@ This repo is already configured for Vercel (`vercel.json`).
 2. Add env vars in Vercel Project Settings:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_GROQ_API_KEY`
 3. Deploy.
 
 Your production URL is shown in Vercel Deployments (typically `https://<project>.vercel.app`).

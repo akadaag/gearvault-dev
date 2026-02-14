@@ -5,6 +5,7 @@ import { db } from '../db';
 import { buildPatterns, getProvider, toEventFromPlan, type AIPlan } from '../services/ai';
 import { matchCatalogItem } from '../lib/catalogMatcher';
 import { groupBySection, priorityLabel } from '../lib/packingHelpers';
+import { classifyPendingItems } from '../lib/gearClassifier';
 import {
   CatalogMatchReviewSheet,
   type ReviewItem,
@@ -113,10 +114,15 @@ export function AIAssistantPage() {
     if (!settings) return;
 
     setLoading(true);
-    setLoadingMessage('Generating your packing list…');
+    setLoadingMessage('Classifying gear items…');
     setError('');
 
     try {
+      // First, classify any pending items
+      await classifyPendingItems();
+      
+      setLoadingMessage('Generating your packing list…');
+      
       const patterns = settings.aiLearningEnabled ? await buildPatterns() : [];
       const provider = await getProvider(settings);
 
@@ -126,6 +132,27 @@ export function AIAssistantPage() {
         catalog,
         patterns,
       });
+
+      // ------------------------------------------------------------------
+      // Safety guard: Ensure video-first camera is PRIMARY for video events
+      // ------------------------------------------------------------------
+      const isVideoEvent = /video|interview|corporate/i.test(rawPlan.eventType);
+      if (isVideoEvent) {
+        const cameraBodies = rawPlan.checklist.filter(item => item.section === 'Camera Bodies');
+        const videoFirstBody = cameraBodies.find(item => {
+          const matchedItem = catalog.find(c => c.id === item.gearItemId);
+          return matchedItem?.inferredProfile === 'video_first';
+        });
+        
+        if (videoFirstBody && videoFirstBody.role !== 'primary') {
+          // Find current primary and swap roles
+          const currentPrimary = cameraBodies.find(item => item.role === 'primary');
+          if (currentPrimary) {
+            currentPrimary.role = videoFirstBody.role || 'standard';
+          }
+          videoFirstBody.role = 'primary';
+        }
+      }
 
       // ------------------------------------------------------------------
       // Client-side catalog matcher
@@ -434,31 +461,42 @@ export function AIAssistantPage() {
             <div key={section} className="card stack-sm">
               <h4 className="section-heading">{section}</h4>
               <div className="stack-sm">
-                {items.map((item) => (
-                  <div key={`${item.name}-${item.gearItemId ?? 'x'}`} className="ai-item-row">
-                    <div className="row between wrap" style={{ gap: '0.5rem' }}>
-                      <div style={{ flex: 1 }}>
-                        <div className="row wrap" style={{ gap: '0.4rem', alignItems: 'center' }}>
-                          <strong>{item.name}</strong>
-                          {item.quantity > 1 && (
-                            <span className="subtle">×{item.quantity}</span>
-                          )}
-                          {item.gearItemId && (
-                            <span className="pill pill--success" style={{ fontSize: '0.65rem' }}>✓ matched</span>
+                {items.map((item) => {
+                  const showRoleBadge = (section === 'Camera Bodies' || section === 'Audio') && 
+                                        item.role && 
+                                        item.role !== 'standard';
+                  
+                  return (
+                    <div key={`${item.name}-${item.gearItemId ?? 'x'}`} className="ai-item-row">
+                      <div className="row between wrap" style={{ gap: '0.5rem' }}>
+                        <div style={{ flex: 1 }}>
+                          <div className="row wrap" style={{ gap: '0.4rem', alignItems: 'center' }}>
+                            <strong>{item.name}</strong>
+                            {item.quantity > 1 && (
+                              <span className="subtle">×{item.quantity}</span>
+                            )}
+                            {showRoleBadge && (
+                              <span className={`pill-role ${item.role}`}>
+                                {item.role}
+                              </span>
+                            )}
+                            {item.gearItemId && (
+                              <span className="pill pill--success" style={{ fontSize: '0.65rem' }}>✓ matched</span>
+                            )}
+                          </div>
+                          {item.notes && (
+                            <p className="subtle" style={{ fontSize: '0.78rem', marginTop: '0.2rem', marginBottom: 0 }}>
+                              {item.notes}
+                            </p>
                           )}
                         </div>
-                        {item.notes && (
-                          <p className="subtle" style={{ fontSize: '0.78rem', marginTop: '0.2rem', marginBottom: 0 }}>
-                            {item.notes}
-                          </p>
-                        )}
+                        <span className={`pill priority-${item.priority}`}>
+                          {priorityLabel(item.priority)}
+                        </span>
                       </div>
-                      <span className={`pill priority-${item.priority}`}>
-                        {priorityLabel(item.priority)}
-                      </span>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}

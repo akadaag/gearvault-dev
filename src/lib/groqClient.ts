@@ -4,10 +4,9 @@ import {
   type FollowUpQuestion,
   type PackingPlan,
 } from './aiSchemas';
-import type { GearItem, EventItem } from '../types/models';
-
-const GROQ_BASE_URL = 'https://api.groq.com/openai/v1/chat/completions';
-const GROQ_MODEL = 'llama-3.3-70b-versatile'; // 12K tokens/min, smarter 70B model
+import type { GearItem, EventItem, Category } from '../types/models';
+import { GROQ_API_KEY, GROQ_BASE_URL, GROQ_MODEL } from './groqConfig';
+import { db } from '../db';
 
 // ---------------------------------------------------------------------------
 // Shared fetch helper — plain browser fetch, no SDK needed
@@ -18,12 +17,12 @@ interface GroqMessage {
   content: string;
 }
 
-async function callGroq(apiKey: string, messages: GroqMessage[], maxTokens = 2000): Promise<string> {
+async function callGroq(messages: GroqMessage[], maxTokens = 2000): Promise<string> {
   const response = await fetch(GROQ_BASE_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${apiKey}`,
+      'Authorization': `Bearer ${GROQ_API_KEY}`,
     },
     body: JSON.stringify({
       model: GROQ_MODEL,
@@ -51,7 +50,6 @@ async function callGroq(apiKey: string, messages: GroqMessage[], maxTokens = 200
 // ---------------------------------------------------------------------------
 
 export async function callGroqForFollowUpQuestions(
-  apiKey: string,
   eventDescription: string,
 ): Promise<FollowUpQuestion[]> {
   const messages: GroqMessage[] = [
@@ -75,7 +73,7 @@ Maximum 3 questions.`,
     },
   ];
 
-  const content = await callGroq(apiKey, messages, 400);
+  const content = await callGroq(messages, 400);
 
   try {
     const parsed = followUpQuestionsSchema.safeParse(JSON.parse(content));
@@ -92,16 +90,18 @@ Maximum 3 questions.`,
 // ---------------------------------------------------------------------------
 
 export async function callGroqForPackingPlan(
-  apiKey: string,
   eventDescription: string,
   answers: Record<string, string>,
   catalog: GearItem[],
   pastEvents: EventItem[],
 ): Promise<PackingPlan> {
-  const messages = buildMessages(eventDescription, answers, catalog, pastEvents);
+  // Fetch categories to enrich catalog data
+  const categories = await db.categories.toArray();
+  
+  const messages = buildMessages(eventDescription, answers, catalog, pastEvents, categories);
 
   // Attempt 1
-  let result = await attemptPlan(apiKey, messages);
+  let result = await attemptPlan(messages);
   if (result.success) return result.data;
 
   // Attempt 2 — push a strict correction message
@@ -116,7 +116,7 @@ export async function callGroqForPackingPlan(
     },
   ];
 
-  result = await attemptPlan(apiKey, retryMessages);
+  result = await attemptPlan(retryMessages);
   if (result.success) return result.data;
 
   throw new Error(
@@ -133,12 +133,11 @@ type AttemptResult =
   | { success: false; error: string; rawContent: string };
 
 async function attemptPlan(
-  apiKey: string,
   messages: GroqMessage[],
 ): Promise<AttemptResult> {
   let rawContent = '{}';
   try {
-    rawContent = await callGroq(apiKey, messages, 3000);
+    rawContent = await callGroq(messages, 3000);
     const json = JSON.parse(rawContent);
     
     // DEBUG: Log the actual Groq response
@@ -171,16 +170,24 @@ function buildMessages(
   answers: Record<string, string>,
   catalog: GearItem[],
   pastEvents: EventItem[],
+  categories: Category[],
 ): GroqMessage[] {
-  const catalogSummary = catalog.map((item) => ({
-    id: item.id,
-    name: item.name,
-    brand: item.brand ?? null,
-    model: item.model ?? null,
-    essential: item.essential,
-    quantity: item.quantity,
-    tags: item.tags,
-  }));
+  const catalogSummary = catalog.map((item) => {
+    const category = categories.find(c => c.id === item.categoryId);
+    return {
+      id: item.id,
+      name: item.name,
+      brand: item.brand ?? null,
+      model: item.model ?? null,
+      category: category?.name ?? null,
+      essential: item.essential,
+      quantity: item.quantity,
+      tags: item.tags,
+      inferredProfile: item.inferredProfile ?? null,
+      capabilities: item.capabilities ?? null,
+      notes: item.notes ?? null,
+    };
+  });
 
   const pastSummary = pastEvents
     .slice(0, 5)
@@ -208,45 +215,77 @@ ${JSON.stringify(catalogSummary, null, 2)}
 PAST EVENTS (learn patterns):
 ${pastSummary.length > 0 ? JSON.stringify(pastSummary, null, 2) : 'No history yet'}
 
-RULES:
-1. Group recommended_items by section in this order:
+CRITICAL RULES FOR CONTEXT-AWARE SELECTION:
+
+1. **Event-Suitability Over "Essential" Flag**:
+   - The "essential" field means "don't forget this item" — it does NOT mean "always use as primary"
+   - ALWAYS prioritize gear based on what's BEST SUITED for THIS specific event type
+   - Use "inferredProfile" and "capabilities" to determine event-suitability:
+     * For VIDEO events (corporate interview, video production, etc.):
+       → Prioritize items with inferredProfile "video_first" or "cinema" over "hybrid" or "photo_first"
+       → Look for capabilities like "4K 120fps", "10-bit internal", "video-optimized"
+     * For PHOTO events (wedding, portrait, etc.):
+       → Prioritize items with inferredProfile "photo_first" over "hybrid" or "video_first"
+       → Look for capabilities like "high resolution", "fast autofocus", "shallow depth of field"
+     * For HYBRID events (wedding with video, events):
+       → Prioritize "hybrid" profile items that balance both
+
+2. **How to Handle Common Scenarios + Role Assignment**:
+   Example: User has Sony A7 IV (hybrid, essential:true) and Sony A7S III (video_first, essential:false, tags:["backup"])
+   - For CORPORATE INTERVIEW (video event):
+     → A7S III should be PRIMARY (it's video-optimized) with role: "primary"
+     → A7 IV should be BACKUP (it's hybrid, still capable) with role: "backup"
+   - For WEDDING (photo event):
+     → A7 IV should be PRIMARY (it's hybrid, good for photos) with role: "primary"
+     → A7S III should be BACKUP or ALTERNATIVE (video-focused) with role: "backup" or "alternative"
+   
+   **Role Field Usage** (ONLY for Camera Bodies and Audio sections):
+   - "primary": The main/best item for this event (most suitable based on inferredProfile)
+   - "backup": Secondary item of the same type (e.g., backup camera body)
+   - "alternative": Different approach for same purpose (e.g., different audio solution)
+   - "standard": Default for all other items (leave blank or omit for items in other sections)
+
+3. **Grouping & Sections**:
+   Group recommended_items by section in this order:
    Essentials → Camera Bodies → Lenses → Lighting → Audio → Support → Power → Media → Cables → Misc
 
-2. For recommended_items:
+4. **For recommended_items**:
    - CRITICAL: DO NOT include any item unless you can find an exact or very close match in the USER'S GEAR CATALOG above
    - ONLY include items where you can confidently set a gear_item_id from the catalog
    - If you're unsure whether the user owns an item, put it in missing_items instead
    - Set gear_item_id to the exact catalog ID when you find a match, otherwise DO NOT include it in recommended_items
-   - ALWAYS include BOTH "name" (the item name from catalog) AND "reason" (why it's needed for this event)
+   - ALWAYS include BOTH "name" (the item name from catalog) AND "reason" (why it's needed for THIS event)
+   - In the "reason" field, explain WHY this specific item is suited for THIS event (e.g., "Video-optimized sensor ideal for interview work" not just "Good camera")
    - Always include accessories: batteries (2-3×), memory cards (2× expected capacity), chargers, cables
 
-3. For missing_items (gear NOT in the catalog):
+5. **For missing_items** (gear NOT in the catalog):
    - Include ANY gear you think is needed but cannot find in the catalog
    - Include gear from different brands (e.g., if user has Sony cameras but you think they need a Canon R5, put it here)
    - ALWAYS include BOTH "name" (item name) AND "reason" (why specifically needed for THIS event)
    - Set action: "buy" for accessories under €50, "rent" for expensive specialty gear, "borrow" otherwise
    - Include estimated_cost when relevant (e.g. "€30/day rental", "~€40 to buy")
 
-4. Priority:
+6. **Priority**:
    - "Must-have": shoot cannot succeed without it
    - "Nice-to-have": significantly improves quality
    - "Optional": useful but not critical
 
-5. Event-specific rules:
+7. **Event-specific rules**:
    - Weddings / corporate → always recommend backup camera body if available
    - Interviews → lavalier mic is Must-have if not in catalog
    - Night / low-light → extra batteries +50%, fast lenses prioritised
    - Travel → note compact alternatives and check battery airline rules
 
-6. Learn from past events: if similar event types had items packed, prioritise them.
+8. **Learn from past events**: if similar event types had items packed, prioritise them.
 
 CRITICAL: Every item in recommended_items MUST have ALL these fields:
 - section (string)
 - gear_item_id (string or null)
 - name (string) - REQUIRED even if gear_item_id is provided
-- reason (string) - REQUIRED, explain why needed for this specific event
+- reason (string) - REQUIRED, explain why THIS specific item suits THIS specific event
 - priority (string: "Must-have" / "Nice-to-have" / "Optional")
 - quantity (number, default 1)
+- role (string: "primary" / "backup" / "alternative" / "standard") - ONLY set for Camera Bodies and Audio sections, use "standard" for everything else
 
 Every item in missing_items MUST have ALL these fields:
 - name (string) - REQUIRED

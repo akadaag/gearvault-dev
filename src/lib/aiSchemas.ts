@@ -23,6 +23,7 @@ export type FollowUpQuestion = z.infer<typeof followUpQuestionsSchema>['question
 
 const priorityEnum = z.enum(['Must-have', 'Nice-to-have', 'Optional']);
 const actionEnum = z.enum(['buy', 'borrow', 'rent']);
+const roleEnum = z.enum(['primary', 'backup', 'alternative', 'standard']);
 
 export const packingPlanSchema = z.object({
   event_title: z.string(),
@@ -36,6 +37,7 @@ export const packingPlanSchema = z.object({
       reason: z.string(),
       priority: priorityEnum,
       quantity: z.number().min(1).default(1),
+      role: roleEnum.optional().default('standard'),
     }),
   ),
 
@@ -91,6 +93,7 @@ export const packingPlanJsonSchema = {
           reason: { type: 'string' },
           priority: { type: 'string', enum: ['Must-have', 'Nice-to-have', 'Optional'] },
           quantity: { type: 'number', minimum: 1 },
+          role: { type: 'string', enum: ['primary', 'backup', 'alternative', 'standard'] },
         },
         required: ['section', 'gear_item_id', 'name', 'reason', 'priority'],
       },

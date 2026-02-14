@@ -11,6 +11,7 @@ import { gearItemSchema } from '../lib/validators';
 import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
 import { compressedImageToDataUrl, uploadCompressedGearPhoto } from '../lib/gearPhotos';
 import { useAuth } from '../hooks/useAuth';
+import { classificationQueue } from '../lib/gearClassifier';
 import type { Category, Condition, GearItem, MaintenanceEntry } from '../types/models';
 
 const initialDraft: GearFormDraft = {
@@ -181,6 +182,10 @@ export function CatalogPage() {
     };
 
     await db.gearItems.add(item);
+    
+    // Enqueue for AI classification
+    classificationQueue.enqueue(item);
+    
     setDraft(initialDraft);
     setShowAddItemForm(false);
   }
