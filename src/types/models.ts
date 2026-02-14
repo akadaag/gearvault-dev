@@ -105,7 +105,7 @@ export interface AppSettings {
   id: 'app-settings';
   demoDataEnabled: boolean;
   defaultCurrency: string;
-  aiProvider: 'mock' | 'openai';
+  aiProvider: 'mock' | 'openai' | 'groq';
   apiKey?: string;
   syncEnabled: boolean;
   theme: ThemeMode;

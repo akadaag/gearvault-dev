@@ -3,7 +3,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, ensureBaseData } from '../db';
 import { defaultCategories } from '../constants/defaultCategories';
 import { useAuth } from '../hooks/useAuth';
-import { seedDemoData } from '../lib/demoData';
+import { seedDemoData, removeDemoData } from '../lib/demoData';
 import { syncNow } from '../services/sync';
 import type { AppSettings, ExportBundle } from '../types/models';
 
@@ -42,6 +42,17 @@ export function SettingsPage() {
     } else {
       setStatus('Demo data preference disabled (existing data retained).');
     }
+  }
+
+  async function loadDemoDataNow() {
+    await seedDemoData(categories);
+    setStatus('Demo data loaded successfully!');
+  }
+
+  async function clearDemoData() {
+    if (!confirm('This will delete ALL gear items and events. Continue?')) return;
+    await removeDemoData();
+    setStatus('All data cleared.');
   }
 
   async function exportDb() {
@@ -199,7 +210,8 @@ export function SettingsPage() {
           <strong>AI Provider</strong>
           <select value={settings.aiProvider} onChange={(e) => void update('aiProvider', e.target.value as typeof settings.aiProvider)}>
             <option value="mock">Mock (offline testing)</option>
-            <option value="openai">OpenAI</option>
+            <option value="groq">Groq (Free — Recommended)</option>
+            <option value="openai">OpenAI (Paid)</option>
           </select>
         </label>
 
@@ -209,9 +221,18 @@ export function SettingsPage() {
             type="password"
             value={settings.apiKey ?? ''}
             onChange={(e) => void update('apiKey', e.target.value)}
-            placeholder="sk-..."
+            placeholder={settings.aiProvider === 'groq' ? 'gsk_...' : 'sk-...'}
           />
           <small className="subtle">Stored locally, never synced</small>
+          {settings.aiProvider === 'groq' && (
+            <small className="subtle">
+              Get a free key at{' '}
+              <a href="https://console.groq.com" target="_blank" rel="noreferrer" style={{ color: 'var(--accent)' }}>
+                console.groq.com
+              </a>
+              {' '}· Free tier: 30 req/min, 12K tokens/min · Model: llama-3.3-70b-versatile
+            </small>
+          )}
         </label>
 
         <label className="checkbox-inline">
@@ -227,8 +248,11 @@ export function SettingsPage() {
           <input type="checkbox" checked={settings.demoDataEnabled} onChange={(e) => void toggleDemoData(e.target.checked)} />
           <span>Enable demo data</span>
         </label>
-        <button className="ghost" onClick={() => void seedDemoData(categories)}>Load Demo Data Now</button>
-        <p className="subtle">Load sample gear items and events to explore features</p>
+        <div className="row wrap" style={{ gap: '0.5rem' }}>
+          <button className="ghost" onClick={() => void loadDemoDataNow()}>Load Demo Data</button>
+          <button className="ghost" onClick={() => void clearDemoData()}>Remove All Data</button>
+        </div>
+        <p className="subtle">Load 22 sample photography/videography items to test AI packing suggestions</p>
       </div>
 
       <div className="card stack-md">

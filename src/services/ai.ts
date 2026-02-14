@@ -6,6 +6,7 @@ import {
   systemPrompt,
   userPromptTemplate,
 } from '../lib/aiPrompts';
+import { callGroqForFollowUpQuestions, callGroqForPackingPlan } from '../lib/groqClient';
 import { makeId } from '../lib/ids';
 import type {
   AIFeedback,
@@ -33,20 +34,27 @@ export interface AIPlan {
     quantity: number;
     notes?: string;
     priority: Priority;
+    section?: string; // populated by Groq provider
   }>;
   missingItems: Array<{
     name: string;
     reason: string;
     priority: Priority;
     action: 'buy' | 'borrow' | 'rent';
-    notes?: string;
+    notes?: string;        // used for estimated_cost
+    category?: string;
   }>;
+  tips?: string[];
 }
 
 interface AIProvider {
   getFollowUpQuestions(ctx: AIContext): Promise<string[]>;
   generatePlan(ctx: AIContext): Promise<AIPlan>;
 }
+
+// ---------------------------------------------------------------------------
+// Mock provider — offline, heuristic-based
+// ---------------------------------------------------------------------------
 
 class MockAIProvider implements AIProvider {
   async getFollowUpQuestions(ctx: AIContext): Promise<string[]> {
@@ -68,7 +76,9 @@ class MockAIProvider implements AIProvider {
     const d = `${ctx.eventDescription} ${Object.values(ctx.followUpAnswers).join(' ')}`.toLowerCase();
     const eventType = inferEventType(d);
     const essentials = ctx.catalog.filter((g) => g.essential);
-    const accessories = ctx.catalog.filter((g) => /battery|charger|card|ssd|cable|adapter|power/i.test(g.name));
+    const accessories = ctx.catalog.filter((g) =>
+      /battery|charger|card|ssd|cable|adapter|power/i.test(g.name),
+    );
 
     const base = [...essentials, ...accessories];
     const deduped = Array.from(new Map(base.map((g) => [g.id, g])).values());
@@ -79,11 +89,14 @@ class MockAIProvider implements AIProvider {
       quantity: recommendQuantity(g, d),
       priority: g.essential ? 'must-have' : 'nice-to-have',
       notes: g.essential ? 'Marked essential in your catalog.' : undefined,
+      section: 'Essentials',
     }));
 
     const missingItems: AIPlan['missingItems'] = [];
     const hasItem = (regex: RegExp) =>
-      ctx.catalog.some((g) => regex.test(`${g.name} ${g.tags.join(' ')} ${g.notes ?? ''}`.toLowerCase()));
+      ctx.catalog.some((g) =>
+        regex.test(`${g.name} ${g.tags.join(' ')} ${g.notes ?? ''}`.toLowerCase()),
+      );
 
     if (d.includes('interview') && !hasItem(/lav|lavalier/)) {
       missingItems.push({
@@ -122,6 +135,7 @@ class MockAIProvider implements AIProvider {
               quantity: 1,
               priority: 'nice-to-have',
               notes: 'Suggested from your local history.',
+              section: 'Misc',
             });
           }
         }
@@ -136,6 +150,10 @@ class MockAIProvider implements AIProvider {
     };
   }
 }
+
+// ---------------------------------------------------------------------------
+// OpenAI provider (kept for backwards compatibility)
+// ---------------------------------------------------------------------------
 
 class OpenAIProvider implements AIProvider {
   private apiKey: string;
@@ -208,6 +226,70 @@ class OpenAIProvider implements AIProvider {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Groq provider — free tier, llama-3.1-8b-instant
+// ---------------------------------------------------------------------------
+
+class GroqProvider implements AIProvider {
+  private apiKey: string;
+
+  constructor(apiKey: string) {
+    this.apiKey = apiKey;
+  }
+
+  async getFollowUpQuestions(ctx: AIContext): Promise<string[]> {
+    const questions = await callGroqForFollowUpQuestions(this.apiKey, ctx.eventDescription);
+    return questions.map((q) => q.question);
+  }
+
+  async generatePlan(ctx: AIContext): Promise<AIPlan> {
+    const events = await db.events.toArray();
+    const result = await callGroqForPackingPlan(
+      this.apiKey,
+      ctx.eventDescription,
+      ctx.followUpAnswers,
+      ctx.catalog,
+      events,
+    );
+
+    return {
+      eventTitle: result.event_title,
+      eventType: result.event_type,
+      checklist: result.recommended_items.map((item) => ({
+        name: item.name,
+        gearItemId: item.gear_item_id,
+        quantity: item.quantity ?? 1,
+        notes: item.reason,
+        priority: mapPriority(item.priority),
+        section: item.section,
+      })),
+      missingItems: result.missing_items.map((item) => ({
+        name: item.name,
+        reason: item.reason,
+        priority: mapPriority(item.priority),
+        action: item.action,
+        notes: item.estimated_cost,
+        category: item.category,
+      })),
+      tips: result.tips ?? [],
+    };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Utility — map Groq priority strings to internal Priority type
+// ---------------------------------------------------------------------------
+
+function mapPriority(p: string): Priority {
+  if (p === 'Must-have') return 'must-have';
+  if (p === 'Nice-to-have') return 'nice-to-have';
+  return 'optional';
+}
+
+// ---------------------------------------------------------------------------
+// Pattern learning from aiFeedback table
+// ---------------------------------------------------------------------------
+
 export async function buildPatterns(): Promise<{ eventType: string; topItems: string[] }[]> {
   const usefulFeedback = (await db.aiFeedback.toArray()).filter((f) => f.useful);
   const grouped = new Map<string, Map<string, number>>();
@@ -228,12 +310,24 @@ export async function buildPatterns(): Promise<{ eventType: string; topItems: st
   }));
 }
 
+// ---------------------------------------------------------------------------
+// Provider factory
+// ---------------------------------------------------------------------------
+
 export async function getProvider(settings: AppSettings): Promise<AIProvider> {
+  if (settings.aiProvider === 'groq' && settings.apiKey) {
+    return new GroqProvider(settings.apiKey);
+  }
   if (settings.aiProvider === 'openai' && settings.apiKey) {
     return new OpenAIProvider(settings.apiKey);
   }
   return new MockAIProvider();
 }
+
+// ---------------------------------------------------------------------------
+// Convert AIPlan → EventItem for persistence (TASK 3.4)
+// categoryName uses section from Groq; falls back to catalog lookup
+// ---------------------------------------------------------------------------
 
 export function toEventFromPlan(plan: AIPlan, ctx: AIContext): EventItem {
   const eventId = makeId();
@@ -247,9 +341,12 @@ export function toEventFromPlan(plan: AIPlan, ctx: AIContext): EventItem {
     quantity: Math.max(1, item.quantity || 1),
     packed: false,
     notes: item.notes,
-    categoryName: item.gearItemId
-      ? ctx.catalog.find((g) => g.id === item.gearItemId)?.categoryId
-      : undefined,
+    // Prefer AI-assigned section; fall back to catalog category lookup
+    categoryName:
+      item.section ??
+      (item.gearItemId
+        ? ctx.catalog.find((g) => g.id === item.gearItemId)?.categoryId
+        : undefined),
     priority: item.priority,
   }));
 
@@ -277,7 +374,15 @@ export function toEventFromPlan(plan: AIPlan, ctx: AIContext): EventItem {
   };
 }
 
-export async function storeSuggestionFeedback(eventType: string, itemName: string, useful: boolean) {
+// ---------------------------------------------------------------------------
+// Feedback storage
+// ---------------------------------------------------------------------------
+
+export async function storeSuggestionFeedback(
+  eventType: string,
+  itemName: string,
+  useful: boolean,
+) {
   const feedback: AIFeedback = {
     id: makeId(),
     eventType,
@@ -287,6 +392,10 @@ export async function storeSuggestionFeedback(eventType: string, itemName: strin
   };
   await db.aiFeedback.add(feedback);
 }
+
+// ---------------------------------------------------------------------------
+// Internal helpers
+// ---------------------------------------------------------------------------
 
 function inferEventType(description: string) {
   if (description.includes('wedding')) return 'wedding';
@@ -300,7 +409,8 @@ function inferEventType(description: string) {
 function recommendQuantity(item: GearItem, description: string) {
   const lower = item.name.toLowerCase();
   if (/battery|card|ssd|media|power/.test(lower)) {
-    if (description.includes('long') || description.includes('day')) return Math.max(2, Math.ceil(item.quantity / 2));
+    if (description.includes('long') || description.includes('day'))
+      return Math.max(2, Math.ceil(item.quantity / 2));
     return Math.max(2, Math.min(item.quantity, 4));
   }
   return 1;
