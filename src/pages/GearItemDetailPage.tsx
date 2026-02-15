@@ -182,6 +182,9 @@ export function GearItemDetailPage() {
     const modelChanged = (draft.model.trim() || undefined) !== currentItem.model;
     
     if (nameChanged || brandChanged || modelChanged) {
+      // Reset classification status to allow re-classification
+      await db.gearItems.update(currentItem.id, { classificationStatus: undefined });
+      
       const updated = await db.gearItems.get(currentItem.id);
       if (updated) {
         classificationQueue.enqueue(updated);

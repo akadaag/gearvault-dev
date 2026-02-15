@@ -1,149 +1,87 @@
-import {
-  packingPlanSchema,
-  type PackingPlan,
-} from './aiSchemas';
+/**
+ * LLM Gateway Client via Supabase Edge Function
+ * 
+ * Securely calls Gemini 2.0 Flash Lite through our Supabase Edge Function proxy.
+ * API keys are kept server-side, never exposed to the client.
+ * Requires Supabase authentication.
+ * 
+ * Primary model: google-ai-studio/gemini-2.0-flash-lite
+ * Fallback: Groq Scout 17B (handled in groqClient.ts)
+ */
+
 import type { GearItem, EventItem, Category } from '../types/models';
-import { GROQ_MODELS, AI_TASKS } from './groqConfig';
-import { db } from '../db';
-import { callLLMGatewayForPackingPlan } from './llmGatewayClient';
+import { packingPlanSchema } from './aiSchemas';
 import { callEdgeFunction } from './edgeFunctionClient';
 
-// ---------------------------------------------------------------------------
-// Packing plan generation (Gemini primary → Scout fallback via Edge Function)
-// ---------------------------------------------------------------------------
+// Primary model for packing lists
+const GEMINI_MODEL = 'google-ai-studio/gemini-2.0-flash-lite';
 
-export async function callGroqForPackingPlan(
-  eventDescription: string,
-  catalog: GearItem[],
-  pastEvents: EventItem[],
-): Promise<PackingPlan> {
-  const categories = await db.categories.toArray();
-  
-  // Tier 1: Gemini 2.0 Flash Lite via LLM Gateway (Supabase Edge Function)
-  console.log('🟢 Attempt 1: Gemini 2.0 Flash Lite (via LLM Gateway)');
-  const geminiResult = await callLLMGatewayForPackingPlan({
-    eventDescription,
-    catalog,
-    pastEvents,
-    categories,
-  });
-  
-  if (geminiResult.success && geminiResult.data) {
-    console.log('✅ Gemini succeeded!');
-    return geminiResult.data;
-  }
-  
-  console.warn('⚠️ Gemini failed, falling back to Groq Scout:', geminiResult.error);
-  
-  // Tier 2: Scout 17b via Edge Function (fallback)
-  console.log('🔵 Attempt 2: Scout 17b (Groq via Edge Function)');
-  const scoutMessages = buildMessages(eventDescription, catalog, pastEvents, categories);
-  const result = await attemptPlanWithEdgeFunction(scoutMessages, GROQ_MODELS.SCOUT);
-  
-  if (result.success) {
-    return result.data;
-  }
-
-  throw new Error(
-    `All AI models exhausted. Gemini error: ${geminiResult.error}. Scout error: ${result.error}. Try again later.`
-  );
+interface CallLLMGatewayOptions {
+  eventDescription: string;
+  catalog: GearItem[];
+  pastEvents: EventItem[];
+  categories: Category[];
 }
 
-// ---------------------------------------------------------------------------
-// Internal — attempt one plan call via Edge Function
-// ---------------------------------------------------------------------------
-
-type AttemptResult =
-  | { success: true; data: PackingPlan; rawContent: string }
-  | { success: false; error: string; rawContent: string };
-
-async function attemptPlanWithEdgeFunction(
-  messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>,
-  model: string,
-): Promise<AttemptResult> {
-  const taskConfig = AI_TASKS.PACKING_LIST;
-  let rawContent = '{}';
-
+/**
+ * Generate packing list using Gemini 2.0 Flash Lite via LLM Gateway
+ */
+export async function callLLMGatewayForPackingPlan(
+  options: CallLLMGatewayOptions
+): Promise<{ success: boolean; data?: any; error?: string }> {
   try {
+    const messages = buildMessages(
+      options.eventDescription,
+      options.catalog,
+      options.pastEvents,
+      options.categories
+    );
+
+    console.log('[LLM Gateway] Calling Gemini 2.0 Flash Lite for packing plan...');
+    
     const response = await callEdgeFunction({
-      provider: 'groq',
-      model,
+      provider: 'llm-gateway',
+      model: GEMINI_MODEL,
       messages,
-      temperature: taskConfig.temperature,
-      max_tokens: taskConfig.maxTokens,
-      response_format: { type: 'json_object' },
+      temperature: 0.3,
+      max_tokens: 8000,
+      response_format: { type: 'json_object' }, // Enforce JSON output
     });
 
-    rawContent = response.choices[0]?.message?.content || '{}';
-    
-    // Sanitize the response
-    const cleaned = sanitizeJsonResponse(rawContent);
-    
-    // DEBUG: Log raw response (first 500 chars) to diagnose issues
-    if (cleaned !== rawContent) {
-      console.log('🧹 Sanitized response (first 500 chars of original):', rawContent.substring(0, 500));
-    }
-    
-    const json = JSON.parse(cleaned);
-    
-    // DEBUG: Log the actual response
-    console.log('🔍 Scout raw response:', json);
-    
-    const parsed = packingPlanSchema.safeParse(json);
-
-    if (parsed.success) {
-      return { success: true, data: parsed.data, rawContent };
+    const content = response.choices[0]?.message?.content;
+    if (!content) {
+      throw new Error('Empty response from LLM Gateway');
     }
 
-    // DEBUG: Log validation errors
-    console.error('❌ Zod validation failed:', parsed.error.format());
-    return { success: false, error: JSON.stringify(parsed.error.format()), rawContent };
+    // Parse and validate JSON
+    const parsed = JSON.parse(content);
+    const validated = packingPlanSchema.parse(parsed);
+
+    console.log('[LLM Gateway] Success! Generated packing plan with', 
+      validated.recommended_items.length, 'items');
+
+    return { success: true, data: validated };
+
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error('[LLM Gateway] Error:', errorMessage);
     
-  } catch (e) {
-    // DEBUG: Log parse errors with context
-    if (e instanceof SyntaxError) {
-      console.error('❌ JSON parse error:', e.message, '\nFirst 500 chars:', rawContent.substring(0, 500));
-    }
-    return {
-      success: false,
-      error: e instanceof Error ? e.message : 'Unknown error',
-      rawContent,
+    return { 
+      success: false, 
+      error: `LLM Gateway error: ${errorMessage}` 
     };
   }
 }
 
-// ---------------------------------------------------------------------------
-// JSON sanitizer — extract valid JSON from messy LLM responses
-// ---------------------------------------------------------------------------
-
-function sanitizeJsonResponse(raw: string): string {
-  let s = raw.trim();
-  
-  // Strip markdown code fences
-  s = s.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
-  
-  // Find JSON boundaries (first { to last })
-  const start = s.indexOf('{');
-  const end = s.lastIndexOf('}');
-  
-  if (start === -1 || end === -1 || end <= start) {
-    // No valid JSON boundaries found, return as-is and let parse fail with clear error
-    return s;
-  }
-  
-  // Extract the JSON portion
-  return s.slice(start, end + 1);
-}
-
-// ---------------------------------------------------------------------------
-// Prompt builder — FULL QUALITY for Scout fallback
-// ---------------------------------------------------------------------------
-
+/**
+ * Build prompt messages for packing list generation
+ * (Same prompt structure as groqClient.ts for consistency)
+ */
 function buildMessages(
   eventDescription: string,
   catalog: GearItem[],
   pastEvents: EventItem[],
-  categories: Category[],
+  categories: Category[]
 ): Array<{ role: 'system' | 'user' | 'assistant'; content: string }> {
   // Optimized catalog: drop capabilities (never referenced in rules, adds noise)
   const catalogSummary = catalog.map((item) => {
@@ -321,90 +259,4 @@ BEFORE RETURNING YOUR RESPONSE, VERIFY:
 Return ONLY valid JSON matching this exact structure. No markdown, no code blocks, no explanation outside the JSON.`;
 
   return [{ role: 'user', content: prompt }];
-}
-
-// ---------------------------------------------------------------------------
-// Chat Q&A generation via Edge Function
-// ---------------------------------------------------------------------------
-
-interface ChatMessage {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-}
-
-export async function callGroqForChat(
-  messages: ChatMessage[],
-  catalog: GearItem[],
-): Promise<string> {
-  const categories = await db.categories.toArray();
-  
-  // Cap conversation history at 20 messages
-  let cappedMessages = [...messages];
-  if (cappedMessages.length > 20) {
-    const systemMessages = cappedMessages.filter(m => m.role === 'system');
-    const conversationMessages = cappedMessages.filter(m => m.role !== 'system');
-    cappedMessages = [...systemMessages, ...conversationMessages.slice(-15)];
-  }
-  
-  // Lighter catalog for chat: only essential fields (saves ~3K tokens)
-  const catalogSummary = catalog.map((item) => {
-    const category = categories.find(c => c.id === item.categoryId);
-    const summary: Record<string, unknown> = {
-      id: item.id,
-      name: item.name,
-      category: category?.name ?? null,
-    };
-    
-    if (item.brand) summary.brand = item.brand;
-    if (item.model) summary.model = item.model;
-    if (item.inferredProfile) summary.inferredProfile = item.inferredProfile;
-    
-    return summary;
-  });
-  
-  const systemPrompt = `You are GearVault AI, an expert photography and videography gear advisor.
-
-You ONLY answer questions about:
-- Camera gear (bodies, lenses, accessories)
-- Lighting equipment
-- Audio equipment
-- Support gear (tripods, gimbals, sliders)
-- Shooting techniques and event preparation
-- Gear purchasing advice and recommendations
-
-The user's gear catalog:
-${JSON.stringify(catalogSummary)}
-
-Important:
-- Use the catalog above to give personalized advice
-- Reference specific items from their catalog when relevant (e.g., "your Sony FX30 is great for...")
-- Be concise and practical
-- If asked about something unrelated to photography/videography, politely redirect
-- If you don't know something, say so - don't make up information
-
-Respond in a helpful, conversational tone.`;
-
-  const allMessages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
-    { role: 'system', content: systemPrompt },
-    ...cappedMessages.map(m => ({ role: m.role, content: m.content })),
-  ];
-  
-  const taskConfig = AI_TASKS.CHAT;
-  const model = GROQ_MODELS[taskConfig.model];
-  
-  try {
-    const response = await callEdgeFunction({
-      provider: 'groq',
-      model,
-      messages: allMessages,
-      temperature: taskConfig.temperature,
-      max_tokens: taskConfig.maxTokens,
-      // No response_format for chat (returns prose, not JSON)
-    });
-
-    return response.choices[0]?.message?.content || 'Sorry, I could not generate a response.';
-  } catch (error) {
-    console.error('[Chat] Error:', error);
-    throw error;
-  }
 }
