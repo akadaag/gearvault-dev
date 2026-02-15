@@ -6,7 +6,7 @@ import type { GearItem, EventItem, Category } from '../types/models';
 import { GROQ_MODELS, AI_TASKS } from './groqConfig';
 import { db } from '../db';
 import { callLLMGatewayForPackingPlan } from './llmGatewayClient';
-import { callEdgeFunction } from './edgeFunctionClient';
+import { callEdgeFunction, AuthExpiredError } from './edgeFunctionClient';
 
 // ---------------------------------------------------------------------------
 // Packing plan generation (Gemini primary → Scout fallback via Edge Function)
@@ -33,9 +33,16 @@ export async function callGroqForPackingPlan(
     return geminiResult.data;
   }
   
-  console.warn('⚠️ Gemini failed, falling back to Groq Scout:', geminiResult.error);
+  console.warn('⚠️ Gemini failed, checking error type...', geminiResult.error);
   
-  // Tier 2: Scout 17b via Edge Function (fallback)
+  // If Gemini failed due to auth, don't try Scout (auth errors aren't model-specific)
+  if (geminiResult.error?.includes('Authentication') || 
+      geminiResult.error?.includes('expired') || 
+      geminiResult.error?.includes('sign in')) {
+    throw new AuthExpiredError(geminiResult.error);
+  }
+  
+  // Tier 2: Scout 17b via Edge Function (fallback for non-auth errors)
   console.log('🔵 Attempt 2: Scout 17b (Groq via Edge Function)');
   const scoutMessages = buildMessages(eventDescription, catalog, pastEvents, categories);
   const result = await attemptPlanWithEdgeFunction(scoutMessages, GROQ_MODELS.SCOUT);
@@ -405,6 +412,10 @@ Respond in a helpful, conversational tone.`;
     return response.choices[0]?.message?.content || 'Sorry, I could not generate a response.';
   } catch (error) {
     console.error('[Chat] Error:', error);
+    // Re-throw AuthExpiredError to be handled by the UI
+    if (error instanceof AuthExpiredError) {
+      throw error;
+    }
     throw error;
   }
 }

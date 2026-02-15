@@ -5,6 +5,7 @@
  * - Uses supabase.functions.invoke() for automatic auth handling
  * - Routes to correct provider (LLM Gateway or Groq)
  * - Handles errors and retries with cold start detection
+ * - Proactively refreshes expired tokens before calling
  * - Single source of truth for all AI calls
  */
 
@@ -12,6 +13,54 @@ import { supabase } from './supabase';
 
 // Client-side timeout for Edge Function calls (60 seconds)
 const EDGE_FUNCTION_TIMEOUT = 60000;
+
+/**
+ * Custom error class for auth failures.
+ * Allows callers to detect auth errors without string matching.
+ */
+export class AuthExpiredError extends Error {
+  constructor(message = 'Session expired. Please sign in again.') {
+    super(message);
+    this.name = 'AuthExpiredError';
+  }
+}
+
+/**
+ * Ensure the session is fresh before making Edge Function calls.
+ * Proactively refreshes if token expires within 120 seconds.
+ * Throws AuthExpiredError if refresh fails.
+ */
+async function ensureFreshSession(): Promise<void> {
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  
+  if (sessionError || !session) {
+    throw new AuthExpiredError('Authentication required. Please sign in to use AI features.');
+  }
+
+  // Decode JWT to check expiry (JWT payload is base64-encoded JSON)
+  const accessToken = session.access_token;
+  try {
+    const payload = JSON.parse(atob(accessToken.split('.')[1]));
+    const expiresAt = payload.exp * 1000; // Convert to milliseconds
+    const now = Date.now();
+    const timeUntilExpiry = expiresAt - now;
+    
+    // If token expires within 120 seconds, proactively refresh
+    if (timeUntilExpiry < 120_000) {
+      console.warn('[Edge Function] Token expires soon, refreshing session...');
+      const { error: refreshError } = await supabase.auth.refreshSession();
+      if (refreshError) {
+        console.error('[Edge Function] Refresh failed:', refreshError);
+        throw new AuthExpiredError('Session expired. Please sign in again.');
+      }
+      console.log('[Edge Function] Session refreshed successfully');
+    }
+  } catch (e) {
+    // If JWT decode fails, log but continue (token might still be valid)
+    if (e instanceof AuthExpiredError) throw e;
+    console.warn('[Edge Function] Could not decode JWT, proceeding anyway:', e);
+  }
+}
 
 export type AIProvider = 'llm-gateway' | 'groq';
 
@@ -47,19 +96,16 @@ function withTimeout<T>(promise: Promise<T>, timeoutMs: number): Promise<T> {
 /**
  * Call the Edge Function with authentication.
  * Uses supabase.functions.invoke() which handles auth headers automatically.
- * Throws if user is not authenticated or request fails.
+ * Proactively refreshes expired tokens before calling.
+ * Throws AuthExpiredError if user is not authenticated or session refresh fails.
  * Default: 3 retries (4 total attempts) with cold start handling.
  */
 export async function callEdgeFunction(
   request: EdgeFunctionRequest,
   maxRetries = 3
 ): Promise<EdgeFunctionResponse> {
-  // Verify we have a session before calling
-  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-  
-  if (sessionError || !session) {
-    throw new Error('Authentication required. Please sign in to use AI features.');
-  }
+  // Ensure we have a fresh session before calling
+  await ensureFreshSession();
 
   let lastError: Error | null = null;
 
@@ -109,11 +155,11 @@ export async function callEdgeFunction(
             console.warn('[Edge Function] Auth error, refreshing session...');
             const { error: refreshError } = await supabase.auth.refreshSession();
             if (refreshError) {
-              throw new Error('Authentication expired. Please sign in again.');
+              throw new AuthExpiredError();
             }
             continue; // Retry with refreshed token
           }
-          throw new Error('Authentication expired. Please sign in again.');
+          throw new AuthExpiredError();
         }
 
         // Check for cold start (500 on first attempt) - retry immediately
@@ -161,6 +207,11 @@ export async function callEdgeFunction(
     } catch (error) {
       lastError = error instanceof Error ? error : new Error('Unknown error');
       
+      // Don't retry auth errors
+      if (error instanceof AuthExpiredError) {
+        throw error;
+      }
+      
       // Retry on network errors only
       if (attempt < maxRetries && error instanceof TypeError) {
         const delay = 2000 * (attempt + 1);
@@ -169,9 +220,9 @@ export async function callEdgeFunction(
         continue;
       }
       
-      // Don't retry auth errors or known failures
+      // Don't retry auth errors or known failures (legacy string checks for backward compat)
       if (lastError.message.includes('Authentication') || lastError.message.includes('sign in')) {
-        throw lastError;
+        throw new AuthExpiredError(lastError.message);
       }
 
       // For other errors, only throw if we've exhausted retries
