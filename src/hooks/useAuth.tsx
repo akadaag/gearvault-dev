@@ -30,8 +30,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    void supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session ?? null);
+    // On startup: validate the session with the server instead of just reading localStorage.
+    // This prevents showing a "logged in" state when the tokens are actually expired/invalid.
+    void supabase.auth.getSession().then(async ({ data }) => {
+      if (data.session) {
+        // Session exists in localStorage — validate it's actually live (network call)
+        const { data: userData, error } = await supabase.auth.getUser();
+        if (error || !userData.user) {
+          // Session is stale/expired/invalid — clear it locally so user sees login prompt
+          console.warn('[Auth] Stale session detected on startup, clearing local storage');
+          await supabase.auth.signOut({ scope: 'local' }); // clear local only, no server call
+          setSession(null);
+        } else {
+          // Session is valid, proceed normally
+          setSession(data.session);
+        }
+      } else {
+        setSession(null);
+      }
       setBooting(false);
     });
 
@@ -99,6 +115,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.removeEventListener('online', onOnline);
     };
   }, [configured, session?.user]);
+
+  // Refresh session when app comes back to foreground (e.g., after backgrounding on mobile)
+  // This prevents "session expired" errors when user locks phone or switches apps.
+  useEffect(() => {
+    if (!configured) return;
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        // App came to foreground — proactively refresh session if we have one
+        void supabase.auth.getSession().then(({ data }) => {
+          if (data.session) {
+            console.log('[Auth] App foregrounded, refreshing session...');
+            void supabase.auth.refreshSession().then(({ error }) => {
+              if (error) {
+                console.warn('[Auth] Foreground refresh failed:', error);
+                // Don't throw — let the user try their action, which will show proper error
+              } else {
+                console.log('[Auth] Foreground refresh successful');
+              }
+            });
+          }
+        });
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, [configured]);
 
   async function signIn(email: string, password: string) {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
