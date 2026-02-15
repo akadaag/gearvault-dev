@@ -75,10 +75,35 @@ export async function callEdgeFunction(
 
       // Handle Supabase invoke errors
       if (error) {
-        const errorMessage = error.message || 'Edge Function invocation failed';
+        // Extract the REAL error from the response context
+        // FunctionsHttpError has a generic message but the actual error is in error.context (Response object)
+        let errorMessage = error.message || 'Edge Function invocation failed';
+        let statusCode = 0;
+        
+        try {
+          if (error.context && typeof error.context.json === 'function') {
+            // error.context is a Response object — read the actual error body
+            const errorBody = await error.context.json();
+            console.error('[Edge Function] Response body:', errorBody);
+            statusCode = error.context.status || 0;
+            errorMessage = errorBody?.error || errorBody?.message || errorBody?.details || errorMessage;
+            if (errorBody?.details) {
+              errorMessage += ` — ${errorBody.details}`;
+            }
+            errorMessage = `[${statusCode}] ${errorMessage}`;
+          } else if (error.context && error.context.status) {
+            statusCode = error.context.status;
+            errorMessage = `[${statusCode}] ${errorMessage}`;
+          }
+        } catch (_) {
+          // Could not parse error context, use original message
+          console.warn('[Edge Function] Could not parse error context');
+        }
+        
+        console.error(`[Edge Function] Error (attempt ${attempt + 1}/${maxRetries + 1}):`, errorMessage);
         
         // Check if it's an auth error
-        if (errorMessage.includes('401') || errorMessage.includes('Unauthorized') || errorMessage.includes('JWT')) {
+        if (errorMessage.includes('401') || errorMessage.includes('Unauthorized') || errorMessage.includes('JWT') || statusCode === 401) {
           // Try refreshing the session once
           if (attempt === 0) {
             console.warn('[Edge Function] Auth error, refreshing session...');
@@ -92,13 +117,13 @@ export async function callEdgeFunction(
         }
 
         // Check for cold start (500 on first attempt) - retry immediately
-        if (errorMessage.includes('500') && attempt === 0) {
+        if ((errorMessage.includes('500') || statusCode === 500) && attempt === 0) {
           console.warn('[Edge Function] Cold start detected (500), retrying immediately...');
           continue; // Immediate retry, no delay
         }
 
         // Check for rate limiting (may appear in error context)
-        if (errorMessage.includes('429') || errorMessage.includes('rate')) {
+        if (errorMessage.includes('429') || errorMessage.includes('rate') || statusCode === 429) {
           if (attempt < maxRetries) {
             const delay = 2000 * (attempt + 1);
             console.warn(`[Edge Function] Rate limit hit, retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})...`);
@@ -108,7 +133,7 @@ export async function callEdgeFunction(
         }
 
         // For other 500 errors after first attempt, use exponential backoff
-        if (errorMessage.includes('500') && attempt < maxRetries) {
+        if ((errorMessage.includes('500') || statusCode === 500) && attempt < maxRetries) {
           const delay = 1000 * Math.pow(2, attempt); // 1s, 2s
           console.warn(`[Edge Function] Server error (500), retrying in ${delay}ms (attempt ${attempt + 1}/${maxRetries})...`);
           await new Promise(resolve => setTimeout(resolve, delay));

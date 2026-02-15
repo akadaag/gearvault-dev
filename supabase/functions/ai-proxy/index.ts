@@ -154,10 +154,19 @@ Deno.serve(async (req) => {
       const errorText = await providerResponse.text();
       console.error(`[${provider}] API error ${providerResponse.status}:`, errorText);
       
+      // Try to parse error for better messaging
+      let errorDetail = errorText;
+      try {
+        const parsed = JSON.parse(errorText);
+        errorDetail = parsed?.error?.message || parsed?.error || parsed?.message || errorText;
+      } catch (_) {
+        // keep raw text
+      }
+      
       return new Response(
         JSON.stringify({ 
-          error: `${provider} API error`,
-          details: errorText,
+          error: `${provider} API error (${providerResponse.status})`,
+          details: typeof errorDetail === 'string' ? errorDetail : JSON.stringify(errorDetail),
           status: providerResponse.status,
         }),
         { status: providerResponse.status, headers: responseHeaders }
