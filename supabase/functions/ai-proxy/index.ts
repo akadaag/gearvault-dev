@@ -12,12 +12,19 @@
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const ALLOWED_ORIGINS = [
-  'http://localhost:5173',
-  'http://localhost:5174',
-  'http://localhost:4173', 
-  'https://gearvault.vercel.app',
-];
+/**
+ * Determine if an origin should be allowed based on pattern matching
+ */
+function getAllowedOrigin(origin: string): string {
+  // Allow localhost (any port) for development
+  if (origin.match(/^http:\/\/localhost:\d+$/)) return origin;
+  
+  // Allow any *.vercel.app deployment (production + all preview deployments)
+  if (origin.match(/^https:\/\/[\w-]+\.vercel\.app$/)) return origin;
+  
+  // Default fallback for production
+  return 'https://gearvault-dev.vercel.app';
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -37,11 +44,11 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
-  // Set CORS origin dynamically
+  // Set CORS origin dynamically based on request origin
   const origin = req.headers.get('origin') || '';
   const responseHeaders = {
     ...corsHeaders,
-    'Access-Control-Allow-Origin': ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0],
+    'Access-Control-Allow-Origin': getAllowedOrigin(origin),
     'Content-Type': 'application/json',
   };
 
