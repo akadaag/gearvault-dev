@@ -6,10 +6,16 @@ import App from './App';
 import { AuthProvider } from './hooks/useAuth';
 import './index.css';
 
-registerSW({
+const updateSW = registerSW({
   immediate: true,
   onRegistered() {
     console.info('GearVault service worker registered');
+  },
+  onNeedRefresh() {
+    // Notify user that an update is available
+    if (confirm('A new version of GearVault is available. Update now?')) {
+      updateSW(true);
+    }
   },
 });
 

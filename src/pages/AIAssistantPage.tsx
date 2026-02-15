@@ -467,7 +467,7 @@ export function AIAssistantPage() {
             AI features require authentication to keep your data secure.
             Please log in to continue.
           </p>
-          <button onClick={() => navigate('/login')}>Go to Login</button>
+          <button type="button" onClick={() => navigate('/login')}>Go to Login</button>
         </div>
       </section>
     );
@@ -489,11 +489,11 @@ export function AIAssistantPage() {
             </div>
             <div className="row" style={{ gap: '0.5rem' }}>
               {currentSession && (
-                <button className="ghost" onClick={handleNewChat}>
+                <button type="button" className="ghost" onClick={handleNewChat}>
                   + New Chat
                 </button>
               )}
-              <button className="ghost" onClick={() => setShowChatDrawer(true)}>
+              <button type="button" className="ghost" onClick={() => setShowChatDrawer(true)}>
                 📁 History ({chatSessions.length})
               </button>
             </div>
@@ -542,6 +542,7 @@ export function AIAssistantPage() {
                   <p className="subtle" style={{ fontSize: '0.85rem' }}>Example questions:</p>
                   {EXAMPLE_QUESTIONS.map((ex) => (
                     <button
+                      type="button"
                       key={ex}
                       className="ghost example-prompt-btn"
                       onClick={() => {
@@ -561,6 +562,7 @@ export function AIAssistantPage() {
           <div className="stack-sm">
             {!currentSession && (
               <button
+                type="button"
                 className="ghost"
                 style={{ fontSize: '0.85rem' }}
                 onClick={() => setShowExamples((v) => !v)}
@@ -591,12 +593,13 @@ export function AIAssistantPage() {
                   : 'AI will answer based on your catalog'
                 }
               </span>
-              <button
-                onClick={() => void handleSubmit()}
-                disabled={loading || !input.trim()}
-              >
-                {loading ? 'Thinking…' : 'Send'}
-              </button>
+            <button
+              type="button"
+              onClick={() => void handleSubmit()}
+              disabled={loading || !input.trim()}
+            >
+              {loading ? 'Thinking…' : 'Send'}
+            </button>
             </div>
 
             {error && <p className="error">{error}</p>}
@@ -612,7 +615,7 @@ export function AIAssistantPage() {
               <h2>AI Pack Assistant</h2>
               <p className="subtle">{catalog.length} items in your catalog</p>
             </div>
-            <button className="ghost" onClick={() => setMode('chat')}>
+            <button type="button" className="ghost" onClick={() => setMode('chat')}>
               💬 Q&A Chat
             </button>
           </div>
@@ -628,6 +631,7 @@ export function AIAssistantPage() {
 
           <div>
             <button
+              type="button"
               className="ghost"
               style={{ fontSize: '0.85rem' }}
               onClick={() => setShowExamples((v) => !v)}
@@ -639,6 +643,7 @@ export function AIAssistantPage() {
               <div className="stack-sm" style={{ marginTop: '0.75rem' }}>
                 {EXAMPLE_PROMPTS.map((ex) => (
                   <button
+                    type="button"
                     key={ex}
                     className="ghost example-prompt-btn"
                     onClick={() => {
@@ -656,6 +661,7 @@ export function AIAssistantPage() {
           <div className="row between wrap">
             <span className="subtle">AI will generate a smart packing checklist</span>
             <button
+              type="button"
               onClick={() => void handleSubmit()}
               disabled={loading || !input.trim()}
             >
@@ -686,7 +692,7 @@ export function AIAssistantPage() {
                 <h2 style={{ margin: 0 }}>{plan.eventTitle}</h2>
                 <p className="subtle" style={{ margin: '0.25rem 0 0' }}>{plan.eventType}</p>
               </div>
-              <button className="ghost" onClick={handleReset} style={{ fontSize: '0.85rem' }}>
+              <button type="button" className="ghost" onClick={handleReset} style={{ fontSize: '0.85rem' }}>
                 ← New prompt
               </button>
             </div>
@@ -804,11 +810,12 @@ export function AIAssistantPage() {
             <p className="subtle" style={{ marginBottom: '1rem' }}>
               Create an event to save this as a checklist you can tick off while packing.
             </p>
-            <button
-              onClick={() => void handleCreateEvent()}
-              disabled={saving}
-              style={{ width: '100%' }}
-            >
+              <button
+                type="button"
+                onClick={() => void handleCreateEvent()}
+                disabled={saving}
+                style={{ width: '100%' }}
+              >
               {saving ? 'Creating event…' : 'Create Event & Checklist →'}
             </button>
           </div>
@@ -824,7 +831,7 @@ export function AIAssistantPage() {
           <div className="chat-drawer">
             <div className="chat-drawer__header">
               <h3>Chat History</h3>
-              <button className="ghost" onClick={() => setShowChatDrawer(false)}>
+              <button type="button" className="ghost" onClick={() => setShowChatDrawer(false)}>
                 ✕
               </button>
             </div>
@@ -838,6 +845,7 @@ export function AIAssistantPage() {
                   {chatSessions.map((session) => (
                     <div key={session.id} className="chat-session-item">
                       <button
+                        type="button"
                         className="chat-session-btn"
                         onClick={() => void handleLoadSession(session.id)}
                       >
@@ -850,6 +858,7 @@ export function AIAssistantPage() {
                         </div>
                       </button>
                       <button
+                        type="button"
                         className="ghost"
                         onClick={() => void handleDeleteSession(session.id)}
                         style={{ padding: '0.5rem' }}
@@ -862,7 +871,7 @@ export function AIAssistantPage() {
               )}
             </div>
             <div className="chat-drawer__footer">
-              <button onClick={handleNewChat} style={{ width: '100%' }}>
+              <button type="button" onClick={handleNewChat} style={{ width: '100%' }}>
                 + New Chat
               </button>
             </div>
