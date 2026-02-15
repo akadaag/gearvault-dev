@@ -51,10 +51,17 @@ async function ensureFreshSession(): Promise<void> {
     const now = Date.now();
     const timeUntilExpiry = expiresAt - now;
     
-    // Token already expired → throw immediately, never call refreshSession()
+    // Token already expired — attempt refresh (safe because callers set loading=true
+    // before reaching here, which prevents the auth guard from wiping the UI)
     if (timeUntilExpiry <= 0) {
-      console.warn('[Edge Function] Token already expired, throwing AuthExpiredError (no refresh attempt)');
-      throw new AuthExpiredError('Your session has expired. Please sign in again.');
+      console.warn('[Edge Function] Token expired, attempting refresh...');
+      const { error: refreshError } = await supabase.auth.refreshSession();
+      if (refreshError) {
+        console.error('[Edge Function] Refresh failed for expired token:', refreshError);
+        throw new AuthExpiredError('Your session has expired. Please sign in again.');
+      }
+      console.log('[Edge Function] Expired token refreshed successfully');
+      return; // Session is now fresh, proceed with the call
     }
     
     // Token expires within 120 seconds but is still valid → safe to proactively refresh
