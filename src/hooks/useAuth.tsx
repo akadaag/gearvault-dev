@@ -30,20 +30,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return;
     }
 
-    // On startup: validate the session with the server instead of just reading localStorage.
-    // This prevents showing a "logged in" state when the tokens are actually expired/invalid.
+    // On startup: refresh the session to ensure tokens are valid.
+    // This handles: expired access token + valid refresh token → silently refreshed.
+    // If refresh token is also dead → fails → clear session → user sees login.
     void supabase.auth.getSession().then(async ({ data }) => {
       if (data.session) {
-        // Session exists in localStorage — validate it's actually live (network call)
-        const { data: userData, error } = await supabase.auth.getUser();
-        if (error || !userData.user) {
-          // Session is stale/expired/invalid — clear it locally so user sees login prompt
-          console.warn('[Auth] Stale session detected on startup, clearing local storage');
+        // Session exists in localStorage — refresh it to ensure tokens are valid
+        const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+        if (refreshError || !refreshData.session) {
+          // Session refresh failed (both tokens likely expired) — clear it locally
+          console.warn('[Auth] Session refresh failed on startup, clearing stale session');
           await supabase.auth.signOut({ scope: 'local' }); // clear local only, no server call
           setSession(null);
         } else {
-          // Session is valid, proceed normally
-          setSession(data.session);
+          // Session refreshed successfully, proceed with fresh tokens
+          setSession(refreshData.session);
         }
       } else {
         setSession(null);
