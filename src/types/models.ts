@@ -48,6 +48,8 @@ export interface GearItem {
   // AI classification fields
   inferredProfile?: 'video_first' | 'photo_first' | 'hybrid' | 'cinema' | 'audio' | 'lighting' | 'support' | 'power' | 'media' | 'accessory';
   capabilities?: string[];
+  eventFit?: string[]; // Event types this item is suited for (wedding, corporate, interview, etc.)
+  strengths?: string[]; // Practical strengths (low-light, autofocus, portability, etc.)
   classificationStatus?: 'pending' | 'done' | 'failed';
 }
 
@@ -103,6 +105,21 @@ export interface AIFeedback {
   itemName: string;
   useful: boolean;
   createdAt: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant' | 'system';
+  content: string;
+  timestamp: string;
+}
+
+export interface ChatSession {
+  id: string;
+  title: string;
+  messages: ChatMessage[];
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface AppSettings {

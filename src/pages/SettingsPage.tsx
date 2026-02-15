@@ -218,9 +218,20 @@ export function SettingsPage() {
       <div className="card stack-md">
         <h3>AI Assistant</h3>
         <p className="subtle">
-          GearVault uses Groq AI (llama-3.3-70b-versatile) for intelligent packing suggestions. 
-          The API key is hardcoded — no configuration needed.
+          GearVault uses Groq AI for intelligent packing suggestions and Q&A chat. 
+          API keys are configured in your environment variables.
         </p>
+
+        <div className="stack-sm">
+          <p className="subtle" style={{ fontSize: '0.85rem', marginBottom: '0.5rem' }}>
+            <strong>Primary:</strong> <code>VITE_GROQ_API_KEY</code> (Required)<br />
+            <strong>Fallback:</strong> <code>VITE_GROQ_API_KEY_FALLBACK</code> (Optional, extends daily request limit)<br />
+            <span style={{ fontSize: '0.8rem', opacity: 0.8 }}>
+              Packing lists and chat use compound-mini (500 requests/day with 2 keys). 
+              Scout 17b acts as emergency fallback when requests are exhausted.
+            </span>
+          </p>
+        </div>
 
         <label className="checkbox-inline">
           <input type="checkbox" checked={settings.aiLearningEnabled} onChange={(e) => void update('aiLearningEnabled', e.target.checked)} />

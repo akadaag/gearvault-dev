@@ -1,6 +1,6 @@
 import Dexie, { type EntityTable } from 'dexie';
 import { defaultCategories } from './constants/defaultCategories';
-import type { AIFeedback, AppSettings, Category, EventItem, ExportBundle, GearItem } from './types/models';
+import type { AIFeedback, AppSettings, Category, ChatSession, EventItem, ExportBundle, GearItem } from './types/models';
 
 class GearVaultDB extends Dexie {
   gearItems!: EntityTable<GearItem, 'id'>;
@@ -8,6 +8,7 @@ class GearVaultDB extends Dexie {
   events!: EntityTable<EventItem, 'id'>;
   settings!: EntityTable<AppSettings, 'id'>;
   aiFeedback!: EntityTable<AIFeedback, 'id'>;
+  chatSessions!: EntityTable<ChatSession, 'id'>;
 
   constructor() {
     super('gearvault-db');
@@ -41,6 +42,25 @@ class GearVaultDB extends Dexie {
           await tx.table('categories').update(id, { name });
         }
       });
+
+    // v3: add eventFit and strengths fields to gearItems
+    this.version(3).stores({
+      gearItems: 'id, name, categoryId, essential, condition, updatedAt, *tags',
+      categories: 'id, sortOrder, name',
+      events: 'id, title, type, dateTime, client, updatedAt, createdBy',
+      settings: 'id',
+      aiFeedback: 'id, eventType, useful, createdAt',
+    });
+
+    // v4: add chatSessions table for AI Q&A feature
+    this.version(4).stores({
+      gearItems: 'id, name, categoryId, essential, condition, updatedAt, *tags',
+      categories: 'id, sortOrder, name',
+      events: 'id, title, type, dateTime, client, updatedAt, createdBy',
+      settings: 'id',
+      aiFeedback: 'id, eventType, useful, createdAt',
+      chatSessions: 'id, updatedAt',
+    });
   }
 }
 

@@ -1,9 +1,11 @@
 import { db } from '../db';
-import { callGroqForFollowUpQuestions, callGroqForPackingPlan } from '../lib/groqClient';
+import { callGroqForPackingPlan, callGroqForChat } from '../lib/groqClient';
 import { makeId } from '../lib/ids';
 import type {
   AIFeedback,
   AppSettings,
+  ChatMessage,
+  ChatSession,
   EventItem,
   GearItem,
   MissingItemSuggestion,
@@ -13,7 +15,6 @@ import type {
 
 export interface AIContext {
   eventDescription: string;
-  followUpAnswers: Record<string, string>;
   catalog: GearItem[];
   patterns: { eventType: string; topItems: string[] }[];
 }
@@ -42,7 +43,6 @@ export interface AIPlan {
 }
 
 interface AIProvider {
-  getFollowUpQuestions(ctx: AIContext): Promise<string[]>;
   generatePlan(ctx: AIContext): Promise<AIPlan>;
 }
 
@@ -51,16 +51,10 @@ interface AIProvider {
 // ---------------------------------------------------------------------------
 
 class GroqProvider implements AIProvider {
-  async getFollowUpQuestions(ctx: AIContext): Promise<string[]> {
-    const questions = await callGroqForFollowUpQuestions(ctx.eventDescription);
-    return questions.map((q) => q.question);
-  }
-
   async generatePlan(ctx: AIContext): Promise<AIPlan> {
     const events = await db.events.toArray();
     const result = await callGroqForPackingPlan(
       ctx.eventDescription,
-      ctx.followUpAnswers,
       ctx.catalog,
       events,
     );
@@ -199,6 +193,104 @@ export async function storeSuggestionFeedback(
     createdAt: new Date().toISOString(),
   };
   await db.aiFeedback.add(feedback);
+}
+
+// ---------------------------------------------------------------------------
+// Chat Q&A Service
+// ---------------------------------------------------------------------------
+
+/**
+ * Send a message to the AI chat and get a response.
+ * Includes the user's gear catalog for personalized advice.
+ * Limits conversation history to last 20 messages.
+ */
+export async function sendChatMessage(
+  messages: ChatMessage[],
+  catalog: GearItem[],
+): Promise<string> {
+  // Limit to last 20 messages (excluding system prompt)
+  const recentMessages = messages.slice(-20);
+  
+  const response = await callGroqForChat(recentMessages, catalog);
+  return response;
+}
+
+/**
+ * Generate a chat session title from the first user message.
+ * Takes the first 50 characters and capitalizes appropriately.
+ */
+export function generateChatTitle(firstUserMessage: string): string {
+  const cleaned = firstUserMessage.trim();
+  if (cleaned.length <= 50) {
+    return cleaned;
+  }
+  // Truncate at word boundary
+  const truncated = cleaned.slice(0, 50);
+  const lastSpace = truncated.lastIndexOf(' ');
+  if (lastSpace > 30) {
+    return truncated.slice(0, lastSpace) + '...';
+  }
+  return truncated + '...';
+}
+
+/**
+ * Save a chat session to the database.
+ */
+export async function saveChatSession(session: ChatSession): Promise<void> {
+  await db.chatSessions.put(session);
+}
+
+/**
+ * Load a chat session by ID.
+ */
+export async function loadChatSession(sessionId: string): Promise<ChatSession | undefined> {
+  return await db.chatSessions.get(sessionId);
+}
+
+/**
+ * Load all chat sessions, sorted by most recent first.
+ */
+export async function loadAllChatSessions(): Promise<ChatSession[]> {
+  const sessions = await db.chatSessions.toArray();
+  return sessions.sort((a, b) => 
+    new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+  );
+}
+
+/**
+ * Delete a chat session by ID.
+ */
+export async function deleteChatSession(sessionId: string): Promise<void> {
+  await db.chatSessions.delete(sessionId);
+}
+
+/**
+ * Create a new chat message object.
+ */
+export function createChatMessage(
+  role: 'user' | 'assistant' | 'system',
+  content: string,
+): ChatMessage {
+  return {
+    id: makeId(),
+    role,
+    content,
+    timestamp: new Date().toISOString(),
+  };
+}
+
+/**
+ * Create a new chat session object.
+ */
+export function createChatSession(title: string, initialMessages: ChatMessage[] = []): ChatSession {
+  const now = new Date().toISOString();
+  return {
+    id: makeId(),
+    title,
+    messages: initialMessages,
+    createdAt: now,
+    updatedAt: now,
+  };
 }
 
 // ---------------------------------------------------------------------------

@@ -1,8 +1,20 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
-import { buildPatterns, getProvider, toEventFromPlan, type AIPlan } from '../services/ai';
+import { 
+  buildPatterns, 
+  getProvider, 
+  toEventFromPlan, 
+  sendChatMessage,
+  createChatMessage,
+  createChatSession,
+  saveChatSession,
+  loadAllChatSessions,
+  deleteChatSession,
+  generateChatTitle,
+  type AIPlan 
+} from '../services/ai';
 import { matchCatalogItem } from '../lib/catalogMatcher';
 import { groupBySection, priorityLabel } from '../lib/packingHelpers';
 import { classifyPendingItems } from '../lib/gearClassifier';
@@ -10,7 +22,8 @@ import {
   CatalogMatchReviewSheet,
   type ReviewItem,
 } from '../components/CatalogMatchReviewSheet';
-import type { GearItem } from '../types/models';
+import type { GearItem, ChatSession } from '../types/models';
+import { useAuth } from '../hooks/useAuth';
 
 // ---------------------------------------------------------------------------
 // Example prompts (from reference)
@@ -25,93 +38,153 @@ const EXAMPLE_PROMPTS = [
   'Real estate video tour, 3 properties',
 ];
 
-type Step = 'input' | 'questions' | 'review' | 'results';
+const EXAMPLE_QUESTIONS = [
+  'What lens should I use for portraits?',
+  'How do I get better low-light video?',
+  'Which camera is best for travel vlogs?',
+  'What gear do I need for a podcast?',
+];
+
+type Mode = 'packing' | 'chat';
+type Step = 'input' | 'review' | 'results';
 
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 export function AIAssistantPage() {
   const navigate = useNavigate();
+  const { user, loading: authLoading } = useAuth();
   const catalog = useLiveQuery(() => db.gearItems.toArray(), [], [] as GearItem[]);
   const settings = useLiveQuery(() => db.settings.get('app-settings'), []);
 
-  // Step control
+  // Mode detection
+  const [mode, setMode] = useState<Mode>('packing');
+  const [input, setInput] = useState('');
+  
+  // Packing list state
   const [step, setStep] = useState<Step>('input');
-
-  // Input
-  const [prompt, setPrompt] = useState('');
-  const [showExamples, setShowExamples] = useState(false);
-
-  // Follow-up questions
-  const [questions, setQuestions] = useState<string[]>([]);
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-
-  // Generated plan (raw from AI + matcher applied)
   const [plan, setPlan] = useState<AIPlan | null>(null);
-
-  // Review sheet state
   const [reviewItems, setReviewItems] = useState<ReviewItem[]>([]);
   const [reviewOpen, setReviewOpen] = useState(false);
   const [selections, setSelections] = useState<Map<string, string>>(new Map());
-
-  // Save / loading state
   const [saving, setSaving] = useState(false);
+
+  // Chat state
+  const [currentSession, setCurrentSession] = useState<ChatSession | null>(null);
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
+  const [showChatDrawer, setShowChatDrawer] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  // Shared state
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [error, setError] = useState('');
+  const [showExamples, setShowExamples] = useState(false);
 
   // ---------------------------------------------------------------------------
-  // Derived stats for results header
+  // Load chat sessions on mount
   // ---------------------------------------------------------------------------
-  const resultStats = useMemo(() => {
-    if (!plan) return null;
-    return {
-      totalItems: plan.checklist.length,
-      missingCount: plan.missingItems.length,
-    };
-  }, [plan]);
+  useEffect(() => {
+    void loadAllChatSessions().then(setChatSessions);
+  }, []);
 
   // ---------------------------------------------------------------------------
-  // STEP 1: Ask for follow-up questions
+  // Auto-scroll chat to bottom
   // ---------------------------------------------------------------------------
-  async function handleGenerate() {
-    if (!prompt.trim() || !settings || loading) return;
+  useEffect(() => {
+    if (mode === 'chat' && currentSession) {
+      chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [mode, currentSession?.messages.length]);
 
-    setLoading(true);
-    setLoadingMessage('Analysing your event…');
-    setError('');
+  // ---------------------------------------------------------------------------
+  // Detect mode from input
+  // ---------------------------------------------------------------------------
+  function detectMode(text: string): Mode {
+    const lower = text.toLowerCase().trim();
+    
+    // Check for question patterns
+    if (text.includes('?')) return 'chat';
+    if (/^(what|which|how|why|when|where|can|should|is|are|do|does)/i.test(lower)) return 'chat';
+    if (/\b(recommend|suggest|advice|help|explain|tell me|compare)\b/i.test(lower)) return 'chat';
+    
+    // Default to packing list
+    return 'packing';
+  }
 
-    try {
-      const patterns = settings.aiLearningEnabled ? await buildPatterns() : [];
-      const provider = await getProvider(settings);
+  // ---------------------------------------------------------------------------
+  // Handle input submission
+  // ---------------------------------------------------------------------------
+  async function handleSubmit() {
+    if (!input.trim() || loading) return;
 
-      const followups = await provider.getFollowUpQuestions({
-        eventDescription: prompt,
-        followUpAnswers: {},
-        catalog,
-        patterns,
-      });
+    const detectedMode = detectMode(input);
+    setMode(detectedMode);
 
-      if (followups.length > 0) {
-        setQuestions(followups);
-        setAnswers({});
-        setStep('questions');
-      } else {
-        // Enough info — go straight to plan generation
-        await runGeneratePlan({});
-      }
-    } catch (e) {
-      setError(friendlyError(e));
-    } finally {
-      setLoading(false);
+    if (detectedMode === 'chat') {
+      await handleChatSubmit();
+    } else {
+      await handlePackingSubmit();
     }
   }
 
   // ---------------------------------------------------------------------------
-  // STEP 2: Generate plan (after questions answered, or directly)
+  // Chat: Send message
   // ---------------------------------------------------------------------------
-  async function runGeneratePlan(answerMap: Record<string, string>) {
-    if (!settings) return;
+  async function handleChatSubmit() {
+    if (!input.trim() || loading) return;
+
+    setLoading(true);
+    setError('');
+    setIsTyping(true);
+
+    try {
+      // Create or update session
+      let session = currentSession;
+      
+      if (!session) {
+        const title = generateChatTitle(input);
+        session = createChatSession(title);
+        setCurrentSession(session);
+      }
+
+      // Add user message
+      const userMessage = createChatMessage('user', input);
+      session.messages.push(userMessage);
+      setCurrentSession({ ...session });
+      setInput('');
+
+      // Get AI response
+      const response = await sendChatMessage(session.messages, catalog);
+
+      // Add assistant message
+      const assistantMessage = createChatMessage('assistant', response);
+      session.messages.push(assistantMessage);
+      session.updatedAt = new Date().toISOString();
+      
+      setCurrentSession({ ...session });
+      
+      // Save to database
+      await saveChatSession(session);
+      
+      // Update sessions list
+      const sessions = await loadAllChatSessions();
+      setChatSessions(sessions);
+      
+    } catch (e) {
+      setError(friendlyError(e));
+    } finally {
+      setLoading(false);
+      setIsTyping(false);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Packing: Generate plan
+  // ---------------------------------------------------------------------------
+  async function handlePackingSubmit() {
+    if (!input.trim() || !settings || loading) return;
 
     setLoading(true);
     setLoadingMessage('Classifying gear items…');
@@ -127,30 +200,35 @@ export function AIAssistantPage() {
       const provider = await getProvider(settings);
 
       const rawPlan = await provider.generatePlan({
-        eventDescription: prompt,
-        followUpAnswers: answerMap,
+        eventDescription: input,
         catalog,
         patterns,
       });
 
       // ------------------------------------------------------------------
-      // Safety guard: Ensure video-first camera is PRIMARY for video events
+      // Safety guard: Ensure at least one video-first camera is PRIMARY for video events
+      // (allows multiple primaries, which the AI may assign for co-equal cameras)
       // ------------------------------------------------------------------
       const isVideoEvent = /video|interview|corporate/i.test(rawPlan.eventType);
       if (isVideoEvent) {
         const cameraBodies = rawPlan.checklist.filter(item => item.section === 'Camera Bodies');
-        const videoFirstBody = cameraBodies.find(item => {
+        
+        // Check if at least one video_first camera is already marked as primary
+        const hasVideoFirstPrimary = cameraBodies.some(item => {
           const matchedItem = catalog.find(c => c.id === item.gearItemId);
-          return matchedItem?.inferredProfile === 'video_first';
+          return matchedItem?.inferredProfile === 'video_first' && item.role === 'primary';
         });
         
-        if (videoFirstBody && videoFirstBody.role !== 'primary') {
-          // Find current primary and swap roles
-          const currentPrimary = cameraBodies.find(item => item.role === 'primary');
-          if (currentPrimary) {
-            currentPrimary.role = videoFirstBody.role || 'standard';
+        // If not, promote the best video_first camera to primary
+        if (!hasVideoFirstPrimary) {
+          const videoFirstBody = cameraBodies.find(item => {
+            const matchedItem = catalog.find(c => c.id === item.gearItemId);
+            return matchedItem?.inferredProfile === 'video_first';
+          });
+          
+          if (videoFirstBody) {
+            videoFirstBody.role = 'primary';
           }
-          videoFirstBody.role = 'primary';
         }
       }
 
@@ -218,7 +296,7 @@ export function AIAssistantPage() {
   }
 
   // ---------------------------------------------------------------------------
-  // STEP 3: Apply user review selections → patch plan → show results
+  // Apply user review selections → patch plan → show results
   // ---------------------------------------------------------------------------
   function handleReviewConfirm() {
     if (!plan) return;
@@ -253,7 +331,7 @@ export function AIAssistantPage() {
   }
 
   // ---------------------------------------------------------------------------
-  // STEP 4: Persist event (explicit user action)
+  // Persist event (explicit user action)
   // ---------------------------------------------------------------------------
   async function handleCreateEvent() {
     if (!plan || !settings || saving) return;
@@ -262,8 +340,7 @@ export function AIAssistantPage() {
     try {
       const patterns = settings.aiLearningEnabled ? await buildPatterns() : [];
       const event = toEventFromPlan(plan, {
-        eventDescription: prompt,
-        followUpAnswers: answers,
+        eventDescription: input,
         catalog,
         patterns,
       });
@@ -278,23 +355,67 @@ export function AIAssistantPage() {
   }
 
   // ---------------------------------------------------------------------------
-  // Reset
+  // Chat: New conversation
+  // ---------------------------------------------------------------------------
+  function handleNewChat() {
+    setCurrentSession(null);
+    setInput('');
+    setError('');
+    setMode('packing'); // Reset to default mode
+  }
+
+  // ---------------------------------------------------------------------------
+  // Chat: Load session
+  // ---------------------------------------------------------------------------
+  async function handleLoadSession(sessionId: string) {
+    const sessions = await loadAllChatSessions();
+    const session = sessions.find(s => s.id === sessionId);
+    if (session) {
+      setCurrentSession(session);
+      setMode('chat');
+      setShowChatDrawer(false);
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Chat: Delete session
+  // ---------------------------------------------------------------------------
+  async function handleDeleteSession(sessionId: string) {
+    await deleteChatSession(sessionId);
+    const sessions = await loadAllChatSessions();
+    setChatSessions(sessions);
+    if (currentSession?.id === sessionId) {
+      handleNewChat();
+    }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Reset packing list
   // ---------------------------------------------------------------------------
   function handleReset() {
     setStep('input');
-    setPrompt('');
-    setQuestions([]);
-    setAnswers({});
+    setInput('');
     setPlan(null);
     setReviewItems([]);
     setSelections(new Map());
     setError('');
     setLoading(false);
+    setMode('packing');
   }
 
   // ---------------------------------------------------------------------------
+  // Derived stats for results header
+  // ---------------------------------------------------------------------------
+  const resultStats = useMemo(() => {
+    if (!plan) return null;
+    return {
+      totalItems: plan.checklist.length,
+      missingCount: plan.missingItems.length,
+    };
+  }, [plan]);
+
+  // ---------------------------------------------------------------------------
   // Group checklist items by section (memoised)
-  // Must be above the early return so hooks are called in consistent order.
   // ---------------------------------------------------------------------------
   const groupedItems = useMemo(() => {
     if (!plan) return {};
@@ -313,9 +434,40 @@ export function AIAssistantPage() {
           <div style={{ fontSize: '2.5rem' }}>📷</div>
           <h3>Add gear first</h3>
           <p className="subtle">
-            The AI needs your gear catalog to generate smart packing lists.
+            The AI needs your gear catalog to generate smart packing lists and answer questions.
           </p>
           <button onClick={() => navigate('/catalog')}>Go to Catalog</button>
+        </div>
+      </section>
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Auth guard
+  // ---------------------------------------------------------------------------
+  if (authLoading) {
+    // Loading auth status
+    return (
+      <section className="stack-lg">
+        <div className="card stack-md" style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '2.5rem' }}>🔄</div>
+          <p className="subtle">Checking authentication...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (!user) {
+    return (
+      <section className="stack-lg">
+        <div className="card stack-md" style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: '2.5rem' }}>🔐</div>
+          <h3>Authentication Required</h3>
+          <p className="subtle">
+            AI features require authentication to keep your data secure.
+            Please log in to continue.
+          </p>
+          <button onClick={() => navigate('/login')}>Go to Login</button>
         </div>
       </section>
     );
@@ -327,112 +479,204 @@ export function AIAssistantPage() {
   return (
     <section className="stack-lg">
 
-      {/* ── INPUT + QUESTIONS ─────────────────────────────────────── */}
-      {(step === 'input' || step === 'questions') && (
+      {/* ── CHAT MODE ──────────────────────────────────────────────── */}
+      {mode === 'chat' && (
+        <div className="card stack-md">
+          <div className="page-header">
+            <div className="page-title-section">
+              <h2>{currentSession ? currentSession.title : 'AI Q&A Chat'}</h2>
+              <p className="subtle">Ask questions about your gear</p>
+            </div>
+            <div className="row" style={{ gap: '0.5rem' }}>
+              {currentSession && (
+                <button className="ghost" onClick={handleNewChat}>
+                  + New Chat
+                </button>
+              )}
+              <button className="ghost" onClick={() => setShowChatDrawer(true)}>
+                📁 History ({chatSessions.length})
+              </button>
+            </div>
+          </div>
+
+          {/* Chat messages */}
+          {currentSession && currentSession.messages.length > 0 && (
+            <div className="chat-messages">
+              {currentSession.messages
+                .filter(m => m.role !== 'system')
+                .map((message) => (
+                  <div
+                    key={message.id}
+                    className={`chat-bubble chat-bubble--${message.role}`}
+                  >
+                    <div className="chat-bubble__content">{message.content}</div>
+                    <div className="chat-bubble__timestamp">
+                      {new Date(message.timestamp).toLocaleTimeString([], { 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
+                    </div>
+                  </div>
+                ))}
+              {isTyping && (
+                <div className="chat-bubble chat-bubble--assistant">
+                  <div className="chat-typing">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                </div>
+              )}
+              <div ref={chatEndRef} />
+            </div>
+          )}
+
+          {/* Empty state */}
+          {!currentSession && (
+            <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
+              <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>💬</div>
+              <p className="subtle">Start a new conversation or load a previous chat</p>
+              
+              {showExamples && (
+                <div className="stack-sm" style={{ marginTop: '1rem' }}>
+                  <p className="subtle" style={{ fontSize: '0.85rem' }}>Example questions:</p>
+                  {EXAMPLE_QUESTIONS.map((ex) => (
+                    <button
+                      key={ex}
+                      className="ghost example-prompt-btn"
+                      onClick={() => {
+                        setInput(ex);
+                        setShowExamples(false);
+                      }}
+                    >
+                      {ex}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Input */}
+          <div className="stack-sm">
+            {!currentSession && (
+              <button
+                className="ghost"
+                style={{ fontSize: '0.85rem' }}
+                onClick={() => setShowExamples((v) => !v)}
+              >
+                {showExamples ? '▲ Hide examples' : '▼ Show example questions'}
+              </button>
+            )}
+
+            <textarea
+              className="assistant-prompt"
+              placeholder="Ask a question about your gear..."
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  void handleSubmit();
+                }
+              }}
+              disabled={loading}
+              rows={3}
+            />
+
+            <div className="row between wrap">
+              <span className="subtle">
+                {currentSession 
+                  ? `${currentSession.messages.filter(m => m.role !== 'system').length} messages`
+                  : 'AI will answer based on your catalog'
+                }
+              </span>
+              <button
+                onClick={() => void handleSubmit()}
+                disabled={loading || !input.trim()}
+              >
+                {loading ? 'Thinking…' : 'Send'}
+              </button>
+            </div>
+
+            {error && <p className="error">{error}</p>}
+          </div>
+        </div>
+      )}
+
+      {/* ── PACKING MODE: INPUT ────────────────────────────────────── */}
+      {mode === 'packing' && step === 'input' && (
         <div className="card stack-md">
           <div className="page-header">
             <div className="page-title-section">
               <h2>AI Pack Assistant</h2>
               <p className="subtle">{catalog.length} items in your catalog</p>
             </div>
+            <button className="ghost" onClick={() => setMode('chat')}>
+              💬 Q&A Chat
+            </button>
           </div>
 
-          {step === 'input' && (
-            <>
-              <textarea
-                className="assistant-prompt"
-                placeholder={'Describe your shoot…\n\nExample: "Wedding in a dark church, full-day coverage, hybrid photo/video, outdoor portraits in the afternoon"'}
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
-                disabled={loading}
-              />
+          <textarea
+            className="assistant-prompt"
+            placeholder={'Describe your shoot…\n\nExample: "Wedding in a dark church, full-day coverage, hybrid photo/video, outdoor portraits in the afternoon"'}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            disabled={loading}
+            rows={5}
+          />
 
-              <div>
-                <button
-                  className="ghost"
-                  style={{ fontSize: '0.85rem' }}
-                  onClick={() => setShowExamples((v) => !v)}
-                >
-                  {showExamples ? '▲ Hide examples' : '▼ Show example prompts'}
-                </button>
+          <div>
+            <button
+              className="ghost"
+              style={{ fontSize: '0.85rem' }}
+              onClick={() => setShowExamples((v) => !v)}
+            >
+              {showExamples ? '▲ Hide examples' : '▼ Show example prompts'}
+            </button>
 
-                {showExamples && (
-                  <div className="stack-sm" style={{ marginTop: '0.75rem' }}>
-                    {EXAMPLE_PROMPTS.map((ex) => (
-                      <button
-                        key={ex}
-                        className="ghost example-prompt-btn"
-                        onClick={() => {
-                          setPrompt(ex);
-                          setShowExamples(false);
-                        }}
-                      >
-                        {ex}
-                      </button>
-                    ))}
-                  </div>
-                )}
+            {showExamples && (
+              <div className="stack-sm" style={{ marginTop: '0.75rem' }}>
+                {EXAMPLE_PROMPTS.map((ex) => (
+                  <button
+                    key={ex}
+                    className="ghost example-prompt-btn"
+                    onClick={() => {
+                      setInput(ex);
+                      setShowExamples(false);
+                    }}
+                  >
+                    {ex}
+                  </button>
+                ))}
               </div>
+            )}
+          </div>
 
-              <div className="row between wrap">
-                <span className="subtle">AI will generate a smart packing checklist</span>
-                <button
-                  onClick={() => void handleGenerate()}
-                  disabled={loading || !prompt.trim()}
-                >
-                  {loading ? loadingMessage || 'Thinking…' : '✦ Generate Checklist'}
-                </button>
-              </div>
+          <div className="row between wrap">
+            <span className="subtle">AI will generate a smart packing checklist</span>
+            <button
+              onClick={() => void handleSubmit()}
+              disabled={loading || !input.trim()}
+            >
+              {loading ? loadingMessage || 'Thinking…' : '✦ Generate Checklist'}
+            </button>
+          </div>
 
-              {error && <p className="error">{error}</p>}
-            </>
-          )}
-
-          {step === 'questions' && (
-            <>
-              <p className="subtle">
-                A few quick questions to improve accuracy:
-              </p>
-
-              {questions.map((q) => (
-                <label key={q} className="stack-sm">
-                  <strong>{q}</strong>
-                  <input
-                    value={answers[q] ?? ''}
-                    onChange={(e) => setAnswers((prev) => ({ ...prev, [q]: e.target.value }))}
-                    placeholder="Your answer…"
-                  />
-                </label>
-              ))}
-
-              <div className="row between wrap">
-                <button className="ghost" onClick={handleReset} disabled={loading}>
-                  ← Back
-                </button>
-                <button
-                  onClick={() => void runGeneratePlan(answers)}
-                  disabled={loading}
-                >
-                  {loading ? loadingMessage || 'Generating…' : 'Generate Packing List →'}
-                </button>
-              </div>
-
-              {error && <p className="error">{error}</p>}
-            </>
-          )}
+          {error && <p className="error">{error}</p>}
         </div>
       )}
 
       {/* ── LOADING INDICATOR ─────────────────────────────────────── */}
-      {loading && (
+      {loading && mode === 'packing' && (
         <div className="card stack-sm" style={{ textAlign: 'center', padding: '2rem' }}>
           <div className="ai-spinner">✦</div>
           <p className="subtle" style={{ marginTop: '0.75rem' }}>{loadingMessage}</p>
         </div>
       )}
 
-      {/* ── RESULTS ───────────────────────────────────────────────── */}
-      {step === 'results' && plan && !loading && (
+      {/* ── PACKING MODE: RESULTS ──────────────────────────────────── */}
+      {mode === 'packing' && step === 'results' && plan && !loading && (
         <div className="stack-lg">
 
           {/* Header */}
@@ -571,6 +815,59 @@ export function AIAssistantPage() {
 
           {error && <p className="error">{error}</p>}
         </div>
+      )}
+
+      {/* ── CHAT DRAWER ──────────────────────────────────────────── */}
+      {showChatDrawer && (
+        <>
+          <div className="sheet-overlay" onClick={() => setShowChatDrawer(false)} />
+          <div className="chat-drawer">
+            <div className="chat-drawer__header">
+              <h3>Chat History</h3>
+              <button className="ghost" onClick={() => setShowChatDrawer(false)}>
+                ✕
+              </button>
+            </div>
+            <div className="chat-drawer__content">
+              {chatSessions.length === 0 ? (
+                <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
+                  <p className="subtle">No chat history yet</p>
+                </div>
+              ) : (
+                <div className="stack-sm">
+                  {chatSessions.map((session) => (
+                    <div key={session.id} className="chat-session-item">
+                      <button
+                        className="chat-session-btn"
+                        onClick={() => void handleLoadSession(session.id)}
+                      >
+                        <div>
+                          <div className="chat-session-title">{session.title}</div>
+                          <div className="chat-session-meta">
+                            {session.messages.filter(m => m.role !== 'system').length} messages · {' '}
+                            {new Date(session.updatedAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </button>
+                      <button
+                        className="ghost"
+                        onClick={() => void handleDeleteSession(session.id)}
+                        style={{ padding: '0.5rem' }}
+                      >
+                        🗑
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="chat-drawer__footer">
+              <button onClick={handleNewChat} style={{ width: '100%' }}>
+                + New Chat
+              </button>
+            </div>
+          </div>
+        </>
       )}
 
       {/* ── REVIEW SHEET ──────────────────────────────────────────── */}

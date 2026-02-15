@@ -1,33 +1,52 @@
 import { z } from 'zod';
 
 // ---------------------------------------------------------------------------
-// Follow-up questions schema
+// Case-insensitive normalizers (models return inconsistent casing)
 // ---------------------------------------------------------------------------
 
-export const followUpQuestionsSchema = z.object({
-  questions: z.array(
-    z.object({
-      id: z.string(),
-      question: z.string(),
-      type: z.enum(['text', 'select']),
-      options: z.array(z.string()).optional(),
-    }),
-  ),
-});
+function normalizePriority(val: unknown): string {
+  if (typeof val !== 'string') return 'Optional';
+  const lower = val.toLowerCase().trim();
+  // Must-have synonyms
+  if (['must-have', 'essential', 'critical', 'required', 'high', 'important'].includes(lower)) return 'Must-have';
+  // Nice-to-have synonyms
+  if (['nice-to-have', 'recommended', 'suggested', 'medium', 'moderate'].includes(lower)) return 'Nice-to-have';
+  // Optional synonyms
+  if (['optional', 'low', 'extra', 'bonus'].includes(lower)) return 'Optional';
+  // Catch-all: any unrecognized value defaults to Optional
+  return 'Optional';
+}
 
-export type FollowUpQuestion = z.infer<typeof followUpQuestionsSchema>['questions'][number];
+function normalizeRole(val: unknown): string {
+  if (typeof val !== 'string') return 'standard';
+  const lower = val.toLowerCase().trim();
+  if (['primary', 'main', 'essential', 'key'].includes(lower)) return 'primary';
+  if (['backup', 'secondary', 'spare', 'redundant'].includes(lower)) return 'backup';
+  if (['alternative', 'alternate', 'alt'].includes(lower)) return 'alternative';
+  if (['standard', 'normal', 'default', 'regular', 'support'].includes(lower)) return 'standard';
+  return 'standard'; // catch-all for any unrecognized value
+}
+
+function normalizeAction(val: unknown): string {
+  if (typeof val !== 'string') return 'buy';
+  const lower = val.toLowerCase().trim();
+  if (['buy', 'purchase'].includes(lower)) return 'buy';
+  if (['borrow', 'loan'].includes(lower)) return 'borrow';
+  if (['rent', 'hire', 'lease'].includes(lower)) return 'rent';
+  return 'buy'; // catch-all for any unrecognized value
+}
 
 // ---------------------------------------------------------------------------
 // Packing plan schema (Zod — used for runtime validation)
 // ---------------------------------------------------------------------------
 
-const priorityEnum = z.enum(['Must-have', 'Nice-to-have', 'Optional']);
-const actionEnum = z.enum(['buy', 'borrow', 'rent']);
-const roleEnum = z.enum(['primary', 'backup', 'alternative', 'standard']);
+const priorityEnum = z.preprocess(normalizePriority, z.enum(['Must-have', 'Nice-to-have', 'Optional']));
+const actionEnum = z.preprocess(normalizeAction, z.enum(['buy', 'borrow', 'rent']));
+const roleEnum = z.preprocess(normalizeRole, z.enum(['primary', 'backup', 'alternative', 'standard']));
 
 export const packingPlanSchema = z.object({
-  event_title: z.string(),
-  event_type: z.string(),
+  event_title: z.string().default('Untitled Event'),
+  event_type: z.string().default('general'),
 
   recommended_items: z.array(
     z.object({
