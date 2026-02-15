@@ -121,18 +121,27 @@ export function AIAssistantPage() {
   async function handleSubmit() {
     if (!input.trim() || loading) return;
 
-    // Pre-flight auth check: ensure session is valid before attempting AI calls
-    try {
-      const { error: refreshError } = await supabase.auth.refreshSession();
-      if (refreshError) {
-        setError('Your session has expired. Please sign in again to use AI features.');
-        console.error('[AI Assistant] Pre-flight session refresh failed:', refreshError);
+    // Pre-flight auth check: verify session locally (NO network calls, NO side effects).
+    // IMPORTANT: Do NOT call supabase.auth.refreshSession() here — when tokens are
+    // deeply expired it triggers onAuthStateChange(null), which sets user=null and
+    // causes the auth guard to wipe the entire page before setError() can display.
+    {
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (!currentSession) {
+        setError('Please sign in to use AI features.');
         return;
       }
-    } catch (e) {
-      setError('Could not verify authentication. Please sign in again.');
-      console.error('[AI Assistant] Pre-flight auth check failed:', e);
-      return;
+
+      // Decode JWT locally to check expiry — zero side effects
+      try {
+        const payload = JSON.parse(atob(currentSession.access_token.split('.')[1]));
+        if (payload.exp * 1000 < Date.now()) {
+          setError('Your session has expired. Please sign in again to use AI features.');
+          return;
+        }
+      } catch {
+        // JWT decode failed — proceed anyway, the Edge Function will handle auth
+      }
     }
 
     const detectedMode = detectMode(input);
@@ -473,7 +482,13 @@ export function AIAssistantPage() {
     );
   }
 
-  if (!user) {
+  // Auth guard: only show "Authentication Required" if user is null AND we're NOT
+  // in the middle of an AI operation (loading) AND there's no error to display.
+  // Without this tolerance, a failed refreshSession() triggers onAuthStateChange(null)
+  // which sets user=null, and this guard would immediately wipe the page — hiding the
+  // error message the user needs to see. On mobile PWA, this instant full-screen swap
+  // looks identical to a page reload (the core reported bug).
+  if (!user && !loading && !error) {
     return (
       <section className="stack-lg">
         <div className="card stack-md" style={{ textAlign: 'center' }}>

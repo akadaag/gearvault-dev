@@ -27,8 +27,14 @@ export class AuthExpiredError extends Error {
 
 /**
  * Ensure the session is fresh before making Edge Function calls.
- * Proactively refreshes if token expires within 120 seconds.
- * Throws AuthExpiredError if refresh fails.
+ * 
+ * CRITICAL: If the token is already expired, throw immediately — do NOT call
+ * refreshSession(). When both tokens are deeply expired, refreshSession() fails
+ * AND fires onAuthStateChange(null), which wipes the React UI before error
+ * messages can be displayed (the "mobile page reload" bug).
+ * 
+ * Only call refreshSession() proactively when the token is CLOSE to expiry
+ * but not yet expired (refresh token is likely still valid in this window).
  */
 async function ensureFreshSession(): Promise<void> {
   const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -45,7 +51,13 @@ async function ensureFreshSession(): Promise<void> {
     const now = Date.now();
     const timeUntilExpiry = expiresAt - now;
     
-    // If token expires within 120 seconds, proactively refresh
+    // Token already expired → throw immediately, never call refreshSession()
+    if (timeUntilExpiry <= 0) {
+      console.warn('[Edge Function] Token already expired, throwing AuthExpiredError (no refresh attempt)');
+      throw new AuthExpiredError('Your session has expired. Please sign in again.');
+    }
+    
+    // Token expires within 120 seconds but is still valid → safe to proactively refresh
     if (timeUntilExpiry < 120_000) {
       console.warn('[Edge Function] Token expires soon, refreshing session...');
       const { error: refreshError } = await supabase.auth.refreshSession();
@@ -148,17 +160,9 @@ export async function callEdgeFunction(
         
         console.error(`[Edge Function] Error (attempt ${attempt + 1}/${maxRetries + 1}):`, errorMessage);
         
-        // Check if it's an auth error
+        // Check if it's an auth error — throw immediately, do NOT attempt refreshSession()
+        // (ensureFreshSession already validated the token; a 401 here means it's truly expired)
         if (errorMessage.includes('401') || errorMessage.includes('Unauthorized') || errorMessage.includes('JWT') || statusCode === 401) {
-          // Try refreshing the session once
-          if (attempt === 0) {
-            console.warn('[Edge Function] Auth error, refreshing session...');
-            const { error: refreshError } = await supabase.auth.refreshSession();
-            if (refreshError) {
-              throw new AuthExpiredError();
-            }
-            continue; // Retry with refreshed token
-          }
           throw new AuthExpiredError();
         }
 
