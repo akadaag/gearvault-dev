@@ -714,6 +714,11 @@ a {
   overscroll-behavior: contain;
 }
 
+/* AI page: remove bottom padding so scroll area extends to bottom nav */
+.content:has(.ai-page) {
+  padding-bottom: 0;
+}
+
 .content.content-catalog {
   padding-top: var(--topbar-catalog-height);
   background: var(--bg);
@@ -4128,7 +4133,6 @@ html {
   height: 100%;
   position: relative;
   background: var(--bg);
-  margin-bottom: calc(-1 * var(--bottom-nav-clearance));
 }
 
 .ai-scroll-area {
