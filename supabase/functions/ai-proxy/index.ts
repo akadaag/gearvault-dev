@@ -4,6 +4,7 @@
  * Securely proxies AI requests to multiple providers (LLM Gateway + Groq).
  * - Protects API keys by keeping them server-side
  * - Validates Supabase auth via JWT (required)
+ * - Supports ES256 and HS256 JWT signatures (requires legacy JWT verification OFF)
  * - Supports multiple providers via "provider" field
  * - Routes requests to the correct API with proper authentication
  * 
