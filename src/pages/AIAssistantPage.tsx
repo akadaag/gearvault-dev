@@ -59,6 +59,11 @@ export function AIAssistantPage() {
   const [isTyping, setIsTyping] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  // Swipe-to-delete state for chat history
+  const [openSessionActionsId, setOpenSessionActionsId] = useState<string | null>(null);
+  const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const [touchCurrentX, setTouchCurrentX] = useState<number | null>(null);
+
   // Shared state
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
@@ -116,6 +121,37 @@ export function AIAssistantPage() {
     
     // Default to packing list
     return 'packing';
+  }
+
+  // ---------------------------------------------------------------------------
+  // Touch handlers for swipe-to-delete (chat history)
+  // ---------------------------------------------------------------------------
+  function onTouchStart(e: React.TouchEvent<HTMLDivElement>) {
+    setTouchStartX(e.touches[0]?.clientX ?? null);
+    setTouchCurrentX(e.touches[0]?.clientX ?? null);
+  }
+
+  function onTouchMove(e: React.TouchEvent<HTMLDivElement>) {
+    setTouchCurrentX(e.touches[0]?.clientX ?? null);
+  }
+
+  function onTouchEnd(sessionId: string) {
+    const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
+    if (!isMobile || touchStartX == null || touchCurrentX == null) {
+      setTouchStartX(null);
+      setTouchCurrentX(null);
+      return;
+    }
+
+    const deltaX = touchCurrentX - touchStartX;
+    if (deltaX < -40) {
+      setOpenSessionActionsId(sessionId);
+    } else if (deltaX > 40) {
+      setOpenSessionActionsId(null);
+    }
+
+    setTouchStartX(null);
+    setTouchCurrentX(null);
   }
 
   // ---------------------------------------------------------------------------
@@ -403,6 +439,8 @@ export function AIAssistantPage() {
   // Chat: Delete session
   // ---------------------------------------------------------------------------
   async function handleDeleteSession(sessionId: string) {
+    if (!window.confirm('Delete this chat session?')) return;
+    setOpenSessionActionsId(null);
     await deleteChatSession(sessionId);
     const sessions = await loadAllChatSessions();
     setChatSessions(sessions);
@@ -772,28 +810,48 @@ export function AIAssistantPage() {
               ) : (
                 <div className="stack-sm">
                   {chatSessions.map((session) => (
-                    <div key={session.id} className="chat-session-item">
-                      <button
-                        type="button"
-                        className="chat-session-btn"
-                        onClick={() => void handleLoadSession(session.id)}
+                    <div
+                      key={session.id}
+                      className={`chat-session-swipe-row ${openSessionActionsId === session.id ? 'is-open' : ''}`}
+                    >
+                      {/* Background action button */}
+                      <div className="chat-session-swipe-actions" aria-hidden={openSessionActionsId !== session.id}>
+                        <button
+                          type="button"
+                          className="chat-session-action-btn chat-session-action-delete"
+                          onClick={() => void handleDeleteSession(session.id)}
+                          aria-label="Delete chat session"
+                        >
+                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M3 6h18" />
+                            <path d="M8 6V4h8v2" />
+                            <path d="M19 6l-1 14H6L5 6" />
+                            <path d="M10 11v6M14 11v6" />
+                          </svg>
+                        </button>
+                      </div>
+
+                      {/* Foreground swipeable card */}
+                      <div
+                        className="chat-session-item chat-session-swipe-foreground"
+                        onTouchStart={onTouchStart}
+                        onTouchMove={onTouchMove}
+                        onTouchEnd={() => onTouchEnd(session.id)}
                       >
-                        <div>
-                          <div className="chat-session-title">{session.title}</div>
-                          <div className="chat-session-meta">
-                            {session.messages.filter(m => m.role !== 'system').length} messages · {' '}
-                            {new Date(session.updatedAt).toLocaleDateString()}
+                        <button
+                          type="button"
+                          className="chat-session-btn"
+                          onClick={() => void handleLoadSession(session.id)}
+                        >
+                          <div>
+                            <div className="chat-session-title">{session.title}</div>
+                            <div className="chat-session-meta">
+                              {session.messages.filter(m => m.role !== 'system').length} messages · {' '}
+                              {new Date(session.updatedAt).toLocaleDateString()}
+                            </div>
                           </div>
-                        </div>
-                      </button>
-                      <button
-                        type="button"
-                        className="ghost"
-                        onClick={() => void handleDeleteSession(session.id)}
-                        style={{ padding: '0.5rem' }}
-                      >
-                        🗑
-                      </button>
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
