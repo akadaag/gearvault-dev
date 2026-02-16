@@ -70,6 +70,7 @@ export function TabLayout() {
   const isCatalogRoute = location.pathname === '/catalog';
   const isSettingsRoute = location.pathname === '/settings';
   const isEventsRoute = location.pathname === '/events';
+  const isAssistantRoute = location.pathname === '/assistant';
   const isGearDetailRoute = /^\/catalog\/item\/[^/]+$/.test(location.pathname);
   const isEventDetailRoute = /^\/events\/[^/]+$/.test(location.pathname);
 
@@ -98,7 +99,7 @@ export function TabLayout() {
       : location.pathname === '/events'
         ? 'Events'
         : location.pathname === '/assistant'
-          ? 'AI Assistant'
+          ? 'PackShot AI Assistant'
           : location.pathname === '/settings'
             ? 'Settings'
             : 'Catalog';
@@ -177,6 +178,13 @@ export function TabLayout() {
     return `${eventsCount} event${eventsCount === 1 ? '' : 's'}`;
   }
 
+  // ── Assistant handlers ────────────────────────────────────────────────────
+  function openAssistantHistory() {
+    const params = new URLSearchParams(searchParams);
+    params.set('history', '1');
+    navigate({ pathname: '/assistant', search: params.toString() ? `?${params.toString()}` : '' });
+  }
+
   // ── SVG icons (defined inside function to avoid JSX hoisting issues) ──────
   const searchIcon = (
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -209,6 +217,13 @@ export function TabLayout() {
       <line x1="16" y1="2" x2="16" y2="6" />
       <line x1="8" y1="2" x2="8" y2="6" />
       <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+  );
+
+  const historyIcon = (
+    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 3" />
     </svg>
   );
 
@@ -250,6 +265,15 @@ export function TabLayout() {
                      </button>
                   </>
                 )}
+                  {isAssistantRoute && (
+                    <button 
+                      className="topbar-icon-btn" 
+                      aria-label="Chat history" 
+                      onClick={openAssistantHistory}
+                    >
+                      {historyIcon}
+                    </button>
+                  )}
               </div>
             </div>
 

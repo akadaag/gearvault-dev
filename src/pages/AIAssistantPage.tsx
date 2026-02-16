@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
 import { 
@@ -27,26 +27,6 @@ import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import { AuthExpiredError } from '../lib/edgeFunctionClient';
 
-// ---------------------------------------------------------------------------
-// Example prompts (from reference)
-// ---------------------------------------------------------------------------
-const EXAMPLE_PROMPTS = [
-  'Wedding in a dark church with reception outdoors',
-  'Corporate interview with 2 speakers, indoor office',
-  'Outdoor portrait session at golden hour',
-  'Music video shoot in an industrial warehouse',
-  'Travel vlog in rainy weather, 5 days',
-  'Product photography for e-commerce',
-  'Real estate video tour, 3 properties',
-];
-
-const EXAMPLE_QUESTIONS = [
-  'What lens should I use for portraits?',
-  'How do I get better low-light video?',
-  'Which camera is best for travel vlogs?',
-  'What gear do I need for a podcast?',
-];
-
 type Mode = 'packing' | 'chat';
 type Step = 'input' | 'review' | 'results';
 
@@ -55,6 +35,7 @@ type Step = 'input' | 'review' | 'results';
 // ---------------------------------------------------------------------------
 export function AIAssistantPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const catalog = useLiveQuery(() => db.gearItems.toArray(), [], [] as GearItem[]);
   const settings = useLiveQuery(() => db.settings.get('app-settings'), []);
@@ -70,11 +51,11 @@ export function AIAssistantPage() {
   const [reviewOpen, setReviewOpen] = useState(false);
   const [selections, setSelections] = useState<Map<string, string>>(new Map());
   const [saving, setSaving] = useState(false);
+  const [headerAnimating, setHeaderAnimating] = useState(false);
 
   // Chat state
   const [currentSession, setCurrentSession] = useState<ChatSession | null>(null);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
-  const [showChatDrawer, setShowChatDrawer] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
@@ -82,7 +63,9 @@ export function AIAssistantPage() {
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [error, setError] = useState('');
-  const [showExamples, setShowExamples] = useState(false);
+
+  // History sheet controlled by URL param
+  const showHistorySheet = searchParams.get('history') === '1';
 
   // ---------------------------------------------------------------------------
   // Load chat sessions on mount
@@ -99,6 +82,17 @@ export function AIAssistantPage() {
       chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [mode, currentSession?.messages.length]);
+
+  // ---------------------------------------------------------------------------
+  // Header animation trigger
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    if (mode === 'packing' && step === 'results' && plan) {
+      setHeaderAnimating(true);
+      const timer = setTimeout(() => setHeaderAnimating(false), 100);
+      return () => clearTimeout(timer);
+    }
+  }, [mode, step, plan]);
 
   // ---------------------------------------------------------------------------
   // Detect mode from input
@@ -380,6 +374,7 @@ export function AIAssistantPage() {
     setInput('');
     setError('');
     setMode('packing'); // Reset to default mode
+    closeHistorySheet();
   }
 
   // ---------------------------------------------------------------------------
@@ -391,7 +386,7 @@ export function AIAssistantPage() {
     if (session) {
       setCurrentSession(session);
       setMode('chat');
-      setShowChatDrawer(false);
+      closeHistorySheet();
     }
   }
 
@@ -405,6 +400,15 @@ export function AIAssistantPage() {
     if (currentSession?.id === sessionId) {
       handleNewChat();
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // History sheet helpers
+  // ---------------------------------------------------------------------------
+  function closeHistorySheet() {
+    const params = new URLSearchParams(searchParams);
+    params.delete('history');
+    setSearchParams(params);
   }
 
   // ---------------------------------------------------------------------------
@@ -447,14 +451,17 @@ export function AIAssistantPage() {
   // ---------------------------------------------------------------------------
   if (catalog.length === 0) {
     return (
-      <section className="stack-lg">
-        <div className="card stack-md" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '2.5rem' }}>📷</div>
-          <h3>Add gear first</h3>
-          <p className="subtle">
-            The AI needs your gear catalog to generate smart packing lists and answer questions.
-          </p>
-          <button onClick={() => navigate('/catalog')}>Go to Catalog</button>
+      <section className="ai-page">
+        <div className="ai-scroll-area">
+          <div className="ai-empty-state">
+            <div className="stack-sm" style={{ textAlign: 'center' }}>
+              <h3>Add gear first</h3>
+              <p className="subtle">
+                The AI needs your gear catalog to generate smart packing lists and answer questions.
+              </p>
+              <button onClick={() => navigate('/catalog')}>Go to Catalog</button>
+            </div>
+          </div>
         </div>
       </section>
     );
@@ -466,10 +473,11 @@ export function AIAssistantPage() {
   if (authLoading) {
     // Loading auth status
     return (
-      <section className="stack-lg">
-        <div className="card stack-md" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '2.5rem' }}>🔄</div>
-          <p className="subtle">Checking authentication...</p>
+      <section className="ai-page">
+        <div className="ai-scroll-area">
+          <div className="ai-empty-state">
+            <p className="subtle">Checking authentication...</p>
+          </div>
         </div>
       </section>
     );
@@ -483,15 +491,18 @@ export function AIAssistantPage() {
   // looks identical to a page reload (the core reported bug).
   if (!user && !loading && !error) {
     return (
-      <section className="stack-lg">
-        <div className="card stack-md" style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '2.5rem' }}>🔐</div>
-          <h3>Authentication Required</h3>
-          <p className="subtle">
-            AI features require authentication to keep your data secure.
-            Please log in to continue.
-          </p>
-          <button type="button" onClick={() => navigate('/login')}>Go to Login</button>
+      <section className="ai-page">
+        <div className="ai-scroll-area">
+          <div className="ai-empty-state">
+            <div className="stack-sm" style={{ textAlign: 'center' }}>
+              <h3>Authentication Required</h3>
+              <p className="subtle">
+                AI features require authentication to keep your data secure.
+                Please log in to continue.
+              </p>
+              <button type="button" onClick={() => navigate('/login')}>Go to Login</button>
+            </div>
+          </div>
         </div>
       </section>
     );
@@ -501,103 +512,214 @@ export function AIAssistantPage() {
   // Render
   // ---------------------------------------------------------------------------
   return (
-    <section className="stack-lg">
+    <section className="ai-page">
+      {/* ── SCROLL AREA ── */}
+      <div className="ai-scroll-area">
+        
+        {/* Initial empty state */}
+        {mode === 'packing' && step === 'input' && !loading && !plan && (
+          <div className="ai-empty-state">
+            <p className="subtle">Describe your shoot or ask about your gear</p>
+          </div>
+        )}
 
-      {/* ── CHAT MODE ──────────────────────────────────────────────── */}
-      {mode === 'chat' && (
-        <div className="card stack-md">
-          <div className="page-header">
-            <div className="page-title-section">
-              <h2>{currentSession ? currentSession.title : 'AI Q&A Chat'}</h2>
-              <p className="subtle">Ask questions about your gear</p>
-            </div>
-            <div className="row" style={{ gap: '0.5rem' }}>
-              {currentSession && (
-                <button type="button" className="ghost" onClick={handleNewChat}>
-                  + New Chat
+        {/* Packing: Loading state */}
+        {loading && mode === 'packing' && (
+          <div className="ai-loading-state">
+            <div className="ai-spinner">✦</div>
+            <p className="subtle">{loadingMessage}</p>
+          </div>
+        )}
+
+        {/* Packing: Results */}
+        {mode === 'packing' && step === 'results' && plan && !loading && (
+          <div className="ai-packing-results">
+            {/* Gradient header */}
+            <div className={`ai-results-header card${headerAnimating ? ' ai-results-header--entering' : ''}`}>
+              <div className="row between wrap">
+                <div>
+                  <h2 style={{ margin: 0 }}>{plan.eventTitle}</h2>
+                  <p className="subtle" style={{ margin: '0.25rem 0 0' }}>{plan.eventType}</p>
+                </div>
+                <button type="button" className="ghost" onClick={handleReset} style={{ fontSize: '0.85rem' }}>
+                  ← New prompt
                 </button>
+              </div>
+              {resultStats && (
+                <p className="subtle" style={{ fontSize: '0.8rem', marginTop: '0.5rem', marginBottom: 0 }}>
+                  {resultStats.totalItems} items from your catalog
+                  {resultStats.missingCount > 0 && (
+                    <> · {resultStats.missingCount} suggested additions</>
+                  )}
+                </p>
               )}
-              <button type="button" className="ghost" onClick={() => setShowChatDrawer(true)}>
-                📁 History ({chatSessions.length})
+            </div>
+
+            {/* Section cards */}
+            {Object.entries(groupedItems).map(([section, items]) => (
+              <div key={section} className="card stack-sm">
+                <h4 className="section-heading">{section}</h4>
+                <div className="stack-sm">
+                  {items.map((item) => {
+                    const showRoleBadge = (section === 'Camera Bodies' || section === 'Audio') && 
+                                          item.role && 
+                                          item.role !== 'standard';
+                    
+                    return (
+                      <div key={`${item.name}-${item.gearItemId ?? 'x'}`} className="ai-item-row">
+                        <div className="row between wrap" style={{ gap: '0.5rem' }}>
+                          <div style={{ flex: 1 }}>
+                            <div className="row wrap" style={{ gap: '0.4rem', alignItems: 'center' }}>
+                              <strong>{item.name}</strong>
+                              {item.quantity > 1 && (
+                                <span className="subtle">×{item.quantity}</span>
+                              )}
+                              {showRoleBadge && (
+                                <span className={`pill-role ${item.role}`}>
+                                  {item.role}
+                                </span>
+                              )}
+                              {item.gearItemId && (
+                                <span className="pill pill--success" style={{ fontSize: '0.65rem' }}>✓ matched</span>
+                              )}
+                            </div>
+                            {item.notes && (
+                              <p className="subtle" style={{ fontSize: '0.78rem', marginTop: '0.2rem', marginBottom: 0 }}>
+                                {item.notes}
+                              </p>
+                            )}
+                          </div>
+                          <span className={`pill priority-${item.priority}`}>
+                            {priorityLabel(item.priority)}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+
+            {/* Missing items */}
+            {plan.missingItems.length > 0 && (
+              <div className="card stack-sm">
+                <h4 className="section-heading section-heading--missing">
+                  ⚠ Consider buying / borrowing / renting
+                </h4>
+                <div className="stack-sm">
+                  {[...plan.missingItems]
+                    .sort((a, b) => {
+                      const r: Record<string, number> = { 'must-have': 0, 'nice-to-have': 1, optional: 2 };
+                      return (r[a.priority] ?? 2) - (r[b.priority] ?? 2);
+                    })
+                    .map((item) => (
+                      <div key={item.name} className="ai-missing-row">
+                        <div className="row between wrap" style={{ gap: '0.5rem' }}>
+                          <div style={{ flex: 1 }}>
+                            <strong>{item.name}</strong>
+                            <p className="subtle" style={{ fontSize: '0.78rem', marginTop: '0.2rem', marginBottom: 0 }}>
+                              {item.reason}
+                            </p>
+                            {item.notes && (
+                              <p className="subtle" style={{ fontSize: '0.75rem', marginTop: '0.15rem', marginBottom: 0 }}>
+                                Est. cost: {item.notes}
+                              </p>
+                            )}
+                          </div>
+                          <div className="stack-sm" style={{ alignItems: 'flex-end', gap: '0.25rem' }}>
+                            <span className={`pill priority-${item.priority}`}>
+                              {priorityLabel(item.priority)}
+                            </span>
+                            <span className="pill pill--action">{item.action}</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </div>
+            )}
+
+            {/* Pro tips */}
+            {plan.tips && plan.tips.length > 0 && (
+              <div className="card stack-sm ai-tips">
+                <h4 style={{ marginBottom: '0.5rem' }}>Pro Tips</h4>
+                <ul style={{ paddingLeft: '1.2rem', margin: 0 }}>
+                  {plan.tips.map((tip, i) => (
+                    <li key={i} className="subtle" style={{ fontSize: '0.85rem', marginBottom: '0.4rem' }}>
+                      {tip}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+            {/* Create event CTA */}
+            <div className="card stack-sm">
+              <h4 style={{ marginBottom: '0.25rem' }}>Ready to pack?</h4>
+              <p className="subtle" style={{ marginBottom: '1rem' }}>
+                Create an event to save this as a checklist you can tick off while packing.
+              </p>
+              <button
+                type="button"
+                onClick={() => void handleCreateEvent()}
+                disabled={saving}
+                style={{ width: '100%' }}
+              >
+                {saving ? 'Creating event…' : 'Create Event & Checklist →'}
               </button>
             </div>
           </div>
+        )}
 
-          {/* Chat messages */}
-          {currentSession && currentSession.messages.length > 0 && (
-            <div className="chat-messages">
-              {currentSession.messages
-                .filter(m => m.role !== 'system')
-                .map((message) => (
-                  <div
-                    key={message.id}
-                    className={`chat-bubble chat-bubble--${message.role}`}
-                  >
-                    <div className="chat-bubble__content">{message.content}</div>
-                    <div className="chat-bubble__timestamp">
-                      {new Date(message.timestamp).toLocaleTimeString([], { 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}
-                    </div>
-                  </div>
-                ))}
-              {isTyping && (
-                <div className="chat-bubble chat-bubble--assistant">
-                  <div className="chat-typing">
-                    <span></span>
-                    <span></span>
-                    <span></span>
+        {/* Chat: Messages */}
+        {mode === 'chat' && currentSession && (
+          <div className="ai-chat-messages">
+            {currentSession.messages
+              .filter(m => m.role !== 'system')
+              .map((message) => (
+                <div
+                  key={message.id}
+                  className={`chat-bubble chat-bubble--${message.role}`}
+                >
+                  <div className="chat-bubble__content">{message.content}</div>
+                  <div className="chat-bubble__timestamp">
+                    {new Date(message.timestamp).toLocaleTimeString([], { 
+                      hour: '2-digit', 
+                      minute: '2-digit' 
+                    })}
                   </div>
                 </div>
-              )}
-              <div ref={chatEndRef} />
-            </div>
-          )}
-
-          {/* Empty state */}
-          {!currentSession && (
-            <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '1rem' }}>💬</div>
-              <p className="subtle">Start a new conversation or load a previous chat</p>
-              
-              {showExamples && (
-                <div className="stack-sm" style={{ marginTop: '1rem' }}>
-                  <p className="subtle" style={{ fontSize: '0.85rem' }}>Example questions:</p>
-                  {EXAMPLE_QUESTIONS.map((ex) => (
-                    <button
-                      type="button"
-                      key={ex}
-                      className="ghost example-prompt-btn"
-                      onClick={() => {
-                        setInput(ex);
-                        setShowExamples(false);
-                      }}
-                    >
-                      {ex}
-                    </button>
-                  ))}
+              ))}
+            {isTyping && (
+              <div className="chat-bubble chat-bubble--assistant">
+                <div className="chat-typing">
+                  <span></span>
+                  <span></span>
+                  <span></span>
                 </div>
-              )}
-            </div>
-          )}
-
-          {/* Input */}
-          <div className="stack-sm">
-            {!currentSession && (
-              <button
-                type="button"
-                className="ghost"
-                style={{ fontSize: '0.85rem' }}
-                onClick={() => setShowExamples((v) => !v)}
-              >
-                {showExamples ? '▲ Hide examples' : '▼ Show example questions'}
-              </button>
+              </div>
             )}
+            <div ref={chatEndRef} />
+          </div>
+        )}
 
+        {/* Chat: Empty state */}
+        {mode === 'chat' && !currentSession && !loading && (
+          <div className="ai-empty-state">
+            <p className="subtle">Start a conversation about your gear</p>
+          </div>
+        )}
+
+      </div>
+
+      {/* ── FIXED INPUT BAR ── */}
+      {/* Hidden when packing results are showing */}
+      {!(mode === 'packing' && step === 'results') && (
+        <div className="ai-input-bar">
+          {error && <p className="ai-input-error">{error}</p>}
+          <div className="ai-input-pill">
             <textarea
-              className="assistant-prompt"
-              placeholder="Ask a question about your gear..."
+              placeholder="Describe your shoot or ask a question..."
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => {
@@ -607,259 +729,37 @@ export function AIAssistantPage() {
                 }
               }}
               disabled={loading}
-              rows={3}
+              rows={1}
             />
-
-            <div className="row between wrap">
-              <span className="subtle">
-                {currentSession 
-                  ? `${currentSession.messages.filter(m => m.role !== 'system').length} messages`
-                  : 'AI will answer based on your catalog'
-                }
-              </span>
-            <button
-              type="button"
+            <button 
+              className="ai-send-btn"
               onClick={() => void handleSubmit()}
               disabled={loading || !input.trim()}
+              aria-label="Send message"
             >
-              {loading ? 'Thinking…' : 'Send'}
+              {loading ? (
+                <span className="ai-spinner-small">✦</span>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M12 19V5M5 12l7-7 7 7" />
+                </svg>
+              )}
             </button>
-            </div>
-
-            {error && <p className="error">{error}</p>}
           </div>
         </div>
       )}
 
-      {/* ── PACKING MODE: INPUT ────────────────────────────────────── */}
-      {mode === 'packing' && step === 'input' && (
-        <div className="card stack-md">
-          <div className="page-header">
-            <div className="page-title-section">
-              <h2>AI Pack Assistant</h2>
-              <p className="subtle">{catalog.length} items in your catalog</p>
-            </div>
-            <button type="button" className="ghost" onClick={() => setMode('chat')}>
-              💬 Q&A Chat
-            </button>
-          </div>
-
-          <textarea
-            className="assistant-prompt"
-            placeholder={'Describe your shoot…\n\nExample: "Wedding in a dark church, full-day coverage, hybrid photo/video, outdoor portraits in the afternoon"'}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            disabled={loading}
-            rows={5}
-          />
-
-          <div>
-            <button
-              type="button"
-              className="ghost"
-              style={{ fontSize: '0.85rem' }}
-              onClick={() => setShowExamples((v) => !v)}
-            >
-              {showExamples ? '▲ Hide examples' : '▼ Show example prompts'}
-            </button>
-
-            {showExamples && (
-              <div className="stack-sm" style={{ marginTop: '0.75rem' }}>
-                {EXAMPLE_PROMPTS.map((ex) => (
-                  <button
-                    type="button"
-                    key={ex}
-                    className="ghost example-prompt-btn"
-                    onClick={() => {
-                      setInput(ex);
-                      setShowExamples(false);
-                    }}
-                  >
-                    {ex}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="row between wrap">
-            <span className="subtle">AI will generate a smart packing checklist</span>
-            <button
-              type="button"
-              onClick={() => void handleSubmit()}
-              disabled={loading || !input.trim()}
-            >
-              {loading ? loadingMessage || 'Thinking…' : '✦ Generate Checklist'}
-            </button>
-          </div>
-
-          {error && <p className="error">{error}</p>}
-        </div>
-      )}
-
-      {/* ── LOADING INDICATOR ─────────────────────────────────────── */}
-      {loading && mode === 'packing' && (
-        <div className="card stack-sm" style={{ textAlign: 'center', padding: '2rem' }}>
-          <div className="ai-spinner">✦</div>
-          <p className="subtle" style={{ marginTop: '0.75rem' }}>{loadingMessage}</p>
-        </div>
-      )}
-
-      {/* ── PACKING MODE: RESULTS ──────────────────────────────────── */}
-      {mode === 'packing' && step === 'results' && plan && !loading && (
-        <div className="stack-lg">
-
-          {/* Header */}
-          <div className="ai-results-header card">
-            <div className="row between wrap">
-              <div>
-                <h2 style={{ margin: 0 }}>{plan.eventTitle}</h2>
-                <p className="subtle" style={{ margin: '0.25rem 0 0' }}>{plan.eventType}</p>
-              </div>
-              <button type="button" className="ghost" onClick={handleReset} style={{ fontSize: '0.85rem' }}>
-                ← New prompt
-              </button>
-            </div>
-            {resultStats && (
-              <p className="subtle" style={{ fontSize: '0.8rem', marginTop: '0.5rem', marginBottom: 0 }}>
-                {resultStats.totalItems} items from your catalog
-                {resultStats.missingCount > 0 && (
-                  <> · {resultStats.missingCount} suggested additions</>
-                )}
-              </p>
-            )}
-          </div>
-
-          {/* Packing list by section */}
-          {Object.entries(groupedItems).map(([section, items]) => (
-            <div key={section} className="card stack-sm">
-              <h4 className="section-heading">{section}</h4>
-              <div className="stack-sm">
-                {items.map((item) => {
-                  const showRoleBadge = (section === 'Camera Bodies' || section === 'Audio') && 
-                                        item.role && 
-                                        item.role !== 'standard';
-                  
-                  return (
-                    <div key={`${item.name}-${item.gearItemId ?? 'x'}`} className="ai-item-row">
-                      <div className="row between wrap" style={{ gap: '0.5rem' }}>
-                        <div style={{ flex: 1 }}>
-                          <div className="row wrap" style={{ gap: '0.4rem', alignItems: 'center' }}>
-                            <strong>{item.name}</strong>
-                            {item.quantity > 1 && (
-                              <span className="subtle">×{item.quantity}</span>
-                            )}
-                            {showRoleBadge && (
-                              <span className={`pill-role ${item.role}`}>
-                                {item.role}
-                              </span>
-                            )}
-                            {item.gearItemId && (
-                              <span className="pill pill--success" style={{ fontSize: '0.65rem' }}>✓ matched</span>
-                            )}
-                          </div>
-                          {item.notes && (
-                            <p className="subtle" style={{ fontSize: '0.78rem', marginTop: '0.2rem', marginBottom: 0 }}>
-                              {item.notes}
-                            </p>
-                          )}
-                        </div>
-                        <span className={`pill priority-${item.priority}`}>
-                          {priorityLabel(item.priority)}
-                        </span>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-
-          {/* Missing items */}
-          {plan.missingItems.length > 0 && (
-            <div className="card stack-sm">
-              <h4 className="section-heading section-heading--missing">
-                ⚠ Consider buying / borrowing / renting
-              </h4>
-              <div className="stack-sm">
-                {[...plan.missingItems]
-                  .sort((a, b) => {
-                    const r: Record<string, number> = { 'must-have': 0, 'nice-to-have': 1, optional: 2 };
-                    return (r[a.priority] ?? 2) - (r[b.priority] ?? 2);
-                  })
-                  .map((item) => (
-                    <div key={item.name} className="ai-missing-row">
-                      <div className="row between wrap" style={{ gap: '0.5rem' }}>
-                        <div style={{ flex: 1 }}>
-                          <strong>{item.name}</strong>
-                          <p className="subtle" style={{ fontSize: '0.78rem', marginTop: '0.2rem', marginBottom: 0 }}>
-                            {item.reason}
-                          </p>
-                          {item.notes && (
-                            <p className="subtle" style={{ fontSize: '0.75rem', marginTop: '0.15rem', marginBottom: 0 }}>
-                              Est. cost: {item.notes}
-                            </p>
-                          )}
-                        </div>
-                        <div className="stack-sm" style={{ alignItems: 'flex-end', gap: '0.25rem' }}>
-                          <span className={`pill priority-${item.priority}`}>
-                            {priorityLabel(item.priority)}
-                          </span>
-                          <span className="pill pill--action">{item.action}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          )}
-
-          {/* Pro tips */}
-          {plan.tips && plan.tips.length > 0 && (
-            <div className="card stack-sm ai-tips">
-              <h4 style={{ marginBottom: '0.5rem' }}>Pro Tips</h4>
-              <ul style={{ paddingLeft: '1.2rem', margin: 0 }}>
-                {plan.tips.map((tip, i) => (
-                  <li key={i} className="subtle" style={{ fontSize: '0.85rem', marginBottom: '0.4rem' }}>
-                    {tip}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {/* Create event CTA */}
-          <div className="card stack-sm">
-            <h4 style={{ marginBottom: '0.25rem' }}>Ready to pack?</h4>
-            <p className="subtle" style={{ marginBottom: '1rem' }}>
-              Create an event to save this as a checklist you can tick off while packing.
-            </p>
-              <button
-                type="button"
-                onClick={() => void handleCreateEvent()}
-                disabled={saving}
-                style={{ width: '100%' }}
-              >
-              {saving ? 'Creating event…' : 'Create Event & Checklist →'}
-            </button>
-          </div>
-
-          {error && <p className="error">{error}</p>}
-        </div>
-      )}
-
-      {/* ── CHAT DRAWER ──────────────────────────────────────────── */}
-      {showChatDrawer && (
+      {/* ── HISTORY BOTTOM SHEET ── */}
+      {showHistorySheet && (
         <>
-          <div className="sheet-overlay" onClick={() => setShowChatDrawer(false)} />
-          <div className="chat-drawer">
-            <div className="chat-drawer__header">
+          <div className="sheet-overlay" onClick={closeHistorySheet} />
+          <div className="ai-history-sheet">
+            <div className="ai-history-sheet__handle" />
+            <div className="ai-history-sheet__header">
               <h3>Chat History</h3>
-              <button type="button" className="ghost" onClick={() => setShowChatDrawer(false)}>
-                ✕
-              </button>
+              <button type="button" className="ghost" onClick={closeHistorySheet}>✕</button>
             </div>
-            <div className="chat-drawer__content">
+            <div className="ai-history-sheet__content">
               {chatSessions.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
                   <p className="subtle">No chat history yet</p>
@@ -894,7 +794,7 @@ export function AIAssistantPage() {
                 </div>
               )}
             </div>
-            <div className="chat-drawer__footer">
+            <div className="ai-history-sheet__footer">
               <button type="button" onClick={handleNewChat} style={{ width: '100%' }}>
                 + New Chat
               </button>
@@ -903,7 +803,7 @@ export function AIAssistantPage() {
         </>
       )}
 
-      {/* ── REVIEW SHEET ──────────────────────────────────────────── */}
+      {/* ── REVIEW SHEET ── */}
       <CatalogMatchReviewSheet
         open={reviewOpen}
         items={reviewItems}
