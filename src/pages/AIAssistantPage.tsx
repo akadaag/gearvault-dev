@@ -682,12 +682,6 @@ export function AIAssistantPage() {
                   className={`chat-bubble chat-bubble--${message.role}`}
                 >
                   <div className="chat-bubble__content">{message.content}</div>
-                  <div className="chat-bubble__timestamp">
-                    {new Date(message.timestamp).toLocaleTimeString([], { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
-                    })}
-                  </div>
                 </div>
               ))}
             {isTyping && (

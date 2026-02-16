@@ -4196,7 +4196,7 @@ html {
   flex: 1;
   border: none;
   background: transparent;
-  font-size: 0.95rem;
+  font-size: 0.875rem;
   line-height: 1.5;
   resize: none;
   outline: none;
@@ -4214,6 +4214,9 @@ html {
   width: 36px;
   height: 36px;
   min-width: 36px;
+  min-height: 36px;
+  flex-shrink: 0;
+  aspect-ratio: 1;
   border-radius: 50%;
   background: var(--accent, #3b82f6);
   color: white;
@@ -4594,13 +4597,15 @@ html {
   border-bottom-right-radius: 0.25rem;
 }
 
-/* Assistant messages (left-aligned) */
+/* Assistant messages (left-aligned, plain text like ChatGPT) */
 .chat-bubble--assistant {
   align-self: flex-start;
-  background: white;
+  background: transparent;
   color: var(--text, #18181b);
-  border: 1px solid var(--border, #e4e4e7);
-  border-bottom-left-radius: 0.25rem;
+  border: none;
+  border-radius: 0;
+  max-width: 100%;
+  padding: 0.75rem 1rem;
 }
 
 /* Bubble content */
@@ -4747,8 +4752,8 @@ html {
 }
 
 :root.dark .chat-bubble--assistant {
-  background: #27272a;
-  border-color: #3f3f46;
+  background: transparent;
+  border: none;
   color: #fafafa;
 }
 
