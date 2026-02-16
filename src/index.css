@@ -4128,6 +4128,8 @@ html {
   height: 100%;
   position: relative;
   background: var(--bg);
+  margin-bottom: calc(-1 * var(--bottom-nav-clearance));
+  padding-bottom: var(--bottom-nav-clearance);
 }
 
 .ai-scroll-area {
