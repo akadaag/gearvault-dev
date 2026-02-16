@@ -99,6 +99,10 @@ body,
   overflow: hidden;
 }
 
+body {
+  background: var(--bg);
+}
+
 
 body.sheet-open {
   overflow: hidden;
@@ -4123,6 +4127,7 @@ html {
   flex-direction: column;
   height: 100%;
   position: relative;
+  background: var(--bg);
 }
 
 .ai-scroll-area {
@@ -4162,6 +4167,11 @@ html {
   z-index: 40;
   padding: 0.75rem var(--space-4, 1rem) 1rem;
   background: var(--bg);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.ai-input-bar--hidden {
+  transform: translateY(calc(100% + 1rem));
 }
 
 /* Move input bar to viewport bottom when keyboard is open */
@@ -4176,6 +4186,10 @@ html {
     transform: translateX(-50%);
     width: min(1100px, 100%);
     padding: 0.75rem 0 0.5rem;
+  }
+
+  .ai-input-bar--hidden {
+    transform: translate(-50%, calc(100% + 1rem));
   }
 }
 
@@ -4304,60 +4318,10 @@ html {
   padding: 0.5rem 0;
 }
 
-/* History bottom sheet */
+/* History bottom sheet - uses maintenance sheet pattern with small override */
 .ai-history-sheet {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  background: var(--surface, #fff);
-  border-radius: 1.25rem 1.25rem 0 0;
-  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.15);
-  max-height: 60vh;
-  display: flex;
-  flex-direction: column;
-  animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  padding-bottom: env(safe-area-inset-bottom);
-}
-
-@keyframes slideUp {
-  from { transform: translateY(100%); opacity: 0; }
-  to   { transform: translateY(0); opacity: 1; }
-}
-
-.ai-history-sheet__handle {
-  width: 2.5rem;
-  height: 4px;
-  background: var(--border, #e4e4e7);
-  border-radius: 9999px;
-  margin: 0.75rem auto 0;
-  flex-shrink: 0;
-}
-
-.ai-history-sheet__header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 1.25rem;
-  flex-shrink: 0;
-}
-
-.ai-history-sheet__header h3 { 
-  margin: 0; 
-  font-size: 1.05rem; 
-}
-
-.ai-history-sheet__content {
-  flex: 1;
-  overflow-y: auto;
-  padding: 0 1.25rem 1rem;
-}
-
-.ai-history-sheet__footer {
-  padding: 0.75rem 1.25rem calc(0.75rem + env(safe-area-inset-bottom));
-  border-top: 1px solid var(--border, #e4e4e7);
-  flex-shrink: 0;
+  z-index: 102;
+  height: min(84dvh, 760px);
 }
 
 /* ==========================================================================
@@ -4512,7 +4476,7 @@ html {
 
 /* Dark mode - Chat App Layout */
 :root.dark .ai-input-bar {
-  background: linear-gradient(to top, var(--bg) 85%, transparent);
+  background: var(--bg);
 }
 
 :root.dark .ai-input-pill {
@@ -4535,19 +4499,6 @@ html {
 
 :root.dark .ai-send-btn:hover:not(:disabled) {
   background: #1d4ed8;
-}
-
-:root.dark .ai-history-sheet {
-  background: var(--surface, #1a1a1f);
-  box-shadow: 0 -8px 32px rgba(0, 0, 0, 0.5);
-}
-
-:root.dark .ai-history-sheet__handle {
-  background: #3f3f46;
-}
-
-:root.dark .ai-history-sheet__footer {
-  border-top-color: #3f3f46;
 }
 
 :root.dark .ai-input-error {
@@ -4718,6 +4669,7 @@ html {
   border: 1px solid var(--border, #e4e4e7);
   border-radius: 0.5rem;
   transition: background 0.15s, border-color 0.15s;
+  background: var(--surface-raised, #fff);
 }
 
 .chat-session-item:hover {
@@ -4850,6 +4802,7 @@ html {
 
 :root.dark .chat-session-item {
   border-color: #3f3f46;
+  background: var(--card, #212121);
 }
 
 :root.dark .chat-session-item:hover {

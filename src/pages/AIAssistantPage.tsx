@@ -64,6 +64,11 @@ export function AIAssistantPage() {
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [touchCurrentX, setTouchCurrentX] = useState<number | null>(null);
 
+  // Auto-hide input bar on scroll (chat mode only)
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const [inputBarHidden, setInputBarHidden] = useState(false);
+  const lastScrollTopRef = useRef(0);
+
   // Shared state
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
@@ -107,6 +112,34 @@ export function AIAssistantPage() {
       document.documentElement.classList.remove('keyboard-open');
     };
   }, []);
+
+  // ---------------------------------------------------------------------------
+  // Auto-hide input bar on scroll (chat mode only)
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    const scrollArea = scrollAreaRef.current;
+    if (!scrollArea || mode !== 'chat' || !currentSession) return;
+
+    function handleScroll() {
+      // Don't hide when keyboard is open
+      if (document.documentElement.classList.contains('keyboard-open')) return;
+
+      const currentScrollTop = scrollAreaRef.current?.scrollTop ?? 0;
+      const delta = currentScrollTop - lastScrollTopRef.current;
+
+      // Show on scroll up (>10px), hide on scroll down (>10px)
+      if (delta > 10 && !inputBarHidden) {
+        setInputBarHidden(true);
+      } else if (delta < -10 && inputBarHidden) {
+        setInputBarHidden(false);
+      }
+
+      lastScrollTopRef.current = currentScrollTop;
+    }
+
+    scrollArea.addEventListener('scroll', handleScroll, { passive: true });
+    return () => scrollArea.removeEventListener('scroll', handleScroll);
+  }, [mode, currentSession, inputBarHidden]);
 
   // ---------------------------------------------------------------------------
   // Detect mode from input
@@ -561,7 +594,7 @@ export function AIAssistantPage() {
   return (
     <section className="ai-page">
       {/* ── SCROLL AREA ── */}
-      <div className="ai-scroll-area">
+      <div className="ai-scroll-area" ref={scrollAreaRef}>
         
         {/* Initial empty state */}
         {mode === 'packing' && step === 'input' && !loading && !plan && (
@@ -756,7 +789,7 @@ export function AIAssistantPage() {
       {/* ── FIXED INPUT BAR ── */}
       {/* Hidden when packing results are showing */}
       {!(mode === 'packing' && step === 'results') && (
-        <div className="ai-input-bar">
+        <div className={`ai-input-bar${inputBarHidden ? ' ai-input-bar--hidden' : ''}`}>
           {error && <p className="ai-input-error">{error}</p>}
           <div className="ai-input-pill">
             <textarea
@@ -795,14 +828,13 @@ export function AIAssistantPage() {
       {/* ── HISTORY BOTTOM SHEET ── */}
       {showHistorySheet && (
         <>
-          <div className="sheet-overlay" onClick={closeHistorySheet} />
-          <div className="ai-history-sheet">
-            <div className="ai-history-sheet__handle" />
-            <div className="ai-history-sheet__header">
+          <button className="sheet-overlay" onClick={closeHistorySheet} aria-label="Close chat history" />
+          <aside className="filter-sheet card ai-history-sheet" aria-label="Chat history">
+            <div className="maintenance-sheet-header">
               <h3>Chat History</h3>
-              <button type="button" className="ghost" onClick={closeHistorySheet}>✕</button>
+              <button type="button" className="sheet-close-btn" onClick={closeHistorySheet} aria-label="Close">✕</button>
             </div>
-            <div className="ai-history-sheet__content">
+            <div className="maintenance-sheet-body stack-sm">
               {chatSessions.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
                   <p className="subtle">No chat history yet</p>
@@ -857,12 +889,12 @@ export function AIAssistantPage() {
                 </div>
               )}
             </div>
-            <div className="ai-history-sheet__footer">
+            <div className="maintenance-sheet-footer">
               <button type="button" onClick={handleNewChat} style={{ width: '100%' }}>
                 + New Chat
               </button>
             </div>
-          </div>
+          </aside>
         </>
       )}
 
