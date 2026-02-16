@@ -788,6 +788,11 @@ a {
   z-index: 45;
 }
 
+/* Hide bottom nav when keyboard is open (AI page) */
+:root.keyboard-open .mobile-bottom-nav {
+  display: none;
+}
+
 @media (min-width: 768px) {
   .mobile-bottom-nav {
     left: 50%;
@@ -4159,6 +4164,11 @@ html {
   background: linear-gradient(to top, var(--bg) 85%, transparent);
 }
 
+/* Move input bar to viewport bottom when keyboard is open */
+:root.keyboard-open .ai-input-bar {
+  bottom: 0;
+}
+
 @media (min-width: 768px) {
   .ai-input-bar {
     left: 50%;
@@ -4178,7 +4188,7 @@ html {
 
 .ai-input-pill {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   gap: 0.5rem;
   background: var(--surface, #fff);
   border: 1px solid var(--border, #e4e4e7);
@@ -4605,7 +4615,7 @@ html {
   border: none;
   border-radius: 0;
   max-width: 100%;
-  padding: 0.75rem 1rem;
+  padding: 0.25rem 0;
 }
 
 /* Bubble content */

@@ -95,6 +95,15 @@ export function AIAssistantPage() {
   }, [mode, step, plan]);
 
   // ---------------------------------------------------------------------------
+  // Cleanup keyboard-open class on unmount
+  // ---------------------------------------------------------------------------
+  useEffect(() => {
+    return () => {
+      document.documentElement.classList.remove('keyboard-open');
+    };
+  }, []);
+
+  // ---------------------------------------------------------------------------
   // Detect mode from input
   // ---------------------------------------------------------------------------
   function detectMode(text: string): Mode {
@@ -722,6 +731,8 @@ export function AIAssistantPage() {
                   void handleSubmit();
                 }
               }}
+              onFocus={() => document.documentElement.classList.add('keyboard-open')}
+              onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               disabled={loading}
               rows={1}
             />
