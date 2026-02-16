@@ -4170,7 +4170,7 @@ html {
   left: 0;
   right: 0;
   z-index: 40;
-  padding: 0.75rem var(--space-4, 1rem) 0.25rem;
+  padding: 0.75rem var(--space-4, 1rem) 0;
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -4189,7 +4189,7 @@ html {
     right: auto;
     transform: translateX(-50%);
     width: min(1100px, 100%);
-    padding: 0.75rem 0 0.5rem;
+    padding: 0.75rem 0 0;
   }
 
   .ai-input-bar--hidden {
