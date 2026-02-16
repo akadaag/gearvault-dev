@@ -32,7 +32,7 @@ export function LoginPage() {
   return (
     <section className="auth-shell">
       <div className="card stack-md auth-card">
-        <h2>Welcome to GearVault</h2>
+        <h2>Welcome to PackShot</h2>
         <p className="subtle">Sign in to access your catalog, events, AI recommendations, and settings across devices.</p>
 
         <div className="row wrap">

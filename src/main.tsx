@@ -10,7 +10,7 @@ import './index.css';
 void registerSW({
   immediate: true,
   onRegistered() {
-    console.info('GearVault service worker registered');
+    console.info('PackShot service worker registered');
   },
   onNeedRefresh() {
     // New version available — accept silently, activates on next navigation/reload.

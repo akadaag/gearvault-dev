@@ -73,7 +73,7 @@ export function SettingsPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `gearvault-export-${Date.now()}.json`;
+    a.download = `packshot-export-${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
     setStatus('Database exported.');
@@ -151,7 +151,7 @@ export function SettingsPage() {
     <section className="stack-lg">
       <div className="card stack-md">
         <h2>Settings</h2>
-        <p className="subtle">Customize your GearVault experience</p>
+        <p className="subtle">Customize your PackShot experience</p>
       </div>
 
       <div className="card stack-md">
@@ -218,7 +218,7 @@ export function SettingsPage() {
       <div className="card stack-md">
         <h3>AI Assistant</h3>
         <p className="subtle">
-          GearVault uses Groq AI for intelligent packing suggestions and Q&A chat. 
+          PackShot uses Groq AI for intelligent packing suggestions and Q&A chat. 
           API keys are configured in your environment variables.
         </p>
 
@@ -263,7 +263,7 @@ export function SettingsPage() {
 
       <div className="card stack-md">
         <h3>About</h3>
-        <p className="subtle">GearVault is a progressive web app with account-based cloud sync and offline-capable local storage.</p>
+        <p className="subtle">PackShot is a progressive web app with account-based cloud sync and offline-capable local storage.</p>
         <div className="stack-sm">
           <p><strong>Version:</strong> 1.0.0</p>
           <p><strong>Storage:</strong> IndexedDB + Supabase cloud sync</p>

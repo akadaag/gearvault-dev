@@ -6,7 +6,7 @@ export function exportEventToPdf(event: EventItem) {
   let y = 14;
 
   doc.setFontSize(18);
-  doc.text(`GearVault Packing List: ${event.title}`, 14, y);
+  doc.text(`PackShot Packing List: ${event.title}`, 14, y);
   y += 8;
 
   doc.setFontSize(11);

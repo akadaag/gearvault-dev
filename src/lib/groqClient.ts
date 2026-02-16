@@ -369,7 +369,7 @@ export async function callGroqForChat(
     return summary;
   });
   
-  const systemPrompt = `You are GearVault AI, an expert photography and videography gear advisor.
+  const systemPrompt = `You are PackShot AI, an expert photography and videography gear advisor.
 
 You ONLY answer questions about:
 - Camera gear (bodies, lenses, accessories)

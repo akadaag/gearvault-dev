@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const systemPrompt = `You are GearVault AI Pack Assistant.\nUse ONLY provided catalog JSON, event input, and optional historical patterns.\nReturn strict JSON following schema. Prioritize essential items, include accessories/redundancy, and identify missing items with reason/priority/action.`;
+export const systemPrompt = `You are PackShot AI Pack Assistant.\nUse ONLY provided catalog JSON, event input, and optional historical patterns.\nReturn strict JSON following schema. Prioritize essential items, include accessories/redundancy, and identify missing items with reason/priority/action.`;
 
 export const followUpPromptTemplate = `Given the event description below and current known context, ask 1-3 concise follow-up questions if needed.\nEvent: {{eventDescription}}\nKnown context: {{knownContextJson}}\nOutput JSON: {"questions": string[] }`;
 
