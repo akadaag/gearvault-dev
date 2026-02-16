@@ -4135,7 +4135,7 @@ html {
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 1rem 0.5rem;
-  padding-bottom: 120px; /* clearance for fixed input bar */
+  padding-bottom: 80px; /* clearance for floating input pill */
 }
 
 .ai-empty-state {
@@ -4166,7 +4166,6 @@ html {
   right: 0;
   z-index: 40;
   padding: 0.75rem var(--space-4, 1rem) 1rem;
-  background: var(--bg);
   transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
@@ -4475,10 +4474,6 @@ html {
 :root.dark .pill--success { background: #14532d; color: #86efac; }
 
 /* Dark mode - Chat App Layout */
-:root.dark .ai-input-bar {
-  background: var(--bg);
-}
-
 :root.dark .ai-input-pill {
   background: var(--surface, #27272a);
   border-color: #3f3f46;
