@@ -15,9 +15,9 @@ function App() {
 
   if (loading) {
     return (
-      <main className="content">
-        <div className="card">Loading your workspace…</div>
-      </main>
+      <div className="splash-screen">
+        <img src="/white-logo.webp" alt="" className="splash-logo" />
+      </div>
     );
   }
 
