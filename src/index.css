@@ -9390,30 +9390,77 @@ html {
 
 /* ================================================================
    GLOBAL BOTTOM NAVIGATION — iOS REDESIGN
-   Overrides previous styles to match iOS Tab Bar standards.
+   Overrides base + Block E styles to match iOS Tab Bar standards.
+   
+   Fixes applied:
+   - Resets all leaking base styles (border-radius, min-height, font-size, grid)
+   - Overrides desktop media query (floating pill) for iOS theme
+   - Scopes label under .ios-theme
+   - Uses --bottom-nav-clearance variable instead of !important hacks
+   - Fully supersedes Block E (lines 6822–6845, 6928–6937)
    ================================================================ */
 
-/* Base container */
+/* Override --bottom-nav-clearance for iOS theme so all content areas
+   automatically get correct bottom padding without !important */
+.ios-theme {
+  --bottom-nav-clearance: calc(49px + env(safe-area-inset-bottom) + 16px);
+}
+
+/* Base container — fully overrides base (.mobile-bottom-nav) and Block E */
 .ios-theme .mobile-bottom-nav {
   position: fixed;
   bottom: 0;
   left: 0;
   right: 0;
   height: calc(49px + env(safe-area-inset-bottom));
-  background: rgba(249, 249, 249, 0.94); /* Standard iOS light mode translucent */
+  background: rgba(249, 249, 249, 0.94);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-top: 0.5px solid rgba(0, 0, 0, 0.3); /* Distinct separator */
+  border-top: 0.5px solid rgba(0, 0, 0, 0.3);
   display: flex;
   justify-content: space-around;
   align-items: flex-start;
   padding-top: 4px;
   padding-bottom: env(safe-area-inset-bottom);
+  padding-left: 0;
+  padding-right: 0;
   z-index: 1000;
   box-shadow: none;
+  /* Reset base grid properties */
+  grid-template-columns: none;
+  gap: 0;
+  /* Reset base border/radius */
+  border-radius: 0;
+  border-left: none;
+  border-right: none;
+  border-bottom: none;
+  /* Reset desktop pill transforms */
+  transform: none;
+  width: auto;
 }
 
-/* Individual tab item */
+/* Override the desktop media query that turns nav into a floating pill.
+   iOS tab bar should stay full-width and docked to bottom on all screens. */
+@media (min-width: 768px) {
+  .ios-theme .mobile-bottom-nav {
+    left: 0;
+    right: 0;
+    transform: none;
+    bottom: 0;
+    width: auto;
+    background: rgba(249, 249, 249, 0.94);
+    border: none;
+    border-top: 0.5px solid rgba(0, 0, 0, 0.3);
+    box-shadow: none;
+    padding: 4px 0 env(safe-area-inset-bottom);
+    border-radius: 0;
+    backdrop-filter: saturate(180%) blur(20px);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    gap: 0;
+  }
+}
+
+/* Individual tab item — resets all leaking base styles */
 .ios-theme .mobile-bottom-nav__item {
   flex: 1;
   display: flex;
@@ -9426,16 +9473,74 @@ html {
   padding: 0;
   margin: 0;
   cursor: pointer;
-  color: #999999; /* Standard iOS inactive gray */
+  color: #999999;
   -webkit-tap-highlight-color: transparent;
   transition: color 0.1s ease;
   height: 48px;
+  /* Reset leaking base styles */
+  min-height: auto;
+  border-radius: 0;
+  font-size: 10px;
+  font-weight: 500;
+  box-shadow: none;
+  outline: none;
+  opacity: 1;
+  transform: none;
 }
 
-/* Active scale effect */
+/* Override base focus/active styles that leak through */
+.ios-theme .mobile-bottom-nav__item:focus,
+.ios-theme .mobile-bottom-nav__item:focus-visible {
+  color: #999999;
+  background: none;
+  box-shadow: none;
+  outline: none;
+}
+
+.ios-theme .mobile-bottom-nav__item.is-active:focus,
+.ios-theme .mobile-bottom-nav__item.is-active:focus-visible {
+  color: var(--ios-blue);
+}
+
+/* Override desktop media query for tab items */
+@media (min-width: 768px) {
+  .ios-theme .mobile-bottom-nav__item {
+    border-radius: 0;
+    font-size: 10px;
+    padding: 0;
+  }
+}
+
+/* Active press effect — iOS uses opacity dim, not scale */
 .ios-theme .mobile-bottom-nav__item:active {
   opacity: 0.7;
-  transform: none; /* iOS tabs don't typically scale, just opacity dim */
+  transform: none;
+  background: none;
+}
+
+/* Override base hover styles */
+.ios-theme .mobile-bottom-nav__item:hover {
+  background: none;
+  box-shadow: none;
+}
+
+.ios-theme .mobile-bottom-nav__item.is-active:hover {
+  background: none;
+  box-shadow: none;
+}
+
+@media (hover: hover) {
+  .ios-theme .mobile-bottom-nav__item:hover {
+    color: #999999;
+    background: none;
+    box-shadow: none;
+  }
+
+  .ios-theme .mobile-bottom-nav__item.is-active:hover {
+    color: var(--ios-blue);
+    background: none;
+    box-shadow: none;
+  }
 }
 
 /* Icon styling */
@@ -9448,6 +9553,7 @@ html {
   font-size: 24px;
   margin-bottom: 0;
   transition: transform 0.15s ease;
+  line-height: 0;
 }
 
 .ios-theme .mobile-bottom-nav__icon svg {
@@ -9458,8 +9564,8 @@ html {
   stroke: currentColor;
 }
 
-/* Label styling - Newly added in TSX */
-.mobile-bottom-nav__label {
+/* Label styling — scoped under .ios-theme for consistency */
+.ios-theme .mobile-bottom-nav__label {
   font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", sans-serif;
   font-size: 10px;
   font-weight: 500;
@@ -9467,19 +9573,23 @@ html {
   letter-spacing: -0.01em;
   color: inherit;
   margin-top: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
-/* Active State */
+/* Active state */
 .ios-theme .mobile-bottom-nav__item.is-active {
   color: var(--ios-blue);
 }
 
 .ios-theme .mobile-bottom-nav__item.is-active .mobile-bottom-nav__icon svg {
   stroke: var(--ios-blue);
-  stroke-width: 2.5px; /* Slightly bolder stroke for active */
+  stroke-width: 2.5px;
 }
 
-/* Dark Mode Overrides */
+/* ── Dark Mode ─────────────────────────────────────────────────── */
 :root.dark .ios-theme .mobile-bottom-nav {
   background: rgba(30, 30, 30, 0.90);
   border-top-color: rgba(255, 255, 255, 0.15);
@@ -9489,17 +9599,37 @@ html {
   color: #8E8E93;
 }
 
-:root.dark .ios-theme .mobile-bottom-nav__item.is-active {
-  color: #0A84FF; /* iOS Blue Dark Mode */
+:root.dark .ios-theme .mobile-bottom-nav__item:focus,
+:root.dark .ios-theme .mobile-bottom-nav__item:focus-visible {
+  color: #8E8E93;
 }
 
-/* Safety clearance for content */
-.ios-theme .content, 
-.ios-theme .content-catalog,
-.ios-theme .content-events, 
-.ios-theme .content-assistant, 
-.ios-theme .content-settings {
-  padding-bottom: calc(50px + env(safe-area-inset-bottom) + 16px) !important;
+:root.dark .ios-theme .mobile-bottom-nav__item.is-active {
+  color: #0A84FF;
+}
+
+:root.dark .ios-theme .mobile-bottom-nav__item.is-active:focus,
+:root.dark .ios-theme .mobile-bottom-nav__item.is-active:focus-visible {
+  color: #0A84FF;
+}
+
+@media (hover: hover) {
+  :root.dark .ios-theme .mobile-bottom-nav__item:hover {
+    color: #8E8E93;
+  }
+
+  :root.dark .ios-theme .mobile-bottom-nav__item.is-active:hover {
+    color: #0A84FF;
+  }
+}
+
+@media (min-width: 768px) {
+  :root.dark .ios-theme .mobile-bottom-nav {
+    background: rgba(30, 30, 30, 0.90);
+    border: none;
+    border-top: 0.5px solid rgba(255, 255, 255, 0.15);
+    box-shadow: none;
+  }
 }
 
 /* Specific fix for Catalog page scrolling */
