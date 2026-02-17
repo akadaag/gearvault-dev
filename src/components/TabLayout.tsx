@@ -7,6 +7,13 @@ import { useTheme } from '../hooks/useTheme';
 import { resetSheetScrollLock } from '../lib/sheetLock';
 import { MobileBottomNav } from './MobileBottomNav';
 
+const homeIcon = (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+    <polyline points="9 22 9 12 15 12 15 22" />
+  </svg>
+);
+
 const catalogIcon = (
   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
     <rect x="3" y="5" width="18" height="14" rx="2" ry="2" />
@@ -40,6 +47,7 @@ const settingsIcon = (
 );
 
 const tabs = [
+  { to: '/home', label: 'Home', icon: homeIcon },
   { to: '/catalog', label: 'Catalog', icon: catalogIcon },
   { to: '/events', label: 'Events', icon: eventsIcon },
   { to: '/assistant', label: 'AI Assistant', icon: assistantIcon },
@@ -67,6 +75,7 @@ export function TabLayout() {
   const pastCount = eventsAll.filter(e => e.dateTime && new Date(e.dateTime) < eventsNow).length;
 
   // ── Route flags ───────────────────────────────────────────────────────────
+  const isHomeRoute = location.pathname === '/home';
   const isCatalogRoute = location.pathname === '/catalog';
   const isSettingsRoute = location.pathname === '/settings';
   const isEventsRoute = location.pathname === '/events';
@@ -94,7 +103,9 @@ export function TabLayout() {
   const showEventsCalendar = searchParams.get('calendar') === '1';
 
   const pageTitle =
-    location.pathname === '/catalog'
+    location.pathname === '/home'
+      ? 'Home'
+      : location.pathname === '/catalog'
       ? 'Catalog'
       : location.pathname === '/events'
         ? 'Events'

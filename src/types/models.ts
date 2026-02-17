@@ -129,6 +129,7 @@ export interface AppSettings {
   syncEnabled: boolean;
   theme: ThemeMode;
   aiLearningEnabled: boolean;
+  displayName?: string;
 }
 
 export interface ExportBundle {

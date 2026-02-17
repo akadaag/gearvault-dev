@@ -7,6 +7,7 @@ import { CatalogPage } from './pages/CatalogPage';
 import { EventDetailPage } from './pages/EventDetailPage';
 import { EventsPage } from './pages/EventsPage';
 import { GearItemDetailPage } from './pages/GearItemDetailPage';
+import { HomePage } from './pages/HomePage';
 import { LoginPage } from './pages/LoginPage';
 import { SettingsPage } from './pages/SettingsPage';
 
@@ -42,14 +43,15 @@ function App() {
           </>
         ) : (
           <Route element={<TabLayout />}>
-            <Route path="/" element={<Navigate to="/catalog" replace />} />
+            <Route path="/" element={<Navigate to="/home" replace />} />
+            <Route path="/home" element={<HomePage />} />
             <Route path="/catalog" element={<CatalogPage />} />
             <Route path="/catalog/item/:id" element={<GearItemDetailPage />} />
             <Route path="/events" element={<EventsPage />} />
             <Route path="/events/:id" element={<EventDetailPage />} />
             <Route path="/assistant" element={<AIAssistantPage />} />
             <Route path="/settings" element={<SettingsPage />} />
-            <Route path="*" element={<Navigate to="/catalog" replace />} />
+            <Route path="*" element={<Navigate to="/home" replace />} />
           </Route>
         )}
       </Routes>
