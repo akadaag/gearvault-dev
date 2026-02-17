@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { db } from '../db';
 import { eventSchema } from '../lib/validators';
 import { makeId } from '../lib/ids';
+import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
 import type { EventItem } from '../types/models';
 
 const EVENT_TYPE_OPTIONS = [
@@ -50,8 +51,8 @@ export function EventFormSheet({ mode, initialData, onClose, onSaved }: EventFor
 
   // Sheet scroll lock
   useEffect(() => {
-    document.body.classList.add('sheet-open');
-    return () => document.body.classList.remove('sheet-open');
+    lockSheetScroll();
+    return () => unlockSheetScroll();
   }, []);
 
   async function handleSubmit() {

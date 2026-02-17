@@ -2046,19 +2046,6 @@ button.category-title-btn {
   margin-top: 0.2rem;
 }
 
-.filter-sheet {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 100;
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-  max-height: min(72vh, 620px);
-  overflow: auto;
-  padding-bottom: calc(1rem + env(safe-area-inset-bottom));
-}
-
 .gear-form-footer {
   flex-shrink: 0;
   padding: 0.5rem 0.9rem;
@@ -3993,39 +3980,33 @@ html {
 
 @keyframes sheet-slide-up {
   from {
-    transform: translateY(8%);
-    opacity: 0;
+    transform: translateY(100%);
   }
   to {
     transform: translateY(0);
-    opacity: 1;
   }
 }
 
 @keyframes maintenance-sheet-slide-up-mobile {
   from {
-    transform: translateY(8%);
-    opacity: 0;
+    transform: translateY(100%);
   }
   to {
     transform: translateY(0);
-    opacity: 1;
   }
 }
 
 @keyframes maintenance-sheet-slide-up-desktop {
   from {
-    transform: translate(-50%, 8%);
-    opacity: 0;
+    transform: translate(-50%, 100%);
   }
   to {
     transform: translate(-50%, 0);
-    opacity: 1;
   }
 }
 
 .filter-sheet {
-  animation: sheet-slide-up 180ms ease-out;
+  animation: sheet-slide-up 200ms ease-out;
 }
 
 .filter-sheet.gear-form-sheet {
@@ -4375,6 +4356,17 @@ html {
 /* ==========================================================================
    Catalog Match Review Sheet (slide-down)
    ========================================================================== */
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.15);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 299;
+  animation: overlay-fade-in 180ms ease-out;
+  cursor: pointer;
+}
 
 .review-sheet {
   position: fixed;
@@ -6854,7 +6846,15 @@ html {
   -webkit-backdrop-filter: blur(4px);
 }
 
-.ios-theme .filter-sheet {
+.ios-theme .filter-sheet,
+.ios-theme .item-detail-sheet,
+.ios-theme .gear-form-sheet,
+.ios-theme .maintenance-history-sheet,
+.ios-theme .maintenance-add-sheet,
+.ios-theme .event-add-sheet,
+.ios-theme .ev-detail-share-sheet,
+.ios-theme .ev-detail-add-sheet,
+.ios-theme .ai-history-sheet {
   border-radius: 14px 14px 0 0;
   background: var(--ios-card-bg);
   backdrop-filter: blur(var(--ios-blur));
@@ -6863,42 +6863,55 @@ html {
   box-shadow: 0 -2px 24px rgba(0, 0, 0, 0.12);
 }
 
-/* Drag handle indicator */
-.ios-theme .filter-sheet::before {
+/* Drag handle indicator for all sheets */
+.ios-theme .filter-sheet::before,
+.ios-theme .item-detail-sheet::before,
+.ios-theme .gear-form-sheet::before,
+.ios-theme .maintenance-history-sheet::before,
+.ios-theme .maintenance-add-sheet::before,
+.ios-theme .event-add-sheet::before,
+.ios-theme .ev-detail-share-sheet::before,
+.ios-theme .ev-detail-add-sheet::before,
+.ios-theme .ai-history-sheet::before {
   content: '';
   display: block;
   width: 36px;
   height: 5px;
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 3px;
+  background: rgba(60, 60, 67, 0.3);
+  border-radius: 100px;
   margin: 8px auto 4px;
+  flex-shrink: 0;
 }
 
-/* Item detail sheet — iOS glass look */
-.ios-theme .item-detail-sheet {
-  border-radius: 14px 14px 0 0;
+/* Review sheet (slide-down) — iOS glass look */
+.ios-theme .review-sheet {
   background: var(--ios-card-bg);
   backdrop-filter: blur(var(--ios-blur));
   -webkit-backdrop-filter: blur(var(--ios-blur));
   border: none;
-  box-shadow: 0 -2px 24px rgba(0, 0, 0, 0.12);
+  border-radius: 0 0 14px 14px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
-/* Gear form sheet — iOS glass look */
-.ios-theme .gear-form-sheet {
-  border-radius: 14px 14px 0 0;
-  background: var(--ios-card-bg);
-  backdrop-filter: blur(var(--ios-blur));
-  -webkit-backdrop-filter: blur(var(--ios-blur));
+.ios-theme .sheet-backdrop {
+  background: rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
 }
 
-/* Maintenance sheet — iOS glass look */
-.ios-theme .maintenance-history-sheet,
-.ios-theme .maintenance-add-sheet {
-  border-radius: 14px 14px 0 0;
-  background: var(--ios-card-bg);
-  backdrop-filter: blur(var(--ios-blur));
-  -webkit-backdrop-filter: blur(var(--ios-blur));
+/* Desktop — fully rounded on all bottom sheets */
+@media (min-width: 768px) {
+  .ios-theme .filter-sheet,
+  .ios-theme .item-detail-sheet,
+  .ios-theme .gear-form-sheet,
+  .ios-theme .maintenance-history-sheet,
+  .ios-theme .maintenance-add-sheet,
+  .ios-theme .event-add-sheet,
+  .ios-theme .ev-detail-share-sheet,
+  .ios-theme .ev-detail-add-sheet,
+  .ios-theme .ai-history-sheet {
+    border-radius: 14px;
+  }
 }
 
 /* ── Block G: Dark Mode Overrides ───────────────────────────────── */
@@ -6942,27 +6955,42 @@ html {
   background: rgba(0, 0, 0, 0.55);
 }
 
-:root.dark .ios-theme .filter-sheet {
+/* Dark glass background + shadow for ALL bottom sheets */
+:root.dark .ios-theme .filter-sheet,
+:root.dark .ios-theme .item-detail-sheet,
+:root.dark .ios-theme .gear-form-sheet,
+:root.dark .ios-theme .maintenance-history-sheet,
+:root.dark .ios-theme .maintenance-add-sheet,
+:root.dark .ios-theme .event-add-sheet,
+:root.dark .ios-theme .ev-detail-share-sheet,
+:root.dark .ios-theme .ev-detail-add-sheet,
+:root.dark .ios-theme .ai-history-sheet {
   background: var(--ios-card-bg);
   box-shadow: 0 -2px 24px rgba(0, 0, 0, 0.3);
 }
 
-:root.dark .ios-theme .filter-sheet::before {
+/* Dark drag handle for ALL bottom sheets */
+:root.dark .ios-theme .filter-sheet::before,
+:root.dark .ios-theme .item-detail-sheet::before,
+:root.dark .ios-theme .gear-form-sheet::before,
+:root.dark .ios-theme .maintenance-history-sheet::before,
+:root.dark .ios-theme .maintenance-add-sheet::before,
+:root.dark .ios-theme .event-add-sheet::before,
+:root.dark .ios-theme .ev-detail-share-sheet::before,
+:root.dark .ios-theme .ev-detail-add-sheet::before,
+:root.dark .ios-theme .ai-history-sheet::before {
   background: rgba(255, 255, 255, 0.15);
 }
 
-:root.dark .ios-theme .item-detail-sheet {
+/* Dark review sheet (slide-down variant) */
+:root.dark .ios-theme .review-sheet {
   background: var(--ios-card-bg);
-  box-shadow: 0 -2px 24px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
-:root.dark .ios-theme .gear-form-sheet {
-  background: var(--ios-card-bg);
-}
-
-:root.dark .ios-theme .maintenance-history-sheet,
-:root.dark .ios-theme .maintenance-add-sheet {
-  background: var(--ios-card-bg);
+/* Dark sheet backdrop */
+:root.dark .ios-theme .sheet-backdrop {
+  background: rgba(0, 0, 0, 0.55);
 }
 
 /* ================================================================

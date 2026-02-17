@@ -4,6 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
 import { EventFormSheet } from '../components/EventFormSheet';
 import { getDaysUntilEvent } from '../lib/eventHelpers';
+import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
 
 export function EventsPage() {
   const events = useLiveQuery(() => db.events.orderBy('updatedAt').reverse().toArray(), [], []);
@@ -25,8 +26,8 @@ export function EventsPage() {
   // ── Sheet scroll lock ──────────────────────────────────────────────────────
   useEffect(() => {
     if (!showFilterSheet) return;
-    document.body.classList.add('sheet-open');
-    return () => document.body.classList.remove('sheet-open');
+    lockSheetScroll();
+    return () => unlockSheetScroll();
   }, [showFilterSheet]);
 
   // ── URL helpers ────────────────────────────────────────────────────────────

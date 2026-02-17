@@ -1,3 +1,5 @@
+import { useEffect } from 'react';
+import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
 import type { GearItem } from '../types/models';
 
 export interface ReviewItem {
@@ -32,6 +34,13 @@ export function CatalogMatchReviewSheet({
   onCancel,
   open,
 }: Props) {
+  // Sheet scroll lock
+  useEffect(() => {
+    if (!open) return;
+    lockSheetScroll();
+    return () => unlockSheetScroll();
+  }, [open]);
+
   if (!open) return null;
 
   const allResolved = items.every((item) => selections.has(item.key));
