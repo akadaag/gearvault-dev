@@ -100,6 +100,7 @@ export function EventsPage() {
     const startDayOfWeek = firstDay.getDay();
     const daysInMonth    = new Date(year, month + 1, 0).getDate();
     const daysInPrevMonth = new Date(year, month, 0).getDate();
+    const todayDate = now.getDate();
 
     const eventsByDate = new Map<string, number>();
     events.forEach(event => {
@@ -120,27 +121,24 @@ export function EventsPage() {
       cells.push({ day, dateKey: null, isCurrentMonth: false, eventCount: 0 });
 
     return (
-      <div className="card stack-sm" style={{ margin: '0 0 16px', borderRadius: '12px' }}>
-        <h3>{firstDay.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
-        <div className="calendar-grid">
+      <div className="ios-glass-card ev-ios-cal-card">
+        <h3 className="ev-ios-cal-title">
+          {firstDay.toLocaleString('default', { month: 'long', year: 'numeric' })}
+        </h3>
+        <div className="ev-ios-cal-grid">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(label => (
-            <strong key={label} style={{ fontSize: '0.8125rem', textAlign: 'center', padding: '0.375rem 0' }}>
-              {label}
-            </strong>
+            <span key={label} className="ev-ios-cal-day-label">{label}</span>
           ))}
           {cells.map((cell, idx) => (
-            <div key={idx} className="calendar-cell">
-              {cell.isCurrentMonth ? (
-                <>
-                  <strong style={{ display: 'block', textAlign: 'center' }}>{cell.day}</strong>
-                  {cell.eventCount > 0 && (
-                    <div style={{ display: 'flex', justifyContent: 'center', marginTop: '0.25rem' }}>
-                      <div className="calendar-event-dot" />
-                    </div>
-                  )}
-                </>
-              ) : (
-                <span style={{ color: 'var(--border)' }}>{cell.day}</span>
+            <div
+              key={idx}
+              className={`ev-ios-cal-cell${!cell.isCurrentMonth ? ' muted' : ''}${cell.isCurrentMonth && cell.day === todayDate ? ' today' : ''}`}
+            >
+              <span className="ev-ios-cal-day-num">{cell.day}</span>
+              {cell.eventCount > 0 && (
+                <span className="ev-ios-cal-dot-wrap">
+                  <span className="ev-ios-cal-dot" />
+                </span>
               )}
             </div>
           ))}
@@ -152,14 +150,14 @@ export function EventsPage() {
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <>
-      <section className="events-page-ios">
+      <section className="events-page ios-theme">
         {/* iOS Header */}
-        <header className="ios-header">
-          <div className="ios-header-top">
-            <h1 className="ios-title">Events</h1>
-            <div style={{ display: 'flex', gap: '8px' }}>
+        <header className="ev-ios-header">
+          <div className="ev-ios-header-top">
+            <h1 className="ev-ios-large-title">Events</h1>
+            <div className="ev-ios-header-actions">
               <button
-                className={`ios-catalog-filter-btn${showCalendar ? ' active' : ''}`}
+                className={`ev-ios-icon-btn${showCalendar ? ' active' : ''}`}
                 onClick={() => setParam('calendar', showCalendar ? null : '1')}
                 aria-label="Toggle calendar view"
               >
@@ -171,7 +169,7 @@ export function EventsPage() {
                 </svg>
               </button>
               <button
-                className="ios-catalog-add-btn"
+                className="ev-ios-icon-btn primary"
                 onClick={() => setParam('add', '1')}
                 aria-label="Create new event"
               >
@@ -184,74 +182,91 @@ export function EventsPage() {
           </div>
 
           {/* Search Bar */}
-          <div className="ios-search-box">
-            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, flexShrink: 0 }}>
+          <div className="ev-ios-search-bar">
+            <svg className="ev-ios-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
             <input
+              type="text"
               placeholder="Search events"
               value={query}
               onChange={e => setParam('q', e.target.value || null)}
               aria-label="Search events"
             />
+            {query && (
+              <button
+                className="ev-ios-search-clear"
+                onClick={() => setParam('q', null)}
+                aria-label="Clear search"
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <circle cx="12" cy="12" r="10" opacity="0.25" />
+                  <path d="M15 9l-6 6M9 9l6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" />
+                </svg>
+              </button>
+            )}
           </div>
 
-          {/* Quick Filters */}
-          <div className="catalog-quick-filters" role="group" aria-label="Quick event filters" style={{ marginTop: '10px' }}>
+          {/* Quick Filter Pills */}
+          <div className="ev-ios-filter-scroll" role="group" aria-label="Quick event filters">
             <button
-              className={`catalog-quick-pill${quickFilter === 'upcoming' ? ' is-active' : ''}`}
+              className={`ev-ios-filter-pill${quickFilter === 'upcoming' ? ' active' : ''}`}
               onClick={() => setParam('qf', 'upcoming')}
             >
               Upcoming
-              <span className="catalog-quick-pill-count">{upcomingCount}</span>
+              <span className="ev-ios-pill-count">{upcomingCount}</span>
             </button>
             <button
-              className={`catalog-quick-pill${quickFilter === 'past' ? ' is-active' : ''}`}
+              className={`ev-ios-filter-pill${quickFilter === 'past' ? ' active' : ''}`}
               onClick={() => setParam('qf', 'past')}
             >
               Past
-              <span className="catalog-quick-pill-count">{pastCount}</span>
+              <span className="ev-ios-pill-count">{pastCount}</span>
             </button>
             <button
-              className={`catalog-quick-pill${quickFilter === 'all' ? ' is-active' : ''}`}
+              className={`ev-ios-filter-pill${quickFilter === 'all' ? ' active' : ''}`}
               onClick={() => setParam('qf', 'all')}
             >
               All
-              <span className="catalog-quick-pill-count">{events.length}</span>
+              <span className="ev-ios-pill-count">{events.length}</span>
             </button>
+
+            <span className="ev-ios-filter-divider" />
+
             <button
-              className={`catalog-quick-pill catalog-quick-filter-btn${selectedEventTypes.length > 0 || clientFilter || locationFilter ? ' is-active' : ''}`}
+              className={`ev-ios-filter-icon-btn${selectedEventTypes.length > 0 || clientFilter || locationFilter ? ' active' : ''}`}
               aria-label="Open event filters"
               onClick={() => setParam('filters', '1')}
             >
-              <span className="catalog-filter-pill-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                  <line x1="4" y1="6" x2="20" y2="6" />
-                  <circle cx="10" cy="6" r="2" />
-                  <line x1="4" y1="12" x2="20" y2="12" />
-                  <circle cx="15" cy="12" r="2" />
-                  <line x1="4" y1="18" x2="20" y2="18" />
-                  <circle cx="8" cy="18" r="2" />
-                </svg>
-              </span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="4" y1="21" x2="4" y2="14" />
+                <line x1="4" y1="10" x2="4" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="12" />
+                <line x1="12" y1="8" x2="12" y2="3" />
+                <line x1="20" y1="21" x2="20" y2="16" />
+                <line x1="20" y1="12" x2="20" y2="3" />
+                <line x1="1" y1="14" x2="7" y2="14" />
+                <line x1="9" y1="8" x2="15" y2="8" />
+                <line x1="17" y1="16" x2="23" y2="16" />
+              </svg>
             </button>
           </div>
 
-          <div className="ios-catalog-item-count">
+          <div className="ev-ios-item-count">
             {sorted.length} event{sorted.length !== 1 ? 's' : ''}
           </div>
         </header>
 
         {/* Scrollable content area */}
-        <div className="ios-catalog-scroll">
+        <div className="ev-ios-content-scroll">
           {/* Calendar */}
           {showCalendar && <MonthCalendar />}
 
           {/* Empty states */}
           {sorted.length === 0 && events.length === 0 && (
-            <div className="ios-catalog-empty">
-              <div className="ios-catalog-empty-icon" aria-hidden="true">
+            <div className="ev-ios-empty">
+              <div className="ev-ios-empty-icon" aria-hidden="true">
                 <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="5" width="18" height="16" rx="2" ry="2" />
                   <path d="M8 3v4" />
@@ -264,9 +279,10 @@ export function EventsPage() {
             </div>
           )}
           {sorted.length === 0 && events.length > 0 && (
-            <div className="ios-catalog-empty">
+            <div className="ev-ios-empty">
               <h3>No events match</h3>
               <p>Try adjusting your search or filters</p>
+              <button className="ev-ios-text-btn" onClick={clearAllFilters}>Clear Filters</button>
             </div>
           )}
 
@@ -277,40 +293,57 @@ export function EventsPage() {
             const month = dateObj ? dateObj.toLocaleString('default', { month: 'short' }).toUpperCase() : '';
             const packed = event.packingChecklist.filter(i => i.packed).length;
             const total  = event.packingChecklist.length;
+            const packingPct = total > 0 ? Math.round((packed / total) * 100) : 0;
             const daysInfo = event.dateTime ? getDaysUntilEvent(event.dateTime) : null;
 
             return (
-              <Link key={event.id} to={`/events/${event.id}`} className="ios-event-card">
+              <Link key={event.id} to={`/events/${event.id}`} className="ios-glass-card ev-ios-event-item">
                 {/* Date badge */}
                 {dateObj ? (
-                  <div className="ios-event-date-badge">
-                    <span className="ios-event-date-month">{month}</span>
-                    <span className="ios-event-date-day">{day}</span>
+                  <div className="ev-ios-date-badge">
+                    <span className="ev-ios-date-month">{month}</span>
+                    <span className="ev-ios-date-day">{day}</span>
                   </div>
                 ) : (
-                  <div className="ios-event-nodate-badge">?</div>
+                  <div className="ev-ios-date-badge placeholder">?</div>
                 )}
 
                 {/* Info */}
-                <div className="ios-event-info">
-                  <div className="ios-event-title">{event.title}</div>
-                  <div className="ios-event-meta">
+                <div className="ev-ios-event-info">
+                  <div className="ev-ios-event-row-top">
+                    <span className="ev-ios-event-title">{event.title}</span>
+                    {daysInfo && (
+                      <span className={`ev-ios-urgency-tag ${daysInfo.colorClass}`}>
+                        {daysInfo.text}
+                      </span>
+                    )}
+                  </div>
+                  <div className="ev-ios-event-meta">
                     {event.type}
+                    {event.client && ` \u00B7 ${event.client}`}
                     {event.location && ` \u00B7 ${event.location}`}
-                    {daysInfo && ` \u00B7 ${daysInfo.text}`}
                   </div>
                   {total > 0 && (
-                    <div className="ios-event-packing">
-                      {packed}/{total} packed
+                    <div className="ev-ios-event-packing">
+                      <div className="ev-ios-packing-bar" aria-hidden="true">
+                        <span
+                          className={`ev-ios-packing-fill${packed === total ? ' complete' : ''}`}
+                          style={{ width: `${packingPct}%` }}
+                        />
+                      </div>
+                      <span className="ev-ios-packing-label">{packed}/{total} packed</span>
                     </div>
                   )}
                 </div>
 
-                {/* Arrow */}
-                <span className="ios-arrow" aria-hidden="true">&#8250;</span>
+                {/* Chevron */}
+                <span className="ev-ios-chevron" aria-hidden="true">&#8250;</span>
               </Link>
             );
           })}
+
+          {/* Bottom spacer for nav bar */}
+          <div className="ev-ios-bottom-spacer" />
         </div>
       </section>
 
@@ -319,12 +352,14 @@ export function EventsPage() {
         <>
           <button className="sheet-overlay" aria-label="Close filters" onClick={closeFilterSheet} />
           <aside className="filter-sheet card stack-md" aria-label="Event filters">
-            <div className="row between">
+            <div className="ios-catalog-sheet-header">
+              <button className="ios-catalog-sheet-action" onClick={clearAllFilters}>Reset</button>
               <h3>Filters</h3>
-              <button className="ghost" onClick={closeFilterSheet}>Done</button>
+              <button className="ios-catalog-sheet-action primary" onClick={closeFilterSheet}>Done</button>
             </div>
+
             <div className="stack-sm">
-              <strong>Event Types</strong>
+              <strong className="ios-catalog-filter-label">Event Types</strong>
               <div className="catalog-filter-checklist">
                 {eventTypes.map(eventType => (
                   <label className="checkbox-inline" key={eventType}>
@@ -338,35 +373,44 @@ export function EventsPage() {
                 ))}
               </div>
             </div>
-            <div className="grid filters">
-              <select
-                value={clientFilter}
-                onChange={e => setParam('client', e.target.value || null)}
-                aria-label="Filter by client"
-              >
-                <option value="">All clients</option>
-                {clients.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-              <select
-                value={locationFilter}
-                onChange={e => setParam('location', e.target.value || null)}
-                aria-label="Filter by location"
-              >
-                <option value="">All locations</option>
-                {locations.map(l => <option key={l} value={l}>{l}</option>)}
-              </select>
-              <select
-                value={sortBy}
-                onChange={e => setParam('sort', e.target.value)}
-                aria-label="Sort events"
-              >
-                <option value="date">Sort: Date</option>
-                <option value="title">Sort: Title</option>
-                <option value="client">Sort: Client</option>
-                <option value="newest">Sort: Recently Updated</option>
-              </select>
+
+            <div className="ios-catalog-filter-grid">
+              <label className="ios-catalog-filter-field">
+                <span>Client</span>
+                <select
+                  value={clientFilter}
+                  onChange={e => setParam('client', e.target.value || null)}
+                  aria-label="Filter by client"
+                >
+                  <option value="">All clients</option>
+                  {clients.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+              </label>
+              <label className="ios-catalog-filter-field">
+                <span>Location</span>
+                <select
+                  value={locationFilter}
+                  onChange={e => setParam('location', e.target.value || null)}
+                  aria-label="Filter by location"
+                >
+                  <option value="">All locations</option>
+                  {locations.map(l => <option key={l} value={l}>{l}</option>)}
+                </select>
+              </label>
+              <label className="ios-catalog-filter-field">
+                <span>Sort</span>
+                <select
+                  value={sortBy}
+                  onChange={e => setParam('sort', e.target.value)}
+                  aria-label="Sort events"
+                >
+                  <option value="date">Date</option>
+                  <option value="title">Title</option>
+                  <option value="client">Client</option>
+                  <option value="newest">Recently Updated</option>
+                </select>
+              </label>
             </div>
-            <button className="ghost" onClick={clearAllFilters}>Clear all filters</button>
           </aside>
         </>
       )}
