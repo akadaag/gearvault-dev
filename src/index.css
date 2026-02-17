@@ -9387,3 +9387,122 @@ html {
 :root.dark .settings-page.ios-theme .ios-settings-toast {
   border-color: rgba(255, 255, 255, 0.08);
 }
+
+/* ================================================================
+   GLOBAL BOTTOM NAVIGATION — iOS REDESIGN
+   Overrides previous styles to match iOS Tab Bar standards.
+   ================================================================ */
+
+/* Base container */
+.ios-theme .mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(49px + env(safe-area-inset-bottom));
+  background: rgba(249, 249, 249, 0.94); /* Standard iOS light mode translucent */
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-top: 0.5px solid rgba(0, 0, 0, 0.3); /* Distinct separator */
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-start;
+  padding-top: 4px;
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 1000;
+  box-shadow: none;
+}
+
+/* Individual tab item */
+.ios-theme .mobile-bottom-nav__item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 3px;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  color: #999999; /* Standard iOS inactive gray */
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.1s ease;
+  height: 48px;
+}
+
+/* Active scale effect */
+.ios-theme .mobile-bottom-nav__item:active {
+  opacity: 0.7;
+  transform: none; /* iOS tabs don't typically scale, just opacity dim */
+}
+
+/* Icon styling */
+.ios-theme .mobile-bottom-nav__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  font-size: 24px;
+  margin-bottom: 0;
+  transition: transform 0.15s ease;
+}
+
+.ios-theme .mobile-bottom-nav__icon svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 2px;
+  fill: none;
+  stroke: currentColor;
+}
+
+/* Label styling - Newly added in TSX */
+.mobile-bottom-nav__label {
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro", sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  color: inherit;
+  margin-top: 0;
+}
+
+/* Active State */
+.ios-theme .mobile-bottom-nav__item.is-active {
+  color: var(--ios-blue);
+}
+
+.ios-theme .mobile-bottom-nav__item.is-active .mobile-bottom-nav__icon svg {
+  stroke: var(--ios-blue);
+  stroke-width: 2.5px; /* Slightly bolder stroke for active */
+}
+
+/* Dark Mode Overrides */
+:root.dark .ios-theme .mobile-bottom-nav {
+  background: rgba(30, 30, 30, 0.90);
+  border-top-color: rgba(255, 255, 255, 0.15);
+}
+
+:root.dark .ios-theme .mobile-bottom-nav__item {
+  color: #8E8E93;
+}
+
+:root.dark .ios-theme .mobile-bottom-nav__item.is-active {
+  color: #0A84FF; /* iOS Blue Dark Mode */
+}
+
+/* Safety clearance for content */
+.ios-theme .content, 
+.ios-theme .content-catalog,
+.ios-theme .content-events, 
+.ios-theme .content-assistant, 
+.ios-theme .content-settings {
+  padding-bottom: calc(50px + env(safe-area-inset-bottom) + 16px) !important;
+}
+
+/* Specific fix for Catalog page scrolling */
+.catalog-page.ios-theme .ios-catalog-scroll {
+  padding-bottom: calc(50px + env(safe-area-inset-bottom) + 20px);
+}

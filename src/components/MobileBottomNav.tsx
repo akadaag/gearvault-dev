@@ -42,6 +42,7 @@ export function MobileBottomNav({ items, ariaLabel = 'Main navigation' }: Mobile
             <span className="mobile-bottom-nav__icon" aria-hidden="true">
               {item.icon}
             </span>
+            <span className="mobile-bottom-nav__label">{item.label}</span>
           </button>
         );
       })}
