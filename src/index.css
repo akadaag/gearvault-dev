@@ -744,6 +744,13 @@ a {
   background: var(--bg);
 }
 
+.content.content-home {
+  padding-top: 0;
+  padding-left: 0;
+  padding-right: 0;
+  background: var(--bg);
+}
+
 .content-immersive {
   margin-top: 0;
   height: 100dvh;

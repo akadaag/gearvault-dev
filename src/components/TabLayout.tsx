@@ -240,7 +240,7 @@ export function TabLayout() {
 
   return (
     <div className="app-shell">
-      {!isGearDetailRoute && !isEventDetailRoute && (
+      {!isHomeRoute && !isGearDetailRoute && !isEventDetailRoute && (
         <header className={`topbar${isCatalogRoute || isEventsRoute ? ' topbar-catalog' : ''}`}>
           <div className="topbar-inner">
             <div className="topbar-primary-row">
@@ -387,7 +387,7 @@ export function TabLayout() {
         </header>
       )}
 
-      <main className={`${isGearDetailRoute || isEventDetailRoute ? 'content content-immersive' : 'content'}${isCatalogRoute ? ' content-catalog' : ''}${isEventsRoute ? ' content-events' : ''}`}>
+      <main className={`${isHomeRoute ? 'content content-home' : isGearDetailRoute || isEventDetailRoute ? 'content content-immersive' : 'content'}${isCatalogRoute ? ' content-catalog' : ''}${isEventsRoute ? ' content-events' : ''}`}>
         <Outlet />
       </main>
 
