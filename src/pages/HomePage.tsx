@@ -146,14 +146,14 @@ export function HomePage() {
   const showSearchDropdown = searchFocused && searchQuery.trim().length > 0;
 
   return (
-    <section className="home-page">
+    <section className="home-page ios-theme">
       {/* Header */}
       <div className="home-header">
+        <p className="home-date">{today}</p>
         <h1 className="home-title">
           {greeting}
           {settings?.displayName ? `, ${settings.displayName}` : ''}
         </h1>
-        <p className="home-date">{today}</p>
       </div>
 
       {/* Search Bar */}
@@ -287,13 +287,61 @@ export function HomePage() {
         )}
       </div>
 
-      {/* Next Event Card */}
-      {nextEvent ? (
-        <div className="card home-event-card" onClick={() => navigate(`/events/${nextEvent.id}`)}>
-          <div className="home-event-top">
-            <div className="home-event-info">
-              <strong className="home-event-title">{nextEvent.title}</strong>
-              <span className="home-event-meta">
+      {/* Quick Actions Row */}
+      <div className="home-actions-row">
+        <button className="home-action-btn" onClick={() => navigate('/catalog?add=1')}>
+          <div className="home-action-icon-box add-gear">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </div>
+          <span className="home-action-label">Add Gear</span>
+        </button>
+        <button className="home-action-btn" onClick={() => navigate('/events?add=1')}>
+          <div className="home-action-icon-box new-event">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <rect x="3" y="4" width="18" height="18" rx="2" />
+              <line x1="16" y1="2" x2="16" y2="6" />
+              <line x1="8" y1="2" x2="8" y2="6" />
+              <line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+          </div>
+          <span className="home-action-label">New Event</span>
+        </button>
+        <button className="home-action-btn" onClick={() => navigate('/assistant')}>
+          <div className="home-action-icon-box ai-assistant">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M12 3 L14.5 8.5 L20 9.5 L16 13.5 L17 19 L12 16.5 L7 19 L8 13.5 L4 9.5 L9.5 8.5 Z" />
+            </svg>
+          </div>
+          <span className="home-action-label">Ask AI</span>
+        </button>
+      </div>
+
+      {/* Widget Grid */}
+      <div className="home-widgets-grid">
+        {/* Next Event Widget */}
+        {nextEvent ? (
+          <div
+            className="home-widget-card full-width"
+            onClick={() => navigate(`/events/${nextEvent.id}`)}
+          >
+            <div className="widget-header">
+              <span className="widget-icon blue">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                </svg>
+              </span>
+              <span className={`widget-tag ${urgencyClass}`}>
+                {daysUntil === 0 ? 'Today' : daysUntil === 1 ? 'Tomorrow' : `${daysUntil}d away`}
+              </span>
+            </div>
+            <div className="widget-content">
+              <span className="widget-title">{nextEvent.title}</span>
+              <span className="widget-subtitle">
                 {nextEvent.dateTime &&
                   new Date(nextEvent.dateTime).toLocaleDateString('en-US', {
                     month: 'short',
@@ -304,183 +352,164 @@ export function HomePage() {
                 {nextEvent.location && ` \u00B7 ${nextEvent.location}`}
               </span>
             </div>
-            <span className={`pill home-event-days ${urgencyClass}`}>
-              {daysUntil === 0 ? 'Today' : daysUntil === 1 ? 'Tomorrow' : `${daysUntil}d`}
-            </span>
-          </div>
-          {totalCount > 0 && (
-            <div className="home-event-packing">
-              <div className="progress-track" aria-hidden="true">
-                <span
-                  className={packedCount === totalCount ? 'complete' : ''}
-                  style={{ width: `${packingProgress}%` }}
-                />
+            {totalCount > 0 && (
+              <div className="widget-progress">
+                <div className="progress-track" aria-hidden="true">
+                  <span
+                    className={packedCount === totalCount ? 'complete' : ''}
+                    style={{ width: `${packingProgress}%` }}
+                  />
+                </div>
+                <span className="widget-subtitle" style={{ textAlign: 'right', display: 'block', marginTop: '4px' }}>
+                  {packedCount}/{totalCount} packed
+                </span>
               </div>
-              <span className="home-event-packed-label">
-                {packedCount}/{totalCount} packed
-              </span>
-            </div>
-          )}
-        </div>
-      ) : (
-        <div className="card home-event-card home-event-empty">
-          <p>No upcoming events</p>
-          <button className="text-btn" onClick={() => navigate('/events?add=1')}>
-            Plan a shoot
-          </button>
-        </div>
-      )}
-
-      {/* Quick Actions */}
-      <div className="home-actions">
-        <button className="home-action" onClick={() => navigate('/catalog?add=1')}>
-          <span className="home-action-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-          </span>
-          <span>Add Gear</span>
-        </button>
-        <button className="home-action" onClick={() => navigate('/events?add=1')}>
-          <span className="home-action-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <rect x="3" y="4" width="18" height="18" rx="2" />
-              <line x1="16" y1="2" x2="16" y2="6" />
-              <line x1="8" y1="2" x2="8" y2="6" />
-              <line x1="3" y1="10" x2="21" y2="10" />
-            </svg>
-          </span>
-          <span>New Event</span>
-        </button>
-        <button className="home-action" onClick={() => navigate('/assistant')}>
-          <span className="home-action-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 3 L14.5 8.5 L20 9.5 L16 13.5 L17 19 L12 16.5 L7 19 L8 13.5 L4 9.5 L9.5 8.5 Z" />
-            </svg>
-          </span>
-          <span>Ask AI</span>
-        </button>
-      </div>
-
-      {/* Essentials */}
-      {essentialItems.length > 0 && (
-        <div className="home-section">
-          <div className="home-section-header">
-            <h3>Essentials</h3>
-            <button className="text-btn" onClick={() => navigate('/catalog?qf=essential')}>
-              See All
+            )}
+          </div>
+        ) : (
+          <div className="home-widget-card full-width empty">
+            <p style={{ color: 'var(--ios-text-secondary)', fontSize: '15px' }}>No upcoming events</p>
+            <button className="text-btn" onClick={() => navigate('/events?add=1')}>
+              Plan a shoot
             </button>
           </div>
-          <div className="home-essentials">
+        )}
+
+        {/* Stats Widgets */}
+        <div className="home-widget-card stat-widget" onClick={() => navigate('/catalog')}>
+          <span className="widget-value">{totalItems}</span>
+          <span className="widget-label">Items</span>
+        </div>
+        <div className="home-widget-card stat-widget" onClick={() => navigate('/catalog')}>
+          <span className="widget-value">
+            {formatMoney(totalValue, settings?.defaultCurrency ?? 'EUR')}
+          </span>
+          <span className="widget-label">Total Value</span>
+        </div>
+        <div className="home-widget-card stat-widget" onClick={() => navigate('/catalog')}>
+          <span className="widget-value">{totalCategories}</span>
+          <span className="widget-label">Categories</span>
+        </div>
+
+        {/* Packing Alerts Widget */}
+        {packingAlerts.length > 0 && (
+          <div className="home-widget-card" style={{ gridColumn: packingAlerts.length > 0 ? 'auto' : undefined }}>
+            <div className="widget-header">
+              <span className="widget-icon red">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+              </span>
+            </div>
+            <div className="widget-content">
+              <span className="widget-title">Packing</span>
+              <span className="widget-subtitle">
+                {packingAlerts.length} event{packingAlerts.length > 1 ? 's' : ''} need packing
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Essentials Carousel */}
+      {essentialItems.length > 0 && (
+        <>
+          <div className="ios-section-label">Essentials</div>
+          <div className="ios-essentials-scroll">
             {essentialItems.map((item) => (
               <button
                 key={item.id}
-                className="home-essential"
+                className="ios-essential-item"
                 onClick={() => navigate(`/catalog/item/${item.id}`)}
               >
                 {item.photo ? (
-                  <img src={item.photo} alt={item.name} className="home-essential-thumb" />
+                  <img src={item.photo} alt={item.name} className="ios-essential-thumb" />
                 ) : (
-                  <div className="home-essential-letter">
+                  <div className="ios-essential-letter">
                     {item.name.charAt(0).toUpperCase()}
                   </div>
                 )}
-                <span className="home-essential-name">{item.name}</span>
+                <span className="ios-essential-name">{item.name}</span>
               </button>
             ))}
           </div>
-        </div>
+        </>
       )}
 
-      {/* Packing Alerts */}
+      {/* Packing Alerts List */}
       {packingAlerts.length > 0 && (
-        <div className="home-section">
-          <div className="home-section-header">
+        <div className="ios-list-group">
+          <div className="ios-list-group-header">
             <h3>Packing Alerts</h3>
           </div>
           {packingAlerts.map((alert) => (
             <button
               key={alert.event.id}
-              className="home-alert-row"
+              className="ios-list-item"
               onClick={() => navigate(`/events/${alert.event.id}`)}
             >
-              <div className="home-alert-left">
-                <span className="home-alert-title">{alert.event.title}</span>
-                <span className="home-alert-sub subtle">
+              <div className="ios-list-content">
+                <span className="ios-list-title">{alert.event.title}</span>
+                <span className="ios-list-sub">
                   {alert.days === 0
                     ? 'Today'
                     : alert.days === 1
                       ? 'Tomorrow'
-                      : `${alert.days} days`}
+                      : `In ${alert.days} days`}{' '}
+                  &middot; {alert.missing} items needed
                 </span>
               </div>
-              <span className={`pill ${alert.days <= 2 ? 'home-pill-urgent' : 'home-pill-warning'}`}>
-                {alert.missing} needed
-              </span>
+              <div className="ios-list-action">
+                <span className={`widget-tag ${alert.days <= 2 ? 'urgent' : 'soon'}`}>
+                  {alert.missing}
+                </span>
+                <span className="ios-arrow">&#8250;</span>
+              </div>
             </button>
           ))}
         </div>
       )}
 
-      {/* Gear Overview */}
-      <div className="home-stats">
-        <div className="home-stat" onClick={() => navigate('/catalog')}>
-          <span className="home-stat-val">{totalItems}</span>
-          <span className="home-stat-lbl">Items</span>
-        </div>
-        <div className="home-stat" onClick={() => navigate('/catalog')}>
-          <span className="home-stat-val">
-            {formatMoney(totalValue, settings?.defaultCurrency ?? 'EUR')}
-          </span>
-          <span className="home-stat-lbl">Total Value</span>
-        </div>
-        <div className="home-stat" onClick={() => navigate('/catalog')}>
-          <span className="home-stat-val">{totalCategories}</span>
-          <span className="home-stat-lbl">Categories</span>
-        </div>
-      </div>
-
       {/* Recently Added */}
       {recentItems.length > 0 && (
-        <div className="home-section">
-          <div className="home-section-header">
+        <div className="ios-list-group">
+          <div className="ios-list-group-header">
             <h3>Recently Added</h3>
             <button className="text-btn" onClick={() => navigate('/catalog')}>
               View All
             </button>
           </div>
-          <div className="home-recent-list">
-            {recentItems.map((item) => (
-              <button
-                key={item.id}
-                className="home-recent-row"
-                onClick={() => navigate(`/catalog/item/${item.id}`)}
-              >
-                <div className="catalog-item-icon-wrapper">
-                  {item.photo ? (
-                    <img src={item.photo} alt={item.name} className="catalog-item-icon-img" />
-                  ) : (
-                    <div className="catalog-item-icon">{item.name.charAt(0).toUpperCase()}</div>
-                  )}
-                </div>
-                <div className="home-recent-info">
-                  <strong>{item.name}</strong>
-                  <span className="subtle">
-                    {categories?.find((c) => c.id === item.categoryId)?.name ?? 'Gear'}
-                    {' \u00B7 '}
-                    {new Date(item.createdAt).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                    })}
-                  </span>
-                </div>
-                <span className="catalog-item-arrow" aria-hidden="true">
-                  ›
+          {recentItems.map((item) => (
+            <button
+              key={item.id}
+              className="ios-list-item"
+              onClick={() => navigate(`/catalog/item/${item.id}`)}
+            >
+              <div className="ios-list-icon">
+                {item.photo ? (
+                  <img src={item.photo} alt={item.name} />
+                ) : (
+                  item.name.charAt(0).toUpperCase()
+                )}
+              </div>
+              <div className="ios-list-content">
+                <span className="ios-list-title">{item.name}</span>
+                <span className="ios-list-sub">
+                  {categories?.find((c) => c.id === item.categoryId)?.name ?? 'Gear'}
+                  {' \u00B7 '}
+                  {new Date(item.createdAt).toLocaleDateString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                  })}
                 </span>
-              </button>
-            ))}
-          </div>
+              </div>
+              <div className="ios-list-action">
+                <span className="ios-arrow">&#8250;</span>
+              </div>
+            </button>
+          ))}
         </div>
       )}
     </section>
