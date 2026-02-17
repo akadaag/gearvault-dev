@@ -4155,7 +4155,7 @@ html {
   overflow-y: auto;
   overscroll-behavior: contain;
   padding: 1rem 0.5rem;
-  padding-bottom: 80px; /* clearance for floating input pill */
+  padding-bottom: 70px; /* clearance for floating input pill */
 }
 
 .ai-empty-state {
@@ -4181,7 +4181,7 @@ html {
 /* Fixed input bar - sits above bottom nav */
 .ai-input-bar {
   position: fixed;
-  bottom: var(--bottom-nav-clearance, 78px);
+  bottom: calc(var(--bottom-nav-clearance, 78px) - 10px);
   left: 0;
   right: 0;
   z-index: 40;
@@ -4190,7 +4190,7 @@ html {
 }
 
 .ai-input-bar--hidden {
-  transform: translateY(calc(100% + 1rem));
+  transform: translateY(calc(100% + 2rem));
 }
 
 /* Move input bar to viewport bottom when keyboard is open */
@@ -4208,7 +4208,7 @@ html {
   }
 
   .ai-input-bar--hidden {
-    transform: translate(-50%, calc(100% + 1rem));
+    transform: translate(-50%, calc(100% + 2rem));
   }
 }
 
