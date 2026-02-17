@@ -156,6 +156,15 @@ export function SettingsPage() {
 
       <div className="card stack-md">
         <h3>Account</h3>
+        <label className="stack-sm">
+          <strong>Display name</strong>
+          <input
+            type="text"
+            value={settings.displayName ?? ''}
+            onChange={(e) => void update('displayName', e.target.value)}
+            placeholder="Your name"
+          />
+        </label>
         <p><strong>Email:</strong> {user?.email ?? 'Not available'}</p>
         <p>
           <strong>Status:</strong>{' '}

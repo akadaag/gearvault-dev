@@ -748,6 +748,7 @@ a {
   padding-top: 0;
   padding-left: 0;
   padding-right: 0;
+  overflow-x: hidden;
   background: var(--bg);
 }
 
@@ -810,11 +811,11 @@ a {
   right: 0;
   bottom: 0;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 0.2rem;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
   background: color-mix(in srgb, var(--bg-elevated) 96%, transparent);
   border-top: 1px solid var(--border-subtle);
-  padding: 0.3rem 0.45rem calc(0.2rem + env(safe-area-inset-bottom));
+  padding: 0.3rem 0.25rem calc(0.2rem + env(safe-area-inset-bottom));
   box-shadow: 0 -6px 18px rgba(0, 0, 0, 0.07);
   z-index: 45;
 }
@@ -850,7 +851,7 @@ a {
   box-shadow: none;
   border-radius: 999px;
   min-height: 44px;
-  padding: 0.2rem 0.35rem;
+  padding: 0.2rem 0;
   text-align: center;
   color: var(--mobile-nav-inactive);
   font-weight: 500;
@@ -878,8 +879,8 @@ a {
 }
 
 .mobile-bottom-nav__icon {
-  width: 1.68rem;
-  height: 1.68rem;
+  width: 1.5rem;
+  height: 1.5rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -887,8 +888,8 @@ a {
 }
 
 .mobile-bottom-nav__icon svg {
-  width: 1.68rem;
-  height: 1.68rem;
+  width: 1.5rem;
+  height: 1.5rem;
   stroke: currentColor;
   fill: none;
   stroke-width: 1.9;
@@ -4840,6 +4841,7 @@ html {
   padding: var(--space-4) var(--space-4) var(--space-12);
   max-width: 600px;
   margin: 0 auto;
+  overflow-x: hidden;
 }
 
 /* Header */
@@ -5063,6 +5065,7 @@ html {
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
   padding-bottom: var(--space-2);
+  max-width: 100%;
 }
 
 .home-essentials-scroll::-webkit-scrollbar {

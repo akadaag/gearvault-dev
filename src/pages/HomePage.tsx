@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
@@ -10,10 +9,6 @@ export function HomePage() {
   const gearItems = useLiveQuery(() => db.gearItems.toArray(), []);
   const events = useLiveQuery(() => db.events.toArray(), []);
   const categories = useLiveQuery(() => db.categories.toArray(), []);
-  
-  const [showNamePrompt, setShowNamePrompt] = useState(true);
-  const [nameInput, setNameInput] = useState('');
-  const [savingName, setSavingName] = useState(false);
 
   // Time of day greeting
   const hour = new Date().getHours();
@@ -84,19 +79,6 @@ export function HomePage() {
     .filter(alert => alert.missing > 0 && alert.days <= 14)
     .sort((a, b) => a.days - b.days);
 
-  async function handleSaveName() {
-    if (!nameInput.trim()) return;
-    setSavingName(true);
-    try {
-      await db.settings.update('app-settings', { displayName: nameInput.trim() });
-      setShowNamePrompt(false);
-    } catch (error) {
-      console.error('Failed to save name:', error);
-    } finally {
-      setSavingName(false);
-    }
-  }
-
   function getCategoryIcon(categoryId: string) {
     const category = categories?.find(c => c.id === categoryId);
     const name = category?.name ?? '';
@@ -120,31 +102,6 @@ export function HomePage() {
         </p>
         <p className="home-date">{today}</p>
       </div>
-
-      {/* Name Prompt (first-run) */}
-      {showNamePrompt && !settings?.displayName && (
-        <div className="home-name-prompt card">
-          <p className="home-name-prompt-label">What should we call you?</p>
-          <div className="home-name-prompt-input-row">
-            <input
-              type="text"
-              placeholder="Your name"
-              value={nameInput}
-              onChange={(e) => setNameInput(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') void handleSaveName();
-              }}
-              disabled={savingName}
-            />
-            <button onClick={() => void handleSaveName()} disabled={savingName || !nameInput.trim()}>
-              {savingName ? 'Saving...' : 'Save'}
-            </button>
-            <button className="ghost" onClick={() => setShowNamePrompt(false)}>
-              Skip
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Next Event Card */}
       {nextEvent ? (
