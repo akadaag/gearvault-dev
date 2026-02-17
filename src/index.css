@@ -5392,7 +5392,8 @@ html {
   background: var(--ios-bg);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 40;
+  border-bottom: 1px solid transparent;
 }
 
 .home-ios-date {
@@ -6500,7 +6501,8 @@ html {
   background: var(--ios-bg);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 40;
+  border-bottom: 1px solid transparent;
 }
 
 .ios-catalog-header-top {
@@ -7364,7 +7366,8 @@ html {
   background: var(--ios-bg);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 40;
+  border-bottom: 1px solid transparent;
 }
 
 .ev-ios-header-top {
@@ -9210,7 +9213,8 @@ html {
   background: var(--ios-bg);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 40;
+  border-bottom: 1px solid transparent;
 }
 
 .settings-page.ios-theme .ios-settings-title {
