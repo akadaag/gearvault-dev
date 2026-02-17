@@ -9416,7 +9416,7 @@ html {
   background: rgba(249, 249, 249, 0.94);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-top: 0.5px solid rgba(0, 0, 0, 0.3);
+  border-top: 0.5px solid rgba(0, 0, 0, 0.12);
   display: flex;
   justify-content: space-around;
   align-items: flex-start;
@@ -9450,7 +9450,7 @@ html {
     width: auto;
     background: rgba(249, 249, 249, 0.94);
     border: none;
-    border-top: 0.5px solid rgba(0, 0, 0, 0.3);
+    border-top: 0.5px solid rgba(0, 0, 0, 0.12);
     box-shadow: none;
     padding: 4px 0 env(safe-area-inset-bottom);
     border-radius: 0;
@@ -9592,7 +9592,7 @@ html {
 /* ── Dark Mode ─────────────────────────────────────────────────── */
 :root.dark .ios-theme .mobile-bottom-nav {
   background: rgba(30, 30, 30, 0.90);
-  border-top-color: rgba(255, 255, 255, 0.15);
+  border-top-color: rgba(255, 255, 255, 0.08);
 }
 
 :root.dark .ios-theme .mobile-bottom-nav__item {
