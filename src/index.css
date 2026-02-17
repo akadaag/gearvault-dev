@@ -8607,3 +8607,202 @@ html {
 :root.dark .ai-page.ios-theme .ai-ios-icon-btn {
   background: rgba(255, 255, 255, 0.08);
 }
+
+/* ================================================================
+   SETTINGS PAGE — iOS Theme
+   Scoped under .settings-page.ios-theme
+   ================================================================ */
+
+/* ── Page layout ─────────────────────────────────────────────────── */
+.settings-page.ios-theme {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+  background: var(--ios-bg);
+}
+
+/* ── Sticky header ───────────────────────────────────────────────── */
+.settings-page.ios-theme .ios-settings-header {
+  flex-shrink: 0;
+  padding: calc(env(safe-area-inset-top, 0px) + 12px) 16px 8px;
+  background: var(--ios-bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.settings-page.ios-theme .ios-settings-title {
+  font-family: -apple-system, 'SF Pro Display', BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: 0.37px;
+  color: var(--ios-text-primary);
+  margin: 0;
+  line-height: 1.15;
+}
+
+/* ── Scrollable content area ─────────────────────────────────────── */
+.settings-page.ios-theme .ios-settings-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 16px;
+  padding-bottom: var(--bottom-nav-clearance, 100px);
+}
+
+/* ── Section labels — first one needs less top margin ─────────── */
+.settings-page.ios-theme .ios-section-label:first-child {
+  margin-top: 8px;
+}
+
+/* ── Button list item resets ─────────────────────────────────────── */
+/* Override global button styles (min-height, bg, color, shadow) */
+.settings-page.ios-theme button.ios-list-item {
+  min-height: auto;
+  background: transparent;
+  color: inherit;
+  box-shadow: none;
+  border: none;
+  font: inherit;
+  text-align: left;
+  width: 100%;
+  padding: 12px 16px;
+  cursor: pointer;
+}
+
+.settings-page.ios-theme button.ios-list-item:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.settings-page.ios-theme button.ios-list-item:active:not(:disabled) {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+/* ── Label list item (for toggle rows) ───────────────────────────── */
+.settings-page.ios-theme label.ios-list-item {
+  display: flex;
+  width: 100%;
+}
+
+/* ── Select element ──────────────────────────────────────────────── */
+.settings-page.ios-theme .ios-settings-select {
+  appearance: none;
+  -webkit-appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--ios-text-secondary);
+  font-size: 17px;
+  font-family: inherit;
+  text-align: right;
+  text-align-last: right;
+  outline: none;
+  padding: 0;
+  padding-right: 16px;
+  min-height: auto;
+  height: auto;
+  width: auto;
+  box-shadow: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%23999' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right center;
+  background-size: 10px 6px;
+}
+
+/* ── Status badge ────────────────────────────────────────────────── */
+.settings-page.ios-theme .ios-status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.settings-page.ios-theme .ios-status-badge.is-online {
+  color: var(--ios-green);
+}
+
+.settings-page.ios-theme .ios-status-badge.is-offline {
+  color: var(--ios-text-secondary);
+}
+
+.settings-page.ios-theme .ios-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.settings-page.ios-theme .ios-status-badge.is-online .ios-status-dot {
+  background: var(--ios-green);
+}
+
+.settings-page.ios-theme .ios-status-badge.is-offline .ios-status-dot {
+  background: var(--ios-text-secondary);
+}
+
+/* ── Status toast ────────────────────────────────────────────────── */
+.settings-page.ios-theme .ios-settings-toast {
+  position: fixed;
+  bottom: calc(var(--bottom-nav-clearance, 100px) + 8px);
+  left: 16px;
+  right: 16px;
+  background: var(--ios-card-bg);
+  backdrop-filter: blur(var(--ios-blur, 20px));
+  -webkit-backdrop-filter: blur(var(--ios-blur, 20px));
+  border-radius: var(--ios-radius-sm, 14px);
+  padding: 14px 18px;
+  box-shadow: var(--ios-shadow);
+  border: 0.5px solid rgba(0, 0, 0, 0.06);
+  z-index: 100;
+  animation: settingsSlideUpFade 0.35s ease-out;
+}
+
+.settings-page.ios-theme .ios-settings-toast-text {
+  color: var(--ios-green);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* ── Scoped keyframe ─────────────────────────────────────────────── */
+@keyframes settingsSlideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================================================================
+   SETTINGS PAGE — iOS Theme — Dark Mode Overrides
+   ================================================================ */
+
+:root.dark .settings-page.ios-theme {
+  background: var(--ios-bg);
+}
+
+:root.dark .settings-page.ios-theme .ios-settings-header {
+  background: var(--ios-bg);
+}
+
+:root.dark .settings-page.ios-theme .ios-settings-select {
+  color: var(--ios-text-secondary);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%2398989F' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+}
+
+:root.dark .settings-page.ios-theme button.ios-list-item:active:not(:disabled) {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:root.dark .settings-page.ios-theme .ios-status-badge.is-offline .ios-status-dot {
+  background: #636366;
+}
+
+:root.dark .settings-page.ios-theme .ios-settings-toast {
+  border-color: rgba(255, 255, 255, 0.08);
+}

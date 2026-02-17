@@ -148,21 +148,18 @@ export function SettingsPage() {
   }
 
   return (
-    <section className="settings-page-ios">
-      {/* iOS-style inline header */}
-      <header className="ios-header">
-        <div className="ios-header-top">
-          <h1 className="ios-title">Settings</h1>
-        </div>
+    <section className="settings-page ios-theme">
+      {/* iOS-style sticky header */}
+      <header className="ios-settings-header">
+        <h1 className="ios-settings-title">Settings</h1>
       </header>
 
-      {/* Scrollable settings list */}
-      <div className="ios-list">
+      {/* Scrollable settings content */}
+      <div className="ios-settings-scroll">
 
         {/* ── Account ─────────────────────────────────────────────────── */}
+        <p className="ios-section-label">Account</p>
         <div className="ios-list-group">
-          <div className="ios-list-group-header"><h3>Account</h3></div>
-
           <div className="ios-list-item" style={{ cursor: 'default' }}>
             <div className="ios-list-content">
               <span className="ios-list-title">Display Name</span>
@@ -192,7 +189,8 @@ export function SettingsPage() {
               <span className="ios-list-title">Status</span>
             </div>
             <div className="ios-list-action">
-              <span style={{ color: isOnline ? 'var(--ios-green)' : 'var(--ios-red)', fontWeight: 600, fontSize: '0.9rem' }}>
+              <span className={`ios-status-badge ${isOnline ? 'is-online' : 'is-offline'}`}>
+                <span className="ios-status-dot" />
                 {isOnline ? 'Online' : 'Offline'}
               </span>
             </div>
@@ -207,16 +205,15 @@ export function SettingsPage() {
         </div>
 
         {/* ── Appearance ──────────────────────────────────────────────── */}
+        <p className="ios-section-label">Appearance</p>
         <div className="ios-list-group">
-          <div className="ios-list-group-header"><h3>Appearance</h3></div>
-
           <div className="ios-list-item" style={{ cursor: 'default' }}>
             <div className="ios-list-content">
               <span className="ios-list-title">Theme</span>
             </div>
             <div className="ios-list-action">
               <select
-                className="ios-settings-input"
+                className="ios-settings-select"
                 value={settings.theme}
                 onChange={(e) => void update('theme', e.target.value as typeof settings.theme)}
               >
@@ -244,9 +241,8 @@ export function SettingsPage() {
         </div>
 
         {/* ── Sync & Backup ───────────────────────────────────────────── */}
+        <p className="ios-section-label">Sync & Backup</p>
         <div className="ios-list-group">
-          <div className="ios-list-group-header"><h3>Sync & Backup</h3></div>
-
           <label className="ios-list-item" style={{ cursor: 'pointer' }}>
             <div className="ios-list-content">
               <span className="ios-list-title">Cloud Sync</span>
@@ -269,7 +265,7 @@ export function SettingsPage() {
           >
             <div className="ios-list-content">
               <span className="ios-list-title ios-settings-action">
-                {syncing ? 'Syncing…' : 'Sync Now'}
+                {syncing ? 'Syncing...' : 'Sync Now'}
               </span>
               {syncMessage && <span className="ios-list-sub">{syncMessage}</span>}
             </div>
@@ -295,9 +291,8 @@ export function SettingsPage() {
         </div>
 
         {/* ── AI Assistant ────────────────────────────────────────────── */}
+        <p className="ios-section-label">AI Assistant</p>
         <div className="ios-list-group">
-          <div className="ios-list-group-header"><h3>AI Assistant</h3></div>
-
           <div className="ios-list-item" style={{ cursor: 'default' }}>
             <div className="ios-list-content">
               <span className="ios-list-title">Provider</span>
@@ -334,9 +329,8 @@ export function SettingsPage() {
         </div>
 
         {/* ── Demo Data ───────────────────────────────────────────────── */}
+        <p className="ios-section-label">Demo Data</p>
         <div className="ios-list-group">
-          <div className="ios-list-group-header"><h3>Demo Data</h3></div>
-
           <label className="ios-list-item" style={{ cursor: 'pointer' }}>
             <div className="ios-list-content">
               <span className="ios-list-title">Enable Demo Data</span>
@@ -368,9 +362,8 @@ export function SettingsPage() {
         </div>
 
         {/* ── App Updates ─────────────────────────────────────────────── */}
+        <p className="ios-section-label">App Updates</p>
         <div className="ios-list-group">
-          <div className="ios-list-group-header"><h3>App Updates</h3></div>
-
           <button className="ios-list-item" onClick={() => void clearCacheAndReload()}>
             <div className="ios-list-content">
               <span className="ios-list-title ios-settings-action">Clear Cache & Reload</span>
@@ -381,9 +374,8 @@ export function SettingsPage() {
         </div>
 
         {/* ── About ───────────────────────────────────────────────────── */}
+        <p className="ios-section-label">About</p>
         <div className="ios-list-group">
-          <div className="ios-list-group-header"><h3>About</h3></div>
-
           <div className="ios-list-item" style={{ cursor: 'default' }}>
             <div className="ios-list-content">
               <span className="ios-list-title">Version</span>
@@ -414,12 +406,8 @@ export function SettingsPage() {
 
         {/* ── Status Toast ────────────────────────────────────────────── */}
         {status && (
-          <div className="ios-list-group">
-            <div className="ios-list-item" style={{ cursor: 'default' }}>
-              <div className="ios-list-content">
-                <span className="ios-list-title" style={{ color: 'var(--ios-green)' }}>{status}</span>
-              </div>
-            </div>
+          <div className="ios-settings-toast" key={status}>
+            <span className="ios-settings-toast-text">{status}</span>
           </div>
         )}
 
