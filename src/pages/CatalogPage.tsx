@@ -262,89 +262,172 @@ export function CatalogPage() {
 
   return (
     <>
-      <section className="stack-lg main-page catalog-page">
-      {gear.length === 0 && (
-        <div className="card empty">
-          <h3>No gear yet</h3>
-          <p>Add your first item to get started</p>
-        </div>
-      )}
+      <section className="catalog-page ios-theme">
+        {/* iOS-style inline header */}
+        <header className="ios-catalog-header">
+          <div className="ios-catalog-header-top">
+            <h1 className="ios-catalog-title">Catalog</h1>
+            <button
+              className="ios-catalog-add-btn"
+              onClick={() => updateSearchParams((p) => p.set('add', '1'))}
+              aria-label="Add Item"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+          </div>
 
-      {filtered.length === 0 && gear.length > 0 && (
-        <div className="card empty">
-          <h3>No results found</h3>
-          <p>Try adjusting your filters or search query</p>
-        </div>
-      )}
-
-      <div className="stack-md">
-        {categories.map((category) => {
-          const items = grouped.get(category.id) ?? [];
-          if (!items.length) return null;
-          return (
-            <article className="catalog-group stack-sm" key={category.id}>
-              <div className="category-header-row">
-                <button className="text-btn category-title-btn" onClick={() => void toggleCollapse(category)}>
-                  {category.name} <span className="category-count-pill">{items.length}</span>
-                </button>
+          <div className="ios-catalog-search-row">
+            <div className="ios-catalog-search-bar">
+              <svg className="ios-catalog-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input
+                type="text"
+                placeholder="Search"
+                value={query}
+                onChange={(e) => updateSearchParams((p) => {
+                  if (e.target.value) p.set('q', e.target.value);
+                  else p.delete('q');
+                })}
+              />
+              {query && (
                 <button
-                  className={`category-toggle-btn${category.collapsed ? ' is-collapsed' : ''}`}
-                  aria-label={category.collapsed ? `Expand ${category.name}` : `Collapse ${category.name}`}
-                  onClick={() => void toggleCollapse(category)}
+                  className="ios-catalog-search-clear"
+                  onClick={() => updateSearchParams((p) => p.delete('q'))}
+                  aria-label="Clear search"
                 >
-                  <span className="catalog-item-arrow" aria-hidden="true">›</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <circle cx="12" cy="12" r="10" opacity="0.25" />
+                    <path d="M15 9l-6 6M9 9l6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" />
+                  </svg>
                 </button>
-              </div>
-              {!category.collapsed && (
-                <div className="catalog-items-surface">
-                  <div className="catalog-items-list">
-                  {items.map((item) => (
-                    <button key={item.id} className="catalog-item-row" onClick={() => setSelectedItemId(item.id)}>
-                      <div className="catalog-item-icon-wrapper">
-                        {item.photo ? (
-                          <img src={item.photo} alt={item.name} className="catalog-item-icon-img" />
-                        ) : (
-                          <div className="catalog-item-icon" aria-hidden="true">{item.name.charAt(0).toUpperCase()}</div>
-                        )}
-                      </div>
-                      {item.essential ? (
-                        <svg className="catalog-item-essential-star" viewBox="0 0 24 24" aria-label="Essential" focusable="false">
-                          <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
-                        </svg>
-                      ) : (
-                        <span className="catalog-item-star-slot" />
-                      )}
-                      <strong className="catalog-item-title">{item.name}</strong>
-                      <div className="catalog-item-arrow" aria-hidden="true">›</div>
-                      {(item.brand || item.model) && (
-                        <span className="subtle catalog-item-subtitle">{item.brand} {item.model}</span>
-                      )}
-                      <div className="row wrap catalog-item-meta-row catalog-item-pills">{/* pills row */}
-                        <span className="pill">x{item.quantity}</span>
-                        <span className={`pill pill-condition pill-condition-${item.condition}`}>{item.condition}</span>
-                      </div>
-                    </button>
-                  ))}
-                  </div>
-                </div>
               )}
-            </article>
-          );
-        })}
-      </div>
+            </div>
+            <button
+              className={`ios-catalog-filter-btn${showFilterSheet || tagFilter || conditionFilter !== 'all' || essentialOnly || selectedCategoryIds.length > 0 ? ' active' : ''}`}
+              onClick={() => updateSearchParams((p) => p.set('filters', '1'))}
+              aria-label="Filters"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="4" y1="21" x2="4" y2="14" />
+                <line x1="4" y1="10" x2="4" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="12" />
+                <line x1="12" y1="8" x2="12" y2="3" />
+                <line x1="20" y1="21" x2="20" y2="16" />
+                <line x1="20" y1="12" x2="20" y2="3" />
+                <line x1="1" y1="14" x2="7" y2="14" />
+                <line x1="9" y1="8" x2="15" y2="8" />
+                <line x1="17" y1="16" x2="23" y2="16" />
+              </svg>
+            </button>
+          </div>
+
+          <div className="ios-catalog-item-count">{filtered.length} item{filtered.length !== 1 ? 's' : ''}</div>
+        </header>
+
+        {/* Scrollable content area */}
+        <div className="ios-catalog-scroll">
+          {gear.length === 0 ? (
+            <div className="ios-catalog-empty">
+              <div className="ios-catalog-empty-icon" aria-hidden="true">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                  <circle cx="12" cy="13" r="4" />
+                </svg>
+              </div>
+              <h3>No Gear Yet</h3>
+              <p>Tap + to add your first item</p>
+            </div>
+          ) : filtered.length === 0 ? (
+            <div className="ios-catalog-empty">
+              <p>No matches found</p>
+              <button className="ios-catalog-text-btn" onClick={clearAllFilters}>Clear Filters</button>
+            </div>
+          ) : (
+            <div className="ios-catalog-groups">
+              {categories.map((category) => {
+                const items = grouped.get(category.id) ?? [];
+                if (!items.length) return null;
+
+                return (
+                  <div className="ios-list-group" key={category.id}>
+                    <button
+                      type="button"
+                      className="ios-catalog-group-header"
+                      onClick={() => void toggleCollapse(category)}
+                      aria-expanded={!category.collapsed}
+                    >
+                      <span className="ios-catalog-group-label">{category.name}</span>
+                      <span className="ios-catalog-group-count">{items.length}</span>
+                      <span className={`ios-catalog-chevron${category.collapsed ? ' collapsed' : ''}`} aria-hidden="true">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="6 9 12 15 18 9" />
+                        </svg>
+                      </span>
+                    </button>
+
+                    {!category.collapsed && items.map((item) => (
+                      <button
+                        key={item.id}
+                        className="ios-list-item"
+                        onClick={() => setSelectedItemId(item.id)}
+                      >
+                        <div className="ios-list-icon">
+                          {item.photo ? (
+                            <img src={item.photo} alt={item.name} />
+                          ) : (
+                            item.name.charAt(0).toUpperCase()
+                          )}
+                        </div>
+                        <div className="ios-list-content">
+                          <span className="ios-list-title">
+                            {item.name}
+                            {item.essential && (
+                              <svg className="ios-catalog-star" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-label="Essential">
+                                <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
+                              </svg>
+                            )}
+                          </span>
+                          <span className="ios-list-sub">
+                            {[item.brand, item.model].filter(Boolean).join(' ') || category.name}
+                            {item.quantity > 1 && ` \u00B7 x${item.quantity}`}
+                          </span>
+                        </div>
+                        <div className="ios-list-action">
+                          {item.currentValue && (
+                            <span className="ios-catalog-value">
+                              {formatMoney(item.currentValue.amount, item.currentValue.currency)}
+                            </span>
+                          )}
+                          <span className="ios-arrow" aria-hidden="true">&#8250;</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </section>
 
+      {/* ── Filter Sheet ───────────────────────────────────────────────── */}
       {showFilterSheet && (
         <>
           <button className="sheet-overlay" aria-label="Close filters" onClick={closeFilterSheet} />
           <aside className="filter-sheet card stack-md" aria-label="Catalog filters">
-            <div className="row between">
+            <div className="ios-catalog-sheet-header">
+              <button className="ios-catalog-sheet-action" onClick={clearAllFilters}>Reset</button>
               <h3>Filters</h3>
-              <button className="ghost" onClick={closeFilterSheet}>Done</button>
+              <button className="ios-catalog-sheet-action primary" onClick={closeFilterSheet}>Done</button>
             </div>
 
             <div className="stack-sm">
-              <strong>Categories</strong>
+              <strong className="ios-catalog-filter-label">Categories</strong>
               <div className="catalog-filter-checklist">
                 {categories.map((category) => {
                   const checked = selectedCategoryIds.includes(category.id);
@@ -358,31 +441,42 @@ export function CatalogPage() {
               </div>
             </div>
 
-            <div className="grid filters">
-              <select value={tagFilter} onChange={(e) => setTagFilter(e.target.value)} aria-label="Filter by tag">
-                <option value="">All tags</option>
-                {tags.map((tag) => (<option key={tag} value={tag}>{tag}</option>))}
-              </select>
-              <select value={conditionFilter} onChange={(e) => setConditionFilter(e.target.value as 'all' | Condition)} aria-label="Condition filter">
-                <option value="all">All conditions</option>
-                <option value="new">New</option>
-                <option value="good">Good</option>
-                <option value="worn">Worn</option>
-              </select>
-              <select value={sortBy} onChange={(e) => setSortBy(e.target.value as 'name' | 'brand' | 'newest' | 'value')} aria-label="Sorting">
-                <option value="name">Sort: Name</option>
-                <option value="brand">Sort: Brand</option>
-                <option value="newest">Sort: Newest</option>
-                <option value="value">Sort: Value</option>
-              </select>
-              <label className="checkbox-inline"><input type="checkbox" checked={essentialOnly} onChange={(e) => setEssentialOnly(e.target.checked)} /> Essential only</label>
+            <div className="ios-catalog-filter-grid">
+              <label className="ios-catalog-filter-field">
+                <span>Tag</span>
+                <select value={tagFilter} onChange={(e) => setTagFilter(e.target.value)} aria-label="Filter by tag">
+                  <option value="">All tags</option>
+                  {tags.map((tag) => (<option key={tag} value={tag}>{tag}</option>))}
+                </select>
+              </label>
+              <label className="ios-catalog-filter-field">
+                <span>Condition</span>
+                <select value={conditionFilter} onChange={(e) => setConditionFilter(e.target.value as 'all' | Condition)} aria-label="Condition filter">
+                  <option value="all">All conditions</option>
+                  <option value="new">New</option>
+                  <option value="good">Good</option>
+                  <option value="worn">Worn</option>
+                </select>
+              </label>
+              <label className="ios-catalog-filter-field">
+                <span>Sort</span>
+                <select value={sortBy} onChange={(e) => setSortBy(e.target.value as 'name' | 'brand' | 'newest' | 'value')} aria-label="Sorting">
+                  <option value="name">Name</option>
+                  <option value="brand">Brand</option>
+                  <option value="newest">Newest</option>
+                  <option value="value">Value</option>
+                </select>
+              </label>
+              <label className="checkbox-inline ios-catalog-filter-check">
+                <input type="checkbox" checked={essentialOnly} onChange={(e) => setEssentialOnly(e.target.checked)} />
+                <span>Essential only</span>
+              </label>
             </div>
-
-            <button className="ghost" onClick={clearAllFilters}>Clear all filters</button>
           </aside>
         </>
       )}
 
+      {/* ── Add Gear Form Sheet ────────────────────────────────────────── */}
       <GearItemFormSheet
         open={showAddItemForm}
         title="Add Gear"
@@ -402,10 +496,11 @@ export function CatalogPage() {
         onSubmit={() => void addItem()}
       />
 
+      {/* ── Item Detail Sheet ──────────────────────────────────────────── */}
       {selectedItemId && (() => {
         const item = gear.find((g) => g.id === selectedItemId);
         if (!item) return null;
-        
+
         const category = categories.find((c) => c.id === item.categoryId);
         const maintenanceSummary = getMaintenanceSummary(item);
 
@@ -435,9 +530,9 @@ export function CatalogPage() {
                 <div className="detail-badges">
                   {category && <span className="pill">{category.name}</span>}
                   <span className={`pill pill-condition pill-condition-${item.condition}`}>{item.condition}</span>
-                  <span className="pill">×{item.quantity} units</span>
+                  <span className="pill">{'\u00D7'}{item.quantity} units</span>
                 </div>
-                <button className="sheet-close-btn" onClick={() => setSelectedItemId(null)} aria-label="Close">✕</button>
+                <button className="sheet-close-btn" onClick={() => setSelectedItemId(null)} aria-label="Close">{'\u2715'}</button>
               </div>
 
               {item.purchasePrice && (
@@ -495,6 +590,7 @@ export function CatalogPage() {
         );
       })()}
 
+      {/* ── Maintenance Sheet ──────────────────────────────────────────── */}
       {maintenanceSheetItemId && (() => {
         const selected = gear.find((g) => g.id === maintenanceSheetItemId);
         if (!selected) return null;

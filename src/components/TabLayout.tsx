@@ -238,7 +238,7 @@ export function TabLayout() {
   );
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell${isCatalogRoute ? ' ios-theme' : ''}`}>
       {!isHomeRoute && !isGearDetailRoute && !isEventDetailRoute && (
         <header className={`topbar${isCatalogRoute || isEventsRoute ? ' topbar-catalog' : ''}`}>
           <div className="topbar-inner">
