@@ -83,7 +83,7 @@ export function TabLayout() {
   const isEventDetailRoute = /^\/events\/[^/]+$/.test(location.pathname);
 
   // All main tabs that use the iOS design system
-  const isIosThemeRoute = isCatalogRoute || isEventsRoute || isEventDetailRoute || isAssistantRoute || isSettingsRoute;
+  const isIosThemeRoute = isHomeRoute || isCatalogRoute || isEventsRoute || isEventDetailRoute || isAssistantRoute || isSettingsRoute;
 
   // ── Catalog search params ─────────────────────────────────────────────────
   const catalogQuery = searchParams.get('q') ?? '';
