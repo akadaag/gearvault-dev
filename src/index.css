@@ -7385,3 +7385,635 @@ html {
 :root.dark .ev-ios-icon-btn.primary {
   background: var(--ios-blue);
 }
+
+
+/* ================================================================
+   EVENT DETAIL PAGE — iOS REDESIGN
+   Scoped under .event-detail-page.ios-theme
+   All new classes prefixed with ev-detail-
+   ================================================================ */
+
+.event-detail-page.ios-theme {
+  display: flex;
+  flex-direction: column;
+  background: var(--ios-bg);
+  min-height: 100vh;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* ── Not-found fallback ── */
+.event-detail-page.ios-theme .ev-detail-ios-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  color: var(--ios-text-secondary);
+  padding: 48px 16px;
+}
+
+/* ── Header ── */
+.event-detail-page.ios-theme .ev-detail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: var(--ios-bg);
+  position: sticky;
+  top: 0;
+  z-index: 20;
+}
+
+.event-detail-page.ios-theme .ev-detail-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ios-blue);
+  font-size: 17px;
+  font-weight: 400;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  min-height: auto;
+  box-shadow: none;
+}
+
+.event-detail-page.ios-theme .ev-detail-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.event-detail-page.ios-theme .ev-detail-icon-btn {
+  color: var(--ios-blue);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  width: 24px;
+  height: 24px;
+  min-height: auto;
+  box-shadow: none;
+}
+.event-detail-page.ios-theme .ev-detail-icon-btn svg {
+  width: 100%;
+  height: 100%;
+}
+
+.event-detail-page.ios-theme .ev-detail-icon-btn.destructive {
+  color: var(--ios-red);
+}
+
+/* ── Content ── */
+.event-detail-page.ios-theme .ev-detail-content {
+  flex: 1;
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.event-detail-page.ios-theme .ev-detail-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 8px;
+}
+
+.event-detail-page.ios-theme .ev-detail-title {
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--ios-text-primary);
+  line-height: 1.1;
+  margin: 0;
+}
+
+.event-detail-page.ios-theme .ev-detail-type-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.event-detail-page.ios-theme .ev-detail-type-badge {
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: var(--ios-text-secondary);
+  background: color-mix(in srgb, var(--ios-text-secondary) 10%, transparent);
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+
+/* Days-until tags — matches getDaysUntilEvent() colorClass values */
+.event-detail-page.ios-theme .ev-detail-days {
+  font-size: 13px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+}
+.event-detail-page.ios-theme .ev-detail-days.overdue  { background: rgba(255, 59, 48, 0.12); color: var(--ios-red); }
+.event-detail-page.ios-theme .ev-detail-days.today    { background: rgba(255, 149, 0, 0.12); color: #FF9500; }
+.event-detail-page.ios-theme .ev-detail-days.urgent   { background: rgba(255, 149, 0, 0.12); color: #FF9500; }
+.event-detail-page.ios-theme .ev-detail-days.upcoming { background: rgba(52, 199, 89, 0.12); color: var(--ios-green); }
+.event-detail-page.ios-theme .ev-detail-days.later    { background: rgba(0, 122, 255, 0.10); color: var(--ios-blue); }
+
+/* Meta Grid */
+.event-detail-page.ios-theme .ev-detail-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.event-detail-page.ios-theme .ev-detail-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: color-mix(in srgb, var(--ios-text-secondary) 5%, transparent);
+  padding: 10px;
+  border-radius: 12px;
+  border: none;
+  cursor: default;
+  text-align: left;
+}
+
+.event-detail-page.ios-theme .ev-detail-meta-item-btn {
+  cursor: pointer;
+  min-height: auto;
+  box-shadow: none;
+}
+.event-detail-page.ios-theme .ev-detail-meta-item-btn:active {
+  background: color-mix(in srgb, var(--ios-text-secondary) 10%, transparent);
+}
+
+.event-detail-page.ios-theme .ev-detail-meta-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.event-detail-page.ios-theme .ev-detail-meta-icon.red    { background: rgba(255, 59, 48, 0.1); color: var(--ios-red); }
+.event-detail-page.ios-theme .ev-detail-meta-icon.blue   { background: rgba(0, 122, 255, 0.1); color: var(--ios-blue); }
+.event-detail-page.ios-theme .ev-detail-meta-icon.purple { background: rgba(175, 82, 222, 0.1); color: #AF52DE; }
+.event-detail-page.ios-theme .ev-detail-meta-icon svg    { width: 18px; height: 18px; }
+
+.event-detail-page.ios-theme .ev-detail-meta-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.event-detail-page.ios-theme .ev-detail-meta-text strong {
+  font-size: 13px;
+  color: var(--ios-text-primary);
+}
+.event-detail-page.ios-theme .ev-detail-meta-text span {
+  font-size: 12px;
+  color: var(--ios-text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Notes Card */
+.event-detail-page.ios-theme .ev-detail-notes {
+  font-size: 15px;
+  color: var(--ios-text-secondary);
+  line-height: 1.5;
+  background: var(--ios-card-bg);
+  padding: 12px;
+  border-radius: 12px;
+  border: 0.5px solid rgba(0, 0, 0, 0.06);
+}
+
+/* Glass Card */
+.event-detail-page.ios-theme .ev-detail-glass-card {
+  background: var(--ios-card-bg);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 20px;
+  padding: 16px;
+  border: 0.5px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+}
+
+/* Progress Section */
+.event-detail-page.ios-theme .ev-detail-progress-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.event-detail-page.ios-theme .ev-detail-section-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ios-text-secondary);
+  text-transform: uppercase;
+}
+.event-detail-page.ios-theme .ev-detail-progress-val {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ios-text-primary);
+}
+
+.event-detail-page.ios-theme .ev-detail-progress-track {
+  height: 6px;
+  background: color-mix(in srgb, var(--ios-text-secondary) 15%, transparent);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.event-detail-page.ios-theme .ev-detail-progress-fill {
+  height: 100%;
+  background: var(--ios-blue);
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+.event-detail-page.ios-theme .ev-detail-progress-fill.complete {
+  background: var(--ios-green);
+}
+
+/* Checklist Section */
+.event-detail-page.ios-theme .ev-detail-checklist-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.event-detail-page.ios-theme .ev-detail-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+.event-detail-page.ios-theme .ev-detail-section-header h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ios-text-primary);
+  margin: 0;
+}
+
+.event-detail-page.ios-theme .ev-detail-section-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.event-detail-page.ios-theme .ev-detail-text-btn {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ios-blue);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  min-height: auto;
+  box-shadow: none;
+}
+
+.event-detail-page.ios-theme .ev-detail-add-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--ios-blue);
+  color: #fff;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  min-height: auto;
+  box-shadow: none;
+}
+.event-detail-page.ios-theme .ev-detail-add-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* Empty State */
+.event-detail-page.ios-theme .ev-detail-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 32px 16px;
+  background: var(--ios-card-bg);
+  border-radius: 12px;
+}
+.event-detail-page.ios-theme .ev-detail-empty-state p {
+  font-size: 15px;
+  color: var(--ios-text-secondary);
+  margin: 0;
+}
+
+/* List Group */
+.event-detail-page.ios-theme .ev-detail-list-group {
+  background: var(--ios-card-bg);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 0.5px solid rgba(0, 0, 0, 0.06);
+}
+
+.event-detail-page.ios-theme .ev-detail-item-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  background: transparent;
+  border-bottom: 0.5px solid color-mix(in srgb, var(--ios-text-secondary) 15%, transparent);
+  cursor: pointer;
+}
+.event-detail-page.ios-theme .ev-detail-item-row:last-child {
+  border-bottom: none;
+}
+.event-detail-page.ios-theme .ev-detail-item-row:active {
+  background: color-mix(in srgb, var(--ios-text-secondary) 5%, transparent);
+}
+
+.event-detail-page.ios-theme .ev-detail-check-circle {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid color-mix(in srgb, var(--ios-text-secondary) 30%, transparent);
+  background: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  cursor: pointer;
+  flex-shrink: 0;
+  min-height: auto;
+  box-shadow: none;
+}
+.event-detail-page.ios-theme .ev-detail-check-circle.checked {
+  background: var(--ios-blue);
+  border-color: var(--ios-blue);
+  color: #fff;
+}
+.event-detail-page.ios-theme .ev-detail-check-circle svg {
+  width: 14px;
+  height: 14px;
+}
+
+.event-detail-page.ios-theme .ev-detail-item-info {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.event-detail-page.ios-theme .ev-detail-item-name {
+  font-size: 17px;
+  color: var(--ios-text-primary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.event-detail-page.ios-theme .ev-detail-item-name.struck {
+  text-decoration: line-through;
+  color: var(--ios-text-secondary);
+}
+.event-detail-page.ios-theme .ev-detail-qty {
+  color: var(--ios-text-secondary);
+  font-size: 15px;
+}
+.event-detail-page.ios-theme .ev-detail-item-sub {
+  font-size: 13px;
+  color: var(--ios-text-secondary);
+}
+
+.event-detail-page.ios-theme .ev-detail-priority-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #FFB800;
+  flex-shrink: 0;
+}
+
+.event-detail-page.ios-theme .ev-detail-delete-row-btn {
+  color: var(--ios-text-secondary);
+  background: none;
+  border: none;
+  opacity: 0.5;
+  cursor: pointer;
+  min-height: auto;
+  box-shadow: none;
+  padding: 0;
+}
+.event-detail-page.ios-theme .ev-detail-delete-row-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Missing Items */
+.event-detail-page.ios-theme .ev-detail-missing-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.event-detail-page.ios-theme .ev-detail-missing-desc {
+  font-size: 13px;
+  color: var(--ios-text-secondary);
+  margin: 0 4px 8px;
+}
+
+.event-detail-page.ios-theme .ev-detail-missing-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 0.5px solid color-mix(in srgb, var(--ios-text-secondary) 15%, transparent);
+}
+.event-detail-page.ios-theme .ev-detail-missing-row:last-child {
+  border-bottom: none;
+}
+
+.event-detail-page.ios-theme .ev-detail-missing-info {
+  flex: 1;
+  min-width: 0;
+}
+.event-detail-page.ios-theme .ev-detail-missing-info strong {
+  display: block;
+  font-size: 15px;
+  color: var(--ios-text-primary);
+}
+.event-detail-page.ios-theme .ev-detail-missing-info p {
+  margin: 2px 0 0;
+  font-size: 13px;
+  color: var(--ios-text-secondary);
+}
+
+.event-detail-page.ios-theme .ev-detail-missing-pills {
+  display: flex;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.event-detail-page.ios-theme .ev-detail-missing-pill {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: capitalize;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--ios-text-secondary) 10%, transparent);
+  color: var(--ios-text-secondary);
+}
+
+.event-detail-page.ios-theme .ev-detail-missing-select {
+  font-size: 13px;
+  color: var(--ios-blue);
+  background: color-mix(in srgb, var(--ios-blue) 10%, transparent);
+  border: none;
+  border-radius: 6px;
+  padding: 4px 8px;
+  outline: none;
+  min-height: auto;
+  box-shadow: none;
+  flex-shrink: 0;
+}
+
+/* ── Share Sheet ── */
+.event-detail-page.ios-theme .ev-detail-share-options {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.event-detail-page.ios-theme .ev-detail-share-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: color-mix(in srgb, var(--ios-text-secondary) 5%, transparent);
+  border: none;
+  border-radius: 12px;
+  padding: 16px;
+  cursor: pointer;
+  min-height: auto;
+  box-shadow: none;
+}
+.event-detail-page.ios-theme .ev-detail-share-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.event-detail-page.ios-theme .ev-detail-share-btn:active:not(:disabled) {
+  background: color-mix(in srgb, var(--ios-text-secondary) 10%, transparent);
+}
+
+.event-detail-page.ios-theme .ev-detail-share-icon {
+  color: var(--ios-text-primary);
+  width: 32px;
+  height: 32px;
+}
+.event-detail-page.ios-theme .ev-detail-share-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.event-detail-page.ios-theme .ev-detail-share-btn span {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ios-text-primary);
+}
+
+/* ── Add Sheet ── */
+.event-detail-page.ios-theme .ev-detail-search-container {
+  padding: 0 16px 8px;
+}
+
+.event-detail-page.ios-theme .ev-detail-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: color-mix(in srgb, var(--ios-text-secondary) 12%, transparent);
+  border-radius: 10px;
+  padding: 0 8px;
+  height: 36px;
+}
+.event-detail-page.ios-theme .ev-detail-search-bar svg {
+  color: var(--ios-text-secondary);
+  flex-shrink: 0;
+}
+
+.event-detail-page.ios-theme .ev-detail-search-bar input {
+  border: none;
+  background: none;
+  font-size: 17px;
+  color: var(--ios-text-primary);
+  width: 100%;
+  outline: none;
+  box-shadow: none;
+  min-height: auto;
+  padding: 0;
+}
+.event-detail-page.ios-theme .ev-detail-search-bar input::placeholder {
+  color: var(--ios-text-secondary);
+}
+
+.event-detail-page.ios-theme .ev-detail-sheet-list {
+  padding: 0 0 30px;
+  overflow-y: auto;
+  max-height: 60vh;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Bottom Spacer */
+.event-detail-page.ios-theme .ev-detail-bottom-spacer {
+  height: 100px;
+  flex-shrink: 0;
+}
+
+/* ── Dark Mode Overrides ── */
+:root.dark .event-detail-page.ios-theme .ev-detail-glass-card {
+  background: rgba(30, 30, 30, 0.6);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:root.dark .event-detail-page.ios-theme .ev-detail-notes {
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:root.dark .event-detail-page.ios-theme .ev-detail-list-group {
+  background: rgba(28, 28, 30, 0.6);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+
+:root.dark .event-detail-page.ios-theme .ev-detail-item-row {
+  background: transparent;
+}
+
+:root.dark .event-detail-page.ios-theme .ev-detail-empty-state {
+  background: rgba(28, 28, 30, 0.6);
+}
+
+:root.dark .event-detail-page.ios-theme .ev-detail-meta-item {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:root.dark .event-detail-page.ios-theme .ev-detail-share-btn {
+  background: rgba(255, 255, 255, 0.06);
+}
+:root.dark .event-detail-page.ios-theme .ev-detail-share-btn:active:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+:root.dark .event-detail-page.ios-theme .ev-detail-search-bar {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+:root.dark .event-detail-page.ios-theme .ev-detail-missing-pill {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--ios-text-secondary);
+}
+
+:root.dark .event-detail-page.ios-theme .ev-detail-missing-select {
+  background: color-mix(in srgb, var(--ios-blue) 15%, transparent);
+}
