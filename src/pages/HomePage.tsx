@@ -74,9 +74,9 @@ export function HomePage() {
   if (nextEvent?.dateTime) {
     const eventDate = new Date(nextEvent.dateTime);
     daysUntil = Math.ceil((eventDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-    if (daysUntil <= 2) urgencyClass = 'priority-must-have';
-    else if (daysUntil <= 7) urgencyClass = 'priority-nice-to-have';
-    else urgencyClass = 'priority-nice-to-have';
+    if (daysUntil <= 2) urgencyClass = 'urgent';
+    else if (daysUntil <= 7) urgencyClass = 'soon';
+    else urgencyClass = 'later';
   }
 
   // Essential items
@@ -148,7 +148,7 @@ export function HomePage() {
   return (
     <section className="home-page">
       {/* Header */}
-      <div className="home-header animate-enter stagger-1">
+      <div className="home-header">
         <h1 className="home-title">
           {greeting}
           {settings?.displayName ? `, ${settings.displayName}` : ''}
@@ -157,7 +157,7 @@ export function HomePage() {
       </div>
 
       {/* Search Bar */}
-      <div className="home-search-wrap animate-enter stagger-1" ref={searchRef}>
+      <div className="home-search-wrap" ref={searchRef}>
         <div className={`topbar-search-field${searchFocused ? ' focused' : ''}`}>
           <span className="topbar-search-icon">
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -289,7 +289,7 @@ export function HomePage() {
 
       {/* Next Event Card */}
       {nextEvent ? (
-        <div className="card home-event-card animate-enter stagger-2" onClick={() => navigate(`/events/${nextEvent.id}`)}>
+        <div className="card home-event-card" onClick={() => navigate(`/events/${nextEvent.id}`)}>
           <div className="home-event-top">
             <div className="home-event-info">
               <strong className="home-event-title">{nextEvent.title}</strong>
@@ -323,7 +323,7 @@ export function HomePage() {
           )}
         </div>
       ) : (
-        <div className="card home-event-card home-event-empty animate-enter stagger-2">
+        <div className="card home-event-card home-event-empty">
           <p>No upcoming events</p>
           <button className="text-btn" onClick={() => navigate('/events?add=1')}>
             Plan a shoot
@@ -332,7 +332,7 @@ export function HomePage() {
       )}
 
       {/* Quick Actions */}
-      <div className="home-actions animate-enter stagger-3">
+      <div className="home-actions">
         <button className="home-action" onClick={() => navigate('/catalog?add=1')}>
           <span className="home-action-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -365,7 +365,7 @@ export function HomePage() {
 
       {/* Essentials */}
       {essentialItems.length > 0 && (
-        <div className="home-section animate-enter stagger-4">
+        <div className="home-section">
           <div className="home-section-header">
             <h3>Essentials</h3>
             <button className="text-btn" onClick={() => navigate('/catalog?qf=essential')}>
@@ -395,7 +395,7 @@ export function HomePage() {
 
       {/* Packing Alerts */}
       {packingAlerts.length > 0 && (
-        <div className="home-section animate-enter stagger-4">
+        <div className="home-section">
           <div className="home-section-header">
             <h3>Packing Alerts</h3>
           </div>
@@ -415,7 +415,7 @@ export function HomePage() {
                       : `${alert.days} days`}
                 </span>
               </div>
-              <span className={`pill ${alert.days <= 2 ? 'priority-must-have' : 'priority-nice-to-have'}`}>
+              <span className={`pill ${alert.days <= 2 ? 'home-pill-urgent' : 'home-pill-warning'}`}>
                 {alert.missing} needed
               </span>
             </button>
@@ -424,7 +424,7 @@ export function HomePage() {
       )}
 
       {/* Gear Overview */}
-      <div className="home-stats animate-enter stagger-5">
+      <div className="home-stats">
         <div className="home-stat" onClick={() => navigate('/catalog')}>
           <span className="home-stat-val">{totalItems}</span>
           <span className="home-stat-lbl">Items</span>
@@ -443,7 +443,7 @@ export function HomePage() {
 
       {/* Recently Added */}
       {recentItems.length > 0 && (
-        <div className="home-section animate-enter stagger-5">
+        <div className="home-section">
           <div className="home-section-header">
             <h3>Recently Added</h3>
             <button className="text-btn" onClick={() => navigate('/catalog')}>
