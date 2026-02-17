@@ -9410,6 +9410,17 @@ html {
   --bottom-nav-clearance: calc(49px + env(safe-area-inset-bottom) + 16px);
 }
 
+/* Remove redundant outer padding-bottom on .content for iOS pages.
+   Inner scroll containers already provide their own bottom clearance
+   via var(--bottom-nav-clearance). Without this, the outer padding
+   creates a visible grey strip (#F2F2F7) above the bottom nav. */
+.ios-theme .content.content-home,
+.ios-theme .content.content-catalog,
+.ios-theme .content.content-events,
+.ios-theme .content.content-settings {
+  padding-bottom: 0;
+}
+
 /* Base container — fully overrides base (.mobile-bottom-nav) and Block E */
 .ios-theme .mobile-bottom-nav {
   position: fixed;
