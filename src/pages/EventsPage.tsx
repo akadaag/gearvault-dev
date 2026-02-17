@@ -5,22 +5,6 @@ import { db } from '../db';
 import { EventFormSheet } from '../components/EventFormSheet';
 import { getDaysUntilEvent } from '../lib/eventHelpers';
 
-const magnifyingGlassIcon = (
-  <svg
-    viewBox="0 0 24 24"
-    aria-hidden="true"
-    focusable="false"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="2"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-  >
-    <circle cx="11" cy="11" r="7" />
-    <path d="M20 20l-4-4" />
-  </svg>
-);
-
 export function EventsPage() {
   const events = useLiveQuery(() => db.events.orderBy('updatedAt').reverse().toArray(), [], []);
   const [searchParams] = useSearchParams();
@@ -74,6 +58,10 @@ export function EventsPage() {
   const eventTypes = Array.from(new Set(events.map(e => e.type))).sort();
   const clients    = Array.from(new Set(events.map(e => e.client).filter(Boolean))).sort();
   const locations  = Array.from(new Set(events.map(e => e.location).filter(Boolean))).sort();
+
+  const now = new Date();
+  const upcomingCount = events.filter(e => e.dateTime && new Date(e.dateTime) >= now).length;
+  const pastCount = events.filter(e => e.dateTime && new Date(e.dateTime) < now).length;
 
   const filtered = useMemo(() => {
     const now = new Date();
@@ -132,7 +120,7 @@ export function EventsPage() {
       cells.push({ day, dateKey: null, isCurrentMonth: false, eventCount: 0 });
 
     return (
-      <div className="card stack-sm">
+      <div className="card stack-sm" style={{ margin: '0 0 16px', borderRadius: '12px' }}>
         <h3>{firstDay.toLocaleString('default', { month: 'long', year: 'numeric' })}</h3>
         <div className="calendar-grid">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(label => (
@@ -163,12 +151,170 @@ export function EventsPage() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
-    <section className="stack-lg main-page catalog-page">
+    <>
+      <section className="events-page-ios">
+        {/* iOS Header */}
+        <header className="ios-header">
+          <div className="ios-header-top">
+            <h1 className="ios-title">Events</h1>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                className={`ios-catalog-filter-btn${showCalendar ? ' active' : ''}`}
+                onClick={() => setParam('calendar', showCalendar ? null : '1')}
+                aria-label="Toggle calendar view"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+              </button>
+              <button
+                className="ios-catalog-add-btn"
+                onClick={() => setParam('add', '1')}
+                aria-label="Create new event"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+              </button>
+            </div>
+          </div>
 
-      {/* Calendar – rendered below header when toggled */}
-      {showCalendar && <MonthCalendar />}
+          {/* Search Bar */}
+          <div className="ios-search-box">
+            <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ opacity: 0.5, flexShrink: 0 }}>
+              <circle cx="11" cy="11" r="8" />
+              <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+              placeholder="Search events"
+              value={query}
+              onChange={e => setParam('q', e.target.value || null)}
+              aria-label="Search events"
+            />
+          </div>
 
-      {/* Filter Sheet */}
+          {/* Quick Filters */}
+          <div className="catalog-quick-filters" role="group" aria-label="Quick event filters" style={{ marginTop: '10px' }}>
+            <button
+              className={`catalog-quick-pill${quickFilter === 'upcoming' ? ' is-active' : ''}`}
+              onClick={() => setParam('qf', 'upcoming')}
+            >
+              Upcoming
+              <span className="catalog-quick-pill-count">{upcomingCount}</span>
+            </button>
+            <button
+              className={`catalog-quick-pill${quickFilter === 'past' ? ' is-active' : ''}`}
+              onClick={() => setParam('qf', 'past')}
+            >
+              Past
+              <span className="catalog-quick-pill-count">{pastCount}</span>
+            </button>
+            <button
+              className={`catalog-quick-pill${quickFilter === 'all' ? ' is-active' : ''}`}
+              onClick={() => setParam('qf', 'all')}
+            >
+              All
+              <span className="catalog-quick-pill-count">{events.length}</span>
+            </button>
+            <button
+              className={`catalog-quick-pill catalog-quick-filter-btn${selectedEventTypes.length > 0 || clientFilter || locationFilter ? ' is-active' : ''}`}
+              aria-label="Open event filters"
+              onClick={() => setParam('filters', '1')}
+            >
+              <span className="catalog-filter-pill-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                  <line x1="4" y1="6" x2="20" y2="6" />
+                  <circle cx="10" cy="6" r="2" />
+                  <line x1="4" y1="12" x2="20" y2="12" />
+                  <circle cx="15" cy="12" r="2" />
+                  <line x1="4" y1="18" x2="20" y2="18" />
+                  <circle cx="8" cy="18" r="2" />
+                </svg>
+              </span>
+            </button>
+          </div>
+
+          <div className="ios-catalog-item-count">
+            {sorted.length} event{sorted.length !== 1 ? 's' : ''}
+          </div>
+        </header>
+
+        {/* Scrollable content area */}
+        <div className="ios-catalog-scroll">
+          {/* Calendar */}
+          {showCalendar && <MonthCalendar />}
+
+          {/* Empty states */}
+          {sorted.length === 0 && events.length === 0 && (
+            <div className="ios-catalog-empty">
+              <div className="ios-catalog-empty-icon" aria-hidden="true">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="5" width="18" height="16" rx="2" ry="2" />
+                  <path d="M8 3v4" />
+                  <path d="M16 3v4" />
+                  <path d="M3 10h18" />
+                </svg>
+              </div>
+              <h3>No Events Yet</h3>
+              <p>Tap + to create your first event</p>
+            </div>
+          )}
+          {sorted.length === 0 && events.length > 0 && (
+            <div className="ios-catalog-empty">
+              <h3>No events match</h3>
+              <p>Try adjusting your search or filters</p>
+            </div>
+          )}
+
+          {/* Event Cards */}
+          {sorted.map(event => {
+            const dateObj = event.dateTime ? new Date(event.dateTime) : null;
+            const day = dateObj ? dateObj.getDate() : '';
+            const month = dateObj ? dateObj.toLocaleString('default', { month: 'short' }).toUpperCase() : '';
+            const packed = event.packingChecklist.filter(i => i.packed).length;
+            const total  = event.packingChecklist.length;
+            const daysInfo = event.dateTime ? getDaysUntilEvent(event.dateTime) : null;
+
+            return (
+              <Link key={event.id} to={`/events/${event.id}`} className="ios-event-card">
+                {/* Date badge */}
+                {dateObj ? (
+                  <div className="ios-event-date-badge">
+                    <span className="ios-event-date-month">{month}</span>
+                    <span className="ios-event-date-day">{day}</span>
+                  </div>
+                ) : (
+                  <div className="ios-event-nodate-badge">?</div>
+                )}
+
+                {/* Info */}
+                <div className="ios-event-info">
+                  <div className="ios-event-title">{event.title}</div>
+                  <div className="ios-event-meta">
+                    {event.type}
+                    {event.location && ` \u00B7 ${event.location}`}
+                    {daysInfo && ` \u00B7 ${daysInfo.text}`}
+                  </div>
+                  {total > 0 && (
+                    <div className="ios-event-packing">
+                      {packed}/{total} packed
+                    </div>
+                  )}
+                </div>
+
+                {/* Arrow */}
+                <span className="ios-arrow" aria-hidden="true">&#8250;</span>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ── Filter Sheet ─────────────────────────────────────────────── */}
       {showFilterSheet && (
         <>
           <button className="sheet-overlay" aria-label="Close filters" onClick={closeFilterSheet} />
@@ -225,106 +371,10 @@ export function EventsPage() {
         </>
       )}
 
-      {/* Create Event Sheet */}
+      {/* ── Create Event Sheet ─────────────────────────────────────────── */}
       {showCreateForm && (
         <EventFormSheet mode="create" onClose={closeCreateForm} />
       )}
-
-      {/* Empty states */}
-      {sorted.length === 0 && events.length === 0 && (
-        <div className="card empty">
-          <div className="empty-icon">{magnifyingGlassIcon}</div>
-          <h3>No events added</h3>
-          <p>Tap the + button to create your first event</p>
-        </div>
-      )}
-      {sorted.length === 0 && events.length > 0 && (
-        <div className="card empty">
-          <div className="empty-icon">{magnifyingGlassIcon}</div>
-          <h3>No events match</h3>
-          <p>Try adjusting your search or filters</p>
-        </div>
-      )}
-
-      {/* Event Cards */}
-      {sorted.length > 0 && (
-        <div className="grid cards">
-          {sorted.map(event => {
-            const packed = event.packingChecklist.filter(i => i.packed).length;
-            const total  = event.packingChecklist.length;
-            const ratio  = total > 0 ? Math.round((packed / total) * 100) : 0;
-            const daysInfo = event.dateTime ? getDaysUntilEvent(event.dateTime) : null;
-
-            const formattedDate = event.dateTime
-              ? new Date(event.dateTime).toLocaleDateString('en-GB', {
-                  day: '2-digit', month: 'short', year: 'numeric',
-                })
-              : '';
-            const formattedTime = event.dateTime
-              ? new Date(event.dateTime).toLocaleTimeString('en-GB', {
-                  hour: '2-digit', minute: '2-digit', hour12: false,
-                })
-              : '';
-
-            return (
-              <Link key={event.id} to={`/events/${event.id}`} className="gear-card event-card">
-                {/* Days pill fixed top-right */}
-                {daysInfo && (
-                  <span className={`pill event-days ${daysInfo.colorClass}`}>
-                    {daysInfo.text}
-                  </span>
-                )}
-
-                {/* Title row */}
-                <div className="event-card-header">
-                  <strong className="event-card-title">{event.title}</strong>
-                </div>
-
-                {/* Event type subtitle */}
-                <span className="event-card-type">{event.type}</span>
-
-                {/* Date + time pills */}
-                {event.dateTime && (
-                  <div className="event-card-meta-row">
-                    <span className="pill">
-                      <svg viewBox="0 0 24 24" aria-hidden="true">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                        <line x1="16" y1="2" x2="16" y2="6" />
-                        <line x1="8" y1="2" x2="8" y2="6" />
-                        <line x1="3" y1="10" x2="21" y2="10" />
-                      </svg>
-                      {formattedDate}
-                    </span>
-                    <span className="pill">{formattedTime}</span>
-                  </div>
-                )}
-
-                {/* Packing info */}
-                {total > 0 && (
-                  <>
-                    <div className="event-card-packed">
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                        <circle cx="12" cy="12" r="10" />
-                        <polyline points="16 12 12 8 8 12" />
-                      </svg>
-                      <span>{packed}/{total} {packed === total ? 'Complete' : 'Packing'}</span>
-                    </div>
-                    <div className="progress-track" aria-hidden="true">
-                      <span
-                        className={packed === total ? 'complete' : ''}
-                        style={{ width: `${ratio}%` }}
-                      />
-                    </div>
-                  </>
-                )}
-
-                {/* Right-side arrow */}
-                <div className="event-card-arrow" aria-hidden="true">›</div>
-              </Link>
-            );
-          })}
-        </div>
-      )}
-    </section>
+    </>
   );
 }

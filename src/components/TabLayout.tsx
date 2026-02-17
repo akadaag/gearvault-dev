@@ -82,6 +82,9 @@ export function TabLayout() {
   const isGearDetailRoute = /^\/catalog\/item\/[^/]+$/.test(location.pathname);
   const isEventDetailRoute = /^\/events\/[^/]+$/.test(location.pathname);
 
+  // All main tabs that use the iOS design system
+  const isIosThemeRoute = isCatalogRoute || isEventsRoute || isAssistantRoute || isSettingsRoute;
+
   // ── Catalog search params ─────────────────────────────────────────────────
   const catalogQuery = searchParams.get('q') ?? '';
   const quickFilter = searchParams.get('qf') ?? 'all';
@@ -238,7 +241,7 @@ export function TabLayout() {
   );
 
   return (
-    <div className={`app-shell${isCatalogRoute ? ' ios-theme' : ''}`}>
+    <div className={`app-shell${isIosThemeRoute ? ' ios-theme' : ''}`}>
       {!isHomeRoute && !isGearDetailRoute && !isEventDetailRoute && (
         <header className={`topbar${isCatalogRoute || isEventsRoute ? ' topbar-catalog' : ''}`}>
           <div className="topbar-inner">
@@ -386,7 +389,7 @@ export function TabLayout() {
         </header>
       )}
 
-      <main className={`${isHomeRoute ? 'content content-home' : isGearDetailRoute || isEventDetailRoute ? 'content content-immersive' : 'content'}${isCatalogRoute ? ' content-catalog' : ''}${isEventsRoute ? ' content-events' : ''}`}>
+      <main className={`${isHomeRoute ? 'content content-home' : isGearDetailRoute || isEventDetailRoute ? 'content content-immersive' : 'content'}${isCatalogRoute ? ' content-catalog' : ''}${isEventsRoute ? ' content-events' : ''}${isAssistantRoute ? ' content-assistant' : ''}${isSettingsRoute ? ' content-settings' : ''}`}>
         <Outlet />
       </main>
 

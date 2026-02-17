@@ -532,6 +532,11 @@ export function AIAssistantPage() {
   if (catalog.length === 0) {
     return (
       <section className="ai-page">
+        <header className="ios-header">
+          <div className="ios-header-top">
+            <h1 className="ios-title">Assistant</h1>
+          </div>
+        </header>
         <div className="ai-scroll-area">
           <div className="ai-empty-state">
             <div className="stack-sm" style={{ textAlign: 'center' }}>
@@ -554,6 +559,11 @@ export function AIAssistantPage() {
     // Loading auth status
     return (
       <section className="ai-page">
+        <header className="ios-header">
+          <div className="ios-header-top">
+            <h1 className="ios-title">Assistant</h1>
+          </div>
+        </header>
         <div className="ai-scroll-area">
           <div className="ai-empty-state">
             <p className="subtle">Checking authentication...</p>
@@ -572,6 +582,11 @@ export function AIAssistantPage() {
   if (!user && !loading && !error) {
     return (
       <section className="ai-page">
+        <header className="ios-header">
+          <div className="ios-header-top">
+            <h1 className="ios-title">Assistant</h1>
+          </div>
+        </header>
         <div className="ai-scroll-area">
           <div className="ai-empty-state">
             <div className="stack-sm" style={{ textAlign: 'center' }}>
@@ -593,6 +608,27 @@ export function AIAssistantPage() {
   // ---------------------------------------------------------------------------
   return (
     <section className="ai-page">
+      {/* ── iOS HEADER ── */}
+      <header className="ios-header">
+        <div className="ios-header-top">
+          <h1 className="ios-title">Assistant</h1>
+          <button
+            className="ios-catalog-filter-btn"
+            onClick={() => {
+              const params = new URLSearchParams(searchParams);
+              params.set('history', '1');
+              setSearchParams(params);
+            }}
+            aria-label="Chat history"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <polyline points="12 6 12 12 16 14" />
+            </svg>
+          </button>
+        </div>
+      </header>
+
       {/* ── SCROLL AREA ── */}
       <div className="ai-scroll-area" ref={scrollAreaRef}>
         

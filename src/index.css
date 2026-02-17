@@ -35,6 +35,8 @@
   --ios-text-secondary: #8E8E93;
   --ios-blue: #007AFF;
   --ios-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  --ios-red: #FF3B30;
+  --ios-green: #34C759;
 
   /* UI system tokens */
   --space-1: 0.25rem;
@@ -6380,3 +6382,378 @@ html {
   background: var(--ios-card-bg);
 }
 
+/* ================================================================
+   iOS SHARED UTILITIES — Events, Settings, Assistant Pages
+   ================================================================ */
+
+/* Shared Header Style (matches Catalog) */
+.ios-header {
+  flex-shrink: 0;
+  padding: 12px 16px 8px;
+  background: var(--ios-bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.ios-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.ios-title {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--ios-text-primary);
+  line-height: 1.1;
+  margin: 0;
+}
+
+/* Shared Search Bar */
+.ios-search-box {
+  background: color-mix(in srgb, var(--ios-text-secondary) 12%, transparent);
+  border-radius: 10px;
+  padding: 0 10px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ios-search-box input {
+  border: none;
+  background: none;
+  font-size: 17px;
+  color: var(--ios-text-primary);
+  width: 100%;
+  outline: none;
+  padding: 0;
+  min-height: auto;
+  height: auto;
+  box-shadow: none;
+}
+
+.ios-search-box input::placeholder {
+  color: var(--ios-text-secondary);
+}
+
+/* Shared List (Inset Grouped) — for Settings page */
+.ios-list {
+  padding: 0 16px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* ================================================================
+   EVENTS PAGE — iOS REDESIGN
+   ================================================================ */
+
+/* Hide legacy topbar on Events route */
+.ios-theme .content-events .topbar-catalog {
+  display: none;
+}
+
+/* Reset padding for Events */
+.ios-theme .content.content-events {
+  padding-top: env(safe-area-inset-top, 0px);
+  background: var(--ios-bg);
+}
+
+/* Events page flex layout */
+.events-page-ios {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  min-height: 0;
+  flex: 1;
+}
+
+.ios-event-card {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  background: var(--ios-card-bg);
+  backdrop-filter: blur(var(--ios-blur));
+  -webkit-backdrop-filter: blur(var(--ios-blur));
+  border-radius: 12px;
+  margin-bottom: 10px;
+  text-decoration: none;
+  color: inherit;
+  position: relative;
+  box-shadow: var(--ios-shadow);
+  border: 0.5px solid rgba(0, 0, 0, 0.06);
+  transition: transform 0.12s ease;
+}
+
+.ios-event-card:active {
+  transform: scale(0.98);
+}
+
+.ios-event-date-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  background: color-mix(in srgb, var(--ios-text-secondary) 10%, transparent);
+  border-radius: 10px;
+  margin-right: 14px;
+  flex-shrink: 0;
+}
+
+.ios-event-date-month {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--ios-red);
+  font-weight: 600;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+
+.ios-event-date-day {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ios-text-primary);
+  line-height: 1;
+}
+
+.ios-event-nodate-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 50px;
+  height: 50px;
+  background: color-mix(in srgb, var(--ios-text-secondary) 10%, transparent);
+  border-radius: 10px;
+  margin-right: 14px;
+  flex-shrink: 0;
+  color: var(--ios-text-secondary);
+  font-size: 20px;
+}
+
+.ios-event-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.ios-event-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ios-text-primary);
+  margin-bottom: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ios-event-meta {
+  font-size: 14px;
+  color: var(--ios-text-secondary);
+}
+
+.ios-event-packing {
+  font-size: 12px;
+  color: var(--ios-text-secondary);
+  margin-top: 2px;
+}
+
+/* ================================================================
+   SETTINGS PAGE — iOS REDESIGN
+   ================================================================ */
+
+/* Hide legacy topbar on Settings */
+.ios-theme .content-settings .topbar {
+  display: none;
+}
+
+/* Reset padding for Settings */
+.ios-theme .content.content-settings {
+  padding-top: env(safe-area-inset-top, 0px);
+  background: var(--ios-bg);
+}
+
+/* Settings page flex layout */
+.settings-page-ios {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  min-height: 0;
+  flex: 1;
+}
+
+/* iOS Toggle Switch */
+.ios-toggle {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 51px;
+  height: 31px;
+  background: #E9E9EA;
+  border-radius: 15.5px;
+  position: relative;
+  transition: background 0.2s;
+  cursor: pointer;
+  flex-shrink: 0;
+  border: none;
+  padding: 0;
+  min-height: auto;
+  box-shadow: none;
+}
+
+.ios-toggle:checked {
+  background: var(--ios-green);
+}
+
+.ios-toggle::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: transform 0.2s;
+}
+
+.ios-toggle:checked::after {
+  transform: translateX(20px);
+}
+
+/* Settings list item input (right-aligned, transparent) */
+.ios-settings-input {
+  text-align: right;
+  border: none;
+  background: transparent;
+  color: var(--ios-text-secondary);
+  font-size: 17px;
+  outline: none;
+  padding: 0;
+  min-height: auto;
+  height: auto;
+  box-shadow: none;
+  max-width: 180px;
+}
+
+/* Settings destructive text */
+.ios-settings-destructive {
+  color: var(--ios-red);
+  font-size: 17px;
+  font-weight: 400;
+}
+
+/* Settings blue action text */
+.ios-settings-action {
+  color: var(--ios-blue);
+  font-size: 17px;
+  font-weight: 400;
+}
+
+/* ================================================================
+   AI ASSISTANT PAGE — iOS REDESIGN
+   ================================================================ */
+
+/* Reset padding for Assistant */
+.ios-theme .content.content-assistant {
+  padding-top: env(safe-area-inset-top, 0px);
+  background: var(--ios-bg);
+}
+
+/* Override ai-page background in ios-theme */
+.ios-theme .ai-page {
+  background: var(--ios-bg);
+}
+
+/* iOS style chat bubbles */
+.ios-theme .chat-bubble--user {
+  background: var(--ios-blue);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.ios-theme .chat-bubble--assistant {
+  background: var(--ios-card-bg);
+  backdrop-filter: blur(var(--ios-blur));
+  -webkit-backdrop-filter: blur(var(--ios-blur));
+  color: var(--ios-text-primary);
+  border-bottom-left-radius: 4px;
+}
+
+/* iOS style input pill */
+.ios-theme .ai-input-pill {
+  background: var(--ios-card-bg);
+  backdrop-filter: blur(var(--ios-blur));
+  -webkit-backdrop-filter: blur(var(--ios-blur));
+  border: 0.5px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
+}
+
+.ios-theme .ai-send-btn {
+  background: var(--ios-blue);
+}
+
+/* iOS style for AI results cards */
+.ios-theme .ai-packing-results .card {
+  background: var(--ios-card-bg);
+  backdrop-filter: blur(var(--ios-blur));
+  -webkit-backdrop-filter: blur(var(--ios-blur));
+  border: 0.5px solid rgba(0, 0, 0, 0.06);
+  border-radius: var(--ios-radius-sm);
+  box-shadow: var(--ios-shadow);
+}
+
+/* ── Dark Mode Overrides for new pages ─────────────────────────── */
+
+:root.dark .ios-theme .content.content-events,
+:root.dark .ios-theme .content.content-settings,
+:root.dark .ios-theme .content.content-assistant {
+  background: var(--ios-bg);
+}
+
+:root.dark .ios-event-card {
+  background: var(--ios-card-bg);
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+:root.dark .ios-event-date-badge,
+:root.dark .ios-event-nodate-badge {
+  background: rgba(118, 118, 128, 0.24);
+}
+
+:root.dark .ios-toggle {
+  background: #39393D;
+}
+
+:root.dark .ios-toggle:checked {
+  background: var(--ios-green);
+}
+
+:root.dark .ios-search-box {
+  background: rgba(118, 118, 128, 0.24);
+}
+
+:root.dark .ios-search-box input {
+  color: var(--ios-text-primary);
+}
+
+:root.dark .ios-header {
+  background: var(--ios-bg);
+}
+
+:root.dark .ios-theme .chat-bubble--assistant {
+  background: rgba(44, 44, 46, 0.8);
+}
+
+:root.dark .ios-theme .ai-input-pill {
+  background: rgba(28, 28, 30, 0.9);
+  border-color: rgba(255, 255, 255, 0.1);
+}

@@ -148,143 +148,282 @@ export function SettingsPage() {
   }
 
   return (
-    <section className="stack-lg">
-      <div className="card stack-md">
-        <h2>Settings</h2>
-        <p className="subtle">Customize your PackShot experience</p>
-      </div>
-
-      <div className="card stack-md">
-        <h3>Account</h3>
-        <label className="stack-sm">
-          <strong>Display name</strong>
-          <input
-            type="text"
-            value={settings.displayName ?? ''}
-            onChange={(e) => void update('displayName', e.target.value)}
-            placeholder="Your name"
-          />
-        </label>
-        <p><strong>Email:</strong> {user?.email ?? 'Not available'}</p>
-        <p>
-          <strong>Status:</strong>{' '}
-          <span className={`status-chip ${isOnline ? 'online' : 'offline'}`}>
-            <span className="status-dot" aria-hidden="true" />
-            {isOnline ? 'Online' : 'Offline'}
-          </span>
-        </p>
-        <div className="row wrap">
-          <button className="ghost" onClick={() => void signOut()}>
-            Logout
-          </button>
+    <section className="settings-page-ios">
+      {/* iOS-style inline header */}
+      <header className="ios-header">
+        <div className="ios-header-top">
+          <h1 className="ios-title">Settings</h1>
         </div>
-      </div>
+      </header>
 
-      <div className="card stack-md">
-        <h3>Appearance</h3>
-        <label className="stack-sm">
-          <strong>Theme</strong>
-          <select value={settings.theme} onChange={(e) => void update('theme', e.target.value as typeof settings.theme)}>
-            <option value="system">System</option>
-            <option value="light">Light</option>
-            <option value="dark">Dark</option>
-          </select>
-        </label>
+      {/* Scrollable settings list */}
+      <div className="ios-list">
 
-        <label className="stack-sm">
-          <strong>Default currency</strong>
-          <input value={settings.defaultCurrency} onChange={(e) => void update('defaultCurrency', e.target.value.toUpperCase())} placeholder="EUR" />
-        </label>
-      </div>
+        {/* ── Account ─────────────────────────────────────────────────── */}
+        <div className="ios-list-group">
+          <div className="ios-list-group-header"><h3>Account</h3></div>
 
-      <div className="card stack-md">
-        <h3>Sync & Backup</h3>
-        <label className="checkbox-inline">
-          <input type="checkbox" checked={settings.syncEnabled} onChange={(e) => void update('syncEnabled', e.target.checked)} />
-          <span>Enable cloud sync</span>
-        </label>
-        <p className="subtle">Your data syncs automatically while online. You can also trigger a manual sync.</p>
-        <div className="row wrap">
-          <button className="ghost" onClick={() => void handleSyncNow()} disabled={!settings.syncEnabled || syncing}>
-            {syncing ? 'Syncing…' : 'Sync now'}
-          </button>
-          {syncMessage && <span className="subtle">{syncMessage}</span>}
-        </div>
-        
-        <hr />
-
-        <div className="stack-sm">
-          <strong>Export & Import</strong>
-          <div className="row wrap">
-            <button className="ghost" onClick={() => void exportDb()}>Export Database</button>
-            <button className="ghost" onClick={() => fileRef.current?.click()}>Import Database</button>
-            <input ref={fileRef} type="file" accept="application/json" hidden onChange={(e) => void importDb(e.target.files?.[0])} />
+          <div className="ios-list-item" style={{ cursor: 'default' }}>
+            <div className="ios-list-content">
+              <span className="ios-list-title">Display Name</span>
+            </div>
+            <div className="ios-list-action">
+              <input
+                className="ios-settings-input"
+                type="text"
+                value={settings.displayName ?? ''}
+                onChange={(e) => void update('displayName', e.target.value)}
+                placeholder="Your name"
+              />
+            </div>
           </div>
-          <p className="subtle">Download or restore your complete database as JSON</p>
+
+          <div className="ios-list-item" style={{ cursor: 'default' }}>
+            <div className="ios-list-content">
+              <span className="ios-list-title">Email</span>
+            </div>
+            <div className="ios-list-action">
+              <span className="ios-list-sub">{user?.email ?? 'Not available'}</span>
+            </div>
+          </div>
+
+          <div className="ios-list-item" style={{ cursor: 'default' }}>
+            <div className="ios-list-content">
+              <span className="ios-list-title">Status</span>
+            </div>
+            <div className="ios-list-action">
+              <span style={{ color: isOnline ? 'var(--ios-green)' : 'var(--ios-red)', fontWeight: 600, fontSize: '0.9rem' }}>
+                {isOnline ? 'Online' : 'Offline'}
+              </span>
+            </div>
+          </div>
+
+          <button className="ios-list-item" onClick={() => void signOut()}>
+            <div className="ios-list-content">
+              <span className="ios-list-title ios-settings-destructive">Log Out</span>
+            </div>
+            <span className="ios-arrow" aria-hidden="true">&#8250;</span>
+          </button>
         </div>
-      </div>
 
-      <div className="card stack-md">
-        <h3>AI Assistant</h3>
-        <p className="subtle">
-          PackShot uses Groq AI for intelligent packing suggestions and Q&A chat. 
-          API keys are configured in your environment variables.
-        </p>
+        {/* ── Appearance ──────────────────────────────────────────────── */}
+        <div className="ios-list-group">
+          <div className="ios-list-group-header"><h3>Appearance</h3></div>
 
-        <div className="stack-sm">
-          <p className="subtle" style={{ fontSize: '0.85rem', marginBottom: '0.5rem' }}>
-            <strong>Primary:</strong> <code>VITE_GROQ_API_KEY</code> (Required)<br />
-            <strong>Fallback:</strong> <code>VITE_GROQ_API_KEY_FALLBACK</code> (Optional, extends daily request limit)<br />
-            <span style={{ fontSize: '0.8rem', opacity: 0.8 }}>
-              Packing lists and chat use compound-mini (500 requests/day with 2 keys). 
-              Scout 17b acts as emergency fallback when requests are exhausted.
-            </span>
-          </p>
+          <div className="ios-list-item" style={{ cursor: 'default' }}>
+            <div className="ios-list-content">
+              <span className="ios-list-title">Theme</span>
+            </div>
+            <div className="ios-list-action">
+              <select
+                className="ios-settings-input"
+                value={settings.theme}
+                onChange={(e) => void update('theme', e.target.value as typeof settings.theme)}
+              >
+                <option value="system">System</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="ios-list-item" style={{ cursor: 'default' }}>
+            <div className="ios-list-content">
+              <span className="ios-list-title">Default Currency</span>
+            </div>
+            <div className="ios-list-action">
+              <input
+                className="ios-settings-input"
+                value={settings.defaultCurrency}
+                onChange={(e) => void update('defaultCurrency', e.target.value.toUpperCase())}
+                placeholder="EUR"
+                style={{ width: '60px', textAlign: 'center' }}
+              />
+            </div>
+          </div>
         </div>
 
-        <label className="checkbox-inline">
-          <input type="checkbox" checked={settings.aiLearningEnabled} onChange={(e) => void update('aiLearningEnabled', e.target.checked)} />
-          <span>Enable AI learning from feedback</span>
-        </label>
-        <p className="subtle">AI learns from your packing list feedback to improve suggestions</p>
-      </div>
+        {/* ── Sync & Backup ───────────────────────────────────────────── */}
+        <div className="ios-list-group">
+          <div className="ios-list-group-header"><h3>Sync & Backup</h3></div>
 
-      <div className="card stack-md">
-        <h3>Demo Data</h3>
-        <label className="checkbox-inline">
-          <input type="checkbox" checked={settings.demoDataEnabled} onChange={(e) => void toggleDemoData(e.target.checked)} />
-          <span>Enable demo data</span>
-        </label>
-        <div className="row wrap" style={{ gap: '0.5rem' }}>
-          <button className="ghost" onClick={() => void loadDemoDataNow()}>Load Demo Data</button>
-          <button className="ghost" onClick={() => void clearDemoData()}>Remove All Data</button>
+          <label className="ios-list-item" style={{ cursor: 'pointer' }}>
+            <div className="ios-list-content">
+              <span className="ios-list-title">Cloud Sync</span>
+              <span className="ios-list-sub">Your data syncs automatically while online</span>
+            </div>
+            <div className="ios-list-action">
+              <input
+                type="checkbox"
+                className="ios-toggle"
+                checked={settings.syncEnabled}
+                onChange={(e) => void update('syncEnabled', e.target.checked)}
+              />
+            </div>
+          </label>
+
+          <button
+            className="ios-list-item"
+            onClick={() => void handleSyncNow()}
+            disabled={!settings.syncEnabled || syncing}
+          >
+            <div className="ios-list-content">
+              <span className="ios-list-title ios-settings-action">
+                {syncing ? 'Syncing…' : 'Sync Now'}
+              </span>
+              {syncMessage && <span className="ios-list-sub">{syncMessage}</span>}
+            </div>
+            <span className="ios-arrow" aria-hidden="true">&#8250;</span>
+          </button>
+
+          <button className="ios-list-item" onClick={() => void exportDb()}>
+            <div className="ios-list-content">
+              <span className="ios-list-title ios-settings-action">Export Database</span>
+              <span className="ios-list-sub">Download your complete database as JSON</span>
+            </div>
+            <span className="ios-arrow" aria-hidden="true">&#8250;</span>
+          </button>
+
+          <button className="ios-list-item" onClick={() => fileRef.current?.click()}>
+            <div className="ios-list-content">
+              <span className="ios-list-title ios-settings-action">Import Database</span>
+              <span className="ios-list-sub">Restore from a JSON backup</span>
+            </div>
+            <span className="ios-arrow" aria-hidden="true">&#8250;</span>
+          </button>
+          <input ref={fileRef} type="file" accept="application/json" hidden onChange={(e) => void importDb(e.target.files?.[0])} />
         </div>
-        <p className="subtle">Load 22 sample photography/videography items to test AI packing suggestions</p>
-      </div>
 
-      <div className="card stack-md">
-        <h3>App Updates</h3>
-        <p className="subtle">If the app feels outdated or a new version isn't loading, clear the cache to force an update.</p>
-        <button className="ghost" onClick={() => void clearCacheAndReload()}>
-          Clear Cache & Reload
-        </button>
-      </div>
+        {/* ── AI Assistant ────────────────────────────────────────────── */}
+        <div className="ios-list-group">
+          <div className="ios-list-group-header"><h3>AI Assistant</h3></div>
 
-      <div className="card stack-md">
-        <h3>About</h3>
-        <p className="subtle">PackShot is a progressive web app with account-based cloud sync and offline-capable local storage.</p>
-        <div className="stack-sm">
-          <p><strong>Version:</strong> 1.0.0</p>
-          <p><strong>Storage:</strong> IndexedDB + Supabase cloud sync</p>
-          <p><strong>Open Source:</strong> Built with React + TypeScript</p>
+          <div className="ios-list-item" style={{ cursor: 'default' }}>
+            <div className="ios-list-content">
+              <span className="ios-list-title">Provider</span>
+              <span className="ios-list-sub">Groq AI (compound-mini, scout-17b fallback)</span>
+            </div>
+          </div>
+
+          <div className="ios-list-item" style={{ cursor: 'default' }}>
+            <div className="ios-list-content">
+              <span className="ios-list-title">API Keys</span>
+              <span className="ios-list-sub">
+                Primary: VITE_GROQ_API_KEY (required)
+              </span>
+              <span className="ios-list-sub">
+                Fallback: VITE_GROQ_API_KEY_FALLBACK (optional)
+              </span>
+            </div>
+          </div>
+
+          <label className="ios-list-item" style={{ cursor: 'pointer' }}>
+            <div className="ios-list-content">
+              <span className="ios-list-title">AI Learning</span>
+              <span className="ios-list-sub">Learn from your packing list feedback</span>
+            </div>
+            <div className="ios-list-action">
+              <input
+                type="checkbox"
+                className="ios-toggle"
+                checked={settings.aiLearningEnabled}
+                onChange={(e) => void update('aiLearningEnabled', e.target.checked)}
+              />
+            </div>
+          </label>
         </div>
-      </div>
 
-      {status && (
-        <div className="card">
-          <p className="success">{status}</p>
+        {/* ── Demo Data ───────────────────────────────────────────────── */}
+        <div className="ios-list-group">
+          <div className="ios-list-group-header"><h3>Demo Data</h3></div>
+
+          <label className="ios-list-item" style={{ cursor: 'pointer' }}>
+            <div className="ios-list-content">
+              <span className="ios-list-title">Enable Demo Data</span>
+              <span className="ios-list-sub">22 sample photography/videography items</span>
+            </div>
+            <div className="ios-list-action">
+              <input
+                type="checkbox"
+                className="ios-toggle"
+                checked={settings.demoDataEnabled}
+                onChange={(e) => void toggleDemoData(e.target.checked)}
+              />
+            </div>
+          </label>
+
+          <button className="ios-list-item" onClick={() => void loadDemoDataNow()}>
+            <div className="ios-list-content">
+              <span className="ios-list-title ios-settings-action">Load Demo Data</span>
+            </div>
+            <span className="ios-arrow" aria-hidden="true">&#8250;</span>
+          </button>
+
+          <button className="ios-list-item" onClick={() => void clearDemoData()}>
+            <div className="ios-list-content">
+              <span className="ios-list-title ios-settings-destructive">Remove All Data</span>
+            </div>
+            <span className="ios-arrow" aria-hidden="true">&#8250;</span>
+          </button>
         </div>
-      )}
+
+        {/* ── App Updates ─────────────────────────────────────────────── */}
+        <div className="ios-list-group">
+          <div className="ios-list-group-header"><h3>App Updates</h3></div>
+
+          <button className="ios-list-item" onClick={() => void clearCacheAndReload()}>
+            <div className="ios-list-content">
+              <span className="ios-list-title ios-settings-action">Clear Cache & Reload</span>
+              <span className="ios-list-sub">Force update if the app feels outdated</span>
+            </div>
+            <span className="ios-arrow" aria-hidden="true">&#8250;</span>
+          </button>
+        </div>
+
+        {/* ── About ───────────────────────────────────────────────────── */}
+        <div className="ios-list-group">
+          <div className="ios-list-group-header"><h3>About</h3></div>
+
+          <div className="ios-list-item" style={{ cursor: 'default' }}>
+            <div className="ios-list-content">
+              <span className="ios-list-title">Version</span>
+            </div>
+            <div className="ios-list-action">
+              <span className="ios-list-sub">1.0.0</span>
+            </div>
+          </div>
+
+          <div className="ios-list-item" style={{ cursor: 'default' }}>
+            <div className="ios-list-content">
+              <span className="ios-list-title">Storage</span>
+            </div>
+            <div className="ios-list-action">
+              <span className="ios-list-sub">IndexedDB + Supabase</span>
+            </div>
+          </div>
+
+          <div className="ios-list-item" style={{ cursor: 'default' }}>
+            <div className="ios-list-content">
+              <span className="ios-list-title">Built With</span>
+            </div>
+            <div className="ios-list-action">
+              <span className="ios-list-sub">React + TypeScript</span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Status Toast ────────────────────────────────────────────── */}
+        {status && (
+          <div className="ios-list-group">
+            <div className="ios-list-item" style={{ cursor: 'default' }}>
+              <div className="ios-list-content">
+                <span className="ios-list-title" style={{ color: 'var(--ios-green)' }}>{status}</span>
+              </div>
+            </div>
+          </div>
+        )}
+
+      </div>
     </section>
   );
 }
