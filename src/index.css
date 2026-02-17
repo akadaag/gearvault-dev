@@ -8017,3 +8017,593 @@ html {
 :root.dark .event-detail-page.ios-theme .ev-detail-missing-select {
   background: color-mix(in srgb, var(--ios-blue) 15%, transparent);
 }
+
+/* ==========================================================================
+   AI ASSISTANT PAGE – iOS Theme
+   Scoped under .ai-page.ios-theme to avoid conflicts with legacy styles.
+   Mirrors the design tokens and patterns from CatalogPage, EventsPage,
+   and EventDetailPage iOS themes.
+   ========================================================================== */
+
+/* ── Page Layout ── */
+.ai-page.ios-theme {
+  display: flex;
+  flex-direction: column;
+  background: var(--ios-bg);
+  min-height: 0;
+  flex: 1;
+  gap: 0;
+  padding: 0;
+}
+
+/* ── Sticky Header ── */
+.ai-page.ios-theme .ai-ios-header {
+  flex-shrink: 0;
+  padding: 12px 16px 8px;
+  background: var(--ios-bg);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.ai-page.ios-theme .ai-ios-header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+.ai-page.ios-theme .ai-ios-title {
+  font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ios-text-primary);
+  line-height: 1.1;
+  margin: 0;
+}
+
+/* ── Icon Button (header clock) ── */
+.ai-page.ios-theme .ai-ios-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: color-mix(in srgb, var(--ios-text-secondary) 10%, transparent);
+  color: var(--ios-text-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  min-height: auto;
+  box-shadow: none;
+  transition: background 0.15s ease, color 0.15s ease, transform 0.12s ease;
+}
+.ai-page.ios-theme .ai-ios-icon-btn:active {
+  transform: scale(0.9);
+  opacity: 0.85;
+}
+
+/* ── Main Scroll Content ── */
+.ai-page.ios-theme .ai-ios-content {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 16px;
+  padding-bottom: 100px;
+}
+
+/* ── Empty State ── */
+.ai-page.ios-theme .ai-ios-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 50vh;
+  text-align: center;
+  gap: 12px;
+  padding: 2rem 1rem;
+}
+.ai-page.ios-theme .ai-ios-empty h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--ios-text-primary);
+  margin: 0;
+}
+.ai-page.ios-theme .ai-ios-empty .subtle {
+  font-size: 15px;
+  color: var(--ios-text-secondary);
+  margin: 0;
+}
+.ai-page.ios-theme .ai-ios-empty-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--ios-text-secondary) 8%, transparent);
+  color: var(--ios-text-secondary);
+  margin-bottom: 4px;
+}
+
+/* ── Loading State ── */
+.ai-page.ios-theme .ai-ios-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 40vh;
+  gap: 12px;
+  text-align: center;
+}
+.ai-page.ios-theme .ai-ios-loading .subtle {
+  font-size: 15px;
+  color: var(--ios-text-secondary);
+}
+
+/* ── Results Container ── */
+.ai-page.ios-theme .ai-ios-results {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 4px;
+}
+
+/* ── Glass Card ── */
+.ai-page.ios-theme .ai-ios-card {
+  background: var(--ios-card-bg);
+  backdrop-filter: blur(var(--ios-blur));
+  -webkit-backdrop-filter: blur(var(--ios-blur));
+  border-radius: var(--ios-radius-sm);
+  padding: 16px;
+  border: 0.5px solid rgba(0, 0, 0, 0.06);
+  box-shadow: var(--ios-shadow);
+}
+
+/* ── Result Header Card ── */
+.ai-page.ios-theme .ai-ios-result-header {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+}
+.ai-page.ios-theme .ai-ios-result-header.entering {
+  opacity: 0;
+  transform: translateY(10px);
+}
+.ai-page.ios-theme .ai-ios-result-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--ios-text-primary);
+  margin: 0;
+  line-height: 1.2;
+}
+.ai-page.ios-theme .ai-ios-result-subtitle {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ios-text-secondary);
+  margin: 4px 0 0;
+  text-transform: capitalize;
+}
+.ai-page.ios-theme .ai-ios-result-stats {
+  font-size: 13px;
+  color: var(--ios-text-secondary);
+  margin: 10px 0 0;
+}
+
+/* ── Text Button ── */
+.ai-page.ios-theme .ai-ios-text-btn {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--ios-blue);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 0;
+  min-height: auto;
+  box-shadow: none;
+  white-space: nowrap;
+}
+.ai-page.ios-theme .ai-ios-text-btn:active {
+  opacity: 0.6;
+}
+
+/* ── iOS Inset Grouped List ── */
+.ai-page.ios-theme .ai-ios-list-group {
+  background: var(--ios-card-bg);
+  backdrop-filter: blur(var(--ios-blur));
+  -webkit-backdrop-filter: blur(var(--ios-blur));
+  border-radius: var(--ios-radius-sm);
+  overflow: hidden;
+  border: 0.5px solid rgba(0, 0, 0, 0.06);
+  box-shadow: var(--ios-shadow);
+}
+
+/* List Header */
+.ai-page.ios-theme .ai-ios-list-header {
+  padding: 10px 16px 6px;
+}
+.ai-page.ios-theme .ai-ios-list-header h3 {
+  font-size: 13px;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--ios-text-secondary);
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+.ai-page.ios-theme .ai-ios-list-header.warning h3 {
+  color: #FF9500;
+}
+
+/* List Body */
+.ai-page.ios-theme .ai-ios-list-body {
+  padding: 0;
+}
+
+/* List Item */
+.ai-page.ios-theme .ai-ios-list-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 0.5px solid color-mix(in srgb, var(--ios-text-secondary) 15%, transparent);
+}
+.ai-page.ios-theme .ai-ios-list-item:last-child {
+  border-bottom: none;
+}
+.ai-page.ios-theme .ai-ios-item-content {
+  flex: 1;
+  min-width: 0;
+}
+.ai-page.ios-theme .ai-ios-item-name {
+  font-size: 17px;
+  font-weight: 400;
+  color: var(--ios-text-primary);
+  line-height: 1.3;
+}
+.ai-page.ios-theme .ai-ios-item-note {
+  font-size: 13px;
+  color: var(--ios-text-secondary);
+  margin: 2px 0 0;
+  line-height: 1.3;
+}
+
+/* ── Badges ── */
+.ai-page.ios-theme .ai-ios-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 6px;
+  white-space: nowrap;
+  background: color-mix(in srgb, var(--ios-text-secondary) 10%, transparent);
+  color: var(--ios-text-secondary);
+  line-height: 1.4;
+}
+.ai-page.ios-theme .ai-ios-badge.success {
+  background: rgba(52, 199, 89, 0.14);
+  color: #34C759;
+}
+.ai-page.ios-theme .ai-ios-badge.role-primary {
+  background: rgba(0, 122, 255, 0.12);
+  color: var(--ios-blue);
+}
+.ai-page.ios-theme .ai-ios-badge.role-backup {
+  background: rgba(255, 149, 0, 0.12);
+  color: #FF9500;
+}
+
+/* ── Priority Dot (checklist items) ── */
+.ai-page.ios-theme .ai-ios-priority-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--ios-text-secondary);
+}
+.ai-page.ios-theme .ai-ios-priority-dot.priority-must-have {
+  background: #FF3B30;
+}
+.ai-page.ios-theme .ai-ios-priority-dot.priority-nice-to-have {
+  background: #FF9500;
+}
+.ai-page.ios-theme .ai-ios-priority-dot.priority-optional {
+  background: #34C759;
+}
+
+/* ── Priority Tag (missing items) ── */
+.ai-page.ios-theme .ai-ios-priority-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 6px;
+  white-space: nowrap;
+  line-height: 1.4;
+  background: color-mix(in srgb, var(--ios-text-secondary) 10%, transparent);
+  color: var(--ios-text-secondary);
+}
+.ai-page.ios-theme .ai-ios-priority-tag.priority-must-have {
+  background: rgba(255, 59, 48, 0.14);
+  color: #FF3B30;
+}
+.ai-page.ios-theme .ai-ios-priority-tag.priority-nice-to-have {
+  background: rgba(255, 149, 0, 0.14);
+  color: #FF9500;
+}
+.ai-page.ios-theme .ai-ios-priority-tag.priority-optional {
+  background: rgba(52, 199, 89, 0.14);
+  color: #34C759;
+}
+
+/* ── Action Tag (rent / borrow / buy) ── */
+.ai-page.ios-theme .ai-ios-action-tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 6px;
+  white-space: nowrap;
+  text-transform: capitalize;
+  background: rgba(0, 122, 255, 0.10);
+  color: var(--ios-blue);
+  line-height: 1.4;
+}
+
+/* ── Section Title (inside cards) ── */
+.ai-page.ios-theme .ai-ios-section-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ios-text-primary);
+  margin: 0 0 8px;
+}
+
+/* ── Card Text ── */
+.ai-page.ios-theme .ai-ios-card-text {
+  font-size: 15px;
+  color: var(--ios-text-secondary);
+  margin: 0 0 16px;
+  line-height: 1.4;
+}
+
+/* ── Tips List ── */
+.ai-page.ios-theme .ai-ios-tips-list {
+  padding-left: 1.2rem;
+  margin: 0;
+  list-style: disc;
+}
+.ai-page.ios-theme .ai-ios-tips-list li {
+  font-size: 15px;
+  color: var(--ios-text-secondary);
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+.ai-page.ios-theme .ai-ios-tips-list li:last-child {
+  margin-bottom: 0;
+}
+
+/* ── Primary Action Button ── */
+.ai-page.ios-theme .ai-ios-primary-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 14px 20px;
+  border-radius: 14px;
+  border: none;
+  background: var(--ios-blue);
+  color: #fff;
+  font-size: 17px;
+  font-weight: 600;
+  cursor: pointer;
+  min-height: auto;
+  box-shadow: none;
+  transition: transform 0.12s ease, opacity 0.12s ease;
+}
+.ai-page.ios-theme .ai-ios-primary-btn:active:not(:disabled) {
+  transform: scale(0.98);
+  opacity: 0.9;
+}
+.ai-page.ios-theme .ai-ios-primary-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+/* ── Bottom Spacer ── */
+.ai-page.ios-theme .ai-ios-bottom-spacer {
+  height: 100px;
+  flex-shrink: 0;
+}
+
+/* ── Chat Message Stream ── */
+.ai-page.ios-theme .ai-ios-chat-stream {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 0;
+}
+
+/* ── Chat Bubbles (iMessage style) ── */
+.ai-page.ios-theme .ai-ios-bubble {
+  max-width: 80%;
+  padding: 10px 14px;
+  border-radius: 18px;
+  font-size: 17px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+.ai-page.ios-theme .ai-ios-bubble.user {
+  align-self: flex-end;
+  background: var(--ios-blue);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+.ai-page.ios-theme .ai-ios-bubble.assistant {
+  align-self: flex-start;
+  background: var(--ios-card-bg);
+  backdrop-filter: blur(var(--ios-blur));
+  -webkit-backdrop-filter: blur(var(--ios-blur));
+  color: var(--ios-text-primary);
+  border: 0.5px solid rgba(0, 0, 0, 0.06);
+  border-bottom-left-radius: 4px;
+}
+.ai-page.ios-theme .ai-ios-bubble-content {
+  white-space: pre-wrap;
+}
+
+/* ── Typing Indicator ── */
+.ai-page.ios-theme .ai-typing-dots {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  padding: 4px 0;
+}
+.ai-page.ios-theme .ai-typing-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ios-text-secondary);
+  opacity: 0.4;
+  animation: ai-ios-typing 1.4s ease-in-out infinite;
+}
+.ai-page.ios-theme .ai-typing-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.ai-page.ios-theme .ai-typing-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+@keyframes ai-ios-typing {
+  0%, 60%, 100% { opacity: 0.4; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-4px); }
+}
+
+/* ── Fixed Input Bar ── */
+.ai-page.ios-theme .ai-ios-input-bar {
+  position: fixed;
+  bottom: calc(var(--bottom-nav-clearance, 60px) - 10px);
+  left: 0;
+  right: 0;
+  z-index: 40;
+  padding: 8px 12px;
+  padding-bottom: max(8px, env(safe-area-inset-bottom, 0px));
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.ai-page.ios-theme .ai-ios-input-bar.hidden {
+  transform: translateY(calc(100% + 2rem));
+  opacity: 0;
+  pointer-events: none;
+}
+:root.keyboard-open .ai-page.ios-theme .ai-ios-input-bar {
+  bottom: 0;
+}
+
+/* Input Pill */
+.ai-page.ios-theme .ai-ios-input-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--ios-card-bg);
+  backdrop-filter: blur(var(--ios-blur));
+  -webkit-backdrop-filter: blur(var(--ios-blur));
+  border: 0.5px solid rgba(0, 0, 0, 0.12);
+  border-radius: 24px;
+  padding: 8px 8px 8px 16px;
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
+}
+.ai-page.ios-theme .ai-ios-input-pill textarea {
+  flex: 1;
+  border: none;
+  background: none;
+  outline: none;
+  font-size: 17px;
+  color: var(--ios-text-primary);
+  resize: none;
+  min-height: auto;
+  height: auto;
+  line-height: 1.4;
+  padding: 0;
+  box-shadow: none;
+  font-family: inherit;
+  max-height: 100px;
+  overflow-y: auto;
+}
+.ai-page.ios-theme .ai-ios-input-pill textarea::placeholder {
+  color: var(--ios-text-secondary);
+}
+.ai-page.ios-theme .ai-ios-input-pill textarea:disabled {
+  opacity: 0.5;
+}
+
+/* Send Button */
+.ai-page.ios-theme .ai-ios-send-btn {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  border-radius: 50%;
+  border: none;
+  background: var(--ios-blue);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  box-shadow: none;
+  transition: opacity 0.15s, transform 0.1s, background 0.15s;
+  flex-shrink: 0;
+}
+.ai-page.ios-theme .ai-ios-send-btn svg {
+  width: 18px;
+  height: 18px;
+}
+.ai-page.ios-theme .ai-ios-send-btn:active:not(:disabled) {
+  transform: scale(0.92);
+}
+.ai-page.ios-theme .ai-ios-send-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* ── Error message (inside input bar) ── */
+.ai-page.ios-theme .ai-input-error {
+  color: #FF3B30;
+  font-size: 13px;
+  padding: 0 8px 6px;
+  margin: 0;
+}
+
+/* ── History Sheet (iOS overrides) ── */
+.ai-page.ios-theme .ai-history-sheet {
+  z-index: 102;
+}
+
+/* ==========================================================================
+   AI ASSISTANT PAGE – iOS Theme – Dark Mode Overrides
+   ========================================================================== */
+:root.dark .ai-page.ios-theme .ai-ios-card {
+  background: rgba(28, 28, 30, 0.6);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+:root.dark .ai-page.ios-theme .ai-ios-list-group {
+  background: rgba(28, 28, 30, 0.6);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+:root.dark .ai-page.ios-theme .ai-ios-list-item {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+:root.dark .ai-page.ios-theme .ai-ios-bubble.assistant {
+  background: rgba(44, 44, 46, 0.8);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+:root.dark .ai-page.ios-theme .ai-ios-input-pill {
+  background: rgba(28, 28, 30, 0.9);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.3);
+}
+:root.dark .ai-page.ios-theme .ai-ios-empty-icon {
+  background: rgba(255, 255, 255, 0.06);
+}
+:root.dark .ai-page.ios-theme .ai-ios-icon-btn {
+  background: rgba(255, 255, 255, 0.08);
+}

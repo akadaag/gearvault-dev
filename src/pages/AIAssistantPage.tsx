@@ -27,8 +27,10 @@ import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import { AuthExpiredError } from '../lib/edgeFunctionClient';
 
+
 type Mode = 'packing' | 'chat';
 type Step = 'input' | 'review' | 'results';
+
 
 // ---------------------------------------------------------------------------
 // Component
@@ -39,6 +41,7 @@ export function AIAssistantPage() {
   const { user, loading: authLoading } = useAuth();
   const catalog = useLiveQuery(() => db.gearItems.toArray(), [], [] as GearItem[]);
   const settings = useLiveQuery(() => db.settings.get('app-settings'), []);
+
 
   // Mode detection
   const [mode, setMode] = useState<Mode>('packing');
@@ -53,29 +56,35 @@ export function AIAssistantPage() {
   const [saving, setSaving] = useState(false);
   const [headerAnimating, setHeaderAnimating] = useState(false);
 
+
   // Chat state
   const [currentSession, setCurrentSession] = useState<ChatSession | null>(null);
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+
   // Swipe-to-delete state for chat history
   const [openSessionActionsId, setOpenSessionActionsId] = useState<string | null>(null);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [touchCurrentX, setTouchCurrentX] = useState<number | null>(null);
+
 
   // Auto-hide input bar on scroll (chat mode only)
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [inputBarHidden, setInputBarHidden] = useState(false);
   const lastScrollTopRef = useRef(0);
 
+
   // Shared state
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [error, setError] = useState('');
 
+
   // History sheet controlled by URL param
   const showHistorySheet = searchParams.get('history') === '1';
+
 
   // ---------------------------------------------------------------------------
   // Load chat sessions on mount
@@ -83,6 +92,7 @@ export function AIAssistantPage() {
   useEffect(() => {
     void loadAllChatSessions().then(setChatSessions);
   }, []);
+
 
   // ---------------------------------------------------------------------------
   // Auto-scroll chat to bottom
@@ -92,6 +102,7 @@ export function AIAssistantPage() {
       chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [mode, currentSession?.messages.length]);
+
 
   // ---------------------------------------------------------------------------
   // Header animation trigger
@@ -104,6 +115,7 @@ export function AIAssistantPage() {
     }
   }, [mode, step, plan]);
 
+
   // ---------------------------------------------------------------------------
   // Cleanup keyboard-open class on unmount
   // ---------------------------------------------------------------------------
@@ -113,6 +125,7 @@ export function AIAssistantPage() {
     };
   }, []);
 
+
   // ---------------------------------------------------------------------------
   // Auto-hide input bar on scroll (chat mode only)
   // ---------------------------------------------------------------------------
@@ -120,12 +133,15 @@ export function AIAssistantPage() {
     const scrollArea = scrollAreaRef.current;
     if (!scrollArea || mode !== 'chat' || !currentSession) return;
 
+
     function handleScroll() {
       // Don't hide when keyboard is open
       if (document.documentElement.classList.contains('keyboard-open')) return;
 
+
       const currentScrollTop = scrollAreaRef.current?.scrollTop ?? 0;
       const delta = currentScrollTop - lastScrollTopRef.current;
+
 
       // Show on scroll up (>10px), hide on scroll down (>10px)
       if (delta > 10 && !inputBarHidden) {
@@ -134,12 +150,15 @@ export function AIAssistantPage() {
         setInputBarHidden(false);
       }
 
+
       lastScrollTopRef.current = currentScrollTop;
     }
+
 
     scrollArea.addEventListener('scroll', handleScroll, { passive: true });
     return () => scrollArea.removeEventListener('scroll', handleScroll);
   }, [mode, currentSession, inputBarHidden]);
+
 
   // ---------------------------------------------------------------------------
   // Detect mode from input
@@ -156,6 +175,7 @@ export function AIAssistantPage() {
     return 'packing';
   }
 
+
   // ---------------------------------------------------------------------------
   // Touch handlers for swipe-to-delete (chat history)
   // ---------------------------------------------------------------------------
@@ -164,9 +184,11 @@ export function AIAssistantPage() {
     setTouchCurrentX(e.touches[0]?.clientX ?? null);
   }
 
+
   function onTouchMove(e: React.TouchEvent<HTMLDivElement>) {
     setTouchCurrentX(e.touches[0]?.clientX ?? null);
   }
+
 
   function onTouchEnd(sessionId: string) {
     const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
@@ -176,6 +198,7 @@ export function AIAssistantPage() {
       return;
     }
 
+
     const deltaX = touchCurrentX - touchStartX;
     if (deltaX < -40) {
       setOpenSessionActionsId(sessionId);
@@ -183,9 +206,11 @@ export function AIAssistantPage() {
       setOpenSessionActionsId(null);
     }
 
+
     setTouchStartX(null);
     setTouchCurrentX(null);
   }
+
 
   // ---------------------------------------------------------------------------
   // Handle input submission
@@ -193,11 +218,11 @@ export function AIAssistantPage() {
   async function handleSubmit() {
     if (!input.trim() || loading) return;
 
+
     // Set loading FIRST — this protects the auth guard from wiping the page.
-    // The auth guard checks `if (!user && !loading && !error)`, so with loading=true,
-    // even if refreshSession() triggers onAuthStateChange(null), the UI stays intact.
     setLoading(true);
     setError('');
+
 
     // Pre-flight: verify a session exists at all (local check, no side effects)
     {
@@ -209,8 +234,10 @@ export function AIAssistantPage() {
       }
     }
 
+
     const detectedMode = detectMode(input);
     setMode(detectedMode);
+
 
     if (detectedMode === 'chat') {
       await handleChatSubmit();
@@ -219,15 +246,18 @@ export function AIAssistantPage() {
     }
   }
 
+
   // ---------------------------------------------------------------------------
   // Chat: Send message
   // ---------------------------------------------------------------------------
   async function handleChatSubmit() {
     if (!input.trim() || loading) return;
 
+
     setLoading(true);
     setError('');
     setIsTyping(true);
+
 
     try {
       // Create or update session
@@ -239,14 +269,17 @@ export function AIAssistantPage() {
         setCurrentSession(session);
       }
 
+
       // Add user message
       const userMessage = createChatMessage('user', input);
       session.messages.push(userMessage);
       setCurrentSession({ ...session });
       setInput('');
 
+
       // Get AI response
       const response = await sendChatMessage(session.messages, catalog);
+
 
       // Add assistant message
       const assistantMessage = createChatMessage('assistant', response);
@@ -270,15 +303,18 @@ export function AIAssistantPage() {
     }
   }
 
+
   // ---------------------------------------------------------------------------
   // Packing: Generate plan
   // ---------------------------------------------------------------------------
   async function handlePackingSubmit() {
     if (!input.trim() || !settings || loading) return;
 
+
     setLoading(true);
     setLoadingMessage('Classifying gear items…');
     setError('');
+
 
     try {
       // First, classify any pending items
@@ -289,27 +325,25 @@ export function AIAssistantPage() {
       const patterns = settings.aiLearningEnabled ? await buildPatterns() : [];
       const provider = await getProvider(settings);
 
+
       const rawPlan = await provider.generatePlan({
         eventDescription: input,
         catalog,
         patterns,
       });
 
+
       // ------------------------------------------------------------------
       // Safety guard: Ensure at least one video-first camera is PRIMARY for video events
-      // (allows multiple primaries, which the AI may assign for co-equal cameras)
       // ------------------------------------------------------------------
       const isVideoEvent = /video|interview|corporate/i.test(rawPlan.eventType);
       if (isVideoEvent) {
         const cameraBodies = rawPlan.checklist.filter(item => item.section === 'Camera Bodies');
-        
-        // Check if at least one video_first camera is already marked as primary
         const hasVideoFirstPrimary = cameraBodies.some(item => {
           const matchedItem = catalog.find(c => c.id === item.gearItemId);
           return matchedItem?.inferredProfile === 'video_first' && item.role === 'primary';
         });
         
-        // If not, promote the best video_first camera to primary
         if (!hasVideoFirstPrimary) {
           const videoFirstBody = cameraBodies.find(item => {
             const matchedItem = catalog.find(c => c.id === item.gearItemId);
@@ -322,17 +356,21 @@ export function AIAssistantPage() {
         }
       }
 
+
       // ------------------------------------------------------------------
       // Client-side catalog matcher
       // ------------------------------------------------------------------
       setLoadingMessage('Matching items to your catalog…');
 
+
       const itemsNeedingReview: ReviewItem[] = [];
       const resolvedChecklist: AIPlan['checklist'] = [];
       const lowConfidenceMissing: AIPlan['missingItems'] = [];
 
+
       for (const item of rawPlan.checklist) {
         const match = matchCatalogItem(item.name, item.gearItemId, catalog);
+
 
         if (match.confidence === 'high') {
           resolvedChecklist.push({
@@ -340,7 +378,6 @@ export function AIAssistantPage() {
             gearItemId: match.bestMatch?.id ?? item.gearItemId,
           });
         } else if (match.confidence === 'medium') {
-          // Queue for user review — placeholder stays gearItemId: null
           itemsNeedingReview.push({
             key: item.name,
             aiName: item.name,
@@ -352,16 +389,16 @@ export function AIAssistantPage() {
           });
           resolvedChecklist.push({ ...item, gearItemId: null });
         } else {
-          // Low confidence — move to missing items instead of keeping in checklist
           lowConfidenceMissing.push({
             name: item.name,
             reason: item.notes || 'Recommended for this event but not found in your catalog',
             priority: item.priority,
-            action: 'rent', // default to rent for expensive gear
+            action: 'rent',
             category: item.section,
           });
         }
       }
+
 
       const processedPlan: AIPlan = {
         ...rawPlan,
@@ -369,6 +406,7 @@ export function AIAssistantPage() {
         missingItems: [...rawPlan.missingItems, ...lowConfidenceMissing],
       };
       setPlan(processedPlan);
+
 
       if (itemsNeedingReview.length > 0) {
         setReviewItems(itemsNeedingReview);
@@ -385,17 +423,21 @@ export function AIAssistantPage() {
     }
   }
 
+
   // ---------------------------------------------------------------------------
   // Apply user review selections → patch plan → show results
   // ---------------------------------------------------------------------------
   function handleReviewConfirm() {
     if (!plan) return;
 
+
     const additionalMissing: AIPlan['missingItems'] = [];
+
 
     const updatedChecklist = plan.checklist.map((item) => {
       const userChoice = selections.get(item.name);
-      if (!userChoice) return item; // high/low confidence — no change
+      if (!userChoice) return item;
+
 
       if (userChoice === '__MISSING__') {
         additionalMissing.push({
@@ -404,11 +446,13 @@ export function AIAssistantPage() {
           priority: item.priority,
           action: 'borrow',
         });
-        return null; // remove from checklist
+        return null;
       }
+
 
       return { ...item, gearItemId: userChoice };
     });
+
 
     setPlan({
       ...plan,
@@ -416,15 +460,18 @@ export function AIAssistantPage() {
       missingItems: [...plan.missingItems, ...additionalMissing],
     });
 
+
     setReviewOpen(false);
     setStep('results');
   }
+
 
   // ---------------------------------------------------------------------------
   // Persist event (explicit user action)
   // ---------------------------------------------------------------------------
   async function handleCreateEvent() {
     if (!plan || !settings || saving) return;
+
 
     setSaving(true);
     try {
@@ -435,6 +482,7 @@ export function AIAssistantPage() {
         patterns,
       });
 
+
       await db.events.add(event);
       navigate(`/events/${event.id}`);
     } catch (e) {
@@ -444,6 +492,7 @@ export function AIAssistantPage() {
     }
   }
 
+
   // ---------------------------------------------------------------------------
   // Chat: New conversation
   // ---------------------------------------------------------------------------
@@ -451,9 +500,10 @@ export function AIAssistantPage() {
     setCurrentSession(null);
     setInput('');
     setError('');
-    setMode('packing'); // Reset to default mode
+    setMode('packing');
     closeHistorySheet();
   }
+
 
   // ---------------------------------------------------------------------------
   // Chat: Load session
@@ -467,6 +517,7 @@ export function AIAssistantPage() {
       closeHistorySheet();
     }
   }
+
 
   // ---------------------------------------------------------------------------
   // Chat: Delete session
@@ -482,6 +533,7 @@ export function AIAssistantPage() {
     }
   }
 
+
   // ---------------------------------------------------------------------------
   // History sheet helpers
   // ---------------------------------------------------------------------------
@@ -490,6 +542,7 @@ export function AIAssistantPage() {
     params.delete('history');
     setSearchParams(params);
   }
+
 
   // ---------------------------------------------------------------------------
   // Reset packing list
@@ -505,6 +558,7 @@ export function AIAssistantPage() {
     setMode('packing');
   }
 
+
   // ---------------------------------------------------------------------------
   // Derived stats for results header
   // ---------------------------------------------------------------------------
@@ -516,6 +570,7 @@ export function AIAssistantPage() {
     };
   }, [plan]);
 
+
   // ---------------------------------------------------------------------------
   // Group checklist items by section (memoised)
   // ---------------------------------------------------------------------------
@@ -526,25 +581,26 @@ export function AIAssistantPage() {
     );
   }, [plan]);
 
+
   // ---------------------------------------------------------------------------
   // Empty catalog guard
   // ---------------------------------------------------------------------------
   if (catalog.length === 0) {
     return (
-      <section className="ai-page">
-        <header className="ios-header">
-          <div className="ios-header-top">
-            <h1 className="ios-title">Assistant</h1>
+      <section className="ai-page ios-theme">
+        <header className="ai-ios-header">
+          <div className="ai-ios-header-top">
+            <h1 className="ai-ios-title">Assistant</h1>
           </div>
         </header>
-        <div className="ai-scroll-area">
-          <div className="ai-empty-state">
+        <div className="ai-ios-content">
+          <div className="ai-ios-empty">
             <div className="stack-sm" style={{ textAlign: 'center' }}>
               <h3>Add gear first</h3>
               <p className="subtle">
                 The AI needs your gear catalog to generate smart packing lists and answer questions.
               </p>
-              <button onClick={() => navigate('/catalog')}>Go to Catalog</button>
+              <button className="ai-ios-text-btn" onClick={() => navigate('/catalog')}>Go to Catalog</button>
             </div>
           </div>
         </div>
@@ -552,20 +608,20 @@ export function AIAssistantPage() {
     );
   }
 
+
   // ---------------------------------------------------------------------------
   // Auth guard
   // ---------------------------------------------------------------------------
   if (authLoading) {
-    // Loading auth status
     return (
-      <section className="ai-page">
-        <header className="ios-header">
-          <div className="ios-header-top">
-            <h1 className="ios-title">Assistant</h1>
+      <section className="ai-page ios-theme">
+        <header className="ai-ios-header">
+          <div className="ai-ios-header-top">
+            <h1 className="ai-ios-title">Assistant</h1>
           </div>
         </header>
-        <div className="ai-scroll-area">
-          <div className="ai-empty-state">
+        <div className="ai-ios-content">
+          <div className="ai-ios-empty">
             <p className="subtle">Checking authentication...</p>
           </div>
         </div>
@@ -573,29 +629,24 @@ export function AIAssistantPage() {
     );
   }
 
-  // Auth guard: only show "Authentication Required" if user is null AND we're NOT
-  // in the middle of an AI operation (loading) AND there's no error to display.
-  // Without this tolerance, a failed refreshSession() triggers onAuthStateChange(null)
-  // which sets user=null, and this guard would immediately wipe the page — hiding the
-  // error message the user needs to see. On mobile PWA, this instant full-screen swap
-  // looks identical to a page reload (the core reported bug).
+
   if (!user && !loading && !error) {
     return (
-      <section className="ai-page">
-        <header className="ios-header">
-          <div className="ios-header-top">
-            <h1 className="ios-title">Assistant</h1>
+      <section className="ai-page ios-theme">
+        <header className="ai-ios-header">
+          <div className="ai-ios-header-top">
+            <h1 className="ai-ios-title">Assistant</h1>
           </div>
         </header>
-        <div className="ai-scroll-area">
-          <div className="ai-empty-state">
+        <div className="ai-ios-content">
+          <div className="ai-ios-empty">
             <div className="stack-sm" style={{ textAlign: 'center' }}>
               <h3>Authentication Required</h3>
               <p className="subtle">
                 AI features require authentication to keep your data secure.
                 Please log in to continue.
               </p>
-              <button type="button" onClick={() => navigate('/login')}>Go to Login</button>
+              <button className="ai-ios-text-btn" type="button" onClick={() => navigate('/login')}>Go to Login</button>
             </div>
           </div>
         </div>
@@ -603,17 +654,18 @@ export function AIAssistantPage() {
     );
   }
 
+
   // ---------------------------------------------------------------------------
   // Render
   // ---------------------------------------------------------------------------
   return (
-    <section className="ai-page">
-      {/* ── iOS HEADER ── */}
-      <header className="ios-header">
-        <div className="ios-header-top">
-          <h1 className="ios-title">Assistant</h1>
+    <section className="ai-page ios-theme">
+      {/* -- iOS HEADER -- */}
+      <header className="ai-ios-header">
+        <div className="ai-ios-header-top">
+          <h1 className="ai-ios-title">Assistant</h1>
           <button
-            className="ios-catalog-filter-btn"
+            className="ai-ios-icon-btn"
             onClick={() => {
               const params = new URLSearchParams(searchParams);
               params.set('history', '1');
@@ -629,86 +681,91 @@ export function AIAssistantPage() {
         </div>
       </header>
 
-      {/* ── SCROLL AREA ── */}
-      <div className="ai-scroll-area" ref={scrollAreaRef}>
+
+      {/* -- SCROLL AREA -- */}
+      <div className="ai-ios-content" ref={scrollAreaRef}>
         
         {/* Initial empty state */}
         {mode === 'packing' && step === 'input' && !loading && !plan && (
-          <div className="ai-empty-state">
+          <div className="ai-ios-empty">
+            <div className="ai-ios-empty-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                 <path d="M12 3 L14.5 8.5 L20 9.5 L16 13.5 L17 19 L12 16.5 L7 19 L8 13.5 L4 9.5 L9.5 8.5 Z" />
+              </svg>
+            </div>
             <p className="subtle">Describe your shoot or ask about your gear</p>
           </div>
         )}
 
+
         {/* Packing: Loading state */}
         {loading && mode === 'packing' && (
-          <div className="ai-loading-state">
+          <div className="ai-ios-loading">
             <div className="ai-spinner">✦</div>
             <p className="subtle">{loadingMessage}</p>
           </div>
         )}
 
+
         {/* Packing: Results */}
         {mode === 'packing' && step === 'results' && plan && !loading && (
-          <div className="ai-packing-results">
-            {/* Gradient header */}
-            <div className={`ai-results-header card${headerAnimating ? ' ai-results-header--entering' : ''}`}>
+          <div className="ai-ios-results">
+            {/* Results Header Card */}
+            <div className={`ai-ios-card ai-ios-result-header${headerAnimating ? ' entering' : ''}`}>
               <div className="row between wrap">
                 <div>
-                  <h2 style={{ margin: 0 }}>{plan.eventTitle}</h2>
-                  <p className="subtle" style={{ margin: '0.25rem 0 0' }}>{plan.eventType}</p>
+                  <h2 className="ai-ios-result-title">{plan.eventTitle}</h2>
+                  <p className="ai-ios-result-subtitle">{plan.eventType}</p>
                 </div>
-                <button type="button" className="ghost" onClick={handleReset} style={{ fontSize: '0.85rem' }}>
-                  ← New prompt
+                <button type="button" className="ai-ios-text-btn" onClick={handleReset}>
+                  New prompt
                 </button>
               </div>
               {resultStats && (
-                <p className="subtle" style={{ fontSize: '0.8rem', marginTop: '0.5rem', marginBottom: 0 }}>
-                  {resultStats.totalItems} items from your catalog
+                <p className="ai-ios-result-stats">
+                  {resultStats.totalItems} items from catalog
                   {resultStats.missingCount > 0 && (
-                    <> · {resultStats.missingCount} suggested additions</>
+                    <> · {resultStats.missingCount} missing</>
                   )}
                 </p>
               )}
             </div>
 
+
             {/* Section cards */}
             {Object.entries(groupedItems).map(([section, items]) => (
-              <div key={section} className="card stack-sm">
-                <h4 className="section-heading">{section}</h4>
-                <div className="stack-sm">
+              <div key={section} className="ai-ios-list-group">
+                <div className="ai-ios-list-header">
+                   <h3>{section}</h3>
+                </div>
+                <div className="ai-ios-list-body">
                   {items.map((item) => {
                     const showRoleBadge = (section === 'Camera Bodies' || section === 'Audio') && 
                                           item.role && 
                                           item.role !== 'standard';
                     
                     return (
-                      <div key={`${item.name}-${item.gearItemId ?? 'x'}`} className="ai-item-row">
-                        <div className="row between wrap" style={{ gap: '0.5rem' }}>
-                          <div style={{ flex: 1 }}>
-                            <div className="row wrap" style={{ gap: '0.4rem', alignItems: 'center' }}>
-                              <strong>{item.name}</strong>
-                              {item.quantity > 1 && (
-                                <span className="subtle">×{item.quantity}</span>
-                              )}
-                              {showRoleBadge && (
-                                <span className={`pill-role ${item.role}`}>
-                                  {item.role}
-                                </span>
-                              )}
-                              {item.gearItemId && (
-                                <span className="pill pill--success" style={{ fontSize: '0.65rem' }}>✓ matched</span>
-                              )}
-                            </div>
-                            {item.notes && (
-                              <p className="subtle" style={{ fontSize: '0.78rem', marginTop: '0.2rem', marginBottom: 0 }}>
-                                {item.notes}
-                              </p>
+                      <div key={`${item.name}-${item.gearItemId ?? 'x'}`} className="ai-ios-list-item">
+                        <div className="ai-ios-item-content">
+                          <div className="row wrap" style={{ gap: '0.4rem', alignItems: 'center' }}>
+                            <span className="ai-ios-item-name">{item.name}</span>
+                            {item.quantity > 1 && (
+                              <span className="ai-ios-badge">×{item.quantity}</span>
+                            )}
+                            {showRoleBadge && (
+                              <span className={`ai-ios-badge role-${item.role}`}>
+                                {item.role}
+                              </span>
+                            )}
+                            {item.gearItemId && (
+                              <span className="ai-ios-badge success">✓ matched</span>
                             )}
                           </div>
-                          <span className={`pill priority-${item.priority}`}>
-                            {priorityLabel(item.priority)}
-                          </span>
+                          {item.notes && (
+                            <p className="ai-ios-item-note">{item.notes}</p>
+                          )}
                         </div>
+                        <span className={`ai-ios-priority-dot priority-${item.priority}`} />
                       </div>
                     );
                   })}
@@ -716,38 +773,33 @@ export function AIAssistantPage() {
               </div>
             ))}
 
+
             {/* Missing items */}
             {plan.missingItems.length > 0 && (
-              <div className="card stack-sm">
-                <h4 className="section-heading section-heading--missing">
-                  ⚠ Consider buying / borrowing / renting
-                </h4>
-                <div className="stack-sm">
+              <div className="ai-ios-list-group">
+                <div className="ai-ios-list-header warning">
+                  <h3>⚠ Considerations</h3>
+                </div>
+                <div className="ai-ios-list-body">
                   {[...plan.missingItems]
                     .sort((a, b) => {
                       const r: Record<string, number> = { 'must-have': 0, 'nice-to-have': 1, optional: 2 };
                       return (r[a.priority] ?? 2) - (r[b.priority] ?? 2);
                     })
                     .map((item) => (
-                      <div key={item.name} className="ai-missing-row">
-                        <div className="row between wrap" style={{ gap: '0.5rem' }}>
-                          <div style={{ flex: 1 }}>
-                            <strong>{item.name}</strong>
-                            <p className="subtle" style={{ fontSize: '0.78rem', marginTop: '0.2rem', marginBottom: 0 }}>
-                              {item.reason}
-                            </p>
-                            {item.notes && (
-                              <p className="subtle" style={{ fontSize: '0.75rem', marginTop: '0.15rem', marginBottom: 0 }}>
-                                Est. cost: {item.notes}
-                              </p>
-                            )}
-                          </div>
-                          <div className="stack-sm" style={{ alignItems: 'flex-end', gap: '0.25rem' }}>
-                            <span className={`pill priority-${item.priority}`}>
+                      <div key={item.name} className="ai-ios-list-item">
+                        <div className="ai-ios-item-content">
+                          <span className="ai-ios-item-name">{item.name}</span>
+                          <p className="ai-ios-item-note">{item.reason}</p>
+                          {item.notes && (
+                            <p className="ai-ios-item-note subtle">Est: {item.notes}</p>
+                          )}
+                        </div>
+                        <div className="stack-sm" style={{ alignItems: 'flex-end', gap: '4px' }}>
+                           <span className={`ai-ios-priority-tag priority-${item.priority}`}>
                               {priorityLabel(item.priority)}
-                            </span>
-                            <span className="pill pill--action">{item.action}</span>
-                          </div>
+                           </span>
+                           <span className="ai-ios-action-tag">{item.action}</span>
                         </div>
                       </div>
                     ))}
@@ -755,54 +807,57 @@ export function AIAssistantPage() {
               </div>
             )}
 
+
             {/* Pro tips */}
             {plan.tips && plan.tips.length > 0 && (
-              <div className="card stack-sm ai-tips">
-                <h4 style={{ marginBottom: '0.5rem' }}>Pro Tips</h4>
-                <ul style={{ paddingLeft: '1.2rem', margin: 0 }}>
+              <div className="ai-ios-card">
+                <h4 className="ai-ios-section-title">Pro Tips</h4>
+                <ul className="ai-ios-tips-list">
                   {plan.tips.map((tip, i) => (
-                    <li key={i} className="subtle" style={{ fontSize: '0.85rem', marginBottom: '0.4rem' }}>
-                      {tip}
-                    </li>
+                    <li key={i}>{tip}</li>
                   ))}
                 </ul>
               </div>
             )}
 
+
             {/* Create event CTA */}
-            <div className="card stack-sm">
-              <h4 style={{ marginBottom: '0.25rem' }}>Ready to pack?</h4>
-              <p className="subtle" style={{ marginBottom: '1rem' }}>
+            <div className="ai-ios-card">
+              <h4 className="ai-ios-section-title">Ready to pack?</h4>
+              <p className="ai-ios-card-text">
                 Create an event to save this as a checklist you can tick off while packing.
               </p>
               <button
                 type="button"
+                className="ai-ios-primary-btn"
                 onClick={() => void handleCreateEvent()}
                 disabled={saving}
-                style={{ width: '100%' }}
               >
-                {saving ? 'Creating event…' : 'Create Event & Checklist →'}
+                {saving ? 'Creating event…' : 'Create Event & Checklist'}
               </button>
             </div>
+            
+            <div className="ai-ios-bottom-spacer" />
           </div>
         )}
 
+
         {/* Chat: Messages */}
         {mode === 'chat' && currentSession && (
-          <div className="ai-chat-messages">
+          <div className="ai-ios-chat-stream">
             {currentSession.messages
               .filter(m => m.role !== 'system')
               .map((message) => (
                 <div
                   key={message.id}
-                  className={`chat-bubble chat-bubble--${message.role}`}
+                  className={`ai-ios-bubble ${message.role}`}
                 >
-                  <div className="chat-bubble__content">{message.content}</div>
+                  <div className="ai-ios-bubble-content">{message.content}</div>
                 </div>
               ))}
             {isTyping && (
-              <div className="chat-bubble chat-bubble--assistant">
-                <div className="chat-typing">
+              <div className="ai-ios-bubble assistant typing">
+                <div className="ai-typing-dots">
                   <span></span>
                   <span></span>
                   <span></span>
@@ -810,24 +865,27 @@ export function AIAssistantPage() {
               </div>
             )}
             <div ref={chatEndRef} />
+            <div className="ai-ios-bottom-spacer" />
           </div>
         )}
 
+
         {/* Chat: Empty state */}
         {mode === 'chat' && !currentSession && !loading && (
-          <div className="ai-empty-state">
+          <div className="ai-ios-empty">
             <p className="subtle">Start a conversation about your gear</p>
           </div>
         )}
 
+
       </div>
 
-      {/* ── FIXED INPUT BAR ── */}
-      {/* Hidden when packing results are showing */}
+
+      {/* -- FIXED INPUT BAR -- */}
       {!(mode === 'packing' && step === 'results') && (
-        <div className={`ai-input-bar${inputBarHidden ? ' ai-input-bar--hidden' : ''}`}>
+        <div className={`ai-ios-input-bar${inputBarHidden ? ' hidden' : ''}`}>
           {error && <p className="ai-input-error">{error}</p>}
-          <div className="ai-input-pill">
+          <div className="ai-ios-input-pill">
             <textarea
               placeholder="Describe your shoot or ask a question..."
               value={input}
@@ -844,7 +902,7 @@ export function AIAssistantPage() {
               rows={1}
             />
             <button 
-              className="ai-send-btn"
+              className="ai-ios-send-btn"
               onClick={() => void handleSubmit()}
               disabled={loading || !input.trim()}
               aria-label="Send message"
@@ -852,7 +910,7 @@ export function AIAssistantPage() {
               {loading ? (
                 <span className="ai-spinner-small">✦</span>
               ) : (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M12 19V5M5 12l7-7 7 7" />
                 </svg>
               )}
@@ -861,7 +919,8 @@ export function AIAssistantPage() {
         </div>
       )}
 
-      {/* ── HISTORY BOTTOM SHEET ── */}
+
+      {/* -- HISTORY BOTTOM SHEET -- */}
       {showHistorySheet && (
         <>
           <button className="sheet-overlay" onClick={closeHistorySheet} aria-label="Close chat history" />
@@ -899,6 +958,7 @@ export function AIAssistantPage() {
                         </button>
                       </div>
 
+
                       {/* Foreground swipeable card */}
                       <div
                         className="chat-session-item chat-session-swipe-foreground"
@@ -934,7 +994,8 @@ export function AIAssistantPage() {
         </>
       )}
 
-      {/* ── REVIEW SHEET ── */}
+
+      {/* -- REVIEW SHEET -- */}
       <CatalogMatchReviewSheet
         open={reviewOpen}
         items={reviewItems}
@@ -952,24 +1013,16 @@ export function AIAssistantPage() {
   );
 }
 
+
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
 function friendlyError(e: unknown): string {
   if (!(e instanceof Error)) return 'Something went wrong. Please try again.';
-  
-  // Handle custom AuthExpiredError from edgeFunctionClient
-  if (e instanceof AuthExpiredError) {
+  if (e instanceof AuthExpiredError) return 'Your session has expired. Please sign in again to use AI features.';
+  if (e.message.includes('Authentication') || e.message.includes('expired') || e.message.includes('sign in')) {
     return 'Your session has expired. Please sign in again to use AI features.';
   }
-  
-  // Handle auth-related errors by message content
-  if (e.message.includes('Authentication') || 
-      e.message.includes('expired') || 
-      e.message.includes('sign in')) {
-    return 'Your session has expired. Please sign in again to use AI features.';
-  }
-  
   if (e.message.includes('401')) return 'Invalid API key. Check Settings → AI Provider.';
   if (e.message.includes('429')) return 'Rate limit reached. Wait a moment and try again.';
   if (!navigator.onLine) return 'No internet connection. AI features require online access.';
