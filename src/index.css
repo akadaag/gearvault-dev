@@ -5502,7 +5502,7 @@ html {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 9px 12px;
+  padding: 8px 12px;
   border-radius: 12px;
   background: rgba(142, 142, 147, 0.12);
   transition: background 0.2s, box-shadow 0.2s;
@@ -5685,8 +5685,8 @@ html {
   -webkit-backdrop-filter: blur(var(--ios-blur));
   border: 0.5px solid rgba(0, 0, 0, 0.06);
   box-shadow: var(--ios-shadow);
-  padding: 20px;
-  min-height: 140px;
+  padding: 16px;
+  min-height: 120px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -5704,7 +5704,7 @@ html {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .home-ios-hero-label {
@@ -5755,7 +5755,7 @@ html {
 .home-ios-hero-subtitle {
   font-size: 14px;
   color: var(--ios-text-secondary);
-  margin-bottom: 16px;
+  margin-bottom: 10px;
   line-height: 1.3;
 }
 
@@ -5830,14 +5830,14 @@ html {
 
 .home-ios-bento-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
   margin-bottom: 24px;
 }
 
-/* Value Card — left column, spans 2 rows */
+/* Value Card — left column, spans 3 rows */
 .home-ios-value-card {
-  grid-row: span 2;
+  grid-row: span 3;
   border-radius: var(--ios-radius-sm);
   background: linear-gradient(135deg, var(--ios-blue), #5856D6);
   padding: 20px 16px;
@@ -5845,6 +5845,8 @@ html {
   flex-direction: column;
   justify-content: space-between;
   min-height: 120px;
+  min-width: 0;
+  overflow: hidden;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   box-shadow: 0 4px 20px rgba(0, 122, 255, 0.25);
@@ -5895,6 +5897,8 @@ html {
   gap: 10px;
   padding: 12px 14px;
   min-height: auto;
+  min-width: 0;
+  overflow: hidden;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
@@ -6305,12 +6309,12 @@ html {
   }
 
   .home-ios-hero-card {
-    min-height: 110px;
-    padding: 16px;
+    min-height: 90px;
+    padding: 14px;
   }
 
   .home-ios-hero-card.empty {
-    min-height: 100px;
+    min-height: 80px;
   }
 
   .home-ios-hero-title {
@@ -6319,20 +6323,21 @@ html {
 
   .home-ios-hero-subtitle {
     font-size: 13px;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
   }
 
   .home-ios-value-card {
-    min-height: 100px;
-    padding: 16px 14px;
+    min-height: 80px;
+    padding: 14px 12px;
   }
 
   .home-ios-value-amount {
-    font-size: 24px;
+    font-size: 22px;
   }
 
   .home-ios-action-btn {
     padding: 10px 12px;
+    gap: 8px;
   }
 
   .home-ios-action-icon {
@@ -6341,7 +6346,7 @@ html {
   }
 
   .home-ios-action-btn-label {
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .home-section-title {
