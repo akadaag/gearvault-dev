@@ -6145,7 +6145,7 @@ html {
   -webkit-backdrop-filter: blur(var(--ios-blur));
   border-radius: var(--ios-radius-sm);
   border: 0.5px solid rgba(0, 0, 0, 0.06);
-  box-shadow: var(--ios-shadow);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.06);
   overflow: hidden;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -6282,6 +6282,7 @@ html {
 
 :root.dark .home-ios-carousel-card {
   border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 28px rgba(0, 0, 0, 0.5);
 }
 
 :root.dark .home-ios-carousel-thumb {
