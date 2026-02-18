@@ -5460,6 +5460,11 @@ html {
   color: var(--ios-text-primary);
   font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
   line-height: 1.15;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
 }
 
 .home-ios-profile-btn {
@@ -5523,6 +5528,7 @@ html {
   font-size: 17px;
   color: var(--ios-text-primary);
   font-family: inherit;
+  padding: 0;
 }
 
 .home-ios-search-bar input::placeholder {
@@ -5707,6 +5713,7 @@ html {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--ios-text-secondary);
+  line-height: 1.2;
 }
 
 .home-ios-hero-badge {
@@ -5749,6 +5756,7 @@ html {
   font-size: 14px;
   color: var(--ios-text-secondary);
   margin-bottom: 16px;
+  line-height: 1.3;
 }
 
 .home-ios-hero-progress-wrap {
@@ -5775,6 +5783,7 @@ html {
   justify-content: space-between;
   font-size: 12px;
   color: var(--ios-text-secondary);
+  line-height: 1.2;
 }
 
 /* Hero Empty State */
@@ -5794,6 +5803,7 @@ html {
   font-weight: 600;
   color: rgba(255, 255, 255, 0.85);
   margin-bottom: 12px;
+  line-height: 1.3;
 }
 
 .home-ios-hero-cta {
@@ -5851,6 +5861,7 @@ html {
   color: rgba(255, 255, 255, 0.7);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+  line-height: 1.2;
 }
 
 .home-ios-value-amount {
@@ -5868,6 +5879,7 @@ html {
   font-size: 13px;
   color: rgba(255, 255, 255, 0.6);
   margin-top: auto;
+  line-height: 1.2;
 }
 
 /* Action buttons — right column, 3 stacked */
@@ -5920,6 +5932,7 @@ html {
   font-size: 15px;
   font-weight: 600;
   color: var(--ios-text-primary);
+  line-height: 1.2;
 }
 
 /* ── Text Button ────────────────────────────────────────────── */
@@ -6045,11 +6058,13 @@ html {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.3;
 }
 
 .home-list-subtitle {
   font-size: 13px;
   color: var(--ios-text-secondary);
+  line-height: 1.3;
 }
 
 .home-page.ios-theme .text-red {
@@ -6131,6 +6146,7 @@ html {
   overflow: hidden;
   text-overflow: ellipsis;
   display: block;
+  line-height: 1.3;
 }
 
 .home-ios-carousel-sub {
@@ -6141,6 +6157,7 @@ html {
   text-overflow: ellipsis;
   display: block;
   margin-top: 1px;
+  line-height: 1.3;
 }
 
 /* ── Bottom Spacer ──────────────────────────────────────────── */
@@ -6274,12 +6291,104 @@ html {
     padding: 1rem;
   }
 
+  .home-ios-header {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .home-ios-title {
+    font-size: 24px;
+  }
+
   .home-ios-bento-grid {
     gap: 10px;
   }
 
+  .home-ios-hero-card {
+    min-height: 110px;
+    padding: 16px;
+  }
+
+  .home-ios-hero-card.empty {
+    min-height: 100px;
+  }
+
+  .home-ios-hero-title {
+    font-size: 19px;
+  }
+
+  .home-ios-hero-subtitle {
+    font-size: 13px;
+    margin-bottom: 12px;
+  }
+
+  .home-ios-value-card {
+    min-height: 100px;
+    padding: 16px 14px;
+  }
+
+  .home-ios-value-amount {
+    font-size: 24px;
+  }
+
+  .home-ios-action-btn {
+    padding: 10px 12px;
+  }
+
+  .home-ios-action-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .home-ios-action-btn-label {
+    font-size: 14px;
+  }
+
   .home-section-title {
     font-size: 18px;
+  }
+
+  .home-ios-carousel-card {
+    flex: 0 0 120px;
+  }
+
+  .home-ios-carousel-thumb {
+    width: 120px;
+    height: 92px;
+  }
+
+  .home-ios-carousel-info {
+    padding: 6px 8px 8px;
+  }
+
+  .home-ios-carousel-name {
+    font-size: 13px;
+  }
+
+  .home-ios-carousel-sub {
+    font-size: 11px;
+  }
+
+  .home-ios-list-item {
+    padding: 10px 14px;
+  }
+
+  .home-list-icon {
+    width: 32px;
+    height: 32px;
+  }
+
+  .home-list-img-box {
+    width: 40px;
+    height: 40px;
+  }
+
+  .home-list-title {
+    font-size: 16px;
+  }
+
+  .home-list-subtitle {
+    font-size: 12px;
   }
 }
 
