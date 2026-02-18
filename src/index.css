@@ -127,7 +127,7 @@ body,
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #e8e8e8;
+  background: #F2F2F7; /* Match iOS theme light background for seamless blend with white logo */
 }
 
 .splash-logo {

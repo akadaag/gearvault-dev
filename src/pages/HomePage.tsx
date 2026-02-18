@@ -306,46 +306,6 @@ export function HomePage() {
       {/* ── Scrollable Content ────────────────────────────────────────────── */}
       <div className="home-ios-content">
         
-        {/* Quick Actions Grid */}
-        <div className="home-ios-quick-actions">
-          <button className="home-ios-action-card" onClick={() => navigate('/catalog?add=1')}>
-            <div className="home-action-icon blue">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-            </div>
-            <span className="home-action-label">Add Gear</span>
-          </button>
-          
-          <button className="home-ios-action-card" onClick={() => navigate('/events?add=1')}>
-            <div className="home-action-icon purple">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-            </div>
-            <span className="home-action-label">New Event</span>
-          </button>
-
-
-
-
-          <button className="home-ios-action-card" onClick={() => navigate('/assistant')}>
-            <div className="home-action-icon indigo">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
-                <path d="M12 3 L14.5 8.5 L20 9.5 L16 13.5 L17 19 L12 16.5 L7 19 L8 13.5 L4 9.5 L9.5 8.5 Z" />
-              </svg>
-            </div>
-            <span className="home-action-label">Ask AI</span>
-          </button>
-        </div>
-
-
-
-
         {/* Up Next Widget */}
         {nextEvent ? (
           <div className="home-ios-widget-large" onClick={() => navigate(`/events/${nextEvent.id}`)}>
@@ -393,6 +353,43 @@ export function HomePage() {
             <button className="home-text-btn" onClick={() => navigate('/events?add=1')}>Plan a shoot</button>
           </div>
         )}
+
+        {/* Quick Actions Grid */}
+        <div className="home-ios-quick-actions">
+          <button className="home-ios-action-card" onClick={() => navigate('/catalog?add=1')}>
+            <div className="home-action-icon blue">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </div>
+            <span className="home-action-label">Add Gear</span>
+          </button>
+          
+          <button className="home-ios-action-card" onClick={() => navigate('/events?add=1')}>
+            <div className="home-action-icon purple">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+            </div>
+            <span className="home-action-label">New Event</span>
+          </button>
+
+
+
+
+          <button className="home-ios-action-card" onClick={() => navigate('/assistant')}>
+            <div className="home-action-icon indigo">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <path d="M12 3 L14.5 8.5 L20 9.5 L16 13.5 L17 19 L12 16.5 L7 19 L8 13.5 L4 9.5 L9.5 8.5 Z" />
+              </svg>
+            </div>
+            <span className="home-action-label">Ask AI</span>
+          </button>
+        </div>
 
 
 
