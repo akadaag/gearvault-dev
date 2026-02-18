@@ -7434,6 +7434,8 @@ html {
 /* Reset padding for Settings */
 .ios-theme .content.content-settings {
   padding-top: env(safe-area-inset-top, 0px);
+  padding-left: 0;
+  padding-right: 0;
   background: var(--ios-bg);
 }
 
@@ -7522,6 +7524,8 @@ html {
 /* Reset padding for Assistant */
 .ios-theme .content.content-assistant {
   padding-top: env(safe-area-inset-top, 0px);
+  padding-left: 0;
+  padding-right: 0;
   background: var(--ios-bg);
 }
 
