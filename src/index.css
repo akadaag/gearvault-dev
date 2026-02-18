@@ -7434,6 +7434,8 @@ html {
 /* Reset padding for Settings */
 .ios-theme .content.content-settings {
   padding-top: env(safe-area-inset-top, 0px);
+  padding-left: 0;
+  padding-right: 0;
   background: var(--ios-bg);
 }
 
@@ -7448,7 +7450,7 @@ html {
 }
 
 /* iOS Toggle Switch */
-.ios-toggle {
+input[type="checkbox"].ios-toggle {
   appearance: none;
   -webkit-appearance: none;
   width: 51px;
@@ -7465,11 +7467,11 @@ html {
   box-shadow: none;
 }
 
-.ios-toggle:checked {
+input[type="checkbox"].ios-toggle:checked {
   background: var(--ios-green);
 }
 
-.ios-toggle::after {
+input[type="checkbox"].ios-toggle::after {
   content: '';
   position: absolute;
   top: 2px;
@@ -7482,7 +7484,7 @@ html {
   transition: transform 0.2s;
 }
 
-.ios-toggle:checked::after {
+input[type="checkbox"].ios-toggle:checked::after {
   transform: translateX(20px);
 }
 
@@ -7588,11 +7590,11 @@ html {
   background: rgba(118, 118, 128, 0.24);
 }
 
-:root.dark .ios-toggle {
+:root.dark input[type="checkbox"].ios-toggle {
   background: #39393D;
 }
 
-:root.dark .ios-toggle:checked {
+:root.dark input[type="checkbox"].ios-toggle:checked {
   background: var(--ios-green);
 }
 
