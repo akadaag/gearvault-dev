@@ -1,6 +1,6 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { useScrollDirection } from '../hooks/useScrollDirection';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
@@ -39,6 +39,24 @@ const clearSvg = (
     <path d="M15 9l-6 6M9 9l6 6" />
   </svg>
 );
+
+// ── Layout morph transitions ─────────────────────────────────────────────────
+
+const morphSpring = {
+  type: 'spring' as const,
+  stiffness: 500,
+  damping: 32,
+};
+
+const navMorphTransition = {
+  layout: morphSpring,
+  opacity: { duration: 0.15 },
+};
+
+const searchMorphTransition = {
+  layout: morphSpring,
+  opacity: { duration: 0.2 },
+};
 
 // ── Component ────────────────────────────────────────────────────────────────
 
@@ -99,7 +117,6 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
     function handleOutside(e: MouseEvent | TouchEvent) {
       const target = e.target as Node;
       if (dropdownRef.current?.contains(target)) return;
-      // Don't close if clicking inside the floating nav bar area
       const navEl = document.querySelector('.floating-nav');
       if (navEl?.contains(target)) return;
       setSearchOpen(false);
@@ -116,8 +133,7 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
   // Auto-focus input when search opens
   useEffect(() => {
     if (searchOpen) {
-      // Small delay to let animation start
-      const t = setTimeout(() => inputRef.current?.focus(), 150);
+      const t = setTimeout(() => inputRef.current?.focus(), 200);
       return () => clearTimeout(t);
     }
   }, [searchOpen]);
@@ -147,7 +163,6 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
 
   return (
     <>
-      {/* Keyboard-open hides the entire floating nav */}
       <AnimatePresence>
         {!keyboardOpen && (
           <motion.div
@@ -156,19 +171,15 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
           >
-            {/* ─── DEFAULT STATE: Nav Pill + Search Circle ──────────────── */}
-            <AnimatePresence mode="wait">
-              {!searchOpen ? (
-                <motion.div
-                  className="floating-nav__default"
-                  key="nav-default"
-                  initial={{ opacity: 0, scale: 0.92 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.92 }}
-                  transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
-                >
-                  {/* Nav Pill */}
-                  <div className="floating-nav__pill">
+            <LayoutGroup>
+              <div className={`floating-nav__row${searchOpen ? ' is-search-open' : ''}`}>
+                {/* ── Left: Nav Pill ↔ Nav Circle ────────────────────── */}
+                {!searchOpen ? (
+                  <motion.div
+                    className="floating-nav__pill"
+                    layoutId="nav-morph"
+                    transition={navMorphTransition}
+                  >
                     {items.map((item) => {
                       const active = item.match
                         ? item.match(location.pathname)
@@ -190,51 +201,53 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
                         </button>
                       );
                     })}
-                  </div>
-
-                  {/* Search Circle */}
-                  <button
-                    className="floating-nav__search-circle"
-                    type="button"
-                    aria-label="Search"
-                    onClick={openSearch}
-                    onPointerUp={(e) => e.currentTarget.blur()}
-                  >
-                    <span className="floating-nav__search-icon">{searchSvg}</span>
-                  </button>
-                </motion.div>
-              ) : (
-                /* ─── SEARCH STATE: Nav Circle + Search Pill ──────────── */
-                <motion.div
-                  className="floating-nav__search-mode"
-                  key="nav-search"
-                  initial={{ opacity: 0, scale: 0.92 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.92 }}
-                  transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
-                >
-                  {/* Collapsed Nav Circle (shows active tab icon) */}
+                  </motion.div>
+                ) : (
                   <motion.button
                     className={`floating-nav__nav-circle${navCircleHidden ? ' is-hidden' : ''}`}
+                    layoutId="nav-morph"
                     type="button"
                     aria-label={activeItem?.label ?? 'Navigation'}
                     onClick={closeSearch}
                     onPointerUp={(e) => e.currentTarget.blur()}
-                    initial={false}
                     animate={{
                       opacity: navCircleHidden ? 0 : 1,
                       y: navCircleHidden ? 20 : 0,
                       scale: navCircleHidden ? 0.8 : 1,
                     }}
-                    transition={{ duration: 0.25, ease: [0.32, 0.72, 0, 1] }}
+                    transition={{
+                      layout: morphSpring,
+                      opacity: { duration: 0.25, ease: [0.32, 0.72, 0, 1] },
+                      y: { duration: 0.25, ease: [0.32, 0.72, 0, 1] },
+                      scale: { duration: 0.25, ease: [0.32, 0.72, 0, 1] },
+                    }}
                   >
                     <span className="floating-nav__nav-circle-icon" aria-hidden="true">
                       {activeItem?.icon ?? items[0]?.icon}
                     </span>
                   </motion.button>
+                )}
 
-                  {/* Search Pill */}
-                  <div className="floating-nav__search-pill" ref={dropdownRef}>
+                {/* ── Right: Search Circle ↔ Search Pill ─────────────── */}
+                {!searchOpen ? (
+                  <motion.button
+                    className="floating-nav__search-circle"
+                    layoutId="search-morph"
+                    type="button"
+                    aria-label="Search"
+                    onClick={openSearch}
+                    onPointerUp={(e) => e.currentTarget.blur()}
+                    transition={searchMorphTransition}
+                  >
+                    <span className="floating-nav__search-icon">{searchSvg}</span>
+                  </motion.button>
+                ) : (
+                  <motion.div
+                    className="floating-nav__search-pill"
+                    layoutId="search-morph"
+                    ref={dropdownRef}
+                    transition={searchMorphTransition}
+                  >
                     <div className="floating-nav__search-input-wrap">
                       <span className="floating-nav__search-pill-icon">{searchSvg}</span>
                       <input
@@ -344,10 +357,10 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
                         </motion.div>
                       )}
                     </AnimatePresence>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                  </motion.div>
+                )}
+              </div>
+            </LayoutGroup>
           </motion.div>
         )}
       </AnimatePresence>
