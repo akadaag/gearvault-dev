@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
+import { useSheetDismiss } from '../hooks/useSheetDismiss';
 import type { GearItem } from '../types/models';
 
 export interface ReviewItem {
@@ -41,6 +42,8 @@ export function CatalogMatchReviewSheet({
     return () => unlockSheetScroll();
   }, [open]);
 
+  const { closing, dismiss, onAnimationEnd } = useSheetDismiss(onCancel);
+
   if (!open) return null;
 
   const allResolved = items.every((item) => selections.has(item.key));
@@ -48,28 +51,25 @@ export function CatalogMatchReviewSheet({
   return (
     <>
       {/* Backdrop */}
-      <div className="sheet-backdrop" onClick={onCancel} />
+      <div className={`ios-sheet-backdrop${closing ? ' closing' : ''}`} onClick={dismiss} />
 
-      {/* Slide-down sheet */}
-      <div className="sheet sheet--top review-sheet">
-        {/* Handle bar */}
-        <div className="sheet-handle" />
+      {/* Slide-down-from-top sheet */}
+      <div className={`ios-sheet-modal ios-sheet-modal--top${closing ? ' closing' : ''}`} aria-label="Quick confirmation review" onAnimationEnd={onAnimationEnd}>
+        <div className="ios-sheet-handle" />
+        <div className="ios-sheet-header">
+          <button className="ios-sheet-btn secondary" onClick={dismiss}>Cancel</button>
+          <h3 className="ios-sheet-title">Quick Confirmation</h3>
+          <button className="ios-sheet-btn primary" onClick={onConfirm} disabled={!allResolved}>
+            Confirm
+          </button>
+        </div>
 
-        <div className="sheet-content stack-md">
-          {/* Header */}
-          <div className="stack-sm">
-            <div className="row between">
-              <h3 className="sheet-title">Quick Confirmation</h3>
-              <button className="ghost icon-btn" onClick={onCancel} aria-label="Close">
-                ✕
-              </button>
-            </div>
-            <p className="subtle">
-              {items.length === 1
-                ? '1 item needs your input — the AI wasn\'t 100% sure about the match.'
-                : `${items.length} items need your input — the AI wasn't 100% sure about the matches.`}
-            </p>
-          </div>
+        <div className="ios-sheet-content">
+          <p style={{ fontSize: '15px', color: 'var(--ios-text-secondary)', marginBottom: '16px', textAlign: 'center' }}>
+            {items.length === 1
+              ? '1 item needs your input — the AI wasn\'t 100% sure about the match.'
+              : `${items.length} items need your input — the AI wasn't 100% sure about the matches.`}
+          </p>
 
           {/* Review cards */}
           <div className="stack-md">
@@ -87,7 +87,7 @@ export function CatalogMatchReviewSheet({
                 </div>
 
                 {/* Candidates */}
-                <p className="subtle" style={{ fontSize: '0.75rem' }}>
+                <p style={{ fontSize: '13px', color: 'var(--ios-text-secondary)' }}>
                   Pick the closest match from your catalog:
                 </p>
 
@@ -109,7 +109,7 @@ export function CatalogMatchReviewSheet({
                         <div className="radio-option-body">
                           <span className="radio-option-name">{candidate.name}</span>
                           {(candidate.brand || candidate.model) && (
-                            <span className="subtle radio-option-meta">
+                            <span className="radio-option-meta" style={{ fontSize: '13px', color: 'var(--ios-text-secondary)' }}>
                               {[candidate.brand, candidate.model].filter(Boolean).join(' · ')}
                             </span>
                           )}
@@ -133,7 +133,7 @@ export function CatalogMatchReviewSheet({
                     />
                     <div className="radio-option-body">
                       <span className="radio-option-name">Not in my catalog</span>
-                      <span className="subtle radio-option-meta">
+                      <span className="radio-option-meta" style={{ fontSize: '13px', color: 'var(--ios-text-secondary)' }}>
                         Will be added to missing items
                       </span>
                     </div>
@@ -144,10 +144,9 @@ export function CatalogMatchReviewSheet({
           </div>
 
           {/* Batch quick-actions */}
-          <div className="row wrap" style={{ gap: '0.5rem' }}>
+          <div className="row wrap" style={{ gap: '0.5rem', marginTop: '16px' }}>
             <button
               className="ghost"
-              style={{ fontSize: '0.8rem' }}
               onClick={() => {
                 items.forEach((item) => {
                   if (!selections.has(item.key) && item.candidates[0]) {
@@ -160,7 +159,6 @@ export function CatalogMatchReviewSheet({
             </button>
             <button
               className="ghost"
-              style={{ fontSize: '0.8rem' }}
               onClick={() => {
                 items.forEach((item) => onSelect(item.key, '__MISSING__'));
               }}
@@ -169,20 +167,12 @@ export function CatalogMatchReviewSheet({
             </button>
           </div>
 
-          {/* Confirm / Cancel */}
-          <div className="row between" style={{ paddingTop: '0.5rem' }}>
-            <button className="ghost" onClick={onCancel}>
-              Cancel
-            </button>
-            <button onClick={onConfirm} disabled={!allResolved}>
-              Confirm & Continue
-              {!allResolved && (
-                <span style={{ marginLeft: '0.4rem', opacity: 0.5, fontSize: '0.75rem' }}>
-                  ({items.length - selections.size} remaining)
-                </span>
-              )}
-            </button>
-          </div>
+          {/* Remaining count */}
+          {!allResolved && (
+            <p style={{ fontSize: '13px', color: 'var(--ios-text-secondary)', textAlign: 'center', marginTop: '12px' }}>
+              {items.length - selections.size} remaining
+            </p>
+          )}
         </div>
       </div>
     </>

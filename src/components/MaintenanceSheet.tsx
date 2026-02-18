@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type TouchEvent } from 'react';
 import { makeId } from '../lib/ids';
 import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
+import { useSheetDismiss } from '../hooks/useSheetDismiss';
 import type { MaintenanceEntry } from '../types/models';
 
 interface MaintenanceSheetProps {
@@ -69,6 +70,10 @@ export function MaintenanceSheet({
   useEffect(() => {
     setOpenEntryActionsId(null);
   }, [history]);
+
+  const { closing, dismiss, onAnimationEnd } = useSheetDismiss(onClose);
+  const closeAddSheet = () => { setShowAddSheet(false); setEditingEntryId(null); };
+  const { closing: closingAdd, dismiss: dismissAdd, onAnimationEnd: onAnimationEndAdd } = useSheetDismiss(closeAddSheet);
 
   if (!open) return null;
 
@@ -153,22 +158,24 @@ export function MaintenanceSheet({
 
   return (
     <>
-      <button className="sheet-overlay" aria-label="Close maintenance history" onClick={onClose} />
-      <aside className="filter-sheet card maintenance-history-sheet" aria-label="Maintenance history">
-        <div className="maintenance-sheet-header">
-          <h3>Maintenance</h3>
-          <button className="sheet-close-btn" onClick={onClose} aria-label="Close">✕</button>
+      <div className={`ios-sheet-backdrop${closing ? ' closing' : ''}`} onClick={dismiss} />
+      <div className={`ios-sheet-modal${closing ? ' closing' : ''}`} aria-label="Maintenance history" onAnimationEnd={onAnimationEnd}>
+        <div className="ios-sheet-handle" />
+        <div className="ios-sheet-header">
+          <button className="ios-sheet-btn secondary" onClick={dismiss}>Close</button>
+          <h3 className="ios-sheet-title">Maintenance</h3>
+          <button className="ios-sheet-btn primary" onClick={openAddEntrySheet}>Add</button>
         </div>
 
-        <div className="maintenance-sheet-body stack-sm">
-          <p className="subtle maintenance-sheet-subtitle">{itemName}</p>
+        <div className="ios-sheet-content">
+          <p className="maintenance-sheet-subtitle">{itemName}</p>
 
           {sortedHistory.length === 0 ? (
-            <div className="maintenance-empty card">
+            <div className="maintenance-empty">
               <p>No history yet</p>
             </div>
           ) : (
-            <div className="maintenance-list stack-sm">
+            <div className="maintenance-list">
               {sortedHistory.map((entry) => (
                 <div
                   key={entry.id}
@@ -203,7 +210,7 @@ export function MaintenanceSheet({
                   </div>
 
                   <article
-                    className="maintenance-entry card maintenance-swipe-foreground"
+                    className="maintenance-entry maintenance-swipe-foreground"
                     onTouchStart={onTouchStart}
                     onTouchMove={onTouchMove}
                     onTouchEnd={() => onTouchEnd(entry.id)}
@@ -233,67 +240,66 @@ export function MaintenanceSheet({
             </div>
           )}
         </div>
-
-        <div className="maintenance-sheet-footer">
-          <button onClick={openAddEntrySheet}>
-            <span className="maintenance-plus" aria-hidden="true">+</span>
-            Add Maintenance Record
-          </button>
-        </div>
-      </aside>
+      </div>
 
       {showAddSheet && (
         <>
-          <button className="sheet-overlay maintenance-add-overlay" aria-label="Close add maintenance" onClick={() => setShowAddSheet(false)} />
-          <aside className="filter-sheet card maintenance-add-sheet" aria-label="Add maintenance record">
-            <div className="maintenance-sheet-header">
-              <h3>{editingEntryId ? 'Edit Maintenance' : 'Add Maintenance'}</h3>
+          <div className={`ios-sheet-backdrop ios-sheet-backdrop--nested${closingAdd ? ' closing' : ''}`} onClick={dismissAdd} />
+          <div
+            className={`ios-sheet-modal ios-sheet-modal--nested${closingAdd ? ' closing' : ''}`}
+            aria-label={editingEntryId ? 'Edit maintenance record' : 'Add maintenance record'}
+            onAnimationEnd={onAnimationEndAdd}
+          >
+            <div className="ios-sheet-handle" />
+            <div className="ios-sheet-header">
               <button
-                className="sheet-close-btn"
-                onClick={() => {
-                  setShowAddSheet(false);
-                  setEditingEntryId(null);
-                }}
-                aria-label="Close"
+                className="ios-sheet-btn secondary"
+                onClick={dismissAdd}
               >
-                ✕
+                Cancel
               </button>
+              <h3 className="ios-sheet-title">{editingEntryId ? 'Edit Record' : 'New Record'}</h3>
+              <button className="ios-sheet-btn primary" onClick={() => void saveEntry()}>Save</button>
             </div>
 
-            <div className="maintenance-sheet-body stack-sm">
-              <div className="gear-form-two-col">
-                <label className="gear-field-block">
-                  <span>Date</span>
-                  <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
-                </label>
-
-                <label className="gear-field-block">
-                  <span>Type</span>
-                  <select value={type} onChange={(e) => setType(e.target.value)}>
+            <div className="ios-sheet-content">
+              <div className="ios-form-group">
+                <div className="ios-form-row">
+                  <span className="ios-form-label">Date</span>
+                  <input
+                    type="date"
+                    className="ios-form-input"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                  />
+                </div>
+                <label className="ios-form-row">
+                  <span className="ios-form-label">Type</span>
+                  <select
+                    className="ios-form-input"
+                    value={type}
+                    onChange={(e) => setType(e.target.value)}
+                  >
                     {maintenanceTypeOptions.map((option) => (
                       <option key={option} value={option}>{option}</option>
                     ))}
                   </select>
                 </label>
+                <div className="ios-form-row textarea-row">
+                  <span className="ios-form-label">Description</span>
+                  <textarea
+                    className="ios-form-textarea"
+                    rows={3}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Describe what was done"
+                  />
+                </div>
               </div>
 
-              <label className="gear-field-block">
-                <span>Description</span>
-                <textarea
-                  rows={3}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe what was done"
-                />
-              </label>
-
-              {error && <p className="error">{error}</p>}
+              {error && <p className="ios-sheet-error">{error}</p>}
             </div>
-
-            <div className="maintenance-sheet-footer">
-              <button onClick={() => void saveEntry()}>Save Changes</button>
-            </div>
-          </aside>
+          </div>
         </>
       )}
     </>

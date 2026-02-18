@@ -5,6 +5,7 @@ import { db } from '../db';
 import { EventFormSheet } from '../components/EventFormSheet';
 import { getDaysUntilEvent } from '../lib/eventHelpers';
 import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
+import { useSheetDismiss } from '../hooks/useSheetDismiss';
 
 export function EventsPage() {
   const events = useLiveQuery(() => db.events.orderBy('updatedAt').reverse().toArray(), [], []);
@@ -17,6 +18,13 @@ export function EventsPage() {
   const showFilterSheet = searchParams.get('filters') === '1';
   const showCreateForm  = searchParams.get('add') === '1';
   const showCalendar    = searchParams.get('calendar') === '1';
+
+  // ── Closing animation for filter sheet ─────────────────────────────────────
+  const { closing: closingFilter, dismiss: dismissFilter, onAnimationEnd: onFilterAnimEnd } = useSheetDismiss(() => {
+    const params = new URLSearchParams(searchParams);
+    params.delete('filters');
+    navigate({ search: params.toString() }, { replace: true });
+  });
 
   const selectedEventTypes = (searchParams.get('types') ?? '').split(',').filter(Boolean);
   const clientFilter   = searchParams.get('client') ?? '';
@@ -38,7 +46,7 @@ export function EventsPage() {
     navigate({ search: params.toString() }, { replace: true });
   }
 
-  function closeFilterSheet() { setParam('filters', null); }
+  // closeFilterSheet replaced by dismissFilter for animated close
   function closeCreateForm()  { setParam('add', null); }
 
   function toggleEventTypeFilter(eventType: string) {
@@ -351,68 +359,78 @@ export function EventsPage() {
       {/* ── Filter Sheet ─────────────────────────────────────────────── */}
       {showFilterSheet && (
         <>
-          <button className="sheet-overlay" aria-label="Close filters" onClick={closeFilterSheet} />
-          <aside className="filter-sheet card stack-md" aria-label="Event filters">
-            <div className="ios-catalog-sheet-header">
-              <button className="ios-catalog-sheet-action" onClick={clearAllFilters}>Reset</button>
-              <h3>Filters</h3>
-              <button className="ios-catalog-sheet-action primary" onClick={closeFilterSheet}>Done</button>
+          <div className={`ios-sheet-backdrop${closingFilter ? ' closing' : ''}`} onClick={dismissFilter} />
+          <div className={`ios-sheet-modal${closingFilter ? ' closing' : ''}`} aria-label="Event filters" onAnimationEnd={onFilterAnimEnd}>
+            <div className="ios-sheet-handle" />
+            <div className="ios-sheet-header">
+              <button className="ios-sheet-btn secondary" onClick={clearAllFilters}>Reset</button>
+              <h3 className="ios-sheet-title">Filters</h3>
+              <button className="ios-sheet-btn primary" onClick={dismissFilter}>Done</button>
             </div>
 
-            <div className="stack-sm">
-              <strong className="ios-catalog-filter-label">Event Types</strong>
-              <div className="catalog-filter-checklist">
+            <div className="ios-sheet-content">
+              <p className="ios-form-group-title">Event Types</p>
+              <div className="ios-form-group">
                 {eventTypes.map(eventType => (
-                  <label className="checkbox-inline" key={eventType}>
+                  <label className="ios-form-row" key={eventType}>
+                    <span className="ios-form-label">{eventType}</span>
                     <input
                       type="checkbox"
+                      className="ios-switch"
                       checked={selectedEventTypes.includes(eventType)}
                       onChange={() => toggleEventTypeFilter(eventType)}
                     />
-                    {eventType}
                   </label>
                 ))}
               </div>
-            </div>
 
-            <div className="ios-catalog-filter-grid">
-              <label className="ios-catalog-filter-field">
-                <span>Client</span>
-                <select
-                  value={clientFilter}
-                  onChange={e => setParam('client', e.target.value || null)}
-                  aria-label="Filter by client"
-                >
-                  <option value="">All clients</option>
-                  {clients.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-              </label>
-              <label className="ios-catalog-filter-field">
-                <span>Location</span>
-                <select
-                  value={locationFilter}
-                  onChange={e => setParam('location', e.target.value || null)}
-                  aria-label="Filter by location"
-                >
-                  <option value="">All locations</option>
-                  {locations.map(l => <option key={l} value={l}>{l}</option>)}
-                </select>
-              </label>
-              <label className="ios-catalog-filter-field">
-                <span>Sort</span>
-                <select
-                  value={sortBy}
-                  onChange={e => setParam('sort', e.target.value)}
-                  aria-label="Sort events"
-                >
-                  <option value="date">Date</option>
-                  <option value="title">Title</option>
-                  <option value="client">Client</option>
-                  <option value="newest">Recently Updated</option>
-                </select>
-              </label>
+              <p className="ios-form-group-title">Filters</p>
+              <div className="ios-form-group">
+                <label className="ios-form-row">
+                  <span className="ios-form-label">Client</span>
+                  <select
+                    className="ios-form-input"
+                    value={clientFilter}
+                    onChange={e => setParam('client', e.target.value || null)}
+                    aria-label="Filter by client"
+                  >
+                    <option value="">All clients</option>
+                    {clients.map(c => <option key={c} value={c}>{c}</option>)}
+                  </select>
+                </label>
+                <label className="ios-form-row">
+                  <span className="ios-form-label">Location</span>
+                  <select
+                    className="ios-form-input"
+                    value={locationFilter}
+                    onChange={e => setParam('location', e.target.value || null)}
+                    aria-label="Filter by location"
+                  >
+                    <option value="">All locations</option>
+                    {locations.map(l => <option key={l} value={l}>{l}</option>)}
+                  </select>
+                </label>
+              </div>
+
+              <p className="ios-form-group-title">Sort By</p>
+              <div className="ios-form-group">
+                <label className="ios-form-row">
+                  <span className="ios-form-label">Sort</span>
+                  <select
+                    className="ios-form-input"
+                    value={sortBy}
+                    onChange={e => setParam('sort', e.target.value)}
+                    aria-label="Sort events"
+                  >
+                    <option value="date">Date</option>
+                    <option value="title">Title</option>
+                    <option value="client">Client</option>
+                    <option value="newest">Recently Updated</option>
+                  </select>
+                </label>
+              </div>
             </div>
-          </aside>
+          </div>
         </>
       )}
 

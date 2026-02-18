@@ -1,9 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
 import { makeId } from '../lib/ids';
 import { exportEventToPdf } from '../lib/pdf';
+import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
+import { useSheetDismiss } from '../hooks/useSheetDismiss';
 import { EventFormSheet } from '../components/EventFormSheet';
 import { getDaysUntilEvent } from '../lib/eventHelpers';
 import type { PackingChecklistItem } from '../types/models';
@@ -19,6 +21,22 @@ export function EventDetailPage() {
   const [showShareSheet, setShowShareSheet] = useState(false);
   const [selectedCatalogItems, setSelectedCatalogItems] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Dismiss animation hooks for inline sheets
+  const { closing: closingShare, dismiss: dismissShare, onAnimationEnd: onAnimationEndShare } =
+    useSheetDismiss(() => setShowShareSheet(false));
+  const { closing: closingAdd, dismiss: dismissAdd, onAnimationEnd: onAnimationEndAdd } =
+    useSheetDismiss(() => { setShowAddSheet(false); setSelectedCatalogItems(new Set()); setSearchQuery(''); });
+
+  // Lock body scroll when any sheet is open
+  useEffect(() => {
+    if (showShareSheet || showAddSheet) {
+      lockSheetScroll();
+    } else {
+      unlockSheetScroll();
+    }
+    return () => unlockSheetScroll();
+  }, [showShareSheet, showAddSheet]);
 
   if (!event) {
     return (
@@ -389,90 +407,96 @@ export function EventDetailPage() {
 
       {showShareSheet && (
         <>
-          <button className="sheet-overlay" aria-label="Close share sheet" onClick={() => setShowShareSheet(false)} />
-          <aside className="filter-sheet card ev-detail-share-sheet" aria-label="Share & export">
-            <div className="ios-catalog-sheet-header">
+          <div className={`ios-sheet-backdrop${closingShare ? ' closing' : ''}`} onClick={dismissShare} />
+          <div className={`ios-sheet-modal${closingShare ? ' closing' : ''}`} aria-label="Share & export" onAnimationEnd={onAnimationEndShare}>
+            <div className="ios-sheet-handle" />
+            <div className="ios-sheet-header">
               <span />
-              <h3>Share & Export</h3>
-              <button className="ios-catalog-sheet-action primary" onClick={() => setShowShareSheet(false)}>Done</button>
+              <h3 className="ios-sheet-title">Share &amp; Export</h3>
+              <button className="ios-sheet-btn primary" onClick={dismissShare}>Done</button>
             </div>
-            <div className="ev-detail-share-options">
-              <button className="ev-detail-share-btn" onClick={() => { exportEventToPdf(currentEvent); setShowShareSheet(false); }}>
-                <div className="ev-detail-share-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /></svg>
-                </div>
-                <span>Export PDF</span>
-              </button>
-              <button className="ev-detail-share-btn" onClick={() => { exportEventJson(); setShowShareSheet(false); }}>
-                <div className="ev-detail-share-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M7 7h10M7 12h10M7 17h6" /></svg>
-                </div>
-                <span>Export JSON</span>
-              </button>
-              <button className="ev-detail-share-btn" onClick={() => { window.print(); setShowShareSheet(false); }}>
-                <div className="ev-detail-share-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 6 2 18 2 18 9" /><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><rect x="6" y="14" width="12" height="8" /></svg>
-                </div>
-                <span>Print</span>
-              </button>
-              <button className="ev-detail-share-btn" disabled>
-                <div className="ev-detail-share-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" /></svg>
-                </div>
-                <span>Share Link</span>
-              </button>
+            <div className="ios-sheet-content">
+              <div className="ev-detail-share-options">
+                <button className="ev-detail-share-btn" onClick={() => { exportEventToPdf(currentEvent); dismissShare(); }}>
+                  <div className="ev-detail-share-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" /><path d="M14 2v6h6" /></svg>
+                  </div>
+                  <span>Export PDF</span>
+                </button>
+                <button className="ev-detail-share-btn" onClick={() => { exportEventJson(); dismissShare(); }}>
+                  <div className="ev-detail-share-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M7 7h10M7 12h10M7 17h6" /></svg>
+                  </div>
+                  <span>Export JSON</span>
+                </button>
+                <button className="ev-detail-share-btn" onClick={() => { window.print(); dismissShare(); }}>
+                  <div className="ev-detail-share-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="6 9 6 2 18 2 18 9" /><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" /><rect x="6" y="14" width="12" height="8" /></svg>
+                  </div>
+                  <span>Print</span>
+                </button>
+                <button className="ev-detail-share-btn" disabled>
+                  <div className="ev-detail-share-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" /></svg>
+                  </div>
+                  <span>Share Link</span>
+                </button>
+              </div>
             </div>
-          </aside>
+          </div>
         </>
       )}
 
       {showAddSheet && (
         <>
-          <button className="sheet-overlay" aria-label="Close add item sheet" onClick={() => setShowAddSheet(false)} />
-          <aside className="filter-sheet card ev-detail-add-sheet" aria-label="Add to packing list">
-            <div className="ios-catalog-sheet-header">
-              <button className="ios-catalog-sheet-action" onClick={() => { setShowAddSheet(false); setSelectedCatalogItems(new Set()); setSearchQuery(''); }}>Cancel</button>
-              <h3>Add Items</h3>
-              <button className="ios-catalog-sheet-action primary" onClick={addSelectedItems} disabled={selectedCatalogItems.size === 0}>
+          <div className={`ios-sheet-backdrop${closingAdd ? ' closing' : ''}`} onClick={dismissAdd} />
+          <div className={`ios-sheet-modal${closingAdd ? ' closing' : ''}`} aria-label="Add to packing list" onAnimationEnd={onAnimationEndAdd}>
+            <div className="ios-sheet-handle" />
+            <div className="ios-sheet-header">
+              <button className="ios-sheet-btn secondary" onClick={dismissAdd}>Cancel</button>
+              <h3 className="ios-sheet-title">Add Items</h3>
+              <button className="ios-sheet-btn primary" onClick={addSelectedItems} disabled={selectedCatalogItems.size === 0}>
                 Add{selectedCatalogItems.size > 0 ? ` (${selectedCatalogItems.size})` : ''}
               </button>
             </div>
 
-            <div className="ev-detail-search-container">
-              <div className="ev-detail-search-bar">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-                <input
-                  type="text"
-                  placeholder="Search catalog..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+            <div className="ios-sheet-content">
+              <div className="ev-detail-search-container">
+                <div className="ev-detail-search-bar">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
+                  <input
+                    type="text"
+                    placeholder="Search catalog..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="ev-detail-sheet-list">
+                {filteredAvailableItems.length === 0 ? (
+                  <div className="ev-detail-empty-state">
+                    <p>{searchQuery ? 'No items found matching your search.' : 'All catalog items are already in this list.'}</p>
+                  </div>
+                ) : (
+                  filteredAvailableItems.map((item) => (
+                    <div key={item.id} className="ev-detail-item-row" onClick={() => toggleSelection(item.id)}>
+                      <button
+                        className={`ev-detail-check-circle${selectedCatalogItems.has(item.id) ? ' checked' : ''}`}
+                        aria-label={selectedCatalogItems.has(item.id) ? 'Deselect item' : 'Select item'}
+                      >
+                        {selectedCatalogItems.has(item.id) && <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" fill="none"><polyline points="20 6 9 17 4 12" /></svg>}
+                      </button>
+                      <div className="ev-detail-item-info">
+                        <span className="ev-detail-item-name">{item.name}</span>
+                        {item.brand && <span className="ev-detail-item-sub">{item.brand}</span>}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
-
-            <div className="ev-detail-sheet-list">
-              {filteredAvailableItems.length === 0 ? (
-                <div className="ev-detail-empty-state">
-                  <p>{searchQuery ? 'No items found matching your search.' : 'All catalog items are already in this list.'}</p>
-                </div>
-              ) : (
-                filteredAvailableItems.map((item) => (
-                  <div key={item.id} className="ev-detail-item-row" onClick={() => toggleSelection(item.id)}>
-                    <button
-                      className={`ev-detail-check-circle${selectedCatalogItems.has(item.id) ? ' checked' : ''}`}
-                      aria-label={selectedCatalogItems.has(item.id) ? 'Deselect item' : 'Select item'}
-                    >
-                      {selectedCatalogItems.has(item.id) && <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" fill="none"><polyline points="20 6 9 17 4 12" /></svg>}
-                    </button>
-                    <div className="ev-detail-item-info">
-                      <span className="ev-detail-item-name">{item.name}</span>
-                      {item.brand && <span className="ev-detail-item-sub">{item.brand}</span>}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </aside>
+          </div>
         </>
       )}
 

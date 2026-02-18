@@ -9,6 +9,7 @@ import { makeId } from '../lib/ids';
 import { fuzzyIncludes } from '../lib/search';
 import { gearItemSchema } from '../lib/validators';
 import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
+import { useSheetDismiss } from '../hooks/useSheetDismiss';
 import { compressedImageToDataUrl, uploadCompressedGearPhoto } from '../lib/gearPhotos';
 import { useAuth } from '../hooks/useAuth';
 import { classificationQueue } from '../lib/gearClassifier';
@@ -55,6 +56,12 @@ export function CatalogPage() {
   const [error, setError] = useState('');
   const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
   const [maintenanceSheetItemId, setMaintenanceSheetItemId] = useState<string | null>(null);
+
+  // Closing animations for filter sheet and item detail sheet
+  const { closing: closingFilter, dismiss: dismissFilter, onAnimationEnd: onFilterAnimEnd } = useSheetDismiss(() => {
+    updateSearchParams((params) => { params.delete('filters'); });
+  });
+  const { closing: closingDetail, dismiss: dismissDetail, onAnimationEnd: onDetailAnimEnd } = useSheetDismiss(() => setSelectedItemId(null));
 
   useEffect(() => {
     if (searchParams.get('add') !== '1') return;
@@ -212,11 +219,7 @@ export function CatalogPage() {
     });
   }
 
-  function closeFilterSheet() {
-    updateSearchParams((params) => {
-      params.delete('filters');
-    });
-  }
+  // closeFilterSheet replaced by dismissFilter for animated close
 
   function clearAllFilters() {
     updateSearchParams((params) => {
@@ -418,61 +421,88 @@ export function CatalogPage() {
       {/* ── Filter Sheet ───────────────────────────────────────────────── */}
       {showFilterSheet && (
         <>
-          <button className="sheet-overlay" aria-label="Close filters" onClick={closeFilterSheet} />
-          <aside className="filter-sheet card stack-md" aria-label="Catalog filters">
-            <div className="ios-catalog-sheet-header">
-              <button className="ios-catalog-sheet-action" onClick={clearAllFilters}>Reset</button>
-              <h3>Filters</h3>
-              <button className="ios-catalog-sheet-action primary" onClick={closeFilterSheet}>Done</button>
+          <div className={`ios-sheet-backdrop${closingFilter ? ' closing' : ''}`} onClick={dismissFilter} />
+          <div className={`ios-sheet-modal${closingFilter ? ' closing' : ''}`} aria-label="Catalog filters" onAnimationEnd={onFilterAnimEnd}>
+            <div className="ios-sheet-handle" />
+            <div className="ios-sheet-header">
+              <button className="ios-sheet-btn secondary" onClick={clearAllFilters}>Reset</button>
+              <h3 className="ios-sheet-title">Filters</h3>
+              <button className="ios-sheet-btn primary" onClick={dismissFilter}>Done</button>
             </div>
 
-            <div className="stack-sm">
-              <strong className="ios-catalog-filter-label">Categories</strong>
-              <div className="catalog-filter-checklist">
+            <div className="ios-sheet-content">
+              <div className="ios-form-group-title">View Options</div>
+              <div className="ios-form-group">
+                <label className="ios-form-row">
+                  <span className="ios-form-label">Sort By</span>
+                  <select
+                    className="ios-form-input"
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value as 'name' | 'brand' | 'newest' | 'value')}
+                    aria-label="Sorting"
+                  >
+                    <option value="name">Name</option>
+                    <option value="brand">Brand</option>
+                    <option value="newest">Newest</option>
+                    <option value="value">Value</option>
+                  </select>
+                </label>
+                <label className="ios-form-row">
+                  <span className="ios-form-label">Tag</span>
+                  <select
+                    className="ios-form-input"
+                    value={tagFilter}
+                    onChange={(e) => setTagFilter(e.target.value)}
+                    aria-label="Filter by tag"
+                  >
+                    <option value="">All tags</option>
+                    {tags.map((tag) => (<option key={tag} value={tag}>{tag}</option>))}
+                  </select>
+                </label>
+                <label className="ios-form-row">
+                  <span className="ios-form-label">Condition</span>
+                  <select
+                    className="ios-form-input"
+                    value={conditionFilter}
+                    onChange={(e) => setConditionFilter(e.target.value as 'all' | Condition)}
+                    aria-label="Condition filter"
+                  >
+                    <option value="all">Any</option>
+                    <option value="new">New</option>
+                    <option value="good">Good</option>
+                    <option value="worn">Worn</option>
+                  </select>
+                </label>
+                <label className="ios-form-row">
+                  <span className="ios-form-label">Essential Only</span>
+                  <input
+                    type="checkbox"
+                    className="ios-switch"
+                    checked={essentialOnly}
+                    onChange={(e) => setEssentialOnly(e.target.checked)}
+                  />
+                </label>
+              </div>
+
+              <div className="ios-form-group-title">Categories</div>
+              <div className="ios-form-group">
                 {categories.map((category) => {
                   const checked = selectedCategoryIds.includes(category.id);
                   return (
-                    <label className="checkbox-inline" key={category.id}>
-                      <input type="checkbox" checked={checked} onChange={() => toggleCategoryFilter(category.id)} />
-                      {category.name}
+                    <label className="ios-form-row" key={category.id}>
+                      <span className="ios-form-label">{category.name}</span>
+                      <input
+                        type="checkbox"
+                        className="ios-switch"
+                        checked={checked}
+                        onChange={() => toggleCategoryFilter(category.id)}
+                      />
                     </label>
                   );
                 })}
               </div>
             </div>
-
-            <div className="ios-catalog-filter-grid">
-              <label className="ios-catalog-filter-field">
-                <span>Tag</span>
-                <select value={tagFilter} onChange={(e) => setTagFilter(e.target.value)} aria-label="Filter by tag">
-                  <option value="">All tags</option>
-                  {tags.map((tag) => (<option key={tag} value={tag}>{tag}</option>))}
-                </select>
-              </label>
-              <label className="ios-catalog-filter-field">
-                <span>Condition</span>
-                <select value={conditionFilter} onChange={(e) => setConditionFilter(e.target.value as 'all' | Condition)} aria-label="Condition filter">
-                  <option value="all">All conditions</option>
-                  <option value="new">New</option>
-                  <option value="good">Good</option>
-                  <option value="worn">Worn</option>
-                </select>
-              </label>
-              <label className="ios-catalog-filter-field">
-                <span>Sort</span>
-                <select value={sortBy} onChange={(e) => setSortBy(e.target.value as 'name' | 'brand' | 'newest' | 'value')} aria-label="Sorting">
-                  <option value="name">Name</option>
-                  <option value="brand">Brand</option>
-                  <option value="newest">Newest</option>
-                  <option value="value">Value</option>
-                </select>
-              </label>
-              <label className="checkbox-inline ios-catalog-filter-check">
-                <input type="checkbox" checked={essentialOnly} onChange={(e) => setEssentialOnly(e.target.checked)} />
-                <span>Essential only</span>
-              </label>
-            </div>
-          </aside>
+          </div>
         </>
       )}
 
@@ -502,90 +532,99 @@ export function CatalogPage() {
         if (!item) return null;
 
         const category = categories.find((c) => c.id === item.categoryId);
-        const maintenanceSummary = getMaintenanceSummary(item);
 
         return (
           <>
-            <button className="sheet-overlay" aria-label="Close item details" onClick={() => setSelectedItemId(null)} />
-            <aside className="item-detail-sheet card" aria-label="Item details">
-              <div className="detail-sheet-header">
-                {item.photo ? (
-                  <img src={item.photo} alt={item.name} className="detail-photo" />
-                ) : (
-                  <div className="detail-photo detail-photo-placeholder" aria-label="No photo available">
-                    <span className="detail-photo-initial">{item.name.charAt(0).toUpperCase()}</span>
+            <div className={`ios-sheet-backdrop${closingDetail ? ' closing' : ''}`} onClick={dismissDetail} />
+            <div className={`ios-sheet-modal${closingDetail ? ' closing' : ''}`} aria-label="Item details" onAnimationEnd={onDetailAnimEnd}>
+              <div className="ios-sheet-handle" />
+              <div className="ios-sheet-header">
+                <button className="ios-sheet-btn secondary" onClick={dismissDetail}>Close</button>
+                <h3 className="ios-sheet-title">Details</h3>
+                <button className="ios-sheet-btn primary" onClick={() => navigate(`/catalog/item/${item.id}`)}>More</button>
+              </div>
+
+              <div className="ios-sheet-content">
+                <div className="ios-detail-hero">
+                  {item.photo ? (
+                    <img src={item.photo} alt={item.name} className="ios-detail-img" />
+                  ) : (
+                    <div className="ios-detail-placeholder">
+                      <span>{item.name.charAt(0).toUpperCase()}</span>
+                    </div>
+                  )}
+                  <div className="ios-detail-titles">
+                    <h2>{item.name}</h2>
+                    <p>{[item.brand, item.model].filter(Boolean).join(' ') || 'No brand/model'}</p>
+                    <div className="ios-detail-badges">
+                      {item.essential && <span className="ios-badge star">Essential</span>}
+                      {category && <span className="ios-badge">{category.name}</span>}
+                      <span className={`ios-badge condition-${item.condition}`}>{item.condition}</span>
+                      {item.quantity > 1 && <span className="ios-badge">{'\u00D7'}{item.quantity}</span>}
+                    </div>
                   </div>
-                )}
-                {item.essential ? (
-                  <svg className="detail-sheet-essential-star" viewBox="0 0 24 24" aria-label="Essential" focusable="false">
-                    <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
-                  </svg>
-                ) : (
-                  <span className="detail-sheet-star-placeholder" />
-                )}
-                <div className="detail-header-content">
-                  <h2>{item.name}</h2>
-                  <p className="subtle detail-subtitle">{[item.brand, item.model].filter(Boolean).join(' ') || 'No brand/model yet'}</p>
                 </div>
-                <div className="detail-badges">
-                  {category && <span className="pill">{category.name}</span>}
-                  <span className={`pill pill-condition pill-condition-${item.condition}`}>{item.condition}</span>
-                  <span className="pill">{'\u00D7'}{item.quantity} units</span>
+
+                <div className="ios-form-group-title">Info</div>
+                <div className="ios-form-group">
+                  {item.purchasePrice && (
+                    <div className="ios-form-row">
+                      <span className="ios-form-label">Purchase Price</span>
+                      <span className="ios-form-value">{formatMoney(item.purchasePrice.amount, item.purchasePrice.currency)}</span>
+                    </div>
+                  )}
+                  {item.currentValue && (
+                    <div className="ios-form-row">
+                      <span className="ios-form-label">Current Value</span>
+                      <span className="ios-form-value">{formatMoney(item.currentValue.amount, item.currentValue.currency)}</span>
+                    </div>
+                  )}
+                  {item.serialNumber && (
+                    <div className="ios-form-row">
+                      <span className="ios-form-label">Serial Number</span>
+                      <span className="ios-form-value">{item.serialNumber}</span>
+                    </div>
+                  )}
+                  {item.purchaseDate && (
+                    <div className="ios-form-row">
+                      <span className="ios-form-label">Purchase Date</span>
+                      <span className="ios-form-value">{new Date(item.purchaseDate).toLocaleDateString()}</span>
+                    </div>
+                  )}
                 </div>
-                <button className="sheet-close-btn" onClick={() => setSelectedItemId(null)} aria-label="Close">{'\u2715'}</button>
-              </div>
 
-              {item.purchasePrice && (
-                <section className="detail-preview-card detail-sheet-preview-card">
-                  <div className="detail-preview-icon" aria-hidden="true">$</div>
-                  <div>
-                    <span className="detail-label">Purchase Price</span>
-                    <p className="detail-preview-value">{formatMoney(item.purchasePrice.amount, item.purchasePrice.currency)}</p>
+                <div className="ios-form-group">
+                  <div
+                    className="ios-form-row clickable"
+                    onClick={() => setMaintenanceSheetItemId(item.id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter') setMaintenanceSheetItemId(item.id); }}
+                  >
+                    <span className="ios-form-label">Maintenance</span>
+                    <div className="ios-form-value-group">
+                      <span>{item.maintenanceHistory?.length ?? 0} records</span>
+                      <span className="ios-sheet-chevron" />
+                    </div>
                   </div>
-                </section>
-              )}
+                  <div className="ios-form-row">
+                    <span className="ios-form-label">Accessories</span>
+                    <span className="ios-form-value">{item.relatedItemIds?.length ?? 0} linked</span>
+                  </div>
+                </div>
 
-              <div className="detail-quick-grid" style={{ overflowY: 'auto', minHeight: 0 }}>
-                <button
-                  type="button"
-                  className="detail-quick-card detail-quick-card-btn"
-                  onClick={() => setMaintenanceSheetItemId(item.id)}
-                >
-                  <div className="detail-quick-icon blue" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" focusable="false">
-                      <path d="M14.7 6.3a4.5 4.5 0 0 0-5.4 5.4L4 17l3 3 5.3-5.3a4.5 4.5 0 0 0 5.4-5.4l-2.4 2.4-2.2-2.2z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <strong>Maintenance</strong>
-                    <p className="subtle">{item.maintenanceHistory?.length ?? 0} records</p>
-                    <p className="subtle detail-quick-summary">{maintenanceSummary.last}</p>
-                    {maintenanceSummary.type && (
-                      <p className="subtle detail-quick-summary">{maintenanceSummary.type}</p>
-                    )}
-                  </div>
-                </button>
-                <article className="detail-quick-card">
-                  <div className="detail-quick-icon purple" aria-hidden="true">
-                    <svg viewBox="0 0 24 24" focusable="false">
-                      <path d="M10.6 13.4 8.5 15.5a3 3 0 1 1-4.2-4.2l3.2-3.2a3 3 0 0 1 4.2 0" />
-                      <path d="m13.4 10.6 2.1-2.1a3 3 0 0 1 4.2 4.2l-3.2 3.2a3 3 0 0 1-4.2 0" />
-                      <path d="m9 15 6-6" />
-                    </svg>
-                  </div>
-                  <div>
-                    <strong>Accessories</strong>
-                    <p className="subtle">{item.relatedItemIds?.length ?? 0} linked</p>
-                  </div>
-                </article>
+                {item.notes && (
+                  <>
+                    <div className="ios-form-group-title">Notes</div>
+                    <div className="ios-form-group">
+                      <div className="ios-form-row textarea-row">
+                        <span style={{ fontSize: '15px', color: 'var(--ios-text-primary)', whiteSpace: 'pre-wrap' }}>{item.notes}</span>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
-
-              <div className="detail-actions">
-                <button onClick={() => navigate(`/catalog/item/${item.id}`)} className="ghost">
-                  More Details
-                </button>
-              </div>
-            </aside>
+            </div>
           </>
         );
       })()}
@@ -609,17 +648,6 @@ export function CatalogPage() {
       })()}
     </>
   );
-}
-
-function getMaintenanceSummary(item: GearItem) {
-  const latest = [...(item.maintenanceHistory ?? [])].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-  )[0];
-
-  if (!latest) return { last: 'No maintenance', type: undefined as string | undefined };
-
-  const dateText = new Date(latest.date).toLocaleDateString();
-  return { last: `Last: ${dateText}`, type: latest.type };
 }
 
 function parseMoney(raw: string) {

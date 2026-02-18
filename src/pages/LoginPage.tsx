@@ -38,48 +38,88 @@ export function LoginPage() {
   }
 
   return (
-    <section className="auth-shell">
-      <div className="card stack-md auth-card">
-        <h2>Welcome to PackShot</h2>
-        <p className="subtle">Sign in to access your catalog, events, AI recommendations, and settings across devices.</p>
+    <section className="ios-auth-shell">
+      <h1 className="ios-auth-app-name">GearVault</h1>
+      <p className="ios-auth-tagline">Sign in to sync your catalog, events &amp; AI features.</p>
 
-        <div className="row wrap">
-          <button className={mode === 'signin' ? '' : 'ghost'} onClick={() => setMode('signin')}>
-            Sign in
+      <div className="ios-auth-card">
+        {/* Segmented control */}
+        <div className="ios-auth-segmented">
+          <button
+            className={`ios-auth-segment${mode === 'signin' ? ' active' : ''}`}
+            onClick={() => setMode('signin')}
+          >
+            Sign In
           </button>
-          <button className={mode === 'signup' ? '' : 'ghost'} onClick={() => setMode('signup')}>
-            Create account
+          <button
+            className={`ios-auth-segment${mode === 'signup' ? ' active' : ''}`}
+            onClick={() => setMode('signup')}
+          >
+            Create Account
           </button>
         </div>
 
+        {/* Name fields (sign-up only) */}
         {mode === 'signup' && (
-          <div className="row wrap" style={{ gap: '0.75rem' }}>
-            <label className="stack-sm" style={{ flex: 1, minWidth: '120px' }}>
-              <strong>First name</strong>
-              <input type="text" value={firstName} onChange={(e) => setFirstName(e.target.value)} placeholder="John" />
-            </label>
-            <label className="stack-sm" style={{ flex: 1, minWidth: '120px' }}>
-              <strong>Last name</strong>
-              <input type="text" value={lastName} onChange={(e) => setLastName(e.target.value)} placeholder="Doe" />
-            </label>
+          <div className="ios-auth-name-row">
+            <div className="ios-auth-field">
+              <label className="ios-auth-field-label">First Name</label>
+              <input
+                className="ios-auth-field-input"
+                type="text"
+                value={firstName}
+                onChange={(e) => setFirstName(e.target.value)}
+                placeholder="John"
+              />
+            </div>
+            <div className="ios-auth-field">
+              <label className="ios-auth-field-label">Last Name</label>
+              <input
+                className="ios-auth-field-input"
+                type="text"
+                value={lastName}
+                onChange={(e) => setLastName(e.target.value)}
+                placeholder="Doe"
+              />
+            </div>
           </div>
         )}
 
-        <label className="stack-sm">
-          <strong>Email</strong>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
-        </label>
+        {/* Email */}
+        <div className="ios-auth-field">
+          <label className="ios-auth-field-label">Email</label>
+          <input
+            className="ios-auth-field-input"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="you@example.com"
+          />
+        </div>
 
-        <label className="stack-sm">
-          <strong>Password</strong>
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 6 characters" />
-        </label>
+        {/* Password */}
+        <div className="ios-auth-field">
+          <label className="ios-auth-field-label">Password</label>
+          <input
+            className="ios-auth-field-input"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="At least 6 characters"
+          />
+        </div>
 
-        {error && <p className="error">{error}</p>}
-        {status && <p className="success">{status}</p>}
+        {/* Error / success */}
+        {error && <p className="ios-auth-error">{error}</p>}
+        {status && <p className="ios-auth-success">{status}</p>}
 
-        <button onClick={() => void submit()} disabled={loading || !email || password.length < 6}>
-          {loading ? 'Please wait...' : mode === 'signin' ? 'Sign in' : 'Create account'}
+        {/* Submit */}
+        <button
+          className="ios-auth-submit"
+          onClick={() => void submit()}
+          disabled={loading || !email || password.length < 6}
+        >
+          {loading ? 'Please wait...' : mode === 'signin' ? 'Sign In' : 'Create Account'}
         </button>
       </div>
     </section>

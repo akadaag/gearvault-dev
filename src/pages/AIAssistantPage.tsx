@@ -26,6 +26,8 @@ import type { GearItem, ChatSession } from '../types/models';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import { AuthExpiredError } from '../lib/edgeFunctionClient';
+import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
+import { useSheetDismiss } from '../hooks/useSheetDismiss';
 
 
 type Mode = 'packing' | 'chat';
@@ -84,6 +86,24 @@ export function AIAssistantPage() {
 
   // History sheet controlled by URL param
   const showHistorySheet = searchParams.get('history') === '1';
+
+  // Lock body scroll when history sheet is open
+  useEffect(() => {
+    if (showHistorySheet) {
+      lockSheetScroll();
+    } else {
+      unlockSheetScroll();
+    }
+    return () => unlockSheetScroll();
+  }, [showHistorySheet]);
+
+  // Closing animation for history sheet
+  const { closing: closingHistory, dismiss: dismissHistory, onAnimationEnd: onHistoryAnimEnd } = useSheetDismiss(closeHistorySheetImmediate);
+  function closeHistorySheetImmediate() {
+    const params = new URLSearchParams(searchParams);
+    params.delete('history');
+    setSearchParams(params);
+  }
 
 
   // ---------------------------------------------------------------------------
@@ -538,9 +558,7 @@ export function AIAssistantPage() {
   // History sheet helpers
   // ---------------------------------------------------------------------------
   function closeHistorySheet() {
-    const params = new URLSearchParams(searchParams);
-    params.delete('history');
-    setSearchParams(params);
+    dismissHistory();
   }
 
 
@@ -923,19 +941,21 @@ export function AIAssistantPage() {
       {/* -- HISTORY BOTTOM SHEET -- */}
       {showHistorySheet && (
         <>
-          <button className="sheet-overlay" onClick={closeHistorySheet} aria-label="Close chat history" />
-          <aside className="filter-sheet card ai-history-sheet" aria-label="Chat history">
-            <div className="maintenance-sheet-header">
-              <h3>Chat History</h3>
-              <button type="button" className="sheet-close-btn" onClick={closeHistorySheet} aria-label="Close">✕</button>
+          <div className={`ios-sheet-backdrop${closingHistory ? ' closing' : ''}`} onClick={dismissHistory} />
+          <div className={`ios-sheet-modal${closingHistory ? ' closing' : ''}`} aria-label="Chat history" onAnimationEnd={onHistoryAnimEnd}>
+            <div className="ios-sheet-handle" />
+            <div className="ios-sheet-header">
+              <button className="ios-sheet-btn secondary" onClick={dismissHistory}>Close</button>
+              <h3 className="ios-sheet-title">Chat History</h3>
+              <button className="ios-sheet-btn primary" type="button" onClick={handleNewChat}>+ New</button>
             </div>
-            <div className="maintenance-sheet-body stack-sm">
+            <div className="ios-sheet-content">
               {chatSessions.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
-                  <p className="subtle">No chat history yet</p>
+                  <p style={{ fontSize: '15px', color: 'var(--ios-text-secondary)' }}>No chat history yet</p>
                 </div>
               ) : (
-                <div className="stack-sm">
+                <div>
                   {chatSessions.map((session) => (
                     <div
                       key={session.id}
@@ -957,7 +977,6 @@ export function AIAssistantPage() {
                           </svg>
                         </button>
                       </div>
-
 
                       {/* Foreground swipeable card */}
                       <div
@@ -985,12 +1004,7 @@ export function AIAssistantPage() {
                 </div>
               )}
             </div>
-            <div className="maintenance-sheet-footer">
-              <button type="button" onClick={handleNewChat} style={{ width: '100%' }}>
-                + New Chat
-              </button>
-            </div>
-          </aside>
+          </div>
         </>
       )}
 

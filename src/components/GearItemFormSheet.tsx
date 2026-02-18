@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import type { Category, Condition } from '../types/models';
 import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
+import { useSheetDismiss } from '../hooks/useSheetDismiss';
 
 export interface GearFormDraft {
   name: string;
@@ -54,6 +55,8 @@ export function GearItemFormSheet({
     return () => unlockSheetScroll();
   }, [open]);
 
+  const { closing, dismiss, onAnimationEnd } = useSheetDismiss(onClose);
+
   if (!open) return null;
 
   function update<K extends keyof GearFormDraft>(key: K, value: GearFormDraft[K]) {
@@ -93,23 +96,34 @@ export function GearItemFormSheet({
 
   return (
     <>
-      <button className="sheet-overlay" aria-label={`Close ${title}`} onClick={onClose} />
-      <aside className="filter-sheet card gear-form-sheet" aria-label={title}>
-        <div className="gear-form-header">
-          <h3>{title}</h3>
-          <button className="sheet-close-btn" onClick={onClose} aria-label="Close">✕</button>
+      <div className={`ios-sheet-backdrop${closing ? ' closing' : ''}`} onClick={dismiss} />
+      <div className={`ios-sheet-modal${closing ? ' closing' : ''}`} aria-label={title} onAnimationEnd={onAnimationEnd}>
+        <div className="ios-sheet-handle" />
+        <div className="ios-sheet-header">
+          <button className="ios-sheet-btn secondary" onClick={dismiss}>Cancel</button>
+          <h3 className="ios-sheet-title">{title}</h3>
+          <button className="ios-sheet-btn primary" onClick={onSubmit}>{submitLabel}</button>
         </div>
 
-        <div className="gear-form-stack" style={{ flex: 1, overflowY: 'auto', minHeight: 0 }}>
-          <div className="gear-photo-upload-wrap">
-            <label className="gear-photo-upload-tile">
-              <input type="file" accept="image/*" onChange={(e) => handlePhotoUpload(e.target.files?.[0])} />
+        <div className="ios-sheet-content">
+          {/* Photo Section */}
+          <div className="ios-detail-hero">
+            <label className="ios-photo-upload-area">
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handlePhotoUpload(e.target.files?.[0])}
+              />
               {draft.photoPreview || draft.photo ? (
-                <>
-                  <img src={draft.photoPreview || draft.photo} alt="Selected" className="gear-photo-preview" />
+                <div className="ios-detail-hero-photo-wrap">
+                  <img
+                    src={draft.photoPreview || draft.photo}
+                    alt="Selected"
+                    className="ios-detail-img"
+                  />
                   <button
                     type="button"
-                    className="gear-photo-remove-btn"
+                    className="ios-photo-remove-btn"
                     aria-label="Remove photo"
                     onClick={(e) => {
                       e.preventDefault();
@@ -119,103 +133,179 @@ export function GearItemFormSheet({
                   >
                     ✕
                   </button>
-                </>
+                </div>
               ) : (
-                <>
-                  <span className="gear-photo-icon" aria-hidden="true">📷</span>
-                  <span>Add Photo</span>
-                </>
+                <div className="ios-detail-placeholder">
+                  <span aria-hidden="true">📷</span>
+                </div>
               )}
+              <span className="ios-photo-upload-label">
+                {draft.photoPreview || draft.photo ? 'Edit Photo' : 'Add Photo'}
+              </span>
             </label>
           </div>
 
-          <label className="gear-field-block">
-            <span>Name *</span>
-            <input placeholder="Sony FX30" value={draft.name} onChange={(e) => update('name', e.target.value)} />
-          </label>
-
-          <label className="gear-field-block">
-            <span>Category *</span>
-            <select value={draft.categoryId} onChange={(e) => update('categoryId', e.target.value)}>
-              <option value="">Select category</option>
-              {categories.map((c) => (<option key={c.id} value={c.id}>{c.name}</option>))}
-            </select>
-          </label>
-
-          <div className="gear-form-two-col">
-            <label className="gear-field-block">
-              <span>Brand</span>
-              <input placeholder="Sony" value={draft.brand} onChange={(e) => update('brand', e.target.value)} />
+          {/* Details Group */}
+          <div className="ios-form-group-title">Details</div>
+          <div className="ios-form-group">
+            <div className="ios-form-row">
+              <span className="ios-form-label">Name *</span>
+              <input
+                className="ios-form-input"
+                placeholder="Item name"
+                value={draft.name}
+                onChange={(e) => update('name', e.target.value)}
+              />
+            </div>
+            <label className="ios-form-row">
+              <span className="ios-form-label">Category *</span>
+              <select
+                className="ios-form-input"
+                value={draft.categoryId}
+                onChange={(e) => update('categoryId', e.target.value)}
+              >
+                <option value="">Select</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name}</option>
+                ))}
+              </select>
             </label>
-            <label className="gear-field-block">
-              <span>Model</span>
-              <input placeholder="FX30" value={draft.model} onChange={(e) => update('model', e.target.value)} />
-            </label>
+            <div className="ios-form-row">
+              <span className="ios-form-label">Brand</span>
+              <input
+                className="ios-form-input"
+                placeholder="Brand"
+                value={draft.brand}
+                onChange={(e) => update('brand', e.target.value)}
+              />
+            </div>
+            <div className="ios-form-row">
+              <span className="ios-form-label">Model</span>
+              <input
+                className="ios-form-input"
+                placeholder="Model"
+                value={draft.model}
+                onChange={(e) => update('model', e.target.value)}
+              />
+            </div>
+            <div className="ios-form-row">
+              <span className="ios-form-label">Serial</span>
+              <input
+                className="ios-form-input"
+                placeholder="Optional"
+                value={draft.serialNumber}
+                onChange={(e) => update('serialNumber', e.target.value)}
+              />
+            </div>
           </div>
 
-          <label className="gear-field-block">
-            <span>Serial Number</span>
-            <input placeholder="Optional" value={draft.serialNumber} onChange={(e) => update('serialNumber', e.target.value)} />
-          </label>
-
-          <div className="gear-form-two-col">
-            <label className="gear-field-block">
-              <span>Condition</span>
-              <select value={draft.condition} onChange={(e) => update('condition', e.target.value as Condition)}>
+          {/* Status Group */}
+          <div className="ios-form-group-title">Status</div>
+          <div className="ios-form-group">
+            <label className="ios-form-row">
+              <span className="ios-form-label">Condition</span>
+              <select
+                className="ios-form-input"
+                value={draft.condition}
+                onChange={(e) => update('condition', e.target.value as Condition)}
+              >
                 <option value="new">New</option>
                 <option value="good">Good</option>
                 <option value="worn">Worn</option>
               </select>
             </label>
-            <label className="gear-field-block">
-              <span>Quantity</span>
-              <input type="number" min={1} value={draft.quantity} onChange={(e) => update('quantity', Number(e.target.value || 1))} />
+            <div className="ios-form-row">
+              <span className="ios-form-label">Quantity</span>
+              <input
+                type="number"
+                className="ios-form-input"
+                min={1}
+                value={draft.quantity}
+                onChange={(e) => update('quantity', Number(e.target.value || 1))}
+              />
+            </div>
+            <label className="ios-form-row">
+              <span className="ios-form-label">Essential</span>
+              <input
+                type="checkbox"
+                className="ios-switch"
+                checked={draft.essential}
+                onChange={(e) => update('essential', e.target.checked)}
+              />
             </label>
           </div>
 
-          <div className="gear-form-two-col">
-            <label className="gear-field-block">
-              <span>Purchase Price</span>
-              <input type="number" placeholder="EUR" value={draft.purchasePrice} onChange={(e) => update('purchasePrice', e.target.value)} />
-            </label>
-            <label className="gear-field-block">
-              <span>Current Value</span>
-              <input type="number" placeholder="EUR" value={draft.currentValue} onChange={(e) => update('currentValue', e.target.value)} />
-            </label>
+          {/* Value Group */}
+          <div className="ios-form-group-title">Value</div>
+          <div className="ios-form-group">
+            <div className="ios-form-row">
+              <span className="ios-form-label">Purchase Price</span>
+              <input
+                type="number"
+                className="ios-form-input"
+                placeholder="0.00"
+                value={draft.purchasePrice}
+                onChange={(e) => update('purchasePrice', e.target.value)}
+              />
+            </div>
+            <div className="ios-form-row">
+              <span className="ios-form-label">Current Value</span>
+              <input
+                type="number"
+                className="ios-form-input"
+                placeholder="0.00"
+                value={draft.currentValue}
+                onChange={(e) => update('currentValue', e.target.value)}
+              />
+            </div>
+            <div className="ios-form-row">
+              <span className="ios-form-label">Purchase Date</span>
+              <input
+                type="date"
+                className="ios-form-input"
+                value={draft.purchaseDate}
+                onChange={(e) => update('purchaseDate', e.target.value)}
+              />
+            </div>
           </div>
 
-          <label className="gear-field-block">
-            <span>Purchase Date</span>
-            <input className="gear-date-input" type="date" value={draft.purchaseDate} onChange={(e) => update('purchaseDate', e.target.value)} />
-          </label>
+          {/* Additional Group */}
+          <div className="ios-form-group-title">Additional</div>
+          <div className="ios-form-group">
+            <div className="ios-form-row">
+              <span className="ios-form-label">Tags</span>
+              <input
+                className="ios-form-input"
+                placeholder="camera, main"
+                value={draft.tagsText}
+                onChange={(e) => update('tagsText', e.target.value)}
+              />
+            </div>
+            <div className="ios-form-row textarea-row">
+              <span className="ios-form-label">Notes</span>
+              <textarea
+                className="ios-form-textarea"
+                rows={3}
+                placeholder="Add notes..."
+                value={draft.notes}
+                onChange={(e) => update('notes', e.target.value)}
+              />
+            </div>
+            <div className="ios-form-row textarea-row">
+              <span className="ios-form-label">Custom Fields (key:value)</span>
+              <textarea
+                className="ios-form-textarea"
+                rows={2}
+                placeholder="Insurance: Covered"
+                value={draft.customFieldsText}
+                onChange={(e) => update('customFieldsText', e.target.value)}
+              />
+            </div>
+          </div>
 
-          <label className="gear-field-block">
-            <span>Tags</span>
-            <input placeholder="camera, main, b-cam" value={draft.tagsText} onChange={(e) => update('tagsText', e.target.value)} />
-          </label>
-
-          <label className="gear-field-block">
-            <span>Notes</span>
-            <textarea rows={3} placeholder="Add notes" value={draft.notes} onChange={(e) => update('notes', e.target.value)} />
-          </label>
-
-          <label className="gear-field-block">
-            <span>Custom Fields (key:value)</span>
-            <textarea rows={2} placeholder="Insurance: Covered" value={draft.customFieldsText} onChange={(e) => update('customFieldsText', e.target.value)} />
-          </label>
-
-          <label className="checkbox-inline gear-checkbox-row">
-            <input type="checkbox" checked={draft.essential} onChange={(e) => update('essential', e.target.checked)} />
-            <span>Mark as essential</span>
-          </label>
-
-          {error && <p className="error">{error}</p>}
+          {error && <p className="ios-sheet-error">{error}</p>}
         </div>
-
-        <div className="gear-form-footer">
-          <button type="button" onClick={onSubmit}>{submitLabel}</button>
-        </div>
-      </aside>
+      </div>
     </>
   );
 }

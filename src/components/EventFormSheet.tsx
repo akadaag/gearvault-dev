@@ -3,6 +3,7 @@ import { db } from '../db';
 import { eventSchema } from '../lib/validators';
 import { makeId } from '../lib/ids';
 import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
+import { useSheetDismiss } from '../hooks/useSheetDismiss';
 import type { EventItem } from '../types/models';
 
 const EVENT_TYPE_OPTIONS = [
@@ -24,6 +25,7 @@ interface EventFormSheetProps {
 }
 
 export function EventFormSheet({ mode, initialData, onClose, onSaved }: EventFormSheetProps) {
+  const { closing, dismiss, onAnimationEnd } = useSheetDismiss(onClose);
   const [draft, setDraft] = useState({
     title: '',
     type: EVENT_TYPE_OPTIONS[0],
@@ -101,78 +103,96 @@ export function EventFormSheet({ mode, initialData, onClose, onSaved }: EventFor
 
   return (
     <>
-      <button className="sheet-overlay" aria-label="Close event form" onClick={onClose} />
-      <aside
-        className="filter-sheet card maintenance-add-sheet event-create-sheet"
+      <div className={`ios-sheet-backdrop${closing ? ' closing' : ''}`} onClick={dismiss} />
+      <div
+        className={`ios-sheet-modal${closing ? ' closing' : ''}`}
         aria-label={mode === 'create' ? 'Create new event' : 'Edit event'}
+        onAnimationEnd={onAnimationEnd}
       >
-        <div className="maintenance-sheet-header">
-          <h3>{mode === 'create' ? 'New Event' : 'Edit Event'}</h3>
-          <button className="sheet-close-btn" onClick={onClose} aria-label="Close">✕</button>
+        <div className="ios-sheet-handle" />
+        <div className="ios-sheet-header">
+          <button className="ios-sheet-btn secondary" onClick={dismiss}>Cancel</button>
+          <h3 className="ios-sheet-title">{mode === 'create' ? 'New Event' : 'Edit Event'}</h3>
+          <button className="ios-sheet-btn primary" onClick={() => void handleSubmit()}>
+            {mode === 'create' ? 'Create' : 'Save'}
+          </button>
         </div>
-        <div className="maintenance-sheet-body stack-sm">
-          <label className="gear-field-block">
-            <span>Event Title*</span>
-            <input
-              type="text"
-              placeholder="e.g., Smith Wedding"
-              value={draft.title}
-              onChange={e => setDraft({ ...draft, title: e.target.value })}
-            />
-          </label>
-          <div className="gear-form-two-col">
-            <label className="gear-field-block">
-              <span>Event Type*</span>
-              <select value={draft.type} onChange={e => setDraft({ ...draft, type: e.target.value })}>
+
+        <div className="ios-sheet-content">
+          {error && <p className="ios-sheet-error">{error}</p>}
+
+          <p className="ios-form-group-title">Event Details</p>
+          <div className="ios-form-group">
+            <label className="ios-form-row">
+              <span className="ios-form-label">Title</span>
+              <input
+                type="text"
+                className="ios-form-input"
+                placeholder="e.g., Smith Wedding"
+                value={draft.title}
+                onChange={e => setDraft({ ...draft, title: e.target.value })}
+              />
+            </label>
+            <label className="ios-form-row">
+              <span className="ios-form-label">Type</span>
+              <select
+                className="ios-form-input"
+                value={draft.type}
+                onChange={e => setDraft({ ...draft, type: e.target.value })}
+              >
                 {EVENT_TYPE_OPTIONS.map(o => <option key={o} value={o}>{o}</option>)}
               </select>
             </label>
-            <label className="gear-field-block">
-              <span>Date &amp; Time</span>
+            <label className="ios-form-row">
+              <span className="ios-form-label">Date &amp; Time</span>
               <input
                 type="datetime-local"
+                className="ios-form-input"
                 value={draft.dateTime}
                 onChange={e => setDraft({ ...draft, dateTime: e.target.value })}
               />
             </label>
           </div>
-          <div className="gear-form-two-col">
-            <label className="gear-field-block">
-              <span>Location</span>
+
+          <p className="ios-form-group-title">Location &amp; Client</p>
+          <div className="ios-form-group">
+            <label className="ios-form-row">
+              <span className="ios-form-label">Location</span>
               <input
                 type="text"
+                className="ios-form-input"
                 placeholder="e.g., Central Park, NYC"
                 value={draft.location}
                 onChange={e => setDraft({ ...draft, location: e.target.value })}
               />
             </label>
-            <label className="gear-field-block">
-              <span>Client Name</span>
+            <label className="ios-form-row">
+              <span className="ios-form-label">Client</span>
               <input
                 type="text"
+                className="ios-form-input"
                 placeholder="e.g., John Smith"
                 value={draft.client}
                 onChange={e => setDraft({ ...draft, client: e.target.value })}
               />
             </label>
           </div>
-          <label className="gear-field-block">
-            <span>Notes &amp; Special Requirements</span>
-            <textarea
-              rows={3}
-              value={draft.notes}
-              onChange={e => setDraft({ ...draft, notes: e.target.value })}
-              placeholder="Any special requirements, equipment needed, or important details..."
-            />
-          </label>
-          {error && <p className="error">{error}</p>}
+
+          <p className="ios-form-group-title">Notes</p>
+          <div className="ios-form-group">
+            <div className="ios-form-row textarea-row">
+              <span className="ios-form-label">Notes &amp; Requirements</span>
+              <textarea
+                className="ios-form-textarea"
+                rows={3}
+                value={draft.notes}
+                onChange={e => setDraft({ ...draft, notes: e.target.value })}
+                placeholder="Any special requirements, equipment needed, or important details..."
+              />
+            </div>
+          </div>
         </div>
-        <div className="maintenance-sheet-footer">
-          <button onClick={() => void handleSubmit()}>
-            {mode === 'create' ? 'Create Event' : 'Save Changes'}
-          </button>
-        </div>
-      </aside>
+      </div>
     </>
   );
 }

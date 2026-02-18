@@ -7,6 +7,7 @@ import { makeId } from '../lib/ids';
 import { GearItemFormSheet, type GearFormDraft } from '../components/GearItemFormSheet';
 import { MaintenanceSheet } from '../components/MaintenanceSheet';
 import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
+import { useSheetDismiss } from '../hooks/useSheetDismiss';
 import { compressedImageToDataUrl, removeGearPhotoByUrl, uploadCompressedGearPhoto } from '../lib/gearPhotos';
 import { useAuth } from '../hooks/useAuth';
 import { classificationQueue } from '../lib/gearClassifier';
@@ -49,6 +50,9 @@ export function GearItemDetailPage() {
   const [editError, setEditError] = useState('');
   const [essentialNotice, setEssentialNotice] = useState('');
   const [draft, setDraft] = useState<GearFormDraft>(emptyDraft);
+
+  // Closing animation for add-to-event sheet
+  const { closing: closingAddEvent, dismiss: dismissAddEvent, onAnimationEnd: onAddEventAnimEnd } = useSheetDismiss(() => setShowAddToEvent(false));
 
   useEffect(() => {
     if (!showAddToEvent) return;
@@ -465,30 +469,45 @@ export function GearItemDetailPage() {
 
       {showAddToEvent && (
         <>
-          <button className="sheet-overlay" aria-label="Close add to event" onClick={() => setShowAddToEvent(false)} />
-          <aside className="filter-sheet card event-add-sheet" aria-label="Add to event packing list">
-            <div className="event-add-sheet-header">
-              <h3>Add to Event</h3>
-              <button className="sheet-close-btn" onClick={() => setShowAddToEvent(false)} aria-label="Close">✕</button>
+          <div className={`ios-sheet-backdrop${closingAddEvent ? ' closing' : ''}`} onClick={dismissAddEvent} />
+          <div className={`ios-sheet-modal${closingAddEvent ? ' closing' : ''}`} aria-label="Add to event packing list" onAnimationEnd={onAddEventAnimEnd}>
+            <div className="ios-sheet-handle" />
+            <div className="ios-sheet-header">
+              <button className="ios-sheet-btn secondary" onClick={dismissAddEvent}>Cancel</button>
+              <h3 className="ios-sheet-title">Add to Event</h3>
+              <button
+                className="ios-sheet-btn primary"
+                onClick={() => void addToEvent()}
+                disabled={!eventTarget || selectedEventHasItem}
+              >
+                Add
+              </button>
             </div>
 
-            <div className="event-add-sheet-body stack-sm">
-              <label className="gear-field-block">
-                <span>Select Event</span>
-                <select value={eventTarget} onChange={(e) => setEventTarget(e.target.value)}>
-                  <option value="">Select an event</option>
-                  {events.map((ev) => (
-                    <option key={ev.id} value={ev.id}>{ev.title}</option>
-                  ))}
-                </select>
-              </label>
-              {selectedEventHasItem && <p className="subtle">Item already added to this event.</p>}
+            <div className="ios-sheet-content">
+              <p className="ios-form-group-title">Select Event</p>
+              <div className="ios-form-group">
+                <label className="ios-form-row">
+                  <span className="ios-form-label">Event</span>
+                  <select
+                    className="ios-form-input"
+                    value={eventTarget}
+                    onChange={(e) => setEventTarget(e.target.value)}
+                  >
+                    <option value="">Select an event</option>
+                    {events.map((ev) => (
+                      <option key={ev.id} value={ev.id}>{ev.title}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              {selectedEventHasItem && (
+                <p style={{ fontSize: '15px', color: 'var(--ios-text-secondary)', textAlign: 'center', marginTop: '8px' }}>
+                  Item already added to this event.
+                </p>
+              )}
             </div>
-
-            <div className="event-add-sheet-footer">
-              <button onClick={() => void addToEvent()} disabled={!eventTarget || selectedEventHasItem}>Add to Packing List</button>
-            </div>
-          </aside>
+          </div>
         </>
       )}
 

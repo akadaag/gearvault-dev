@@ -4,6 +4,24 @@ import { VitePWA } from 'vite-plugin-pwa'
 
 // https://vite.dev/config/
 export default defineConfig({
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // React core — changes rarely, excellent cache hit rate
+          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+          // Supabase — large SDK, only needed for auth/sync
+          'vendor-supabase': ['@supabase/supabase-js'],
+          // PDF export — very large, only used when exporting
+          'vendor-pdf': ['jspdf'],
+          // Data layer — IndexedDB + schema validation
+          'vendor-data': ['dexie', 'dexie-react-hooks', 'zod'],
+          // html2canvas — transitive dep of jspdf, only needed for export
+          'vendor-html2canvas': ['html2canvas'],
+        },
+      },
+    },
+  },
   plugins: [
     react(),
     VitePWA({

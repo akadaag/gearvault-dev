@@ -9679,3 +9679,1421 @@ html {
 .catalog-page.ios-theme .ios-catalog-scroll {
   padding-bottom: calc(50px + env(safe-area-inset-bottom) + 20px);
 }
+
+/* ==========================================================================
+   iOS Sheet System — Glassmorphic Bottom Sheets
+   Used by: CatalogPage, GearItemFormSheet, MaintenanceSheet, GearItemDetailPage
+   ========================================================================== */
+
+/* ── Backdrop Overlay ───────────────────────────────────────────── */
+
+.ios-theme .ios-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 1100;
+  animation: ios-sheet-fade-in 0.25s ease forwards;
+  cursor: default;
+}
+
+@keyframes ios-sheet-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+:root.dark .ios-theme .ios-sheet-backdrop {
+  background: rgba(0, 0, 0, 0.55);
+}
+
+/* ── Sheet Modal Container ──────────────────────────────────────── */
+
+.ios-theme .ios-sheet-modal {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1101;
+  background: var(--ios-card-bg);
+  backdrop-filter: blur(var(--ios-blur));
+  -webkit-backdrop-filter: blur(var(--ios-blur));
+  border-radius: 14px 14px 0 0;
+  box-shadow: 0 -2px 24px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  max-height: 92vh;
+  padding-bottom: env(safe-area-inset-bottom);
+  animation: ios-sheet-slide-up 0.38s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+}
+
+@keyframes ios-sheet-slide-up {
+  from { transform: translateY(100%); }
+  to   { transform: translateY(0); }
+}
+
+:root.dark .ios-theme .ios-sheet-modal {
+  background: rgba(28, 28, 30, 0.88);
+  border-top: 0.5px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 -2px 32px rgba(0, 0, 0, 0.4);
+}
+
+@media (min-width: 768px) {
+  .ios-theme .ios-sheet-modal {
+    max-width: 480px;
+    margin: 0 auto;
+    border-radius: 14px;
+    bottom: 24px;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    animation: ios-sheet-slide-up-desktop 0.38s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  }
+
+  @keyframes ios-sheet-slide-up-desktop {
+    from { transform: translateX(-50%) translateY(100%); opacity: 0; }
+    to   { transform: translateX(-50%) translateY(0); opacity: 1; }
+  }
+}
+
+/* ── Handle ─────────────────────────────────────────────────────── */
+
+.ios-theme .ios-sheet-handle {
+  width: 36px;
+  height: 5px;
+  background: rgba(60, 60, 67, 0.3);
+  border-radius: 100px;
+  margin: 8px auto 0;
+  flex-shrink: 0;
+}
+
+:root.dark .ios-theme .ios-sheet-handle {
+  background: rgba(235, 235, 245, 0.3);
+}
+
+/* ── Header ─────────────────────────────────────────────────────── */
+
+.ios-theme .ios-sheet-header {
+  display: grid;
+  grid-template-columns: 80px 1fr 80px;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 0.5px solid rgba(60, 60, 67, 0.12);
+  min-height: 48px;
+  flex-shrink: 0;
+}
+
+:root.dark .ios-theme .ios-sheet-header {
+  border-bottom-color: rgba(255, 255, 255, 0.1);
+}
+
+.ios-theme .ios-sheet-title {
+  text-align: center;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ios-text-primary);
+  margin: 0;
+  line-height: 1.3;
+}
+
+.ios-theme .ios-sheet-btn {
+  background: none;
+  border: none;
+  font-size: 17px;
+  padding: 0;
+  cursor: pointer;
+  min-height: auto;
+  box-shadow: none;
+  line-height: 1.3;
+}
+
+.ios-theme .ios-sheet-btn:hover,
+.ios-theme .ios-sheet-btn:active {
+  background: none;
+  box-shadow: none;
+  transform: none;
+}
+
+.ios-theme .ios-sheet-btn.primary {
+  font-weight: 600;
+  color: var(--ios-blue);
+  text-align: right;
+}
+
+.ios-theme .ios-sheet-btn.secondary {
+  font-weight: 400;
+  color: var(--ios-blue);
+  text-align: left;
+}
+
+.ios-theme .ios-sheet-btn.danger {
+  font-weight: 400;
+  color: #FF3B30;
+  text-align: left;
+}
+
+/* ── Scrollable Content Area ────────────────────────────────────── */
+
+.ios-theme .ios-sheet-content {
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  padding: 20px 16px;
+  flex: 1;
+  min-height: 0;
+}
+
+/* ── Form Groups (Inset Grouped Table Style) ────────────────────── */
+
+.ios-theme .ios-form-group-title {
+  font-size: 13px;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--ios-text-secondary);
+  letter-spacing: 0.02em;
+  margin: 0 0 8px 16px;
+}
+
+.ios-theme .ios-form-group {
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+:root.dark .ios-theme .ios-form-group {
+  background: rgba(44, 44, 46, 0.55);
+}
+
+/* ── Form Row ───────────────────────────────────────────────────── */
+
+.ios-theme .ios-form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 16px;
+  min-height: 44px;
+  border-bottom: 0.5px solid rgba(60, 60, 67, 0.1);
+  background: transparent;
+  width: 100%;
+  box-sizing: border-box;
+  gap: 12px;
+  cursor: default;
+}
+
+.ios-theme .ios-form-row:last-child {
+  border-bottom: none;
+}
+
+:root.dark .ios-theme .ios-form-row {
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+.ios-theme .ios-form-row.clickable {
+  cursor: pointer;
+}
+
+.ios-theme .ios-form-row.clickable:active {
+  background: rgba(60, 60, 67, 0.06);
+}
+
+:root.dark .ios-theme .ios-form-row.clickable:active {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* ── Form Labels & Inputs ───────────────────────────────────────── */
+
+.ios-theme .ios-form-label {
+  font-size: 17px;
+  color: var(--ios-text-primary);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ios-theme .ios-form-input {
+  text-align: right;
+  background: transparent;
+  border: none;
+  font-size: 17px;
+  color: var(--ios-text-secondary);
+  flex: 1;
+  min-width: 0;
+  outline: none;
+  padding: 0;
+  margin: 0;
+  font-family: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.ios-theme .ios-form-input::placeholder {
+  color: var(--ios-text-secondary);
+  opacity: 0.6;
+}
+
+.ios-theme .ios-form-input:focus {
+  color: var(--ios-text-primary);
+}
+
+.ios-theme select.ios-form-input {
+  text-align: right;
+  direction: rtl;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding-right: 0;
+}
+
+.ios-theme select.ios-form-input option {
+  direction: ltr;
+}
+
+/* ── Form Value (read-only display) ─────────────────────────────── */
+
+.ios-theme .ios-form-value {
+  font-size: 17px;
+  color: var(--ios-text-secondary);
+  text-align: right;
+}
+
+.ios-theme .ios-form-value-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--ios-text-secondary);
+  font-size: 17px;
+}
+
+/* ── iOS Chevron (right arrow indicator) ────────────────────────── */
+
+.ios-theme .ios-sheet-chevron {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-right: 2px solid var(--ios-text-secondary);
+  border-bottom: 2px solid var(--ios-text-secondary);
+  transform: rotate(-45deg);
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+/* ── iOS Toggle / Switch ────────────────────────────────────────── */
+
+.ios-theme .ios-form-row input[type="checkbox"].ios-switch {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 51px;
+  height: 31px;
+  border-radius: 15.5px;
+  background: rgba(120, 120, 128, 0.16);
+  position: relative;
+  cursor: pointer;
+  transition: background 0.25s ease;
+  flex-shrink: 0;
+  border: none;
+  outline: none;
+  margin: 0;
+  padding: 0;
+  box-shadow: none;
+}
+
+.ios-theme .ios-form-row input[type="checkbox"].ios-switch::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  transition: transform 0.25s ease;
+}
+
+.ios-theme .ios-form-row input[type="checkbox"].ios-switch:checked {
+  background: #34C759;
+}
+
+.ios-theme .ios-form-row input[type="checkbox"].ios-switch:checked::before {
+  transform: translateX(20px);
+}
+
+.ios-theme .ios-form-row input[type="checkbox"].ios-switch:hover,
+.ios-theme .ios-form-row input[type="checkbox"].ios-switch:active,
+.ios-theme .ios-form-row input[type="checkbox"].ios-switch:focus {
+  box-shadow: none;
+  transform: none;
+  border: none;
+}
+
+:root.dark .ios-theme .ios-form-row input[type="checkbox"].ios-switch {
+  background: rgba(120, 120, 128, 0.32);
+}
+
+:root.dark .ios-theme .ios-form-row input[type="checkbox"].ios-switch::before {
+  background: #fff;
+}
+
+:root.dark .ios-theme .ios-form-row input[type="checkbox"].ios-switch:checked {
+  background: #30D158;
+}
+
+/* ── Textarea Row ───────────────────────────────────────────────── */
+
+.ios-theme .ios-form-row.textarea-row {
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  padding: 12px 16px;
+}
+
+.ios-theme .ios-form-row.textarea-row .ios-form-label {
+  font-size: 15px;
+  color: var(--ios-text-secondary);
+}
+
+.ios-theme .ios-form-textarea {
+  width: 100%;
+  background: transparent;
+  border: none;
+  font-size: 17px;
+  color: var(--ios-text-primary);
+  outline: none;
+  resize: none;
+  font-family: inherit;
+  padding: 0;
+  margin: 0;
+  min-height: 60px;
+}
+
+.ios-theme .ios-form-textarea::placeholder {
+  color: var(--ios-text-secondary);
+  opacity: 0.5;
+}
+
+/* ── Detail Sheet: Hero Section ─────────────────────────────────── */
+
+.ios-theme .ios-detail-hero {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.ios-theme .ios-detail-img {
+  width: 100px;
+  height: 100px;
+  border-radius: 22px;
+  object-fit: cover;
+  margin: 0 auto 12px;
+  display: block;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.ios-theme .ios-detail-placeholder {
+  width: 100px;
+  height: 100px;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--ios-text-secondary) 12%, transparent);
+  margin: 0 auto 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 38px;
+  color: var(--ios-text-secondary);
+}
+
+:root.dark .ios-theme .ios-detail-placeholder {
+  background: rgba(58, 58, 60, 0.8);
+}
+
+.ios-theme .ios-detail-titles h2 {
+  font-size: 22px;
+  font-weight: 700;
+  margin: 0 0 2px;
+  color: var(--ios-text-primary);
+}
+
+.ios-theme .ios-detail-titles p {
+  font-size: 15px;
+  color: var(--ios-text-secondary);
+  margin: 0;
+}
+
+.ios-theme .ios-detail-badges {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+/* ── Badges ─────────────────────────────────────────────────────── */
+
+.ios-theme .ios-badge {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: 100px;
+  background: color-mix(in srgb, var(--ios-text-secondary) 12%, transparent);
+  color: var(--ios-text-primary);
+  line-height: 1.4;
+}
+
+.ios-theme .ios-badge.star {
+  background: rgba(255, 204, 0, 0.18);
+  color: #FFB800;
+}
+
+:root.dark .ios-theme .ios-badge.star {
+  background: rgba(255, 214, 10, 0.2);
+  color: #FFD60A;
+}
+
+.ios-theme .ios-badge.condition-new {
+  background: rgba(52, 199, 89, 0.15);
+  color: #248A3D;
+}
+
+:root.dark .ios-theme .ios-badge.condition-new {
+  background: rgba(48, 209, 88, 0.2);
+  color: #30D158;
+}
+
+.ios-theme .ios-badge.condition-good {
+  background: color-mix(in srgb, var(--ios-blue) 15%, transparent);
+  color: var(--ios-blue);
+}
+
+.ios-theme .ios-badge.condition-worn {
+  background: rgba(255, 149, 0, 0.15);
+  color: #C93400;
+}
+
+:root.dark .ios-theme .ios-badge.condition-worn {
+  background: rgba(255, 159, 10, 0.2);
+  color: #FF9F0A;
+}
+
+/* ── Photo Upload (Add Gear Sheet) ──────────────────────────────── */
+
+.ios-theme .ios-photo-upload-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.ios-theme .ios-photo-upload-area input[type="file"] {
+  display: none;
+}
+
+.ios-theme .ios-photo-upload-label {
+  font-size: 15px;
+  color: var(--ios-blue);
+  font-weight: 500;
+}
+
+.ios-theme .ios-photo-remove-btn {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(60, 60, 67, 0.6);
+  color: #fff;
+  font-size: 13px;
+  border: 2px solid var(--ios-card-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0;
+  min-height: auto;
+  box-shadow: none;
+}
+
+.ios-theme .ios-photo-remove-btn:hover,
+.ios-theme .ios-photo-remove-btn:active {
+  background: rgba(60, 60, 67, 0.8);
+  transform: none;
+  box-shadow: none;
+}
+
+.ios-theme .ios-detail-hero-photo-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+/* ── Sheet Error Message ────────────────────────────────────────── */
+
+.ios-theme .ios-sheet-error {
+  color: #FF3B30;
+  font-size: 14px;
+  padding: 0 4px;
+  margin-top: -8px;
+  margin-bottom: 16px;
+}
+
+/* ── Maintenance Entry List inside iOS Sheet ────────────────────── */
+
+.ios-theme .ios-sheet-modal .maintenance-sheet-subtitle {
+  font-size: 15px;
+  color: var(--ios-text-secondary);
+  margin: 0 0 16px;
+  text-align: center;
+}
+
+.ios-theme .ios-sheet-modal .maintenance-empty {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--ios-text-secondary);
+  font-size: 15px;
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 12px;
+  border: none;
+  box-shadow: none;
+}
+
+:root.dark .ios-theme .ios-sheet-modal .maintenance-empty {
+  background: rgba(44, 44, 46, 0.55);
+}
+
+.ios-theme .ios-sheet-modal .maintenance-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ios-theme .ios-sheet-modal .maintenance-entry {
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 12px;
+  border: none;
+  box-shadow: none;
+  padding: 12px 16px;
+}
+
+:root.dark .ios-theme .ios-sheet-modal .maintenance-entry {
+  background: rgba(44, 44, 46, 0.55);
+}
+
+.ios-theme .ios-sheet-modal .maintenance-entry .pill {
+  background: color-mix(in srgb, var(--ios-blue) 12%, transparent);
+  color: var(--ios-blue);
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 100px;
+  padding: 2px 8px;
+}
+
+/* ── Number input stepper styling ───────────────────────────────── */
+
+.ios-theme input[type="number"].ios-form-input {
+  -moz-appearance: textfield;
+}
+
+.ios-theme input[type="number"].ios-form-input::-webkit-inner-spin-button,
+.ios-theme input[type="number"].ios-form-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ── Date input inside iOS form rows ────────────────────────────── */
+
+.ios-theme input[type="date"].ios-form-input {
+  text-align: right;
+  color: var(--ios-blue);
+  cursor: pointer;
+}
+
+.ios-theme input[type="date"].ios-form-input::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  position: absolute;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.ios-theme input[type="date"].ios-form-input::-webkit-date-and-time-value {
+  text-align: right;
+}
+
+/* ==========================================================================
+   iOS Sheet System — Phase 2: Transitions, Top-sheet, and New Sheet Styles
+   ========================================================================== */
+
+/* ── Slide-down dismiss animation (bottom sheets) ───────────────── */
+
+.ios-theme .ios-sheet-backdrop.closing {
+  animation: ios-sheet-fade-out 0.2s ease forwards;
+}
+
+@keyframes ios-sheet-fade-out {
+  from { opacity: 1; }
+  to   { opacity: 0; }
+}
+
+.ios-theme .ios-sheet-modal.closing {
+  animation: ios-sheet-slide-down 0.28s cubic-bezier(0.36, 0, 0.66, -0.56) forwards;
+}
+
+@keyframes ios-sheet-slide-down {
+  from { transform: translateY(0); }
+  to   { transform: translateY(100%); }
+}
+
+@media (min-width: 768px) {
+  .ios-theme .ios-sheet-modal.closing {
+    animation: ios-sheet-slide-down-desktop 0.28s cubic-bezier(0.36, 0, 0.66, -0.56) forwards;
+  }
+
+  @keyframes ios-sheet-slide-down-desktop {
+    from { transform: translateX(-50%) translateY(0); opacity: 1; }
+    to   { transform: translateX(-50%) translateY(100%); opacity: 0; }
+  }
+}
+
+/* ── Top-sheet variant (slides from top) ────────────────────────── */
+
+.ios-theme .ios-sheet-modal.ios-sheet-modal--top {
+  top: 0;
+  bottom: auto;
+  border-radius: 0 0 14px 14px;
+  box-shadow: 0 2px 24px rgba(0, 0, 0, 0.12);
+  animation: ios-sheet-slide-down-from-top 0.38s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  padding-bottom: 0;
+  padding-top: env(safe-area-inset-top);
+}
+
+@keyframes ios-sheet-slide-down-from-top {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(0); }
+}
+
+.ios-theme .ios-sheet-modal.ios-sheet-modal--top.closing {
+  animation: ios-sheet-slide-up-to-top 0.28s cubic-bezier(0.36, 0, 0.66, -0.56) forwards;
+}
+
+@keyframes ios-sheet-slide-up-to-top {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-100%); }
+}
+
+:root.dark .ios-theme .ios-sheet-modal.ios-sheet-modal--top {
+  box-shadow: 0 2px 32px rgba(0, 0, 0, 0.4);
+}
+
+@media (min-width: 768px) {
+  .ios-theme .ios-sheet-modal.ios-sheet-modal--top {
+    max-width: 540px;
+    margin: 0 auto;
+    border-radius: 0 0 14px 14px;
+    top: 24px;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    transform: translateX(-50%);
+    animation: ios-sheet-slide-down-from-top-desktop 0.38s cubic-bezier(0.32, 0.72, 0, 1) forwards;
+  }
+
+  @keyframes ios-sheet-slide-down-from-top-desktop {
+    from { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+    to   { transform: translateX(-50%) translateY(0); opacity: 1; }
+  }
+
+  .ios-theme .ios-sheet-modal.ios-sheet-modal--top.closing {
+    animation: ios-sheet-slide-up-to-top-desktop 0.28s cubic-bezier(0.36, 0, 0.66, -0.56) forwards;
+  }
+
+  @keyframes ios-sheet-slide-up-to-top-desktop {
+    from { transform: translateX(-50%) translateY(0); opacity: 1; }
+    to   { transform: translateX(-50%) translateY(-100%); opacity: 0; }
+  }
+}
+
+/* ── datetime-local input ───────────────────────────────────────── */
+
+.ios-theme input[type="datetime-local"].ios-form-input {
+  text-align: right;
+  color: var(--ios-blue);
+  cursor: pointer;
+}
+
+.ios-theme input[type="datetime-local"].ios-form-input::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  position: absolute;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+
+.ios-theme input[type="datetime-local"].ios-form-input::-webkit-date-and-time-value {
+  text-align: right;
+}
+
+/* ── AI History: Chat session list inside iOS sheet ─────────────── */
+
+.ios-theme .ios-sheet-modal .chat-session-swipe-row {
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.ios-theme .ios-sheet-modal .chat-session-item {
+  background: rgba(255, 255, 255, 0.55);
+  border: none;
+  box-shadow: none;
+}
+
+:root.dark .ios-theme .ios-sheet-modal .chat-session-item {
+  background: rgba(44, 44, 46, 0.55);
+}
+
+.ios-theme .ios-sheet-modal .chat-session-btn {
+  padding: 12px 16px;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  min-height: auto;
+  box-shadow: none;
+}
+
+.ios-theme .ios-sheet-modal .chat-session-btn:hover,
+.ios-theme .ios-sheet-modal .chat-session-btn:active {
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+
+.ios-theme .ios-sheet-modal .chat-session-title {
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--ios-text-primary);
+  margin-bottom: 2px;
+}
+
+.ios-theme .ios-sheet-modal .chat-session-meta {
+  font-size: 13px;
+  color: var(--ios-text-secondary);
+}
+
+.ios-theme .ios-sheet-modal .chat-session-swipe-actions {
+  background: #FF3B30;
+}
+
+.ios-theme .ios-sheet-modal .chat-session-action-delete {
+  background: #FF3B30;
+}
+
+/* ── Event Detail: Share options grid inside iOS sheet ──────────── */
+
+.ios-theme .ios-sheet-modal .ev-detail-share-options {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  padding: 8px 0;
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-share-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 12px 4px;
+  border-radius: 12px;
+  min-height: auto;
+  box-shadow: none;
+  font-size: 13px;
+  color: var(--ios-text-primary);
+  font-weight: 500;
+  transition: background 0.15s ease;
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-share-btn:hover,
+.ios-theme .ios-sheet-modal .ev-detail-share-btn:active {
+  background: rgba(60, 60, 67, 0.06);
+  box-shadow: none;
+  transform: none;
+}
+
+:root.dark .ios-theme .ios-sheet-modal .ev-detail-share-btn:hover,
+:root.dark .ios-theme .ios-sheet-modal .ev-detail-share-btn:active {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-share-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-share-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--ios-blue) 12%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-share-icon svg {
+  width: 24px;
+  height: 24px;
+  stroke: var(--ios-blue);
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Event Detail: Add items search + list inside iOS sheet ────── */
+
+.ios-theme .ios-sheet-modal .ev-detail-search-container {
+  padding: 0 0 12px;
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(120, 120, 128, 0.12);
+  border-radius: 10px;
+  padding: 8px 12px;
+  border: none;
+}
+
+:root.dark .ios-theme .ios-sheet-modal .ev-detail-search-bar {
+  background: rgba(120, 120, 128, 0.24);
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-search-bar svg {
+  width: 16px;
+  height: 16px;
+  stroke: var(--ios-text-secondary);
+  fill: none;
+  flex-shrink: 0;
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-search-bar input {
+  background: transparent;
+  border: none;
+  font-size: 17px;
+  color: var(--ios-text-primary);
+  flex: 1;
+  outline: none;
+  padding: 0;
+  margin: 0;
+  min-height: auto;
+  font-family: inherit;
+  box-shadow: none;
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-search-bar input::placeholder {
+  color: var(--ios-text-secondary);
+  opacity: 0.6;
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-search-bar input:hover,
+.ios-theme .ios-sheet-modal .ev-detail-search-bar input:focus {
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+  border: none;
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-sheet-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-item-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 16px;
+  cursor: pointer;
+  border-bottom: 0.5px solid rgba(60, 60, 67, 0.1);
+  min-height: 44px;
+  transition: background 0.1s ease;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-item-row:first-child {
+  border-radius: 12px 12px 0 0;
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-item-row:last-child {
+  border-bottom: none;
+  border-radius: 0 0 12px 12px;
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-item-row:only-child {
+  border-radius: 12px;
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-item-row:active {
+  background: rgba(60, 60, 67, 0.06);
+}
+
+:root.dark .ios-theme .ios-sheet-modal .ev-detail-item-row {
+  background: rgba(44, 44, 46, 0.55);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
+}
+
+:root.dark .ios-theme .ios-sheet-modal .ev-detail-item-row:active {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-check-circle {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid rgba(60, 60, 67, 0.3);
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  cursor: pointer;
+  padding: 0;
+  min-height: auto;
+  box-shadow: none;
+  transition: all 0.15s ease;
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-check-circle:hover,
+.ios-theme .ios-sheet-modal .ev-detail-check-circle:active {
+  box-shadow: none;
+  transform: none;
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-check-circle.checked {
+  background: var(--ios-blue);
+  border-color: var(--ios-blue);
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-check-circle.checked svg {
+  width: 14px;
+  height: 14px;
+  stroke: #fff;
+  stroke-width: 2.5;
+  fill: none;
+}
+
+:root.dark .ios-theme .ios-sheet-modal .ev-detail-check-circle {
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-item-name {
+  font-size: 17px;
+  color: var(--ios-text-primary);
+  font-weight: 400;
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-item-sub {
+  font-size: 13px;
+  color: var(--ios-text-secondary);
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-empty-state {
+  text-align: center;
+  padding: 32px 16px;
+  color: var(--ios-text-secondary);
+  font-size: 15px;
+}
+
+/* ── Review sheet overrides inside iOS top-sheet ────────────────── */
+
+.ios-theme .ios-sheet-modal .review-card {
+  background: rgba(255, 255, 255, 0.55);
+  border-radius: 12px;
+  padding: 16px;
+  border: none;
+  box-shadow: none;
+}
+
+:root.dark .ios-theme .ios-sheet-modal .review-card {
+  background: rgba(44, 44, 46, 0.55);
+}
+
+.ios-theme .ios-sheet-modal .review-ai-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  font-weight: 500;
+  color: var(--ios-text-secondary);
+}
+
+.ios-theme .ios-sheet-modal .review-item-name {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ios-text-primary);
+  display: block;
+  margin-top: 2px;
+}
+
+.ios-theme .ios-sheet-modal .pill {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 2px 10px;
+  border-radius: 100px;
+}
+
+.ios-theme .ios-sheet-modal .radio-option {
+  background: rgba(255, 255, 255, 0.45);
+  border: 1.5px solid rgba(60, 60, 67, 0.1);
+  border-radius: 10px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ios-theme .ios-sheet-modal .radio-option--selected {
+  border-color: var(--ios-blue);
+  background: color-mix(in srgb, var(--ios-blue) 6%, transparent);
+}
+
+:root.dark .ios-theme .ios-sheet-modal .radio-option {
+  background: rgba(44, 44, 46, 0.45);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+:root.dark .ios-theme .ios-sheet-modal .radio-option--selected {
+  border-color: var(--ios-blue);
+  background: color-mix(in srgb, var(--ios-blue) 10%, transparent);
+}
+
+.ios-theme .ios-sheet-modal .radio-option input[type="radio"] {
+  accent-color: var(--ios-blue);
+}
+
+.ios-theme .ios-sheet-modal .radio-option-name {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--ios-text-primary);
+}
+
+.ios-theme .ios-sheet-modal .radio-option-meta {
+  font-size: 13px;
+  color: var(--ios-text-secondary);
+}
+
+.ios-theme .ios-sheet-modal .radio-option--missing {
+  border-style: dashed;
+}
+
+/* Batch/confirm action buttons in review sheet */
+.ios-theme .ios-sheet-modal .ghost {
+  background: transparent;
+  border: none;
+  color: var(--ios-blue);
+  font-size: 15px;
+  font-weight: 500;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-radius: 8px;
+  min-height: auto;
+  box-shadow: none;
+}
+
+.ios-theme .ios-sheet-modal .ghost:hover,
+.ios-theme .ios-sheet-modal .ghost:active {
+  background: color-mix(in srgb, var(--ios-blue) 8%, transparent);
+  box-shadow: none;
+  transform: none;
+}
+
+/* Confirm button in review sheet */
+.ios-theme .ios-sheet-modal .row button:not(.ghost) {
+  background: var(--ios-blue);
+  color: #fff;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  min-height: auto;
+  box-shadow: none;
+}
+
+.ios-theme .ios-sheet-modal .row button:not(.ghost):disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.ios-theme .ios-sheet-modal .row button:not(.ghost):hover,
+.ios-theme .ios-sheet-modal .row button:not(.ghost):active {
+  box-shadow: none;
+  transform: none;
+}
+
+/* ── Events Filter: ios-switch toggles in form groups ──────────── */
+
+.ios-theme .ios-filter-event-types {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Subtle text inside ios sheet ──────────────────────────────── */
+
+.ios-theme .ios-sheet-modal .subtle {
+  color: var(--ios-text-secondary);
+  font-size: 15px;
+}
+
+/* ── Stacking utilities inside ios sheet ───────────────────────── */
+
+.ios-theme .ios-sheet-modal .stack-sm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ios-theme .ios-sheet-modal .stack-md {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.ios-theme .ios-sheet-modal .row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.ios-theme .ios-sheet-modal .row.between {
+  justify-content: space-between;
+}
+
+.ios-theme .ios-sheet-modal .row.wrap {
+  flex-wrap: wrap;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   Nested sheet z-index (used by MaintenanceSheet inner add/edit form)
+   ────────────────────────────────────────────────────────────────────────────── */
+.ios-sheet-backdrop--nested {
+  z-index: 1200 !important;
+}
+.ios-sheet-modal--nested {
+  z-index: 1201 !important;
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   Splash screen dark mode
+   ────────────────────────────────────────────────────────────────────────────── */
+@media (prefers-color-scheme: dark) {
+  .splash-screen {
+    background: #000000;
+  }
+}
+
+/* ──────────────────────────────────────────────────────────────────────────────
+   iOS Auth – Login / Register page
+   ────────────────────────────────────────────────────────────────────────────── */
+.ios-auth-shell {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+  background: var(--ios-bg);
+  font-family: -apple-system, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.ios-auth-logo {
+  width: 72px;
+  height: 72px;
+  margin-bottom: 12px;
+  border-radius: 16px;
+}
+
+.ios-auth-app-name {
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--ios-text-primary);
+  margin: 0 0 4px;
+}
+
+.ios-auth-tagline {
+  font-size: 15px;
+  color: var(--ios-text-secondary);
+  margin: 0 0 28px;
+  text-align: center;
+}
+
+.ios-auth-card {
+  width: min(400px, 100%);
+  background: var(--ios-card-bg);
+  backdrop-filter: blur(var(--ios-blur));
+  -webkit-backdrop-filter: blur(var(--ios-blur));
+  border-radius: var(--ios-radius-sm);
+  padding: 24px 20px;
+  box-shadow: var(--ios-shadow);
+}
+
+/* Segmented control for sign-in / sign-up toggle */
+.ios-auth-segmented {
+  display: flex;
+  background: rgba(118, 118, 128, 0.12);
+  border-radius: 8px;
+  padding: 2px;
+  margin-bottom: 20px;
+}
+
+.ios-auth-segment {
+  flex: 1;
+  padding: 7px 0;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--ios-text-secondary);
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.ios-auth-segment.active {
+  background: var(--ios-card-bg);
+  color: var(--ios-text-primary);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+}
+
+/* Name row (first/last) */
+.ios-auth-name-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.ios-auth-name-row .ios-auth-field {
+  flex: 1;
+  min-width: 0;
+  margin-bottom: 0;
+}
+
+/* Form fields */
+.ios-auth-field {
+  margin-bottom: 12px;
+}
+
+.ios-auth-field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ios-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  margin-bottom: 5px;
+}
+
+.ios-auth-field-input {
+  width: 100%;
+  padding: 11px 14px;
+  font-size: 17px;
+  font-family: inherit;
+  background: rgba(118, 118, 128, 0.08);
+  border: 1px solid rgba(118, 118, 128, 0.18);
+  border-radius: 10px;
+  color: var(--ios-text-primary);
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.ios-auth-field-input::placeholder {
+  color: var(--ios-text-secondary);
+  opacity: 0.6;
+}
+
+.ios-auth-field-input:focus {
+  border-color: var(--ios-blue);
+}
+
+/* Submit button */
+.ios-auth-submit {
+  width: 100%;
+  padding: 14px;
+  font-size: 17px;
+  font-weight: 600;
+  font-family: inherit;
+  color: #ffffff;
+  background: var(--ios-blue);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  margin-top: 8px;
+  transition: opacity 0.2s, transform 0.1s;
+}
+
+.ios-auth-submit:active {
+  transform: scale(0.98);
+}
+
+.ios-auth-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Error / success messages */
+.ios-auth-error {
+  color: var(--ios-red, #FF3B30);
+  font-size: 14px;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.ios-auth-success {
+  color: var(--ios-green, #34C759);
+  font-size: 14px;
+  text-align: center;
+  margin-top: 8px;
+}
+
+/* Dark mode overrides */
+@media (prefers-color-scheme: dark) {
+  .ios-auth-shell {
+    background: var(--ios-bg);
+  }
+
+  .ios-auth-card {
+    background: var(--ios-card-bg);
+  }
+
+  .ios-auth-segmented {
+    background: rgba(118, 118, 128, 0.24);
+  }
+
+  .ios-auth-segment.active {
+    background: rgba(60, 60, 67, 0.65);
+  }
+
+  .ios-auth-field-input {
+    background: rgba(118, 118, 128, 0.16);
+    border-color: rgba(118, 118, 128, 0.3);
+  }
+}
