@@ -8897,23 +8897,24 @@ html {
 /* ── Sticky Header ── */
 .ai-page.ios-theme .ai-ios-header {
   flex-shrink: 0;
-  padding: 12px 16px 8px;
+  padding: 12px 16px 0;
   background: var(--ios-bg);
   position: sticky;
   top: 0;
-  z-index: 10;
+  z-index: 40;
+  border-bottom: 1px solid transparent;
 }
 .ai-page.ios-theme .ai-ios-header-top {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-bottom: 8px;
 }
 .ai-page.ios-theme .ai-ios-title {
   font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 34px;
   font-weight: 700;
-  letter-spacing: -0.02em;
+  letter-spacing: 0.01em;
   color: var(--ios-text-primary);
   line-height: 1.1;
   margin: 0;
@@ -8925,8 +8926,8 @@ html {
   height: 36px;
   border-radius: 50%;
   border: none;
-  background: color-mix(in srgb, var(--ios-text-secondary) 10%, transparent);
-  color: var(--ios-text-secondary);
+  background: var(--ios-blue);
+  color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -9463,7 +9464,8 @@ html {
   background: rgba(255, 255, 255, 0.06);
 }
 :root.dark .ai-page.ios-theme .ai-ios-icon-btn {
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--ios-blue);
+  color: #fff;
 }
 
 /* ================================================================

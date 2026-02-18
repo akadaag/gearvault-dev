@@ -242,7 +242,7 @@ export function TabLayout() {
 
   return (
     <div className={`app-shell${isIosThemeRoute ? ' ios-theme' : ''}`}>
-      {!isHomeRoute && !isGearDetailRoute && !isEventDetailRoute && !isSettingsRoute && (
+      {!isHomeRoute && !isGearDetailRoute && !isEventDetailRoute && !isSettingsRoute && !isAssistantRoute && (
         <header className={`topbar${isCatalogRoute || isEventsRoute ? ' topbar-catalog' : ''}`}>
           <div className="topbar-inner">
             <div className="topbar-primary-row">
