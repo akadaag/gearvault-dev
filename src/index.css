@@ -65,7 +65,7 @@
   --topbar-height: 68px;
   --topbar-catalog-height: 168px;
   --detail-topbar-height: 56px;
-  --bottom-nav-clearance: calc(78px + env(safe-area-inset-bottom));
+  --bottom-nav-clearance: calc(68px + env(safe-area-inset-bottom));
 
   font-family: 'SF Pro Display', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
   line-height: 1.6;
@@ -3479,7 +3479,7 @@ button.category-title-btn {
     --topbar-height: 96px;
     --topbar-catalog-height: 124px;
     --detail-topbar-height: 58px;
-    --bottom-nav-clearance: calc(104px + env(safe-area-inset-bottom));
+    --bottom-nav-clearance: calc(80px + env(safe-area-inset-bottom));
   }
 
   .detail-page {
@@ -9173,7 +9173,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 /* Override --bottom-nav-clearance for iOS theme so all content areas
    automatically get correct bottom padding without !important */
 .ios-theme {
-  --bottom-nav-clearance: calc(72px + env(safe-area-inset-bottom));
+  --bottom-nav-clearance: calc(68px + env(safe-area-inset-bottom));
 }
 
 /* Remove redundant outer padding-bottom on .content for iOS pages.
@@ -11178,6 +11178,21 @@ input[type="checkbox"].ios-toggle:checked::after {
   pointer-events: auto;
   width: 100%;
   max-width: 500px;
+  position: relative;
+}
+
+.floating-nav__default-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.floating-nav__search-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
 }
 
 .floating-nav__pill {
@@ -11191,14 +11206,13 @@ input[type="checkbox"].ios-toggle:checked::after {
   border-radius: 28px;
   padding: 4px 6px;
   border: 0.5px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  overflow: hidden;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
 }
 
 :root.dark .floating-nav__pill {
   background: rgba(44, 44, 46, 0.92);
   border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55);
 }
 
 .floating-nav__tab {
@@ -11316,12 +11330,13 @@ input[type="checkbox"].ios-toggle:checked::after {
   -webkit-appearance: none;
   width: 52px;
   height: 52px;
+  min-width: 52px;
   border-radius: 50%;
   border: 0.5px solid rgba(0, 0, 0, 0.1);
   background: rgba(249, 249, 249, 0.92);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -11337,19 +11352,19 @@ input[type="checkbox"].ios-toggle:checked::after {
 .floating-nav__search-circle:focus,
 .floating-nav__search-circle:focus-visible {
   outline: none;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
 }
 
 :root.dark .floating-nav__search-circle {
   background: rgba(44, 44, 46, 0.92);
   border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55);
   color: #8E8E93;
 }
 
 :root.dark .floating-nav__search-circle:focus,
 :root.dark .floating-nav__search-circle:focus-visible {
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55);
 }
 
 .floating-nav__search-circle:active {
@@ -11374,72 +11389,67 @@ input[type="checkbox"].ios-toggle:checked::after {
   stroke-linejoin: round;
 }
 
-/* ── Search State: Nav Circle + Search Pill ───────────────────────────── */
+/* ── Close Circle (search state) ──────────────────────────────────────── */
 
-.floating-nav__nav-circle {
+.floating-nav__close-circle {
   appearance: none;
   -webkit-appearance: none;
   width: 52px;
   height: 52px;
   min-width: 52px;
   border-radius: 50%;
-  border: 0.5px solid rgba(255, 255, 255, 0.1);
-  background: rgba(44, 44, 46, 0.92);
+  border: 0.5px solid rgba(0, 0, 0, 0.1);
+  background: rgba(249, 249, 249, 0.92);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  color: #fff;
-  transition: background 0.2s ease;
+  color: #8E8E93;
+  transition: transform 0.15s ease, color 0.2s ease;
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   outline: none;
-  overflow: hidden;
 }
 
-.floating-nav__nav-circle:focus,
-.floating-nav__nav-circle:focus-visible {
+.floating-nav__close-circle:focus,
+.floating-nav__close-circle:focus-visible {
   outline: none;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
 }
 
-:root:not(.dark) .floating-nav__nav-circle {
-  background: rgba(249, 249, 249, 0.92);
-  border-color: rgba(0, 0, 0, 0.1);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-  color: var(--ios-blue, #007AFF);
+:root.dark .floating-nav__close-circle {
+  background: rgba(44, 44, 46, 0.92);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55);
+  color: #8E8E93;
 }
 
-:root:not(.dark) .floating-nav__nav-circle:focus,
-:root:not(.dark) .floating-nav__nav-circle:focus-visible {
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+:root.dark .floating-nav__close-circle:focus,
+:root.dark .floating-nav__close-circle:focus-visible {
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55);
 }
 
-.floating-nav__nav-circle:active {
+.floating-nav__close-circle:active {
   transform: scale(0.92);
 }
 
-.floating-nav__nav-circle.is-hidden {
-  pointer-events: none;
-}
-
-.floating-nav__nav-circle-icon {
-  width: 22px;
-  height: 22px;
+.floating-nav__close-icon {
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.floating-nav__nav-circle-icon svg {
-  width: 22px;
-  height: 22px;
+.floating-nav__close-icon svg {
+  width: 20px;
+  height: 20px;
   stroke: currentColor;
   fill: none;
-  stroke-width: 2;
+  stroke-width: 2.2;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -11461,13 +11471,13 @@ input[type="checkbox"].ios-toggle:checked::after {
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-radius: 26px;
   border: 0.5px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55);
 }
 
 :root:not(.dark) .floating-nav__search-input-wrap {
   background: rgba(249, 249, 249, 0.92);
   border: 0.5px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
 }
 
 .floating-nav__search-pill-icon {
@@ -11505,6 +11515,14 @@ input[type="checkbox"].ios-toggle:checked::after {
   padding: 0;
   line-height: 1.3;
   min-width: 0;
+}
+
+.floating-nav__search-input:focus,
+.floating-nav__search-input:focus-visible {
+  outline: none;
+  border: none;
+  box-shadow: none;
+  background: transparent;
 }
 
 .floating-nav__search-input::placeholder {
@@ -11983,9 +12001,10 @@ input[type="checkbox"].ios-toggle:checked::after {
   .floating-nav__search-circle {
     width: 56px;
     height: 56px;
+    min-width: 56px;
   }
 
-  .floating-nav__nav-circle {
+  .floating-nav__close-circle {
     width: 56px;
     height: 56px;
     min-width: 56px;
