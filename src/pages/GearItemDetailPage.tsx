@@ -88,7 +88,7 @@ export function GearItemDetailPage() {
     [allItems, item],
   );
 
-  if (!item) return <div className="card">Item not found.</div>;
+  if (!item) return <section className="gear-detail-page ios-theme"><div className="gear-detail-empty">Item not found.</div></section>;
   const currentItem = item;
   const editDraft = toDraft(currentItem);
   const maintenanceCount = currentItem.maintenanceHistory?.length ?? 0;
@@ -247,36 +247,39 @@ export function GearItemDetailPage() {
   }
 
   return (
-    <section className="detail-page detail-page-immersive">
-      <div className="detail-page-topbar">
-        <button onClick={() => navigate('/catalog')} className="detail-back-link" aria-label="Back to catalog">‹ Catalog</button>
-        <div className="row detail-topbar-actions">
+    <section className="gear-detail-page ios-theme">
+      {/* ── Header ── */}
+      <header className="gear-detail-header">
+        <button className="gear-detail-back-btn" onClick={() => navigate('/catalog')} aria-label="Back to catalog">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6" />
+          </svg>
+          Catalog
+        </button>
+        <div className="gear-detail-header-actions">
           <button
-            className={`detail-topbar-icon-btn detail-event-btn ${isInAnyEvent ? 'active' : ''}`}
+            className={`gear-detail-icon-btn${isInAnyEvent ? ' active' : ''}`}
             onClick={() => setShowAddToEvent(true)}
             aria-label="Add to event packing list"
           >
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <circle cx="12" cy="12" r="9" />
               <path d="m8.7 12.2 2.1 2.2 4.6-4.6" />
             </svg>
           </button>
           <button
-            className="detail-topbar-icon-btn"
-            onClick={() => {
-              setDraft(editDraft);
-              setShowEditSheet(true);
-            }}
+            className="gear-detail-icon-btn"
+            onClick={() => { setDraft(editDraft); setShowEditSheet(true); }}
             aria-label="Edit"
           >
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
               <path d="M14 2v6h6" />
               <path d="m9 16 4.4-4.4a1.5 1.5 0 0 1 2.1 2.1L11.1 18.1 8 19z" />
             </svg>
           </button>
-          <button className="detail-topbar-icon-btn detail-delete-btn" onClick={() => void deleteItem()} aria-label="Delete">
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <button className="gear-detail-icon-btn destructive" onClick={() => void deleteItem()} aria-label="Delete">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M3 6h18" />
               <path d="M8 6V4h8v2" />
               <path d="M19 6l-1 14H6L5 6" />
@@ -284,189 +287,211 @@ export function GearItemDetailPage() {
             </svg>
           </button>
         </div>
-      </div>
+      </header>
 
-      <div className="detail-hero-card detail-hero-fullbleed">
-        {currentItem.photo ? (
-          <img
-            src={currentItem.photo}
-            alt={currentItem.name}
-            className="detail-hero-photo detail-hero-photo-clickable"
-            onClick={() => setShowImageViewer(true)}
-          />
-        ) : (
-          <div className="detail-hero-photo detail-hero-placeholder" aria-hidden="true">
-            {currentItem.name.charAt(0).toUpperCase()}
+      {/* ── Scrollable Content ── */}
+      <div className="gear-detail-content">
+        {/* Hero Photo */}
+        <div className="gear-detail-hero">
+          {currentItem.photo ? (
+            <img
+              src={currentItem.photo}
+              alt={currentItem.name}
+              className="gear-detail-hero-img"
+              onClick={() => setShowImageViewer(true)}
+            />
+          ) : (
+            <div className="gear-detail-hero-placeholder" aria-hidden="true">
+              {currentItem.name.charAt(0).toUpperCase()}
+            </div>
+          )}
+        </div>
+
+        {/* Image Viewer Overlay */}
+        {showImageViewer && currentItem.photo && (
+          <div
+            className="image-viewer-overlay"
+            role="button"
+            tabIndex={0}
+            aria-label="Close image preview"
+            onClick={() => setShowImageViewer(false)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                setShowImageViewer(false);
+              }
+            }}
+          >
+            <img
+              src={currentItem.photo}
+              alt={currentItem.name}
+              className="image-viewer-image"
+              onClick={(event) => event.stopPropagation()}
+            />
           </div>
         )}
+
+        {/* Title Block */}
+        <div className="gear-detail-title-block">
+          <div className="gear-detail-title-row">
+            <h1 className="gear-detail-name">{currentItem.name}</h1>
+            <button
+              type="button"
+              className={`gear-detail-essential-btn${currentItem.essential ? ' is-active' : ''}`}
+              onClick={() => void toggleEssential()}
+              onPointerUp={(e) => e.currentTarget.blur()}
+              aria-label={currentItem.essential ? 'Remove from essentials' : 'Add to essentials'}
+              aria-pressed={currentItem.essential}
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
+              </svg>
+            </button>
+          </div>
+          <p className="gear-detail-subtitle">{[currentItem.brand, currentItem.model].filter(Boolean).join(' ') || 'No brand/model yet'}</p>
+          <div className="gear-detail-badges">
+            <span className="gear-detail-badge">{categories.find((c) => c.id === currentItem.categoryId)?.name}</span>
+            <span className={`gear-detail-badge condition-${currentItem.condition}`}>{currentItem.condition}</span>
+            {currentItem.quantity > 1 && <span className="gear-detail-badge">{'\u00D7'}{currentItem.quantity} units</span>}
+          </div>
+        </div>
+
+        {/* Price Card */}
+        {currentItem.purchasePrice && (
+          <div className="gear-detail-glass-card gear-detail-price-card">
+            <div className="gear-detail-price-icon" aria-hidden="true">$</div>
+            <div>
+              <p className="gear-detail-price-label">Purchase Price</p>
+              <p className="gear-detail-price-value">{formatMoney(currentItem.purchasePrice.amount, currentItem.purchasePrice.currency)}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Quick Grid */}
+        <div className="gear-detail-quick-grid">
+          <button type="button" className="gear-detail-glass-card gear-detail-quick-card" onClick={() => setShowMaintenanceSheet(true)}>
+            <div className="gear-detail-quick-icon blue" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14.7 6.3a4.5 4.5 0 0 0-5.4 5.4L4 17l3 3 5.3-5.3a4.5 4.5 0 0 0 5.4-5.4l-2.4 2.4-2.2-2.2z" />
+              </svg>
+            </div>
+            <div className="gear-detail-quick-info">
+              <strong>Maintenance</strong>
+              <p>{maintenanceCount} records</p>
+              <p>{maintenanceSummary.last}</p>
+              {maintenanceSummary.type && <p>{maintenanceSummary.type}</p>}
+            </div>
+          </button>
+          <div className="gear-detail-glass-card gear-detail-quick-card">
+            <div className="gear-detail-quick-icon purple" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10.6 13.4 8.5 15.5a3 3 0 1 1-4.2-4.2l3.2-3.2a3 3 0 0 1 4.2 0" />
+                <path d="m13.4 10.6 2.1-2.1a3 3 0 0 1 4.2 4.2l-3.2 3.2a3 3 0 0 1-4.2 0" />
+                <path d="m9 15 6-6" />
+              </svg>
+            </div>
+            <div className="gear-detail-quick-info">
+              <strong>Accessories</strong>
+              <p>{accessoriesCount} linked</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Item Information */}
+        {hasItemInfo && (
+          <div>
+            <h3 className="gear-detail-section-header">Item Information</h3>
+            <div className="gear-detail-glass-card" style={{ padding: 0 }}>
+              <div className="gear-detail-field-grid">
+                {currentItem.serialNumber && (
+                  <div className="gear-detail-field">
+                    <p className="gear-detail-field-label">Serial Number</p>
+                    <p className="gear-detail-field-value">{currentItem.serialNumber}</p>
+                  </div>
+                )}
+                {currentItem.purchaseDate && (
+                  <div className="gear-detail-field">
+                    <p className="gear-detail-field-label">Purchase Date</p>
+                    <p className="gear-detail-field-value">{new Date(currentItem.purchaseDate).toLocaleDateString()}</p>
+                  </div>
+                )}
+                {currentItem.currentValue && (
+                  <div className="gear-detail-field">
+                    <p className="gear-detail-field-label">Current Value</p>
+                    <p className="gear-detail-field-value">{formatMoney(currentItem.currentValue.amount, currentItem.currentValue.currency)}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Notes */}
+        {currentItem.notes && (
+          <div>
+            <h3 className="gear-detail-section-header">Notes</h3>
+            <div className="gear-detail-glass-card">
+              <p className="gear-detail-notes-text">{currentItem.notes}</p>
+            </div>
+          </div>
+        )}
+
+        {/* Tags */}
+        {currentItem.tags.length > 0 && (
+          <div>
+            <h3 className="gear-detail-section-header">Tags</h3>
+            <div className="gear-detail-pills">
+              {currentItem.tags.map((tag) => (
+                <span key={tag} className="gear-detail-pill">{tag}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Warranty */}
+        {hasWarrantyInfo && (
+          <div>
+            <h3 className="gear-detail-section-header">Warranty</h3>
+            <div className="gear-detail-glass-card" style={{ padding: 0 }}>
+              <div className="gear-detail-field-grid">
+                {currentItem.warranty?.provider && (
+                  <div className="gear-detail-field">
+                    <p className="gear-detail-field-label">Provider</p>
+                    <p className="gear-detail-field-value">{currentItem.warranty.provider}</p>
+                  </div>
+                )}
+                {currentItem.warranty?.expirationDate && (
+                  <div className="gear-detail-field">
+                    <p className="gear-detail-field-label">Expires</p>
+                    <p className="gear-detail-field-value">{new Date(currentItem.warranty.expirationDate).toLocaleDateString()}</p>
+                  </div>
+                )}
+                {currentItem.warranty?.notes && (
+                  <div className="gear-detail-field full-width">
+                    <p className="gear-detail-field-label">Warranty Notes</p>
+                    <p className="gear-detail-field-value">{currentItem.warranty.notes}</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Related Items */}
+        {related.length > 0 && (
+          <div>
+            <h3 className="gear-detail-section-header">Related Items</h3>
+            <div className="gear-detail-pills">
+              {related.map((r) => (
+                <span key={r.id} className="gear-detail-pill related">{r.name}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="gear-detail-bottom-spacer" />
       </div>
 
-      {showImageViewer && currentItem.photo && (
-        <div
-          className="image-viewer-overlay"
-          role="button"
-          tabIndex={0}
-          aria-label="Close image preview"
-          onClick={() => setShowImageViewer(false)}
-          onKeyDown={(event) => {
-            if (event.key === 'Enter' || event.key === ' ') {
-              setShowImageViewer(false);
-            }
-          }}
-        >
-          <img
-            src={currentItem.photo}
-            alt={currentItem.name}
-            className="image-viewer-image"
-            onClick={(event) => event.stopPropagation()}
-          />
-        </div>
-      )}
-
-      <section className="detail-page-section detail-page-main-info detail-title-block">
-        <div className="detail-title-row">
-          <h2>{currentItem.name}</h2>
-          <button
-            type="button"
-            className={`detail-essential-btn${currentItem.essential ? ' is-active' : ''}`}
-            onClick={() => void toggleEssential()}
-            onPointerUp={(e) => e.currentTarget.blur()}
-            aria-label={currentItem.essential ? 'Remove from essentials' : 'Add to essentials'}
-            aria-pressed={currentItem.essential}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-              <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
-            </svg>
-          </button>
-        </div>
-        <p className="subtle detail-main-subtitle">{[currentItem.brand, currentItem.model].filter(Boolean).join(' ') || 'No brand/model yet'}</p>
-        <div className="row wrap detail-badges">
-          <span className="pill">{categories.find((c) => c.id === currentItem.categoryId)?.name}</span>
-          <span className={`pill pill-condition pill-condition-${currentItem.condition}`}>{currentItem.condition}</span>
-          <span className="pill">×{currentItem.quantity} units</span>
-        </div>
-      </section>
-
-      {currentItem.purchasePrice && (
-        <section className="detail-preview-card detail-page-section">
-          <div className="detail-preview-icon" aria-hidden="true">$</div>
-          <div>
-            <span className="detail-label">Purchase Price</span>
-            <p className="detail-preview-value">{formatMoney(currentItem.purchasePrice.amount, currentItem.purchasePrice.currency)}</p>
-          </div>
-        </section>
-      )}
-
-      <section className="detail-quick-grid">
-        <button type="button" className="detail-quick-card detail-quick-card-btn" onClick={() => setShowMaintenanceSheet(true)}>
-          <div className="detail-quick-icon blue" aria-hidden="true">
-            <svg viewBox="0 0 24 24" focusable="false">
-              <path d="M14.7 6.3a4.5 4.5 0 0 0-5.4 5.4L4 17l3 3 5.3-5.3a4.5 4.5 0 0 0 5.4-5.4l-2.4 2.4-2.2-2.2z" />
-            </svg>
-          </div>
-          <div>
-            <strong>Maintenance</strong>
-            <p className="subtle">{maintenanceCount} records</p>
-            <p className="subtle detail-quick-summary">{maintenanceSummary.last}</p>
-            {maintenanceSummary.type && <p className="subtle detail-quick-summary">{maintenanceSummary.type}</p>}
-          </div>
-        </button>
-        <article className="detail-quick-card">
-          <div className="detail-quick-icon purple" aria-hidden="true">
-            <svg viewBox="0 0 24 24" focusable="false">
-              <path d="M10.6 13.4 8.5 15.5a3 3 0 1 1-4.2-4.2l3.2-3.2a3 3 0 0 1 4.2 0" />
-              <path d="m13.4 10.6 2.1-2.1a3 3 0 0 1 4.2 4.2l-3.2 3.2a3 3 0 0 1-4.2 0" />
-              <path d="m9 15 6-6" />
-            </svg>
-          </div>
-          <div>
-            <strong>Accessories</strong>
-            <p className="subtle">{accessoriesCount} linked</p>
-          </div>
-        </article>
-      </section>
-
-      {hasItemInfo && (
-        <div className="detail-page-section">
-          <h3>Item Information</h3>
-          <div className="detail-grid">
-            {currentItem.serialNumber && (
-              <div className="detail-field">
-                <span className="detail-label">Serial Number</span>
-                <span className="detail-value">{currentItem.serialNumber}</span>
-              </div>
-            )}
-            {currentItem.purchaseDate && (
-              <div className="detail-field">
-                <span className="detail-label">Purchase Date</span>
-                <span className="detail-value">{new Date(currentItem.purchaseDate).toLocaleDateString()}</span>
-              </div>
-            )}
-            {currentItem.currentValue && (
-              <div className="detail-field">
-                <span className="detail-label">Current Value</span>
-                <span className="detail-value">{formatMoney(currentItem.currentValue.amount, currentItem.currentValue.currency)}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {currentItem.notes && (
-        <div className="detail-page-section">
-          <h3>Notes</h3>
-          <p className="detail-notes">{currentItem.notes}</p>
-        </div>
-      )}
-
-      {currentItem.tags.length > 0 && (
-        <div className="detail-page-section">
-          <h3>Tags</h3>
-          <div className="row wrap">
-            {currentItem.tags.map((tag) => (
-              <span key={tag} className="pill">{tag}</span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {hasWarrantyInfo && (
-        <div className="detail-page-section">
-          <h3>Warranty</h3>
-          <div className="detail-grid">
-            {currentItem.warranty?.provider && (
-              <div className="detail-field">
-                <span className="detail-label">Provider</span>
-                <span className="detail-value">{currentItem.warranty.provider}</span>
-              </div>
-            )}
-            {currentItem.warranty?.expirationDate && (
-              <div className="detail-field">
-                <span className="detail-label">Expires</span>
-                <span className="detail-value">{new Date(currentItem.warranty.expirationDate).toLocaleDateString()}</span>
-              </div>
-            )}
-            {currentItem.warranty?.notes && (
-              <div className="detail-field detail-field-full">
-                <span className="detail-label">Warranty Notes</span>
-                <span className="detail-value">{currentItem.warranty.notes}</span>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {related.length > 0 && (
-        <div className="detail-page-section">
-          <h3>Related Items</h3>
-          <div className="row wrap">
-            {related.map((r) => (
-              <span key={r.id} className="pill">{r.name}</span>
-            ))}
-          </div>
-        </div>
-      )}
-
+      {/* ── Sheets (already iOS styled — untouched) ── */}
       {showAddToEvent && (
         <>
           <div className={`ios-sheet-backdrop${closingAddEvent ? ' closing' : ''}`} onClick={dismissAddEvent} />
@@ -542,7 +567,7 @@ export function GearItemDetailPage() {
       />
 
       {essentialNotice && (
-        <div className="detail-feedback-toast" role="status" aria-live="polite">
+        <div className="gear-detail-toast" role="status" aria-live="polite">
           {essentialNotice}
         </div>
       )}
