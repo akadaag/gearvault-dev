@@ -6,19 +6,14 @@ import App from './App';
 import { AuthProvider } from './hooks/useAuth';
 import './index.css';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-void registerSW({
+// Register service worker with autoUpdate strategy
+registerSW({
   immediate: true,
   onRegistered() {
     console.info('PackShot service worker registered');
   },
   onNeedRefresh() {
-    // New version available — accept silently, activates on next navigation/reload.
-    // IMPORTANT: Do NOT use confirm() here — in PWA standalone mode on mobile,
-    // synchronous dialogs can trigger blank screens or apparent page reloads.
-    // Do NOT call updateSW(true) either — it forces an immediate reload, which is
-    // jarring mid-session. The new SW will activate naturally on next app launch.
-    console.info('[PWA] New version available, will activate on next app launch.');
+    console.info('[PWA] New version detected, auto-updating...');
   },
 });
 
