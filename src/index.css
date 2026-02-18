@@ -6708,6 +6708,8 @@ html {
 /* Remove the large padding-top that compensated for the fixed topbar */
 .ios-theme .content.content-catalog {
   padding-top: env(safe-area-inset-top, 0px);
+  padding-left: 0;
+  padding-right: 0;
   background: var(--ios-bg);
 }
 
@@ -7314,6 +7316,8 @@ html {
 /* Reset padding for Events */
 .ios-theme .content.content-events {
   padding-top: env(safe-area-inset-top, 0px);
+  padding-left: 0;
+  padding-right: 0;
   background: var(--ios-bg);
 }
 
