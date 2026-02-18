@@ -5429,6 +5429,11 @@ html {
   padding: 0;
 }
 
+/* Prevent global span line-height: 1.6 from inflating HomePage elements */
+.home-page.ios-theme span {
+  line-height: 1.3;
+}
+
 /* ── Sticky Header ──────────────────────────────────────────── */
 
 .home-ios-header {
@@ -5446,6 +5451,7 @@ html {
   letter-spacing: 0.04em;
   color: var(--ios-text-secondary);
   margin-bottom: 2px;
+  line-height: 1.2;
 }
 
 .home-ios-title-row {
@@ -5530,6 +5536,7 @@ html {
   color: var(--ios-text-primary);
   font-family: inherit;
   padding: 0;
+  line-height: 1.2;
 }
 
 .home-ios-search-bar input::placeholder {
@@ -5544,6 +5551,10 @@ html {
   color: var(--ios-text-secondary);
   display: flex;
   align-items: center;
+  min-height: auto;
+  box-shadow: none;
+  border-radius: 50%;
+  font-size: inherit;
 }
 
 /* ── Search Dropdown ────────────────────────────────────────── */
@@ -5654,6 +5665,7 @@ html {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.3;
 }
 
 .home-search-item-text .sub {
@@ -5662,6 +5674,7 @@ html {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.3;
 }
 
 /* ── Scrollable Content ─────────────────────────────────────── */
@@ -5725,6 +5738,7 @@ html {
   border-radius: 20px;
   font-size: 12px;
   font-weight: 600;
+  line-height: 1.2;
 }
 
 .home-ios-hero-badge.urgent {
@@ -5787,6 +5801,10 @@ html {
   line-height: 1.2;
 }
 
+.home-ios-hero-progress-labels span {
+  line-height: 1.2;
+}
+
 /* Hero Empty State */
 .home-ios-hero-card.empty {
   background: linear-gradient(135deg, var(--ios-blue), #5856D6);
@@ -5833,7 +5851,7 @@ html {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 12px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
 }
 
 /* Value Card — left column, spans 3 rows */
@@ -5896,12 +5914,16 @@ html {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 14px;
+  padding: 8px 12px;
   min-height: auto;
   min-width: 0;
   overflow: hidden;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  color: var(--ios-text-primary);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
 }
 
 .home-ios-action-btn:active {
@@ -5909,8 +5931,8 @@ html {
 }
 
 .home-ios-action-icon {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 8px;
   display: flex;
   align-items: center;
@@ -6081,6 +6103,7 @@ html {
   color: rgba(0, 0, 0, 0.18);
   font-weight: 300;
   flex-shrink: 0;
+  line-height: 1;
 }
 
 /* ── Carousel (Enhanced 140px cards) ────────────────────────── */
@@ -6337,13 +6360,13 @@ html {
   }
 
   .home-ios-action-btn {
-    padding: 10px 12px;
+    padding: 6px 10px;
     gap: 8px;
   }
 
   .home-ios-action-icon {
-    width: 28px;
-    height: 28px;
+    width: 26px;
+    height: 26px;
   }
 
   .home-ios-action-btn-label {
