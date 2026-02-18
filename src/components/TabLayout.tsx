@@ -5,7 +5,8 @@ import { db, ensureBaseData } from '../db';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
 import { resetSheetScrollLock } from '../lib/sheetLock';
-import { MobileBottomNav } from './MobileBottomNav';
+import { FloatingNavBar } from './FloatingNavBar';
+import { ProfileMenu } from './ProfileMenu';
 
 const homeIcon = (
   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -38,19 +39,13 @@ const assistantIcon = (
   </svg>
 );
 
-const settingsIcon = (
-  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <circle cx="12" cy="12" r="3" />
-    <path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a2 2 0 0 1-2.8 2.8l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a2 2 0 0 1-4 0v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a2 2 0 0 1-2.8-2.8l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H4a2 2 0 0 1 0-4h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a2 2 0 0 1 2.8-2.8l.1.1a1 1 0 0 0 1.1.2h0a1 1 0 0 0 .6-.9V4a2 2 0 0 1 4 0v.2a1 1 0 0 0 .6.9h0a1 1 0 0 0 1.1-.2l.1-.1a2 2 0 0 1 2.8 2.8l-.1.1a1 1 0 0 0-.2 1.1v0a1 1 0 0 0 .9.6H20a2 2 0 0 1 0 4h-.2a1 1 0 0 0-.9.6z" />
-  </svg>
-);
+// Settings icon removed from tabs — now lives in ProfileMenu
 
 const tabs = [
   { to: '/home', label: 'Home', icon: homeIcon },
   { to: '/catalog', label: 'Catalog', icon: catalogIcon },
   { to: '/events', label: 'Events', icon: eventsIcon },
-  { to: '/assistant', label: 'AI Assistant', icon: assistantIcon },
-  { to: '/settings', label: 'Settings', icon: settingsIcon },
+  { to: '/assistant', label: 'Assistant', icon: assistantIcon },
 ];
 
 export function TabLayout() {
@@ -86,13 +81,11 @@ export function TabLayout() {
   const isIosThemeRoute = isHomeRoute || isCatalogRoute || isGearDetailRoute || isEventsRoute || isEventDetailRoute || isAssistantRoute || isSettingsRoute;
 
   // ── Catalog search params ─────────────────────────────────────────────────
-  const catalogQuery = searchParams.get('q') ?? '';
   const quickFilter = searchParams.get('qf') ?? 'all';
   const hasCategoryFilters = (searchParams.get('cats') ?? '').split(',').filter(Boolean).length > 0;
   const isTopFilterActive = quickFilter !== 'all' || hasCategoryFilters;
 
   // ── Events search params ──────────────────────────────────────────────────
-  const eventsQuery = searchParams.get('q') ?? '';
   const eventsQuickFilter = searchParams.get('qf') ?? 'upcoming';
   const hasEventsTypeFilters = (searchParams.get('types') ?? '').split(',').filter(Boolean).length > 0;
   const hasEventsClientFilter = !!searchParams.get('client');
@@ -126,12 +119,6 @@ export function TabLayout() {
   }, [location.pathname]);
 
   // ── Catalog handlers ──────────────────────────────────────────────────────
-  function handleCatalogSearch(value: string) {
-    const params = new URLSearchParams(searchParams);
-    if (value.trim()) params.set('q', value);
-    else params.delete('q');
-    navigate({ pathname: '/catalog', search: params.toString() ? `?${params.toString()}` : '' });
-  }
 
   function openCatalogFilters() {
     const params = new URLSearchParams(searchParams);
@@ -153,12 +140,6 @@ export function TabLayout() {
   }
 
   // ── Events handlers ───────────────────────────────────────────────────────
-  function handleEventsSearch(value: string) {
-    const params = new URLSearchParams(searchParams);
-    if (value.trim()) params.set('q', value);
-    else params.delete('q');
-    navigate({ pathname: '/events', search: params.toString() ? `?${params.toString()}` : '' });
-  }
 
   function openEventsFilters() {
     const params = new URLSearchParams(searchParams);
@@ -198,13 +179,7 @@ export function TabLayout() {
     navigate({ pathname: '/assistant', search: params.toString() ? `?${params.toString()}` : '' });
   }
 
-  // ── SVG icons (defined inside function to avoid JSX hoisting issues) ──────
-  const searchIcon = (
-    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-      <circle cx="11" cy="11" r="7" />
-      <path d="M20 20l-4-4" />
-    </svg>
-  );
+  // ── SVG icons ─────────────────────────────────────────────────────────────
 
   const filterIcon = (
     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -242,6 +217,13 @@ export function TabLayout() {
 
   return (
     <div className={`app-shell${isIosThemeRoute ? ' ios-theme' : ''}`}>
+      {/* ── Global Profile Avatar (top-right) ─────────────────────────── */}
+      {!isGearDetailRoute && !isEventDetailRoute && (
+        <div className="global-profile-bar">
+          <ProfileMenu />
+        </div>
+      )}
+
       {!isHomeRoute && !isGearDetailRoute && !isEventDetailRoute && !isSettingsRoute && !isAssistantRoute && (
         <header className={`topbar${isCatalogRoute || isEventsRoute ? ' topbar-catalog' : ''}`}>
           <div className="topbar-inner">
@@ -265,19 +247,18 @@ export function TabLayout() {
                   )}
                   {isEventsRoute && (
                      <>
-
-<button
-                       className={`topbar-icon-btn${showEventsCalendar ? ' is-active' : ''}`}
-                       aria-label="Toggle calendar view"
-                       onClick={toggleEventsCalendar}
-                     >
-                       {calendarBtnIcon}
-                     </button>
-<button className="topbar-icon-btn" aria-label="Create new event" onClick={openEventsAdd}>
-                       {addIcon}
-                     </button>
-                  </>
-                )}
+                       <button
+                         className={`topbar-icon-btn${showEventsCalendar ? ' is-active' : ''}`}
+                         aria-label="Toggle calendar view"
+                         onClick={toggleEventsCalendar}
+                       >
+                         {calendarBtnIcon}
+                       </button>
+                       <button className="topbar-icon-btn" aria-label="Create new event" onClick={openEventsAdd}>
+                         {addIcon}
+                       </button>
+                     </>
+                  )}
                   {isAssistantRoute && (
                     <button 
                       className="topbar-icon-btn" 
@@ -292,18 +273,6 @@ export function TabLayout() {
 
             {isCatalogRoute && (
               <div className="topbar-catalog-controls">
-                <div className="topbar-search-row">
-                  <div className="topbar-search-field">
-                    <span className="topbar-search-icon">{searchIcon}</span>
-                    <input
-                      className="topbar-search-input"
-                      aria-label="Search catalog items"
-                      placeholder="Search gear..."
-                      value={catalogQuery}
-                      onChange={(event) => handleCatalogSearch(event.target.value)}
-                    />
-                  </div>
-                </div>
                 <div className="catalog-quick-filters" role="group" aria-label="Quick catalog filters">
                    <button
                      className={`catalog-quick-pill${quickFilter === 'all' ? ' is-active' : ''}`}
@@ -340,18 +309,6 @@ export function TabLayout() {
 
             {isEventsRoute && (
               <div className="topbar-catalog-controls">
-                <div className="topbar-search-row">
-                  <div className="topbar-search-field">
-                    <span className="topbar-search-icon">{searchIcon}</span>
-                    <input
-                      className="topbar-search-input"
-                      aria-label="Search events"
-                      placeholder="Search events..."
-                      value={eventsQuery}
-                      onChange={(event) => handleEventsSearch(event.target.value)}
-                    />
-                  </div>
-                </div>
                  <div className="catalog-quick-filters" role="group" aria-label="Quick event filters">
                    <button
                      className={`catalog-quick-pill${eventsQuickFilter === 'upcoming' ? ' is-active' : ''}`}
@@ -393,7 +350,7 @@ export function TabLayout() {
         <Outlet />
       </main>
 
-      <MobileBottomNav items={tabs} ariaLabel="Main navigation" />
+      <FloatingNavBar items={tabs} />
     </div>
   );
 }

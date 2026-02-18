@@ -9687,7 +9687,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 /* Override --bottom-nav-clearance for iOS theme so all content areas
    automatically get correct bottom padding without !important */
 .ios-theme {
-  --bottom-nav-clearance: calc(49px + env(safe-area-inset-bottom) + 16px);
+  --bottom-nav-clearance: calc(72px + env(safe-area-inset-bottom));
 }
 
 /* Remove redundant outer padding-bottom on .content for iOS pages.
@@ -11886,4 +11886,843 @@ input[type="checkbox"].ios-toggle:checked::after {
 :root.dark .gear-detail-page.ios-theme .gear-detail-essential-btn.is-active svg {
   fill: #FF9F0A;
   stroke: #FF9F0A;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   FLOATING NAV BAR
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.floating-nav {
+  position: fixed;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+  padding: 0 12px;
+}
+
+:root.keyboard-open .floating-nav {
+  display: none;
+}
+
+/* ── Default state: Nav Pill + Search Circle ──────────────────────────── */
+
+.floating-nav__default {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: auto;
+}
+
+.floating-nav__pill {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  background: rgba(249, 249, 249, 0.92);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-radius: 28px;
+  padding: 4px 6px;
+  box-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.08),
+    0 0 0 0.5px rgba(0, 0, 0, 0.06);
+}
+
+:root.dark .floating-nav__pill {
+  background: rgba(44, 44, 46, 0.92);
+  box-shadow:
+    0 2px 16px rgba(0, 0, 0, 0.35),
+    0 0 0 0.5px rgba(255, 255, 255, 0.08);
+}
+
+.floating-nav__tab {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  background: transparent;
+  border-radius: 22px;
+  min-height: 44px;
+  min-width: 56px;
+  padding: 6px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  color: #8E8E93;
+  cursor: pointer;
+  transition: color 0.2s ease, background 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  position: relative;
+  box-shadow: none;
+  outline: none;
+}
+
+.floating-nav__tab:focus,
+.floating-nav__tab:focus-visible {
+  outline: none;
+  box-shadow: none;
+  color: #8E8E93;
+  background: transparent;
+}
+
+.floating-nav__tab.is-active {
+  color: var(--ios-blue, #007AFF);
+  background: rgba(0, 122, 255, 0.12);
+}
+
+.floating-nav__tab.is-active:focus,
+.floating-nav__tab.is-active:focus-visible {
+  color: var(--ios-blue, #007AFF);
+  background: rgba(0, 122, 255, 0.12);
+}
+
+:root.dark .floating-nav__tab {
+  color: #8E8E93;
+}
+
+:root.dark .floating-nav__tab:focus,
+:root.dark .floating-nav__tab:focus-visible {
+  color: #8E8E93;
+  background: transparent;
+}
+
+:root.dark .floating-nav__tab.is-active {
+  color: #0A84FF;
+  background: rgba(10, 132, 255, 0.16);
+}
+
+:root.dark .floating-nav__tab.is-active:focus,
+:root.dark .floating-nav__tab.is-active:focus-visible {
+  color: #0A84FF;
+  background: rgba(10, 132, 255, 0.16);
+}
+
+.floating-nav__tab:active {
+  transform: scale(0.95);
+  opacity: 0.8;
+}
+
+@media (hover: hover) {
+  .floating-nav__tab:hover {
+    color: var(--ios-blue, #007AFF);
+  }
+  :root.dark .floating-nav__tab:hover {
+    color: #0A84FF;
+  }
+}
+
+.floating-nav__tab-icon {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-nav__tab-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.floating-nav__tab.is-active .floating-nav__tab-icon svg {
+  stroke-width: 2.2;
+}
+
+.floating-nav__tab-label {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+}
+
+/* ── Search Circle (default state) ────────────────────────────────────── */
+
+.floating-nav__search-circle {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(249, 249, 249, 0.92);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  box-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.08),
+    0 0 0 0.5px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #8E8E93;
+  transition: transform 0.15s ease, color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  outline: none;
+}
+
+.floating-nav__search-circle:focus,
+.floating-nav__search-circle:focus-visible {
+  outline: none;
+  box-shadow:
+    0 2px 12px rgba(0, 0, 0, 0.08),
+    0 0 0 0.5px rgba(0, 0, 0, 0.06);
+}
+
+:root.dark .floating-nav__search-circle {
+  background: rgba(44, 44, 46, 0.92);
+  box-shadow:
+    0 2px 16px rgba(0, 0, 0, 0.35),
+    0 0 0 0.5px rgba(255, 255, 255, 0.08);
+  color: #8E8E93;
+}
+
+:root.dark .floating-nav__search-circle:focus,
+:root.dark .floating-nav__search-circle:focus-visible {
+  box-shadow:
+    0 2px 16px rgba(0, 0, 0, 0.35),
+    0 0 0 0.5px rgba(255, 255, 255, 0.08);
+}
+
+.floating-nav__search-circle:active {
+  transform: scale(0.92);
+}
+
+.floating-nav__search-icon {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-nav__search-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Search State: Nav Circle + Search Pill ───────────────────────────── */
+
+.floating-nav__search-mode {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  width: 100%;
+  max-width: 500px;
+  pointer-events: auto;
+}
+
+.floating-nav__nav-circle {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 52px;
+  height: 52px;
+  min-width: 52px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(44, 44, 46, 0.92);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  box-shadow:
+    0 2px 16px rgba(0, 0, 0, 0.2),
+    0 0 0 0.5px rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  transition: background 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  outline: none;
+}
+
+.floating-nav__nav-circle:focus,
+.floating-nav__nav-circle:focus-visible {
+  outline: none;
+  box-shadow:
+    0 2px 16px rgba(0, 0, 0, 0.2),
+    0 0 0 0.5px rgba(255, 255, 255, 0.06);
+}
+
+:root:not(.dark) .floating-nav__nav-circle {
+  background: rgba(60, 60, 67, 0.92);
+  color: #fff;
+}
+
+.floating-nav__nav-circle:active {
+  transform: scale(0.92);
+}
+
+.floating-nav__nav-circle.is-hidden {
+  pointer-events: none;
+}
+
+.floating-nav__nav-circle-icon {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-nav__nav-circle-icon svg {
+  width: 22px;
+  height: 22px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Search Pill (expanded) ───────────────────────────────────────────── */
+
+.floating-nav__search-pill {
+  flex: 1;
+  position: relative;
+}
+
+.floating-nav__search-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(44, 44, 46, 0.92);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-radius: 26px;
+  box-shadow:
+    0 2px 16px rgba(0, 0, 0, 0.2),
+    0 0 0 0.5px rgba(255, 255, 255, 0.06);
+}
+
+:root:not(.dark) .floating-nav__search-input-wrap {
+  background: rgba(60, 60, 67, 0.92);
+}
+
+.floating-nav__search-pill-icon {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.floating-nav__search-pill-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.floating-nav__search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 17px;
+  color: #fff;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  padding: 0;
+  line-height: 1.3;
+  min-width: 0;
+}
+
+.floating-nav__search-input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+:root:not(.dark) .floating-nav__search-input {
+  color: #fff;
+}
+
+:root:not(.dark) .floating-nav__search-input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.floating-nav__search-clear {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  background: transparent;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.5);
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  box-shadow: none;
+}
+
+.floating-nav__search-clear:focus,
+.floating-nav__search-clear:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.floating-nav__search-clear svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── Search Results Dropdown ──────────────────────────────────────────── */
+
+.floating-nav__search-results {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: rgba(44, 44, 46, 0.96);
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  border-radius: 16px;
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.3),
+    0 0 0 0.5px rgba(255, 255, 255, 0.08);
+  max-height: 360px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  z-index: 100;
+}
+
+:root:not(.dark) .floating-nav__search-results {
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.12),
+    0 0 0 0.5px rgba(0, 0, 0, 0.06);
+}
+
+.floating-nav__search-empty {
+  padding: 20px 16px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 15px;
+}
+
+:root:not(.dark) .floating-nav__search-empty {
+  color: #8E8E93;
+}
+
+.floating-nav__search-section {
+  padding: 8px 0;
+}
+
+.floating-nav__search-section + .floating-nav__search-section {
+  border-top: 0.5px solid rgba(255, 255, 255, 0.08);
+}
+
+:root:not(.dark) .floating-nav__search-section + .floating-nav__search-section {
+  border-top-color: rgba(0, 0, 0, 0.06);
+}
+
+.floating-nav__search-label {
+  padding: 4px 16px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+:root:not(.dark) .floating-nav__search-label {
+  color: #8E8E93;
+}
+
+.floating-nav__search-item {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  background: transparent;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  text-align: left;
+  outline: none;
+  box-shadow: none;
+}
+
+.floating-nav__search-item:focus,
+.floating-nav__search-item:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.floating-nav__search-item:active {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+:root:not(.dark) .floating-nav__search-item:active {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.floating-nav__search-item-icon {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 600;
+  overflow: hidden;
+}
+
+.floating-nav__search-item-icon.gear {
+  background: rgba(10, 132, 255, 0.15);
+  color: #0A84FF;
+}
+
+:root:not(.dark) .floating-nav__search-item-icon.gear {
+  background: rgba(0, 122, 255, 0.1);
+  color: var(--ios-blue, #007AFF);
+}
+
+.floating-nav__search-item-icon.gear img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.floating-nav__search-item-icon.event {
+  background: rgba(255, 159, 10, 0.15);
+  color: #FF9F0A;
+}
+
+:root:not(.dark) .floating-nav__search-item-icon.event {
+  background: rgba(255, 149, 0, 0.1);
+  color: #FF9500;
+}
+
+.floating-nav__search-item-icon.settings {
+  background: rgba(142, 142, 147, 0.15);
+  color: #8E8E93;
+}
+
+.floating-nav__search-item-icon.settings svg {
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:root:not(.dark) .floating-nav__search-item-icon.settings {
+  background: rgba(142, 142, 147, 0.1);
+}
+
+.floating-nav__search-item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.floating-nav__search-item-text .name {
+  font-size: 15px;
+  font-weight: 500;
+  color: #fff;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:root:not(.dark) .floating-nav__search-item-text .name {
+  color: #1C1C1E;
+}
+
+.floating-nav__search-item-text .sub {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.4);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:root:not(.dark) .floating-nav__search-item-text .sub {
+  color: #8E8E93;
+}
+
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   GLOBAL PROFILE BAR (top-right avatar on all pages)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.global-profile-bar {
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 8px);
+  right: 12px;
+  z-index: 999;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PROFILE MENU
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.profile-menu {
+  position: relative;
+}
+
+.profile-menu__avatar-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  box-shadow: none;
+  min-height: auto;
+}
+
+.profile-menu__avatar-btn:focus,
+.profile-menu__avatar-btn:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.profile-menu__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ios-blue, #007AFF), #5856D6);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0, 122, 255, 0.25);
+  transition: transform 0.15s ease;
+}
+
+:root.dark .profile-menu__avatar {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.profile-menu__avatar-btn:active .profile-menu__avatar {
+  transform: scale(0.92);
+}
+
+/* ── Profile Dropdown ─────────────────────────────────────────────────── */
+
+.profile-menu__dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 260px;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  border-radius: 14px;
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.15),
+    0 0 0 0.5px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+  z-index: 1000;
+}
+
+:root.dark .profile-menu__dropdown {
+  background: rgba(44, 44, 46, 0.96);
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.5),
+    0 0 0 0.5px rgba(255, 255, 255, 0.08);
+}
+
+.profile-menu__user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+}
+
+.profile-menu__user-avatar {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--ios-blue, #007AFF), #5856D6);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-menu__user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.profile-menu__user-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1C1C1E;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:root.dark .profile-menu__user-name {
+  color: #F2F2F7;
+}
+
+.profile-menu__user-email {
+  font-size: 13px;
+  color: #8E8E93;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.profile-menu__divider {
+  height: 0.5px;
+  background: rgba(0, 0, 0, 0.08);
+  margin: 0 16px;
+}
+
+:root.dark .profile-menu__divider {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.profile-menu__item {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  background: transparent;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  font-size: 15px;
+  font-weight: 400;
+  color: #1C1C1E;
+  text-align: left;
+  outline: none;
+  box-shadow: none;
+  font-family: inherit;
+}
+
+.profile-menu__item:focus,
+.profile-menu__item:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+:root.dark .profile-menu__item {
+  color: #F2F2F7;
+}
+
+.profile-menu__item:active {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+:root.dark .profile-menu__item:active {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.profile-menu__item--danger {
+  color: #FF3B30;
+}
+
+:root.dark .profile-menu__item--danger {
+  color: #FF453A;
+}
+
+.profile-menu__item-icon {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: inherit;
+}
+
+.profile-menu__item-icon svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   DESKTOP OVERRIDES for Floating Nav
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@media (min-width: 768px) {
+  .floating-nav {
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    padding: 0 20px;
+  }
+
+  .floating-nav__pill {
+    padding: 6px 8px;
+    border-radius: 30px;
+  }
+
+  .floating-nav__tab {
+    min-width: 64px;
+    padding: 8px 16px;
+    border-radius: 24px;
+  }
+
+  .floating-nav__search-circle {
+    width: 56px;
+    height: 56px;
+  }
+
+  .floating-nav__nav-circle {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+  }
+
+  .floating-nav__search-mode {
+    max-width: 600px;
+  }
 }

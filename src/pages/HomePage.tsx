@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
@@ -9,26 +9,6 @@ export function HomePage() {
   const settings = useLiveQuery(() => db.settings.get('app-settings'));
   const gearItems = useLiveQuery(() => db.gearItems.toArray(), []);
   const events = useLiveQuery(() => db.events.toArray(), []);
-
-  // ── Search State ───────────────────────────────────────────────────────────
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchFocused, setSearchFocused] = useState(false);
-  const searchRef = useRef<HTMLDivElement>(null);
-
-  // Click-outside handler (mouse + touch for mobile)
-  useEffect(() => {
-    function handleOutside(e: MouseEvent | TouchEvent) {
-      if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
-        setSearchFocused(false);
-      }
-    }
-    document.addEventListener('mousedown', handleOutside);
-    document.addEventListener('touchstart', handleOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleOutside);
-      document.removeEventListener('touchstart', handleOutside);
-    };
-  }, []);
 
   // ── Greeting & Time ────────────────────────────────────────────────────────
   const hour = new Date().getHours();
@@ -124,48 +104,6 @@ export function HomePage() {
     [upcomingEvents]
   );
 
-  // ── Search Logic ───────────────────────────────────────────────────────────
-  const searchResults = useMemo(() => {
-    const q = searchQuery.trim().toLowerCase();
-    if (!q) return { gear: [], events: [], settings: [] };
-
-    const matchedGear = (gearItems ?? [])
-      .filter((item) => {
-        const text = [item.name, item.brand, item.model]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase();
-        return text.includes(q);
-      })
-      .slice(0, 5);
-
-    const matchedEvents = (events ?? [])
-      .filter((e) => {
-        const text = [e.title, e.type, e.location]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase();
-        return text.includes(q);
-      })
-      .slice(0, 5);
-
-    const settingsSections = [
-      { label: 'Account', path: '/settings', keywords: 'account name email display profile' },
-      { label: 'Categories', path: '/settings', keywords: 'categories gear type' },
-      { label: 'Appearance', path: '/settings', keywords: 'appearance theme dark light mode' },
-      { label: 'Data', path: '/settings', keywords: 'data export import backup' },
-    ];
-    const matchedSettings = settingsSections.filter((s) => s.keywords.includes(q));
-
-    return { gear: matchedGear, events: matchedEvents, settings: matchedSettings };
-  }, [searchQuery, gearItems, events]);
-
-  const hasSearchResults =
-    searchResults.gear.length > 0 ||
-    searchResults.events.length > 0 ||
-    searchResults.settings.length > 0;
-  const showSearchDropdown = searchFocused && searchQuery.trim().length > 0;
-
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <section className="home-page ios-theme">
@@ -177,152 +115,6 @@ export function HomePage() {
             {greeting}
             {firstName ? `, ${firstName}` : ''}
           </h1>
-          <button
-            className="home-ios-profile-btn"
-            onClick={() => navigate('/settings')}
-          >
-            <div className="home-ios-avatar">
-              {firstName ? firstName.charAt(0).toUpperCase() : 'G'}
-            </div>
-          </button>
-        </div>
-
-        {/* Search Bar */}
-        <div className="home-ios-search-container" ref={searchRef}>
-          <div
-            className={`home-ios-search-bar${searchFocused ? ' focused' : ''}`}
-          >
-            <svg
-              className="home-search-icon"
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-              type="text"
-              placeholder="Search gear, events, settings..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              onFocus={() => setSearchFocused(true)}
-            />
-            {searchQuery && (
-              <button
-                className="home-search-clear"
-                onClick={() => {
-                  setSearchQuery('');
-                  setSearchFocused(false);
-                }}
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                  <circle cx="12" cy="12" r="10" opacity="0.25" />
-                  <path
-                    d="M15 9l-6 6M9 9l6 6"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    fill="none"
-                  />
-                </svg>
-              </button>
-            )}
-          </div>
-
-          {/* Dropdown Results */}
-          {showSearchDropdown && (
-            <div className="home-search-dropdown">
-              {!hasSearchResults && (
-                <div className="home-search-empty">No results found</div>
-              )}
-
-              {searchResults.gear.length > 0 && (
-                <div className="home-search-section">
-                  <div className="home-search-label">Gear</div>
-                  {searchResults.gear.map((item) => (
-                    <button
-                      key={item.id}
-                      className="home-search-item"
-                      onClick={() => navigate(`/catalog/item/${item.id}`)}
-                    >
-                      <div className="home-search-item-icon gear">
-                        {item.photo ? (
-                          <img src={item.photo} alt="" />
-                        ) : (
-                          item.name.charAt(0)
-                        )}
-                      </div>
-                      <div className="home-search-item-text">
-                        <span className="name">{item.name}</span>
-                        <span className="sub">
-                          {item.brand} {item.model}
-                        </span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {searchResults.events.length > 0 && (
-                <div className="home-search-section">
-                  <div className="home-search-label">Events</div>
-                  {searchResults.events.map((event) => (
-                    <button
-                      key={event.id}
-                      className="home-search-item"
-                      onClick={() => navigate(`/events/${event.id}`)}
-                    >
-                      <div className="home-search-item-icon event">
-                        {event.title.charAt(0)}
-                      </div>
-                      <div className="home-search-item-text">
-                        <span className="name">{event.title}</span>
-                        <span className="sub">{event.type}</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {searchResults.settings.length > 0 && (
-                <div className="home-search-section">
-                  <div className="home-search-label">Settings</div>
-                  {searchResults.settings.map((section) => (
-                    <button
-                      key={section.label}
-                      className="home-search-item"
-                      onClick={() => navigate(section.path)}
-                    >
-                      <div className="home-search-item-icon settings">
-                        <svg
-                          width="18"
-                          height="18"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                        >
-                          <circle cx="12" cy="12" r="3" />
-                          <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
-                        </svg>
-                      </div>
-                      <div className="home-search-item-text">
-                        <span className="name">{section.label}</span>
-                        <span className="sub">Settings</span>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </header>
 
