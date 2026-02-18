@@ -172,7 +172,7 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
             exit={{ opacity: 0 }}
           >
             <LayoutGroup>
-              <div className={`floating-nav__row${searchOpen ? ' is-search-open' : ''}`}>
+              <div className="floating-nav__row">
                 {/* ── Left: Nav Pill ↔ Nav Circle ────────────────────── */}
                 {!searchOpen ? (
                   <motion.div
