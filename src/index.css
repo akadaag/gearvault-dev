@@ -5425,6 +5425,7 @@ html {
 /* ── Base Layout ─────────────────────────────────────────────── */
 
 .home-page.ios-theme {
+  width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
