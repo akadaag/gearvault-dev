@@ -5426,6 +5426,7 @@ html {
   margin: 0 auto;
   background: var(--ios-bg);
   overflow-x: hidden;
+  padding: 0;
 }
 
 /* ── Sticky Header ──────────────────────────────────────────── */
@@ -6290,7 +6291,7 @@ html {
 
 /* ── Mobile Responsive Adjustments ─────────────────────────────── */
 
-@media (max-width: 390px) {
+@media (max-width: 430px) {
   .home-ios-content {
     padding: 1rem;
   }
