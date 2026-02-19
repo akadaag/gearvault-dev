@@ -97,15 +97,17 @@ export function GearItemDetailPage() {
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, [showOptionsMenu]);
 
-  // Sync theme-color meta tag to white/black while on this page
+  // Sync theme-color meta + body background to white/black while on this page
   useEffect(() => {
     const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
-    if (!meta) return;
-    const original = meta.content;
+    const originalMeta = meta?.content;
+    const originalBg = document.body.style.background;
 
     function applyColor() {
-      if (!meta) return;
-      meta.content = document.documentElement.classList.contains('dark') ? '#000000' : '#ffffff';
+      const isDark = document.documentElement.classList.contains('dark');
+      const color = isDark ? '#000000' : '#ffffff';
+      if (meta) meta.content = color;
+      document.body.style.background = color;
     }
 
     applyColor();
@@ -115,7 +117,8 @@ export function GearItemDetailPage() {
 
     return () => {
       observer.disconnect();
-      if (meta) meta.content = original;
+      if (meta) meta.content = originalMeta ?? '';
+      document.body.style.background = originalBg;
     };
   }, []);
 
