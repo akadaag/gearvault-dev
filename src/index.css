@@ -6289,7 +6289,7 @@ html {
 .ios-catalog-header-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: flex-end;
 }
 
 .ios-catalog-title {
@@ -6301,26 +6301,47 @@ html {
   margin: 0;
 }
 
-.ios-catalog-add-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
+.ios-catalog-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  border: 0.75px solid color-mix(in srgb, var(--ios-text-primary) 12%, transparent);
+  background: color-mix(in srgb, var(--ios-text-primary) 8%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.ios-catalog-toolbar-btn {
+  width: 38px;
+  height: 38px;
   border: none;
-  background: var(--ios-blue);
-  color: #fff;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--ios-text-primary);
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   padding: 0;
   min-height: auto;
+  cursor: pointer;
   box-shadow: none;
-  transition: transform 0.12s ease, opacity 0.12s ease;
+  transition: transform 0.12s ease, color 0.12s ease, background 0.12s ease;
 }
 
-.ios-catalog-add-btn:active {
-  transform: scale(0.9);
-  opacity: 0.85;
+.ios-catalog-toolbar-btn:active {
+  transform: scale(0.92);
+}
+
+.ios-catalog-toolbar-btn.active {
+  color: var(--ios-blue);
+  background: color-mix(in srgb, var(--ios-blue) 16%, transparent);
+}
+
+:root.dark .ios-catalog-toolbar {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .ios-catalog-search-row {
@@ -6385,33 +6406,6 @@ html {
   box-shadow: none;
 }
 
-.ios-catalog-filter-btn {
-  flex-shrink: 0;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: none;
-  background: color-mix(in srgb, var(--ios-text-secondary) 10%, transparent);
-  color: var(--ios-text-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  padding: 0;
-  min-height: auto;
-  box-shadow: none;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.ios-catalog-filter-btn.active {
-  background: color-mix(in srgb, var(--ios-blue) 15%, transparent);
-  color: var(--ios-blue);
-}
-
-.ios-catalog-filter-btn:active {
-  transform: scale(0.9);
-}
-
 .ios-catalog-item-count {
   font-size: 13px;
   color: var(--ios-text-secondary);
@@ -6460,10 +6454,10 @@ html {
 }
 
 .ios-catalog-group-label {
-  font-size: 32px;
+  font-size: 22px;
   font-weight: 700;
   text-transform: none;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.005em;
   color: var(--ios-text-primary);
   flex: 1;
 }
@@ -6549,6 +6543,11 @@ html {
   margin-left: 4px;
   vertical-align: middle;
   flex-shrink: 0;
+}
+
+.ios-catalog-star--action {
+  margin-left: 0;
+  margin-right: 1px;
 }
 
 /* Value label right-aligned */

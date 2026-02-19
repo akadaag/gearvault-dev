@@ -271,33 +271,35 @@ export function CatalogPage() {
           <div className="ios-catalog-header-top">
             <h1 className="ios-catalog-title">Catalog</h1>
             <div className="ios-catalog-header-actions">
-              <button
-                className={`ios-catalog-filter-btn${showFilterSheet || tagFilter || conditionFilter !== 'all' || essentialOnly || selectedCategoryIds.length > 0 ? ' active' : ''}`}
-                onClick={() => updateSearchParams((p) => p.set('filters', '1'))}
-                aria-label="Filters"
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="4" y1="21" x2="4" y2="14" />
-                  <line x1="4" y1="10" x2="4" y2="3" />
-                  <line x1="12" y1="21" x2="12" y2="12" />
-                  <line x1="12" y1="8" x2="12" y2="3" />
-                  <line x1="20" y1="21" x2="20" y2="16" />
-                  <line x1="20" y1="12" x2="20" y2="3" />
-                  <line x1="1" y1="14" x2="7" y2="14" />
-                  <line x1="9" y1="8" x2="15" y2="8" />
-                  <line x1="17" y1="16" x2="23" y2="16" />
-                </svg>
-              </button>
-              <button
-                className="ios-catalog-add-btn"
-                onClick={() => updateSearchParams((p) => p.set('add', '1'))}
-                aria-label="Add Item"
-              >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="12" y1="5" x2="12" y2="19" />
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                </svg>
-              </button>
+              <div className="ios-catalog-toolbar" role="group" aria-label="Catalog actions">
+                <button
+                  className={`ios-catalog-toolbar-btn${showFilterSheet || tagFilter || conditionFilter !== 'all' || essentialOnly || selectedCategoryIds.length > 0 ? ' active' : ''}`}
+                  onClick={() => updateSearchParams((p) => p.set('filters', '1'))}
+                  aria-label="Filters"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="4" y1="21" x2="4" y2="14" />
+                    <line x1="4" y1="10" x2="4" y2="3" />
+                    <line x1="12" y1="21" x2="12" y2="12" />
+                    <line x1="12" y1="8" x2="12" y2="3" />
+                    <line x1="20" y1="21" x2="20" y2="16" />
+                    <line x1="20" y1="12" x2="20" y2="3" />
+                    <line x1="1" y1="14" x2="7" y2="14" />
+                    <line x1="9" y1="8" x2="15" y2="8" />
+                    <line x1="17" y1="16" x2="23" y2="16" />
+                  </svg>
+                </button>
+                <button
+                  className="ios-catalog-toolbar-btn"
+                  onClick={() => updateSearchParams((p) => p.set('add', '1'))}
+                  aria-label="Add Item"
+                >
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
 
@@ -366,11 +368,6 @@ export function CatalogPage() {
                           <div className="ios-list-content">
                             <span className="ios-list-title">
                               {item.name}
-                              {item.essential && (
-                                <svg className="ios-catalog-star" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-label="Essential">
-                                  <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
-                                </svg>
-                              )}
                             </span>
                             <span className="ios-list-sub">
                               {[item.brand, item.model].filter(Boolean).join(' ') || category.name}
@@ -383,7 +380,11 @@ export function CatalogPage() {
                                 {formatMoney(item.currentValue.amount, item.currentValue.currency)}
                               </span>
                             )}
-                            <span className="ios-arrow" aria-hidden="true">&#8250;</span>
+                            {item.essential && (
+                              <svg className="ios-catalog-star ios-catalog-star--action" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-label="Essential">
+                                <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
+                              </svg>
+                            )}
                           </div>
                         </button>
                       ))}
