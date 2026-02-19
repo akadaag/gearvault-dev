@@ -7335,8 +7335,8 @@ input[type="checkbox"].ios-toggle:checked::after {
 /* Fixed circular filter button */
 .ev-ios-filter-circle-btn {
   flex-shrink: 0;
-  width: 46px;
-  height: 46px;
+  width: 42px;
+  height: 42px;
   border-radius: 999px;
   border: none;
   background: #ffffff;
@@ -7370,12 +7370,12 @@ input[type="checkbox"].ios-toggle:checked::after {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
-  padding: 1px 0;
-  /* Ensure pills don't clip their shadows */
-  padding-top: 3px;
-  padding-bottom: 3px;
-  margin-top: -3px;
-  margin-bottom: -3px;
+  /* Extra vertical room so box-shadows aren't clipped by overflow-x: auto */
+  padding-top: 8px;
+  padding-bottom: 8px;
+  margin-top: -8px;
+  margin-bottom: -8px;
+  padding-right: 8px;
 }
 
 .ev-ios-pills-scroll::-webkit-scrollbar {
@@ -7388,12 +7388,12 @@ input[type="checkbox"].ios-toggle:checked::after {
   align-items: center;
   gap: 7px;
   padding: 0 14px 0 8px;
-  height: 46px;
+  height: 42px;
   border-radius: 999px;
   border: none;
   background: #ffffff;
   color: var(--ios-text-primary);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   white-space: nowrap;
   cursor: pointer;
@@ -7418,16 +7418,16 @@ input[type="checkbox"].ios-toggle:checked::after {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 26px;
-  height: 26px;
+  min-width: 24px;
+  height: 24px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   line-height: 1;
   border: 1.5px solid rgba(0, 0, 0, 0.12);
   background: transparent;
   color: var(--ios-text-primary);
-  padding: 0 5px;
+  padding: 0 4px;
   flex-shrink: 0;
 }
 
@@ -7442,7 +7442,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   flex: 1;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 0 16px;
+  padding: 12px 16px 0;
   padding-bottom: var(--bottom-nav-clearance);
   min-height: 0;
   background: #ffffff;
