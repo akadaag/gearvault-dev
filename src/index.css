@@ -9546,9 +9546,9 @@ input[type="checkbox"].ios-toggle:checked::after {
 .ios-theme .ios-form-row input[type="checkbox"].ios-switch {
   -webkit-appearance: none;
   appearance: none;
-  width: 51px;
-  height: 31px;
-  border-radius: 15.5px;
+  width: 56px;
+  height: 28px;
+  border-radius: 8px;
   background: rgba(120, 120, 128, 0.16);
   position: relative;
   cursor: pointer;
@@ -9564,11 +9564,11 @@ input[type="checkbox"].ios-toggle:checked::after {
 .ios-theme .ios-form-row input[type="checkbox"].ios-switch::before {
   content: '';
   position: absolute;
-  top: 2px;
-  left: 2px;
-  width: 27px;
-  height: 27px;
-  border-radius: 50%;
+  top: 3px;
+  left: 3px;
+  width: 24px;
+  height: 22px;
+  border-radius: 6px;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
   transition: transform 0.25s ease;
@@ -9579,7 +9579,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 }
 
 .ios-theme .ios-form-row input[type="checkbox"].ios-switch:checked::before {
-  transform: translateX(20px);
+  transform: translateX(28px);
 }
 
 .ios-theme .ios-form-row input[type="checkbox"].ios-switch:hover,
@@ -10717,6 +10717,13 @@ input[type="checkbox"].ios-toggle:checked::after {
   margin-bottom: 0;
 }
 
+/* ── Toggle-only pill (Essential row) — compact height ─────────── */
+
+.ios-theme .ios-form-pill--toggle .ios-form-row {
+  padding: 10px 16px;
+  min-height: 44px;
+}
+
 /* ── "Add Photo" small capsule pill button ──────────────────────── */
 
 .ios-theme .ios-form-pill--photo-btn {
@@ -10724,7 +10731,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   padding: 7px 20px;
   font-size: 14px;
   font-weight: 500;
-  color: var(--ios-blue);
+  color: var(--ios-text-primary);
   cursor: pointer;
   text-align: center;
   line-height: 1.3;
@@ -10733,7 +10740,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 }
 
 :root.dark .ios-theme .ios-form-pill--photo-btn {
-  color: var(--ios-blue);
+  color: var(--ios-text-primary);
 }
 
 /* ──────────────────────────────────────────────────────────────────────────────

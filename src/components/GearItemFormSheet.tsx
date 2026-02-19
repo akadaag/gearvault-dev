@@ -230,7 +230,7 @@ export function GearItemFormSheet({
           </div>
 
           {/* Pill 3 — Essential (always visible in quick) */}
-          <div className="ios-form-pill">
+          <div className="ios-form-pill ios-form-pill--toggle">
             <label className="ios-form-row">
               <span className="ios-form-label">Essential</span>
               <input
