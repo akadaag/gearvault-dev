@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
@@ -6,6 +6,108 @@ import { EventFormSheet } from '../components/EventFormSheet';
 import { getDaysUntilEvent } from '../lib/eventHelpers';
 import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
 import { useSheetDismiss } from '../hooks/useSheetDismiss';
+import type { EventItem } from '../types/models';
+
+// ── MonthCalendar ────────────────────────────────────────────────────────────
+
+interface MonthCalendarProps {
+  events: EventItem[];
+  calYear: number;
+  calMonth: number;
+  selectedDate: string | null;
+  onPrevMonth: () => void;
+  onNextMonth: () => void;
+  onDayClick: (dateKey: string) => void;
+}
+
+function MonthCalendar({
+  events,
+  calYear,
+  calMonth,
+  selectedDate,
+  onPrevMonth,
+  onNextMonth,
+  onDayClick,
+}: MonthCalendarProps) {
+  const now           = new Date();
+  const todayKey      = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+
+  const firstDay       = new Date(calYear, calMonth, 1);
+  const startDayOfWeek = firstDay.getDay();
+  const daysInMonth    = new Date(calYear, calMonth + 1, 0).getDate();
+  const daysInPrevMonth = new Date(calYear, calMonth, 0).getDate();
+
+  const eventsByDate = new Map<string, number>();
+  events.forEach(event => {
+    if (event.dateTime) {
+      const key = event.dateTime.slice(0, 10);
+      eventsByDate.set(key, (eventsByDate.get(key) ?? 0) + 1);
+    }
+  });
+
+  const cells: { day: number; dateKey: string | null; isCurrentMonth: boolean; eventCount: number }[] = [];
+  for (let i = startDayOfWeek - 1; i >= 0; i--)
+    cells.push({ day: daysInPrevMonth - i, dateKey: null, isCurrentMonth: false, eventCount: 0 });
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateKey = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    cells.push({ day, dateKey, isCurrentMonth: true, eventCount: eventsByDate.get(dateKey) ?? 0 });
+  }
+  for (let day = 1; day <= 42 - cells.length; day++)
+    cells.push({ day, dateKey: null, isCurrentMonth: false, eventCount: 0 });
+
+  const monthLabel = firstDay.toLocaleString('default', { month: 'long', year: 'numeric' });
+
+  return (
+    <div className="ev-ios-cal-card">
+      {/* Calendar header with prev/next navigation */}
+      <div className="ev-ios-cal-header">
+        <button className="ev-ios-cal-nav-btn" onClick={onPrevMonth} aria-label="Previous month">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+        </button>
+        <h3 className="ev-ios-cal-title">{monthLabel}</h3>
+        <button className="ev-ios-cal-nav-btn" onClick={onNextMonth} aria-label="Next month">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="9 18 15 12 9 6" />
+          </svg>
+        </button>
+      </div>
+
+      <div className="ev-ios-cal-grid">
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(label => (
+          <span key={label} className="ev-ios-cal-day-label">{label}</span>
+        ))}
+        {cells.map((cell, idx) => {
+          const isToday    = cell.isCurrentMonth && cell.dateKey === todayKey;
+          const isSelected = cell.isCurrentMonth && cell.dateKey === selectedDate;
+          let className = 'ev-ios-cal-cell';
+          if (!cell.isCurrentMonth) className += ' muted';
+          if (isToday)    className += ' today';
+          if (isSelected) className += ' selected';
+          if (cell.isCurrentMonth) className += ' clickable';
+
+          return (
+            <div
+              key={idx}
+              className={className}
+              onClick={cell.isCurrentMonth && cell.dateKey ? () => onDayClick(cell.dateKey!) : undefined}
+            >
+              <span className="ev-ios-cal-day-num">{cell.day}</span>
+              {cell.eventCount > 0 && (
+                <span className="ev-ios-cal-dot-wrap">
+                  <span className="ev-ios-cal-dot" />
+                </span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+// ── EventsPage ───────────────────────────────────────────────────────────────
 
 export function EventsPage() {
   const events = useLiveQuery(() => db.events.orderBy('updatedAt').reverse().toArray(), [], []);
@@ -18,6 +120,17 @@ export function EventsPage() {
   const showFilterSheet = searchParams.get('filters') === '1';
   const showCreateForm  = searchParams.get('add') === '1';
   const showCalendar    = searchParams.get('calendar') === '1';
+
+  // ── Local calendar state ───────────────────────────────────────────────────
+  const now = new Date();
+  const [calYear,  setCalYear]  = useState(now.getFullYear());
+  const [calMonth, setCalMonth] = useState(now.getMonth());
+  const [selectedCalDate, setSelectedCalDate] = useState<string | null>(null);
+
+  // Clear selected date when calendar is closed
+  useEffect(() => {
+    if (!showCalendar) setSelectedCalDate(null);
+  }, [showCalendar]);
 
   // ── Closing animation for filter sheet ─────────────────────────────────────
   const { closing: closingFilter, dismiss: dismissFilter, onAnimationEnd: onFilterAnimEnd } = useSheetDismiss(() => {
@@ -49,7 +162,6 @@ export function EventsPage() {
   function closeCreateForm() { setParam('add', null); }
 
   function toggleQuickFilter(filter: string) {
-    // Toggle: clicking the active filter deactivates it (show all)
     setParam('qf', quickFilter === filter ? null : filter);
   }
 
@@ -67,8 +179,24 @@ export function EventsPage() {
     navigate({ search: params.toString() }, { replace: true });
   }
 
+  // ── Calendar month navigation ──────────────────────────────────────────────
+  function handlePrevMonth() {
+    if (calMonth === 0) { setCalYear(y => y - 1); setCalMonth(11); }
+    else setCalMonth(m => m - 1);
+    setSelectedCalDate(null);
+  }
+
+  function handleNextMonth() {
+    if (calMonth === 11) { setCalYear(y => y + 1); setCalMonth(0); }
+    else setCalMonth(m => m + 1);
+    setSelectedCalDate(null);
+  }
+
+  function handleDayClick(dateKey: string) {
+    setSelectedCalDate(prev => prev === dateKey ? null : dateKey);
+  }
+
   // ── Counts for filter pills ────────────────────────────────────────────────
-  const now = new Date();
   const upcomingCount = events.filter(e => e.dateTime && new Date(e.dateTime) >= now).length;
   const pastCount     = events.filter(e => e.dateTime && new Date(e.dateTime) < now).length;
   const weddingCount  = events.filter(e => e.type === 'Wedding').length;
@@ -82,21 +210,26 @@ export function EventsPage() {
 
   const filtered = useMemo(() => {
     const now = new Date();
+
+    // When a calendar day is selected, override all other filters
+    if (selectedCalDate) {
+      return events.filter(e => e.dateTime?.slice(0, 10) === selectedCalDate);
+    }
+
     return events.filter(e => {
       const text = [e.title, e.type, e.client, e.location, e.notes].join(' ').toLowerCase();
       if (query && !text.includes(query.toLowerCase())) return false;
       if (selectedEventTypes.length > 0 && !selectedEventTypes.includes(e.type)) return false;
       if (clientFilter   && e.client   !== clientFilter)   return false;
       if (locationFilter && e.location !== locationFilter) return false;
-      // Quick filter pills
       if (quickFilter === 'upcoming') return e.dateTime ? new Date(e.dateTime) >= now : false;
       if (quickFilter === 'past')     return e.dateTime ? new Date(e.dateTime) <  now : false;
       if (quickFilter === 'wedding')  return e.type === 'Wedding';
       if (quickFilter === 'corporate') return e.type === 'Corporate Event';
       if (quickFilter === 'tourist')  return e.type === 'Tourist portrait';
-      return true; // '' = show all
+      return true;
     });
-  }, [events, query, selectedEventTypes, clientFilter, locationFilter, quickFilter]);
+  }, [events, query, selectedEventTypes, clientFilter, locationFilter, quickFilter, selectedCalDate]);
 
   const sorted = useMemo(() => {
     const items = [...filtered];
@@ -112,62 +245,6 @@ export function EventsPage() {
     return items;
   }, [filtered, sortBy]);
 
-  // ── Month calendar ─────────────────────────────────────────────────────────
-  function MonthCalendar() {
-    const now   = new Date();
-    const year  = now.getFullYear();
-    const month = now.getMonth();
-    const firstDay       = new Date(year, month, 1);
-    const startDayOfWeek = firstDay.getDay();
-    const daysInMonth    = new Date(year, month + 1, 0).getDate();
-    const daysInPrevMonth = new Date(year, month, 0).getDate();
-    const todayDate = now.getDate();
-
-    const eventsByDate = new Map<string, number>();
-    events.forEach(event => {
-      if (event.dateTime) {
-        const key = event.dateTime.slice(0, 10);
-        eventsByDate.set(key, (eventsByDate.get(key) ?? 0) + 1);
-      }
-    });
-
-    const cells: { day: number; dateKey: string | null; isCurrentMonth: boolean; eventCount: number }[] = [];
-    for (let i = startDayOfWeek - 1; i >= 0; i--)
-      cells.push({ day: daysInPrevMonth - i, dateKey: null, isCurrentMonth: false, eventCount: 0 });
-    for (let day = 1; day <= daysInMonth; day++) {
-      const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-      cells.push({ day, dateKey, isCurrentMonth: true, eventCount: eventsByDate.get(dateKey) ?? 0 });
-    }
-    for (let day = 1; day <= 42 - cells.length; day++)
-      cells.push({ day, dateKey: null, isCurrentMonth: false, eventCount: 0 });
-
-    return (
-      <div className="ios-glass-card ev-ios-cal-card">
-        <h3 className="ev-ios-cal-title">
-          {firstDay.toLocaleString('default', { month: 'long', year: 'numeric' })}
-        </h3>
-        <div className="ev-ios-cal-grid">
-          {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(label => (
-            <span key={label} className="ev-ios-cal-day-label">{label}</span>
-          ))}
-          {cells.map((cell, idx) => (
-            <div
-              key={idx}
-              className={`ev-ios-cal-cell${!cell.isCurrentMonth ? ' muted' : ''}${cell.isCurrentMonth && cell.day === todayDate ? ' today' : ''}`}
-            >
-              <span className="ev-ios-cal-day-num">{cell.day}</span>
-              {cell.eventCount > 0 && (
-                <span className="ev-ios-cal-dot-wrap">
-                  <span className="ev-ios-cal-dot" />
-                </span>
-              )}
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   // ── Filter pills definition ────────────────────────────────────────────────
   const filterPills = [
     { key: 'upcoming',  label: 'Upcoming',  count: upcomingCount },
@@ -176,6 +253,11 @@ export function EventsPage() {
     { key: 'corporate', label: 'Corporate', count: corpCount     },
     { key: 'tourist',   label: 'Tourist',   count: touristCount  },
   ];
+
+  // ── "No events on [date]" label ────────────────────────────────────────────
+  const selectedDateLabel = selectedCalDate
+    ? new Date(selectedCalDate + 'T00:00:00').toLocaleDateString('default', { weekday: 'long', month: 'long', day: 'numeric' })
+    : null;
 
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
@@ -260,7 +342,17 @@ export function EventsPage() {
         {/* ── Scrollable content area ───────────────────────────────── */}
         <div className="ev-ios-content-scroll page-scroll-area">
           {/* Calendar */}
-          {showCalendar && <MonthCalendar />}
+          {showCalendar && (
+            <MonthCalendar
+              events={events}
+              calYear={calYear}
+              calMonth={calMonth}
+              selectedDate={selectedCalDate}
+              onPrevMonth={handlePrevMonth}
+              onNextMonth={handleNextMonth}
+              onDayClick={handleDayClick}
+            />
+          )}
 
           {/* Empty states */}
           {sorted.length === 0 && events.length === 0 && (
@@ -277,7 +369,13 @@ export function EventsPage() {
               <p>Tap + to create your first event</p>
             </div>
           )}
-          {sorted.length === 0 && events.length > 0 && (
+          {sorted.length === 0 && events.length > 0 && selectedCalDate && (
+            <div className="ev-ios-empty">
+              <h3>No events on {selectedDateLabel}</h3>
+              <p>Tap a day with a dot to filter events</p>
+            </div>
+          )}
+          {sorted.length === 0 && events.length > 0 && !selectedCalDate && (
             <div className="ev-ios-empty">
               <h3>No events match</h3>
               <p>Try adjusting your search or filters</p>
