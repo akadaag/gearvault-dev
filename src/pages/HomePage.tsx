@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
 import { formatMoney } from '../lib/format';
+import { ProfileMenu } from '../components/ProfileMenu';
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -115,6 +116,7 @@ export function HomePage() {
             {greeting}
             {firstName ? `, ${firstName}` : ''}
           </h1>
+          <ProfileMenu />
         </div>
       </header>
 

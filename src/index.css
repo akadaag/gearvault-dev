@@ -6280,6 +6280,12 @@ html {
   margin-bottom: 8px;
 }
 
+.ios-catalog-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .ios-catalog-title {
   font-size: 34px;
   font-weight: 700;

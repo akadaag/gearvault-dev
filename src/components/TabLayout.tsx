@@ -7,7 +7,6 @@ import { useTheme } from '../hooks/useTheme';
 import { useKeyboardOpen } from '../hooks/useKeyboardOpen';
 import { resetSheetScrollLock } from '../lib/sheetLock';
 import { FloatingNavBar } from './FloatingNavBar';
-import { ProfileMenu } from './ProfileMenu';
 
 const homeIcon = (
   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -219,13 +218,6 @@ export function TabLayout() {
 
   return (
     <div className={`app-shell${isIosThemeRoute ? ' ios-theme' : ''}`}>
-      {/* ── Global Profile Avatar (top-right) ─────────────────────────── */}
-      {isHomeRoute && (
-        <div className="global-profile-bar">
-          <ProfileMenu />
-        </div>
-      )}
-
       {!isHomeRoute && !isGearDetailRoute && !isEventDetailRoute && !isSettingsRoute && !isAssistantRoute && (
         <header className={`topbar${isCatalogRoute || isEventsRoute ? ' topbar-catalog' : ''}`}>
           <div className="topbar-inner">
