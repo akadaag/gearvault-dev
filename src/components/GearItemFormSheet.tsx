@@ -52,6 +52,7 @@ export function GearItemFormSheet({
   onSubmit,
 }: GearItemFormSheetProps) {
   const [mode, setMode] = useState<FormMode>('quick');
+  const canSubmit = draft.name.trim().length > 0 && Boolean(draft.categoryId);
 
   useEffect(() => {
     if (!open) return;
@@ -121,7 +122,7 @@ export function GearItemFormSheet({
             </svg>
           </button>
           <h3 className="ios-sheet-title">{title}</h3>
-          <button className="ios-sheet-icon-btn ios-sheet-icon-btn--save" onClick={onSubmit} aria-label={submitLabel}>
+          <button className="ios-sheet-icon-btn ios-sheet-icon-btn--save" onClick={onSubmit} aria-label={submitLabel} disabled={!canSubmit}>
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
               <path d="M2.5 9.5L7 14L15.5 4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>

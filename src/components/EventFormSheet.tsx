@@ -35,6 +35,7 @@ export function EventFormSheet({ mode, initialData, onClose, onSaved }: EventFor
     notes: '',
   });
   const [error, setError] = useState('');
+  const canSubmit = draft.title.trim().length > 0;
 
   useEffect(() => {
     if (mode === 'edit' && initialData) {
@@ -115,7 +116,7 @@ export function EventFormSheet({ mode, initialData, onClose, onSaved }: EventFor
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 2L16 16M16 2L2 16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/></svg>
           </button>
           <h3 className="ios-sheet-title">{mode === 'create' ? 'New Event' : 'Edit Event'}</h3>
-          <button className="ios-sheet-icon-btn ios-sheet-icon-btn--save" onClick={() => void handleSubmit()} aria-label={mode === 'create' ? 'Create' : 'Save'}>
+          <button className="ios-sheet-icon-btn ios-sheet-icon-btn--save" onClick={() => void handleSubmit()} aria-label={mode === 'create' ? 'Create' : 'Save'} disabled={!canSubmit}>
             <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2.5 9.5L7 14L15.5 4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </button>
         </div>

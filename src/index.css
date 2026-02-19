@@ -9423,6 +9423,14 @@ input[type="checkbox"].ios-toggle:checked::after {
   margin-bottom: 24px;
 }
 
+.ios-theme .ios-form-group .ios-form-label {
+  font-size: 15px;
+}
+
+.ios-theme .ios-form-group .ios-form-input {
+  font-size: 15px;
+}
+
 :root.dark .ios-theme .ios-form-group {
   background: rgba(44, 44, 46, 1);
 }
