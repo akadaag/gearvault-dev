@@ -6433,15 +6433,22 @@ html {
 .ios-catalog-groups {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
 /* Category group header */
+.ios-catalog-group-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
 .ios-catalog-group-header {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 10px 16px 6px;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 2px 2px 10px;
   background: none;
   border: none;
   width: 100%;
@@ -6453,23 +6460,75 @@ html {
 }
 
 .ios-catalog-group-label {
-  font-size: 13px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--ios-text-secondary);
+  font-size: 32px;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: -0.01em;
+  color: var(--ios-text-primary);
   flex: 1;
 }
 
-.ios-catalog-group-count {
-  font-size: 13px;
+.ios-catalog-group-panel {
+  border-radius: 22px;
+  margin-bottom: 0;
+  max-height: 10000px;
+  opacity: 1;
+  transform: translateY(0);
+  transition: max-height 0.36s ease, opacity 0.24s ease, transform 0.24s ease;
+}
+
+.ios-catalog-group-panel.collapsed {
+  max-height: 0;
+  opacity: 0;
+  transform: translateY(-8px);
+  pointer-events: none;
+  border-color: transparent;
+}
+
+.catalog-page.ios-theme .ios-list-group {
+  border-radius: 22px;
+  margin-bottom: 0;
+}
+
+.catalog-page.ios-theme .ios-list-item {
+  gap: 16px;
+  padding: 14px 16px;
+  border-bottom: none;
+  min-height: 84px;
+  position: relative;
+}
+
+.catalog-page.ios-theme .ios-list-item:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 88px;
+  right: 16px;
+  bottom: 0;
+  height: 0.5px;
+  background: rgba(60, 60, 67, 0.18);
+}
+
+:root.dark .catalog-page.ios-theme .ios-list-item:not(:last-child)::after {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.catalog-page.ios-theme .ios-list-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 14px;
+}
+
+.catalog-page.ios-theme .ios-list-title,
+.catalog-page.ios-theme .ios-list-sub {
+  font-size: 15px;
+}
+
+.catalog-page.ios-theme .ios-list-title {
   font-weight: 600;
-  color: var(--ios-text-secondary);
-  background: color-mix(in srgb, var(--ios-text-secondary) 12%, transparent);
-  border-radius: 10px;
-  padding: 1px 8px;
-  min-width: 22px;
-  text-align: center;
+}
+
+.catalog-page.ios-theme .ios-list-sub {
+  line-height: 1.35;
 }
 
 .ios-catalog-chevron {
@@ -6477,7 +6536,7 @@ html {
   align-items: center;
   justify-content: center;
   transition: transform 0.25s ease;
-  color: var(--ios-text-secondary);
+  color: var(--ios-text-primary);
 }
 
 .ios-catalog-chevron.collapsed {

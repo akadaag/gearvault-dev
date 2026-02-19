@@ -329,15 +329,15 @@ export function CatalogPage() {
                 if (!items.length) return null;
 
                 return (
-                  <div className="ios-list-group" key={category.id}>
+                  <section className="ios-catalog-group-block" key={category.id}>
                     <button
                       type="button"
                       className="ios-catalog-group-header"
                       onClick={() => void toggleCollapse(category)}
                       aria-expanded={!category.collapsed}
+                      aria-controls={`catalog-group-${category.id}`}
                     >
                       <span className="ios-catalog-group-label">{category.name}</span>
-                      <span className="ios-catalog-group-count">{items.length}</span>
                       <span className={`ios-catalog-chevron${category.collapsed ? ' collapsed' : ''}`} aria-hidden="true">
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                           <polyline points="6 9 12 15 18 9" />
@@ -345,44 +345,50 @@ export function CatalogPage() {
                       </span>
                     </button>
 
-                    {!category.collapsed && items.map((item) => (
-                      <button
-                        key={item.id}
-                        className="ios-list-item"
-                        onClick={() => setSelectedItemId(item.id)}
-                      >
-                        <div className="ios-list-icon">
-                          {item.photo ? (
-                            <img src={item.photo} alt={item.name} />
-                          ) : (
-                            item.name.charAt(0).toUpperCase()
-                          )}
-                        </div>
-                        <div className="ios-list-content">
-                          <span className="ios-list-title">
-                            {item.name}
-                            {item.essential && (
-                              <svg className="ios-catalog-star" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-label="Essential">
-                                <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
-                              </svg>
+                    <div
+                      id={`catalog-group-${category.id}`}
+                      className={`ios-list-group ios-catalog-group-panel${category.collapsed ? ' collapsed' : ''}`}
+                    >
+                      {items.map((item) => (
+                        <button
+                          key={item.id}
+                          className="ios-list-item"
+                          onClick={() => setSelectedItemId(item.id)}
+                          tabIndex={category.collapsed ? -1 : undefined}
+                        >
+                          <div className="ios-list-icon">
+                            {item.photo ? (
+                              <img src={item.photo} alt={item.name} />
+                            ) : (
+                              item.name.charAt(0).toUpperCase()
                             )}
-                          </span>
-                          <span className="ios-list-sub">
-                            {[item.brand, item.model].filter(Boolean).join(' ') || category.name}
-                            {item.quantity > 1 && ` \u00B7 x${item.quantity}`}
-                          </span>
-                        </div>
-                        <div className="ios-list-action">
-                          {item.currentValue && (
-                            <span className="ios-catalog-value">
-                              {formatMoney(item.currentValue.amount, item.currentValue.currency)}
+                          </div>
+                          <div className="ios-list-content">
+                            <span className="ios-list-title">
+                              {item.name}
+                              {item.essential && (
+                                <svg className="ios-catalog-star" width="12" height="12" viewBox="0 0 24 24" fill="currentColor" aria-label="Essential">
+                                  <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
+                                </svg>
+                              )}
                             </span>
-                          )}
-                          <span className="ios-arrow" aria-hidden="true">&#8250;</span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                            <span className="ios-list-sub">
+                              {[item.brand, item.model].filter(Boolean).join(' ') || category.name}
+                              {item.quantity > 1 && ` \u00B7 x${item.quantity}`}
+                            </span>
+                          </div>
+                          <div className="ios-list-action">
+                            {item.currentValue && (
+                              <span className="ios-catalog-value">
+                                {formatMoney(item.currentValue.amount, item.currentValue.currency)}
+                              </span>
+                            )}
+                            <span className="ios-arrow" aria-hidden="true">&#8250;</span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </section>
                 );
               })}
             </div>
