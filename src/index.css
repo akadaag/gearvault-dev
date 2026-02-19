@@ -5271,11 +5271,9 @@ html {
   position: relative;
   border-radius: var(--ios-radius);
   overflow: hidden;
-  background: var(--ios-card-bg);
-  backdrop-filter: blur(var(--ios-blur));
-  -webkit-backdrop-filter: blur(var(--ios-blur));
-  border: 0.5px solid rgba(0, 0, 0, 0.06);
-  box-shadow: var(--ios-shadow);
+  background: #ffffff;
+  border: 0.5px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 1px 3px rgba(0, 0, 0, 0.06);
   padding: 14px;
   min-height: 100px;
   display: flex;
@@ -5484,11 +5482,9 @@ html {
 /* Action buttons — right column, 2 stacked */
 .home-ios-action-btn {
   border-radius: var(--ios-radius);
-  background: var(--ios-card-bg);
-  backdrop-filter: blur(var(--ios-blur));
-  -webkit-backdrop-filter: blur(var(--ios-blur));
-  border: 0.5px solid rgba(0, 0, 0, 0.06);
-  box-shadow: var(--ios-shadow);
+  background: #ffffff;
+  border: 0.5px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 1px 3px rgba(0, 0, 0, 0.06);
   display: flex;
   align-items: center;
   justify-content: flex-start;
@@ -5705,13 +5701,11 @@ html {
 }
 
 .home-ios-carousel-card {
-  flex: 0 0 140px;
-  background: var(--ios-card-bg);
-  backdrop-filter: blur(var(--ios-blur));
-  -webkit-backdrop-filter: blur(var(--ios-blur));
+  flex: 0 0 112px;
+  background: #ffffff;
   border-radius: var(--ios-radius);
-  border: 0.5px solid rgba(0, 0, 0, 0.06);
-  box-shadow: var(--ios-shadow);
+  border: 0.5px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 1px 3px rgba(0, 0, 0, 0.06);
   overflow: hidden;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
@@ -5723,8 +5717,8 @@ html {
 }
 
 .home-ios-carousel-thumb {
-  width: 140px;
-  height: 108px;
+  width: 112px;
+  height: 86px;
   background: transparent;
   display: flex;
   align-items: center;
@@ -5783,7 +5777,9 @@ html {
    ============================================================ */
 
 :root.dark .home-ios-hero-card {
-  border-color: rgba(255, 255, 255, 0.06);
+  background: rgba(28, 28, 30, 0.98);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
 :root.dark .home-ios-hero-badge.urgent {
@@ -5803,7 +5799,9 @@ html {
 }
 
 :root.dark .home-ios-action-btn {
-  border-color: rgba(255, 255, 255, 0.06);
+  background: rgba(28, 28, 30, 0.98);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
 :root.dark .home-ios-action-btn:active {
@@ -5843,8 +5841,9 @@ html {
 }
 
 :root.dark .home-ios-carousel-card {
-  border-color: rgba(255, 255, 255, 0.06);
-  box-shadow: var(--ios-shadow);
+  background: rgba(28, 28, 30, 0.98);
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.5), 0 1px 4px rgba(0, 0, 0, 0.3);
 }
 
 :root.dark .home-ios-carousel-thumb {
@@ -5929,12 +5928,12 @@ html {
   }
 
   .home-ios-carousel-card {
-    flex: 0 0 120px;
+    flex: 0 0 96px;
   }
 
   .home-ios-carousel-thumb {
-    width: 120px;
-    height: 92px;
+    width: 96px;
+    height: 74px;
   }
 
   .home-ios-carousel-info {
