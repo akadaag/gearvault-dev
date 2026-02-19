@@ -395,11 +395,10 @@ export function CatalogPage() {
         <>
           <div className={`ios-sheet-backdrop${closingFilter ? ' closing' : ''}`} onClick={dismissFilter} />
           <div className={`ios-sheet-modal${closingFilter ? ' closing' : ''}`} aria-label="Catalog filters" onAnimationEnd={onFilterAnimEnd}>
-            <div className="ios-sheet-handle" />
-            <div className="ios-sheet-header">
-              <button className="ios-sheet-btn secondary" onClick={clearAllFilters}>Reset</button>
+            <div className="ios-sheet-header ios-sheet-header--icon">
+              <button className="ios-sheet-pill-btn" onClick={clearAllFilters}>Reset</button>
               <h3 className="ios-sheet-title">Filters</h3>
-              <button className="ios-sheet-btn primary" onClick={dismissFilter}>Done</button>
+              <button className="ios-sheet-pill-btn" onClick={dismissFilter}>Done</button>
             </div>
 
             <div className="ios-sheet-content">
@@ -509,11 +508,12 @@ export function CatalogPage() {
           <>
             <div className={`ios-sheet-backdrop${closingDetail ? ' closing' : ''}`} onClick={dismissDetail} />
             <div className={`ios-sheet-modal${closingDetail ? ' closing' : ''}`} aria-label="Item details" onAnimationEnd={onDetailAnimEnd}>
-              <div className="ios-sheet-handle" />
-              <div className="ios-sheet-header">
-                <button className="ios-sheet-btn secondary" onClick={dismissDetail}>Close</button>
+              <div className="ios-sheet-header ios-sheet-header--icon">
+                <button className="ios-sheet-icon-btn ios-sheet-icon-btn--cancel" onClick={dismissDetail} aria-label="Close">
+                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 2L16 16M16 2L2 16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/></svg>
+                </button>
                 <h3 className="ios-sheet-title">Details</h3>
-                <button className="ios-sheet-btn primary" onClick={() => navigate(`/catalog/item/${item.id}`)}>More</button>
+                <button className="ios-sheet-pill-btn" onClick={() => navigate(`/catalog/item/${item.id}`)}>More</button>
               </div>
 
               <div className="ios-sheet-content">

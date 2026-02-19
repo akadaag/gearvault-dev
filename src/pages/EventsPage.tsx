@@ -335,11 +335,10 @@ export function EventsPage() {
         <>
           <div className={`ios-sheet-backdrop${closingFilter ? ' closing' : ''}`} onClick={dismissFilter} />
           <div className={`ios-sheet-modal${closingFilter ? ' closing' : ''}`} aria-label="Event filters" onAnimationEnd={onFilterAnimEnd}>
-            <div className="ios-sheet-handle" />
-            <div className="ios-sheet-header">
-              <button className="ios-sheet-btn secondary" onClick={clearAllFilters}>Reset</button>
+            <div className="ios-sheet-header ios-sheet-header--icon">
+              <button className="ios-sheet-pill-btn" onClick={clearAllFilters}>Reset</button>
               <h3 className="ios-sheet-title">Filters</h3>
-              <button className="ios-sheet-btn primary" onClick={dismissFilter}>Done</button>
+              <button className="ios-sheet-pill-btn" onClick={dismissFilter}>Done</button>
             </div>
 
             <div className="ios-sheet-content">

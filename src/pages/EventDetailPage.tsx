@@ -410,11 +410,12 @@ export function EventDetailPage() {
         <>
           <div className={`ios-sheet-backdrop${closingShare ? ' closing' : ''}`} onClick={dismissShare} />
           <div className={`ios-sheet-modal${closingShare ? ' closing' : ''}`} aria-label="Share & export" onAnimationEnd={onAnimationEndShare}>
-            <div className="ios-sheet-handle" />
-            <div className="ios-sheet-header">
-              <span />
+            <div className="ios-sheet-header ios-sheet-header--icon">
+              <button className="ios-sheet-icon-btn ios-sheet-icon-btn--cancel" onClick={dismissShare} aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 2L16 16M16 2L2 16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/></svg>
+              </button>
               <h3 className="ios-sheet-title">Share &amp; Export</h3>
-              <button className="ios-sheet-btn primary" onClick={dismissShare}>Done</button>
+              <button className="ios-sheet-pill-btn" onClick={dismissShare}>Done</button>
             </div>
             <div className="ios-sheet-content">
               <div className="ev-detail-share-options">
@@ -452,12 +453,13 @@ export function EventDetailPage() {
         <>
           <div className={`ios-sheet-backdrop${closingAdd ? ' closing' : ''}`} onClick={dismissAdd} />
           <div className={`ios-sheet-modal${closingAdd ? ' closing' : ''}`} aria-label="Add to packing list" onAnimationEnd={onAnimationEndAdd}>
-            <div className="ios-sheet-handle" />
-            <div className="ios-sheet-header">
-              <button className="ios-sheet-btn secondary" onClick={dismissAdd}>Cancel</button>
+            <div className="ios-sheet-header ios-sheet-header--icon">
+              <button className="ios-sheet-icon-btn ios-sheet-icon-btn--cancel" onClick={dismissAdd} aria-label="Cancel">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 2L16 16M16 2L2 16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/></svg>
+              </button>
               <h3 className="ios-sheet-title">Add Items</h3>
-              <button className="ios-sheet-btn primary" onClick={addSelectedItems} disabled={selectedCatalogItems.size === 0}>
-                Add{selectedCatalogItems.size > 0 ? ` (${selectedCatalogItems.size})` : ''}
+              <button className="ios-sheet-icon-btn ios-sheet-icon-btn--save" onClick={addSelectedItems} disabled={selectedCatalogItems.size === 0} aria-label="Add items">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2.5 9.5L7 14L15.5 4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </button>
             </div>
 

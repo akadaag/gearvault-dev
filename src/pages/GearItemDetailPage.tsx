@@ -496,16 +496,13 @@ export function GearItemDetailPage() {
         <>
           <div className={`ios-sheet-backdrop${closingAddEvent ? ' closing' : ''}`} onClick={dismissAddEvent} />
           <div className={`ios-sheet-modal${closingAddEvent ? ' closing' : ''}`} aria-label="Add to event packing list" onAnimationEnd={onAddEventAnimEnd}>
-            <div className="ios-sheet-handle" />
-            <div className="ios-sheet-header">
-              <button className="ios-sheet-btn secondary" onClick={dismissAddEvent}>Cancel</button>
+            <div className="ios-sheet-header ios-sheet-header--icon">
+              <button className="ios-sheet-icon-btn ios-sheet-icon-btn--cancel" onClick={dismissAddEvent} aria-label="Cancel">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 2L16 16M16 2L2 16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/></svg>
+              </button>
               <h3 className="ios-sheet-title">Add to Event</h3>
-              <button
-                className="ios-sheet-btn primary"
-                onClick={() => void addToEvent()}
-                disabled={!eventTarget || selectedEventHasItem}
-              >
-                Add
+              <button className="ios-sheet-icon-btn ios-sheet-icon-btn--save" onClick={() => void addToEvent()} disabled={!eventTarget || selectedEventHasItem} aria-label="Add to event">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2.5 9.5L7 14L15.5 4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
               </button>
             </div>
 

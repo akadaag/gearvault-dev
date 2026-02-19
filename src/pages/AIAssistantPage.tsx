@@ -944,11 +944,14 @@ export function AIAssistantPage() {
         <>
           <div className={`ios-sheet-backdrop${closingHistory ? ' closing' : ''}`} onClick={dismissHistory} />
           <div className={`ios-sheet-modal${closingHistory ? ' closing' : ''}`} aria-label="Chat history" onAnimationEnd={onHistoryAnimEnd}>
-            <div className="ios-sheet-handle" />
-            <div className="ios-sheet-header">
-              <button className="ios-sheet-btn secondary" onClick={dismissHistory}>Close</button>
+            <div className="ios-sheet-header ios-sheet-header--icon">
+              <button className="ios-sheet-icon-btn ios-sheet-icon-btn--cancel" onClick={dismissHistory} aria-label="Close">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 2L16 16M16 2L2 16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/></svg>
+              </button>
               <h3 className="ios-sheet-title">Chat History</h3>
-              <button className="ios-sheet-btn primary" type="button" onClick={handleNewChat}>+ New</button>
+              <button className="ios-sheet-icon-btn ios-sheet-icon-btn--save" type="button" onClick={handleNewChat} aria-label="New chat">
+                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2v14M2 9h14" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/></svg>
+              </button>
             </div>
             <div className="ios-sheet-content">
               {chatSessions.length === 0 ? (

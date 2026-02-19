@@ -55,12 +55,13 @@ export function CatalogMatchReviewSheet({
 
       {/* Slide-down-from-top sheet */}
       <div className={`ios-sheet-modal ios-sheet-modal--top${closing ? ' closing' : ''}`} aria-label="Quick confirmation review" onAnimationEnd={onAnimationEnd}>
-        <div className="ios-sheet-handle" />
-        <div className="ios-sheet-header">
-          <button className="ios-sheet-btn secondary" onClick={dismiss}>Cancel</button>
+        <div className="ios-sheet-header ios-sheet-header--icon">
+          <button className="ios-sheet-icon-btn ios-sheet-icon-btn--cancel" onClick={dismiss} aria-label="Cancel">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 2L16 16M16 2L2 16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/></svg>
+          </button>
           <h3 className="ios-sheet-title">Quick Confirmation</h3>
-          <button className="ios-sheet-btn primary" onClick={onConfirm} disabled={!allResolved}>
-            Confirm
+          <button className="ios-sheet-icon-btn ios-sheet-icon-btn--save" onClick={onConfirm} disabled={!allResolved} aria-label="Confirm">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2.5 9.5L7 14L15.5 4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </button>
         </div>
 
