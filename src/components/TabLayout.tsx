@@ -344,7 +344,7 @@ export function TabLayout() {
         <Outlet />
       </main>
 
-      {!isKeyboardOpen && <FloatingNavBar items={tabs} />}
+      {!isKeyboardOpen && !isGearDetailRoute && !isEventDetailRoute && <FloatingNavBar items={tabs} />}
     </div>
   );
 }
