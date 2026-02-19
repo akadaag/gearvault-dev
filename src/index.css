@@ -65,7 +65,7 @@
   --topbar-height: 68px;
   --topbar-catalog-height: 168px;
   --detail-topbar-height: 56px;
-  --bottom-nav-clearance: calc(68px + env(safe-area-inset-bottom));
+  --bottom-nav-clearance: calc(66px + env(safe-area-inset-bottom));
 
   font-family: 'SF Pro Display', 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
   line-height: 1.6;
@@ -3479,7 +3479,7 @@ button.category-title-btn {
     --topbar-height: 96px;
     --topbar-catalog-height: 124px;
     --detail-topbar-height: 58px;
-    --bottom-nav-clearance: calc(80px + env(safe-area-inset-bottom));
+    --bottom-nav-clearance: calc(78px + env(safe-area-inset-bottom));
   }
 
   .detail-page {
@@ -9173,7 +9173,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 /* Override --bottom-nav-clearance for iOS theme so all content areas
    automatically get correct bottom padding without !important */
 .ios-theme {
-  --bottom-nav-clearance: calc(68px + env(safe-area-inset-bottom));
+  --bottom-nav-clearance: calc(66px + env(safe-area-inset-bottom));
 }
 
 /* Remove redundant outer padding-bottom on .content for iOS pages.
@@ -11155,7 +11155,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 
 .floating-nav {
   position: fixed;
-  bottom: env(safe-area-inset-bottom);
+  bottom: calc(env(safe-area-inset-bottom) - 2px);
   left: 0;
   right: 0;
   z-index: 1000;
