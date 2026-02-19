@@ -149,43 +149,41 @@ export function GearItemFormSheet({
         <div className="ios-sheet-content ios-sheet-content--form">
 
           {/* Photo */}
-          <div className="ios-form-pill ios-form-pill--photo">
-            <label className="ios-photo-upload-area">
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => handlePhotoUpload(e.target.files?.[0])}
-              />
-              {draft.photoPreview || draft.photo ? (
-                <div className="ios-detail-hero-photo-wrap">
-                  <img
-                    src={draft.photoPreview || draft.photo}
-                    alt="Selected"
-                    className="ios-detail-img"
-                  />
-                  <button
-                    type="button"
-                    className="ios-photo-remove-btn"
-                    aria-label="Remove photo"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      clearPhoto();
-                    }}
-                  >
-                    ✕
-                  </button>
-                </div>
-              ) : (
-                <div className="ios-detail-placeholder">
-                  <span aria-hidden="true">📷</span>
-                </div>
-              )}
-              <span className="ios-photo-upload-label">
-                {draft.photoPreview || draft.photo ? 'Edit Photo' : 'Add Photo'}
-              </span>
-            </label>
-          </div>
+          <label className="ios-photo-upload-area ios-photo-upload-area--form">
+            <input
+              type="file"
+              accept="image/*"
+              onChange={(e) => handlePhotoUpload(e.target.files?.[0])}
+            />
+            {draft.photoPreview || draft.photo ? (
+              <div className="ios-detail-hero-photo-wrap">
+                <img
+                  src={draft.photoPreview || draft.photo}
+                  alt="Selected"
+                  className="ios-detail-img"
+                />
+                <button
+                  type="button"
+                  className="ios-photo-remove-btn"
+                  aria-label="Remove photo"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    clearPhoto();
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            ) : (
+              <div className="ios-detail-placeholder">
+                <span aria-hidden="true">📷</span>
+              </div>
+            )}
+            <span className="ios-form-pill ios-form-pill--photo-btn">
+              {draft.photoPreview || draft.photo ? 'Edit Photo' : 'Add Photo'}
+            </span>
+          </label>
 
           {/* Pill 1 — Name / Brand / Model */}
           <div className="ios-form-pill">

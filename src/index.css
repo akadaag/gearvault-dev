@@ -9282,7 +9282,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   background: var(--ios-card-bg);
   backdrop-filter: blur(var(--ios-blur));
   -webkit-backdrop-filter: blur(var(--ios-blur));
-  border-radius: 22px 22px 0 0;
+  border-radius: 28px 28px 0 0;
   box-shadow: 0 -2px 24px rgba(0, 0, 0, 0.12);
   display: flex;
   flex-direction: column;
@@ -9306,7 +9306,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   .ios-theme .ios-sheet-modal {
     max-width: 480px;
     margin: 0 auto;
-    border-radius: 22px;
+    border-radius: 28px;
     bottom: 24px;
     left: 50%;
     right: auto;
@@ -10540,7 +10540,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 .ios-theme .ios-sheet-segment {
   display: flex;
   background: rgba(120, 120, 128, 0.16);
-  border-radius: 12px;
+  border-radius: 20px;
   padding: 2px;
   gap: 0;
 }
@@ -10553,7 +10553,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   flex: 1;
   padding: 6px 0;
   border: none;
-  border-radius: 10px;
+  border-radius: 18px;
   background: transparent;
   font-size: 13px;
   font-weight: 500;
@@ -10594,7 +10594,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 
 .ios-theme .ios-form-pill {
   background: #fff;
-  border-radius: 16px;
+  border-radius: 24px;
   overflow: hidden;
   margin-bottom: 12px;
 }
@@ -10697,33 +10697,43 @@ input[type="checkbox"].ios-toggle:checked::after {
   margin: 0;
 }
 
-/* ── Photo pill (photo upload inside a rounded pill) ────────────── */
+/* ── Photo upload area (standalone on gray background) ───────────── */
 
-.ios-theme .ios-form-pill--photo {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px 16px;
-}
-
-.ios-theme .ios-form-pill--photo .ios-photo-upload-area {
+.ios-theme .ios-photo-upload-area--form {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   cursor: pointer;
+  padding: 8px 0 4px;
+  margin-bottom: 12px;
 }
 
-.ios-theme .ios-form-pill--photo .ios-photo-upload-label {
+.ios-theme .ios-photo-upload-area--form .ios-detail-img {
+  margin-bottom: 0;
+}
+
+.ios-theme .ios-photo-upload-area--form .ios-detail-placeholder {
+  margin-bottom: 0;
+}
+
+/* ── "Add Photo" small capsule pill button ──────────────────────── */
+
+.ios-theme .ios-form-pill--photo-btn {
+  display: inline-block;
+  padding: 7px 20px;
   font-size: 14px;
+  font-weight: 500;
+  color: var(--ios-blue);
+  cursor: pointer;
+  text-align: center;
+  line-height: 1.3;
+  margin: 0;
+  overflow: visible;
 }
 
-.ios-theme .ios-form-pill--photo .ios-detail-img {
-  margin-bottom: 0;
-}
-
-.ios-theme .ios-form-pill--photo .ios-detail-placeholder {
-  margin-bottom: 0;
+:root.dark .ios-theme .ios-form-pill--photo-btn {
+  color: var(--ios-blue);
 }
 
 /* ──────────────────────────────────────────────────────────────────────────────
