@@ -131,7 +131,7 @@ body,
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #F2F2F7; /* Match iOS theme light background for seamless blend with white logo */
+  background: #E9E9E9; /* Match logo image background color */
 }
 
 .splash-logo {
@@ -5190,6 +5190,12 @@ html {
   z-index: 40;
   padding: max(0.75rem, env(safe-area-inset-top)) 1.25rem 0.75rem;
   background: var(--ios-bg);
+}
+
+.home-ios-header .profile-menu {
+  position: absolute;
+  top: max(12px, env(safe-area-inset-top));
+  right: 16px;
 }
 
 .home-ios-date {
@@ -10475,7 +10481,7 @@ input[type="checkbox"].ios-toggle:checked::after {
    ────────────────────────────────────────────────────────────────────────────── */
 @media (prefers-color-scheme: dark) {
   .splash-screen {
-    background: #F2F2F7;
+    background: #E9E9E9;
   }
 }
 

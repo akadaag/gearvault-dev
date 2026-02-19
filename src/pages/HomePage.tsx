@@ -110,13 +110,13 @@ export function HomePage() {
     <section className="home-page ios-theme">
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <header className="home-ios-header">
+        <ProfileMenu />
         <div className="home-ios-date">{today}</div>
         <div className="home-ios-title-row">
           <h1 className="home-ios-title">
             {greeting}
             {firstName ? `, ${firstName}` : ''}
           </h1>
-          <ProfileMenu />
         </div>
       </header>
 
