@@ -9359,7 +9359,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   right: 0;
   bottom: 0;
   z-index: 1101;
-  background: #F2F2F7;
+  background: #ffffff;
   border-radius: 28px 28px 0 0;
   box-shadow: 0 -2px 24px rgba(0, 0, 0, 0.12);
   display: flex;
@@ -9501,6 +9501,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   border-radius: 20px;
   overflow: hidden;
   margin-bottom: 24px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
 }
 
 .ios-theme .ios-form-group .ios-form-label {
@@ -9513,6 +9514,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 
 :root.dark .ios-theme .ios-form-group {
   background: rgba(44, 44, 46, 1);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
 }
 
 /* ── Form Row ───────────────────────────────────────────────────── */
@@ -10726,10 +10728,12 @@ input[type="checkbox"].ios-toggle:checked::after {
   border-radius: 20px;
   overflow: hidden;
   margin-bottom: 8px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
 }
 
 :root.dark .ios-theme .ios-form-pill {
   background: rgba(44, 44, 46, 1);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
 }
 
 /* ── Placeholder-only text input inside pill ────────────────────── */
