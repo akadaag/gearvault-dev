@@ -155,7 +155,7 @@ export function SettingsPage() {
       </header>
 
       {/* Scrollable settings content */}
-      <div className="ios-settings-scroll">
+      <div className="ios-settings-scroll page-scroll-area">
 
         {/* ── Account ─────────────────────────────────────────────────── */}
         <p className="ios-section-label">Account</p>

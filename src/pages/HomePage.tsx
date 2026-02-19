@@ -119,7 +119,7 @@ export function HomePage() {
       </header>
 
       {/* ── Scrollable Content ────────────────────────────────────────── */}
-      <div className="home-ios-content">
+      <div className="home-ios-content page-scroll-area">
         {/* Hero Card — Next Event */}
         {nextEvent ? (
           <div

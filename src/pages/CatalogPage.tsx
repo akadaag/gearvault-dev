@@ -333,7 +333,7 @@ export function CatalogPage() {
         </header>
 
         {/* Scrollable content area */}
-        <div className="ios-catalog-scroll">
+        <div className="ios-catalog-scroll page-scroll-area">
           {gear.length === 0 ? (
             <div className="ios-catalog-empty">
               <div className="ios-catalog-empty-icon" aria-hidden="true">

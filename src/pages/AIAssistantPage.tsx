@@ -701,7 +701,7 @@ export function AIAssistantPage() {
 
 
       {/* -- SCROLL AREA -- */}
-      <div className="ai-ios-content" ref={scrollAreaRef}>
+      <div className="ai-ios-content page-scroll-area" ref={scrollAreaRef}>
         
         {/* Initial empty state */}
         {mode === 'packing' && step === 'input' && !loading && !plan && (

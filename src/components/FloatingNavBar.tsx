@@ -69,7 +69,7 @@ const searchMorphTransition = {
 export function FloatingNavBar({ items }: FloatingNavBarProps) {
   const location = useLocation();
   const navigate = useNavigate();
-  const scrollHidden = useScrollDirection(10);
+  const scrollHidden = useScrollDirection(10, '.page-scroll-area', location.pathname);
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -233,7 +233,7 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
                 /* Input focused — nav circle is gone, layoutId orphaned to avoid glitch */
                 <motion.div
                   layoutId="nav-morph"
-                  style={{ width: 0, height: 0, overflow: 'hidden', opacity: 0 }}
+                  style={{ width: 0, height: 0, overflow: 'hidden', opacity: 0, marginRight: '-10px' }}
                   transition={{ layout: morphSpring }}
                 />
               )}

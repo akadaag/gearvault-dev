@@ -268,7 +268,7 @@ export function EventsPage() {
         </header>
 
         {/* Scrollable content area */}
-        <div className="ev-ios-content-scroll">
+        <div className="ev-ios-content-scroll page-scroll-area">
           {/* Calendar */}
           {showCalendar && <MonthCalendar />}
 
