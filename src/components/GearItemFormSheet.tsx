@@ -155,6 +155,8 @@ export function GearItemFormSheet({
                 placeholder="Item name"
                 value={draft.name}
                 onChange={(e) => update('name', e.target.value)}
+                onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               />
             </div>
             <label className="ios-form-row">
@@ -177,6 +179,8 @@ export function GearItemFormSheet({
                 placeholder="Brand"
                 value={draft.brand}
                 onChange={(e) => update('brand', e.target.value)}
+                onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               />
             </div>
             <div className="ios-form-row">
@@ -186,6 +190,8 @@ export function GearItemFormSheet({
                 placeholder="Model"
                 value={draft.model}
                 onChange={(e) => update('model', e.target.value)}
+                onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               />
             </div>
             <div className="ios-form-row">
@@ -195,6 +201,8 @@ export function GearItemFormSheet({
                 placeholder="Optional"
                 value={draft.serialNumber}
                 onChange={(e) => update('serialNumber', e.target.value)}
+                onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               />
             </div>
           </div>
@@ -222,6 +230,8 @@ export function GearItemFormSheet({
                 min={1}
                 value={draft.quantity}
                 onChange={(e) => update('quantity', Number(e.target.value || 1))}
+                onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               />
             </div>
             <label className="ios-form-row">
@@ -246,6 +256,8 @@ export function GearItemFormSheet({
                 placeholder="0.00"
                 value={draft.purchasePrice}
                 onChange={(e) => update('purchasePrice', e.target.value)}
+                onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               />
             </div>
             <div className="ios-form-row">
@@ -256,6 +268,8 @@ export function GearItemFormSheet({
                 placeholder="0.00"
                 value={draft.currentValue}
                 onChange={(e) => update('currentValue', e.target.value)}
+                onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               />
             </div>
             <div className="ios-form-row">
@@ -265,6 +279,8 @@ export function GearItemFormSheet({
                 className="ios-form-input"
                 value={draft.purchaseDate}
                 onChange={(e) => update('purchaseDate', e.target.value)}
+                onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               />
             </div>
           </div>
@@ -279,6 +295,8 @@ export function GearItemFormSheet({
                 placeholder="camera, main"
                 value={draft.tagsText}
                 onChange={(e) => update('tagsText', e.target.value)}
+                onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               />
             </div>
             <div className="ios-form-row textarea-row">
@@ -289,6 +307,8 @@ export function GearItemFormSheet({
                 placeholder="Add notes..."
                 value={draft.notes}
                 onChange={(e) => update('notes', e.target.value)}
+                onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               />
             </div>
             <div className="ios-form-row textarea-row">
@@ -299,6 +319,8 @@ export function GearItemFormSheet({
                 placeholder="Insurance: Covered"
                 value={draft.customFieldsText}
                 onChange={(e) => update('customFieldsText', e.target.value)}
+                onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               />
             </div>
           </div>

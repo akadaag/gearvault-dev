@@ -202,6 +202,8 @@ export function EventsPage() {
               value={query}
               onChange={e => setParam('q', e.target.value || null)}
               aria-label="Search events"
+              onFocus={() => document.documentElement.classList.add('keyboard-open')}
+              onBlur={() => document.documentElement.classList.remove('keyboard-open')}
             />
             {query && (
               <button

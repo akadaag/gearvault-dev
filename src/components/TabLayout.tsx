@@ -4,6 +4,7 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, ensureBaseData } from '../db';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
+import { useKeyboardOpen } from '../hooks/useKeyboardOpen';
 import { resetSheetScrollLock } from '../lib/sheetLock';
 import { FloatingNavBar } from './FloatingNavBar';
 import { ProfileMenu } from './ProfileMenu';
@@ -51,6 +52,7 @@ const tabs = [
 export function TabLayout() {
   useTheme();
   const { syncMessage } = useAuth();
+  const isKeyboardOpen = useKeyboardOpen();
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -350,7 +352,7 @@ export function TabLayout() {
         <Outlet />
       </main>
 
-      <FloatingNavBar items={tabs} />
+      {!isKeyboardOpen && <FloatingNavBar items={tabs} />}
     </div>
   );
 }

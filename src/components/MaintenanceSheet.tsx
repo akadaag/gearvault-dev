@@ -271,6 +271,8 @@ export function MaintenanceSheet({
                     className="ios-form-input"
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
+                    onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                    onBlur={() => document.documentElement.classList.remove('keyboard-open')}
                   />
                 </div>
                 <label className="ios-form-row">
@@ -293,6 +295,8 @@ export function MaintenanceSheet({
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Describe what was done"
+                    onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                    onBlur={() => document.documentElement.classList.remove('keyboard-open')}
                   />
                 </div>
               </div>

@@ -171,6 +171,8 @@ export function SettingsPage() {
                 value={settings.displayName ?? ''}
                 onChange={(e) => void update('displayName', e.target.value)}
                 placeholder="Your name"
+                onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               />
             </div>
           </div>
@@ -235,6 +237,8 @@ export function SettingsPage() {
                 onChange={(e) => void update('defaultCurrency', e.target.value.toUpperCase())}
                 placeholder="EUR"
                 style={{ width: '60px', textAlign: 'center' }}
+                onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               />
             </div>
           </div>

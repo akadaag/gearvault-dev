@@ -469,6 +469,8 @@ export function EventDetailPage() {
                     placeholder="Search catalog..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
+                    onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                    onBlur={() => document.documentElement.classList.remove('keyboard-open')}
                   />
                 </div>
               </div>

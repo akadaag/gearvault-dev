@@ -296,6 +296,8 @@ export function CatalogPage() {
                   if (e.target.value) p.set('q', e.target.value);
                   else p.delete('q');
                 })}
+                onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               />
               {query && (
                 <button

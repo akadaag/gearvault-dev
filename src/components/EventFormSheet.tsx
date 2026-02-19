@@ -131,6 +131,8 @@ export function EventFormSheet({ mode, initialData, onClose, onSaved }: EventFor
                 placeholder="e.g., Smith Wedding"
                 value={draft.title}
                 onChange={e => setDraft({ ...draft, title: e.target.value })}
+                onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               />
             </label>
             <label className="ios-form-row">
@@ -150,6 +152,8 @@ export function EventFormSheet({ mode, initialData, onClose, onSaved }: EventFor
                 className="ios-form-input"
                 value={draft.dateTime}
                 onChange={e => setDraft({ ...draft, dateTime: e.target.value })}
+                onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               />
             </label>
           </div>
@@ -164,6 +168,8 @@ export function EventFormSheet({ mode, initialData, onClose, onSaved }: EventFor
                 placeholder="e.g., Central Park, NYC"
                 value={draft.location}
                 onChange={e => setDraft({ ...draft, location: e.target.value })}
+                onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               />
             </label>
             <label className="ios-form-row">
@@ -174,6 +180,8 @@ export function EventFormSheet({ mode, initialData, onClose, onSaved }: EventFor
                 placeholder="e.g., John Smith"
                 value={draft.client}
                 onChange={e => setDraft({ ...draft, client: e.target.value })}
+                onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               />
             </label>
           </div>
@@ -188,6 +196,8 @@ export function EventFormSheet({ mode, initialData, onClose, onSaved }: EventFor
                 value={draft.notes}
                 onChange={e => setDraft({ ...draft, notes: e.target.value })}
                 placeholder="Any special requirements, equipment needed, or important details..."
+                onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               />
             </div>
           </div>

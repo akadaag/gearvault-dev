@@ -70,6 +70,8 @@ export function LoginPage() {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="John"
+                onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               />
             </div>
             <div className="ios-auth-field">
@@ -80,6 +82,8 @@ export function LoginPage() {
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Doe"
+                onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               />
             </div>
           </div>
@@ -94,6 +98,8 @@ export function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
+            onFocus={() => document.documentElement.classList.add('keyboard-open')}
+            onBlur={() => document.documentElement.classList.remove('keyboard-open')}
           />
         </div>
 
@@ -106,6 +112,8 @@ export function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="At least 6 characters"
+            onFocus={() => document.documentElement.classList.add('keyboard-open')}
+            onBlur={() => document.documentElement.classList.remove('keyboard-open')}
           />
         </div>
 
