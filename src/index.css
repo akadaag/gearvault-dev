@@ -10490,7 +10490,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 
 .ios-theme .ios-sheet-header--icon {
   border-bottom: none;
-  padding: 16px 16px 4px;
+  padding: 20px 16px 8px;
 }
 
 .ios-theme .ios-sheet-icon-btn {
@@ -10539,7 +10539,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 /* ── Segmented Control ──────────────────────────────────────────── */
 
 .ios-theme .ios-sheet-segment-wrap {
-  padding: 2px 16px 8px;
+  padding: 8px 16px 12px;
   flex-shrink: 0;
 }
 
@@ -10599,7 +10599,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 /* ── Form Pill Group (spacing between sections) ─────────────────── */
 
 .ios-theme .ios-pill-group {
-  margin-bottom: 16px;
+  margin-bottom: 24px;
 }
 
 .ios-theme .ios-pill-group .ios-form-pill {
@@ -10607,16 +10607,16 @@ input[type="checkbox"].ios-toggle:checked::after {
 }
 
 .ios-theme .ios-pill-group .ios-form-pill + .ios-form-pill {
-  margin-top: 2px;
+  margin-top: 8px;
 }
 
 /* ── Form Pill (rounded white card) ─────────────────────────────── */
 
 .ios-theme .ios-form-pill {
   background: #fff;
-  border-radius: 18px;
+  border-radius: 20px;
   overflow: hidden;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 :root.dark .ios-theme .ios-form-pill {
@@ -10629,7 +10629,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   display: block;
   width: 100%;
   box-sizing: border-box;
-  padding: 9px 16px;
+  padding: 12px 16px;
   background: transparent;
   border: none;
   outline: none;
@@ -10666,8 +10666,8 @@ input[type="checkbox"].ios-toggle:checked::after {
 
 .ios-theme .ios-form-pill .ios-form-row {
   border-bottom: none;
-  padding: 9px 16px;
-  min-height: 40px;
+  padding: 11px 16px;
+  min-height: 44px;
 }
 
 .ios-theme .ios-form-pill .ios-form-label {
@@ -10740,8 +10740,8 @@ input[type="checkbox"].ios-toggle:checked::after {
 /* ── Toggle-only pill (Essential row) — compact height ─────────── */
 
 .ios-theme .ios-form-pill--toggle .ios-form-row {
-  padding: 8px 16px;
-  min-height: 40px;
+  padding: 10px 16px;
+  min-height: 44px;
 }
 
 /* ── "Add Photo" small capsule pill button ──────────────────────── */
