@@ -105,7 +105,6 @@ export function GearItemDetailPage() {
   if (!item) return <section className="gear-detail-page ios-theme"><div className="gear-detail-empty">Item not found.</div></section>;
   const currentItem = item;
   const editDraft = toDraft(currentItem);
-  const maintenanceCount = currentItem.maintenanceHistory?.length ?? 0;
   const accessoriesCount = currentItem.relatedItemIds?.length ?? 0;
   const isInAnyEvent = events.some((ev) => ev.packingChecklist.some((entry) => entry.gearItemId === currentItem.id));
   const selectedEventHasItem = Boolean(
@@ -288,7 +287,7 @@ export function GearItemDetailPage() {
           {showOptionsMenu && (
             <div className="gear-detail-options-menu" role="menu">
               <button
-                className={`gear-detail-menu-item${isInAnyEvent ? ' active' : ''}`}
+                className={`gear-detail-menu-item${isInAnyEvent ? ' active-event' : ''}`}
                 role="menuitem"
                 onClick={() => { setShowOptionsMenu(false); setShowAddToEvent(true); }}
               >
@@ -310,6 +309,17 @@ export function GearItemDetailPage() {
                   <path d="m9 16 4.4-4.4a1.5 1.5 0 0 1 2.1 2.1L11.1 18.1 8 19z" />
                 </svg>
                 Edit
+              </button>
+              <div className="gear-detail-menu-divider" />
+              <button
+                className={`gear-detail-menu-item${currentItem.essential ? ' active' : ''}`}
+                role="menuitem"
+                onClick={() => { setShowOptionsMenu(false); void toggleEssential(); }}
+              >
+                <svg viewBox="0 0 24 24" fill={currentItem.essential ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
+                </svg>
+                {currentItem.essential ? 'Remove from Essentials' : 'Add to Essentials'}
               </button>
               <div className="gear-detail-menu-divider" />
               <button
@@ -373,43 +383,24 @@ export function GearItemDetailPage() {
 
         {/* Title Block */}
         <div className="gear-detail-title-block">
-          <div className="gear-detail-title-row">
-            <h1 className="gear-detail-name">{currentItem.name}</h1>
-            <button
-              type="button"
-              className={`gear-detail-essential-btn${currentItem.essential ? ' is-active' : ''}`}
-              onClick={() => void toggleEssential()}
-              onPointerUp={(e) => e.currentTarget.blur()}
-              aria-label={currentItem.essential ? 'Remove from essentials' : 'Add to essentials'}
-              aria-pressed={currentItem.essential}
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
-              </svg>
-            </button>
-          </div>
+          <h1 className="gear-detail-name">{currentItem.name}</h1>
           <p className="gear-detail-subtitle">{[currentItem.brand, currentItem.model].filter(Boolean).join(' ') || 'No brand/model yet'}</p>
-          <div className="gear-detail-badges">
-            <span className="gear-detail-badge">{categories.find((c) => c.id === currentItem.categoryId)?.name}</span>
-            <span className={`gear-detail-badge condition-${currentItem.condition}`}>{currentItem.condition}</span>
-            {currentItem.quantity > 1 && <span className="gear-detail-badge">{'\u00D7'}{currentItem.quantity} units</span>}
+          <div className="gear-detail-inline-meta">
+            <span>{categories.find((c) => c.id === currentItem.categoryId)?.name}</span>
+            <span className="gear-detail-meta-dot">{'\u00B7'}</span>
+            <span className={`gear-detail-condition-text condition-${currentItem.condition}`}>{currentItem.condition}</span>
+            {currentItem.quantity > 1 && (
+              <>
+                <span className="gear-detail-meta-dot">{'\u00B7'}</span>
+                <span>{'\u00D7'}{currentItem.quantity} units</span>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Price Card */}
-        {currentItem.purchasePrice && (
-          <div className="gear-detail-glass-card gear-detail-price-card">
-            <div className="gear-detail-price-icon" aria-hidden="true">$</div>
-            <div>
-              <p className="gear-detail-price-label">Purchase Price</p>
-              <p className="gear-detail-price-value">{formatMoney(currentItem.purchasePrice.amount, currentItem.purchasePrice.currency)}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Quick Grid */}
+        {/* Quick Grid — Maintenance & Accessories */}
         <div className="gear-detail-quick-grid">
-          <button type="button" className="gear-detail-glass-card gear-detail-quick-card" onClick={() => setShowMaintenanceSheet(true)}>
+          <button type="button" className="gear-detail-quick-card" onClick={() => setShowMaintenanceSheet(true)}>
             <div className="gear-detail-quick-icon blue" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M14.7 6.3a4.5 4.5 0 0 0-5.4 5.4L4 17l3 3 5.3-5.3a4.5 4.5 0 0 0 5.4-5.4l-2.4 2.4-2.2-2.2z" />
@@ -417,12 +408,10 @@ export function GearItemDetailPage() {
             </div>
             <div className="gear-detail-quick-info">
               <strong>Maintenance</strong>
-              <p>{maintenanceCount} records</p>
               <p>{maintenanceSummary.last}</p>
-              {maintenanceSummary.type && <p>{maintenanceSummary.type}</p>}
             </div>
           </button>
-          <div className="gear-detail-glass-card gear-detail-quick-card">
+          <div className="gear-detail-quick-card">
             <div className="gear-detail-quick-icon purple" aria-hidden="true">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M10.6 13.4 8.5 15.5a3 3 0 1 1-4.2-4.2l3.2-3.2a3 3 0 0 1 4.2 0" />
@@ -437,95 +426,121 @@ export function GearItemDetailPage() {
           </div>
         </div>
 
-        {/* Item Information */}
+        {/* Price Card */}
+        {currentItem.purchasePrice && (
+          <div className="gear-detail-info-card">
+            <div className="gear-detail-info-card-header">
+              <div className="gear-detail-info-icon green" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="1" x2="12" y2="23" />
+                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+                </svg>
+              </div>
+              <strong className="gear-detail-info-card-title">Purchase Price</strong>
+            </div>
+            <div className="gear-detail-info-card-divider" />
+            <div className="gear-detail-info-card-row">
+              <span className="gear-detail-info-row-label">{formatMoney(currentItem.purchasePrice.amount, currentItem.purchasePrice.currency)}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Item Details Card (Notifiche style) */}
         {hasItemInfo && (
-          <div>
-            <h3 className="gear-detail-section-header">Item Information</h3>
-            <div className="gear-detail-glass-card" style={{ padding: 0 }}>
-              <div className="gear-detail-field-grid">
-                {currentItem.serialNumber && (
-                  <div className="gear-detail-field">
-                    <p className="gear-detail-field-label">Serial Number</p>
-                    <p className="gear-detail-field-value">{currentItem.serialNumber}</p>
-                  </div>
-                )}
-                {currentItem.purchaseDate && (
-                  <div className="gear-detail-field">
-                    <p className="gear-detail-field-label">Purchase Date</p>
-                    <p className="gear-detail-field-value">{new Date(currentItem.purchaseDate).toLocaleDateString()}</p>
-                  </div>
-                )}
-                {currentItem.currentValue && (
-                  <div className="gear-detail-field">
-                    <p className="gear-detail-field-label">Current Value</p>
-                    <p className="gear-detail-field-value">{formatMoney(currentItem.currentValue.amount, currentItem.currentValue.currency)}</p>
-                  </div>
-                )}
+          <div className="gear-detail-info-card">
+            <div className="gear-detail-info-card-header">
+              <div className="gear-detail-info-icon blue" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="16" x2="12" y2="12" />
+                  <line x1="12" y1="8" x2="12.01" y2="8" />
+                </svg>
               </div>
+              <strong className="gear-detail-info-card-title">Item Details</strong>
             </div>
-          </div>
-        )}
-
-        {/* Notes */}
-        {currentItem.notes && (
-          <div>
-            <h3 className="gear-detail-section-header">Notes</h3>
-            <div className="gear-detail-glass-card">
-              <p className="gear-detail-notes-text">{currentItem.notes}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Tags */}
-        {currentItem.tags.length > 0 && (
-          <div>
-            <h3 className="gear-detail-section-header">Tags</h3>
-            <div className="gear-detail-pills">
-              {currentItem.tags.map((tag) => (
-                <span key={tag} className="gear-detail-pill">{tag}</span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Warranty */}
-        {hasWarrantyInfo && (
-          <div>
-            <h3 className="gear-detail-section-header">Warranty</h3>
-            <div className="gear-detail-glass-card" style={{ padding: 0 }}>
-              <div className="gear-detail-field-grid">
-                {currentItem.warranty?.provider && (
-                  <div className="gear-detail-field">
-                    <p className="gear-detail-field-label">Provider</p>
-                    <p className="gear-detail-field-value">{currentItem.warranty.provider}</p>
-                  </div>
-                )}
-                {currentItem.warranty?.expirationDate && (
-                  <div className="gear-detail-field">
-                    <p className="gear-detail-field-label">Expires</p>
-                    <p className="gear-detail-field-value">{new Date(currentItem.warranty.expirationDate).toLocaleDateString()}</p>
-                  </div>
-                )}
-                {currentItem.warranty?.notes && (
-                  <div className="gear-detail-field full-width">
-                    <p className="gear-detail-field-label">Warranty Notes</p>
-                    <p className="gear-detail-field-value">{currentItem.warranty.notes}</p>
-                  </div>
-                )}
+            <div className="gear-detail-info-card-divider" />
+            {currentItem.serialNumber && (
+              <>
+                <div className="gear-detail-info-card-row">
+                  <span className="gear-detail-info-row-label">Serial Number</span>
+                  <span className="gear-detail-info-row-value">{currentItem.serialNumber}</span>
+                </div>
+                {(currentItem.purchaseDate || currentItem.currentValue) && <div className="gear-detail-info-card-divider" />}
+              </>
+            )}
+            {currentItem.purchaseDate && (
+              <>
+                <div className="gear-detail-info-card-row">
+                  <span className="gear-detail-info-row-label">Purchase Date</span>
+                  <span className="gear-detail-info-row-value">{new Date(currentItem.purchaseDate).toLocaleDateString()}</span>
+                </div>
+                {currentItem.currentValue && <div className="gear-detail-info-card-divider" />}
+              </>
+            )}
+            {currentItem.currentValue && (
+              <div className="gear-detail-info-card-row">
+                <span className="gear-detail-info-row-label">Current Value</span>
+                <span className="gear-detail-info-row-value">{formatMoney(currentItem.currentValue.amount, currentItem.currentValue.currency)}</span>
               </div>
-            </div>
+            )}
           </div>
         )}
 
-        {/* Related Items */}
-        {related.length > 0 && (
-          <div>
-            <h3 className="gear-detail-section-header">Related Items</h3>
-            <div className="gear-detail-pills">
-              {related.map((r) => (
-                <span key={r.id} className="gear-detail-pill related">{r.name}</span>
-              ))}
+        {/* More Info Card (Impostazioni style) */}
+        {(currentItem.notes || hasWarrantyInfo || related.length > 0) && (
+          <div className="gear-detail-info-card">
+            <div className="gear-detail-info-card-header">
+              <div className="gear-detail-info-icon gray" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="12" cy="12" r="3" />
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+                </svg>
+              </div>
+              <strong className="gear-detail-info-card-title">More Info</strong>
             </div>
+            <div className="gear-detail-info-card-divider" />
+            {currentItem.notes && (
+              <>
+                <div className="gear-detail-info-card-row">
+                  <span className="gear-detail-info-row-label">Notes</span>
+                  <span className="gear-detail-info-row-value">{currentItem.notes}</span>
+                </div>
+                {(hasWarrantyInfo || related.length > 0) && <div className="gear-detail-info-card-divider" />}
+              </>
+            )}
+            {currentItem.warranty?.provider && (
+              <>
+                <div className="gear-detail-info-card-row">
+                  <span className="gear-detail-info-row-label">Warranty Provider</span>
+                  <span className="gear-detail-info-row-value">{currentItem.warranty.provider}</span>
+                </div>
+                {(currentItem.warranty?.expirationDate || currentItem.warranty?.notes || related.length > 0) && <div className="gear-detail-info-card-divider" />}
+              </>
+            )}
+            {currentItem.warranty?.expirationDate && (
+              <>
+                <div className="gear-detail-info-card-row">
+                  <span className="gear-detail-info-row-label">Warranty Expires</span>
+                  <span className="gear-detail-info-row-value">{new Date(currentItem.warranty.expirationDate).toLocaleDateString()}</span>
+                </div>
+                {(currentItem.warranty?.notes || related.length > 0) && <div className="gear-detail-info-card-divider" />}
+              </>
+            )}
+            {currentItem.warranty?.notes && (
+              <>
+                <div className="gear-detail-info-card-row">
+                  <span className="gear-detail-info-row-label">Warranty Notes</span>
+                  <span className="gear-detail-info-row-value">{currentItem.warranty.notes}</span>
+                </div>
+                {related.length > 0 && <div className="gear-detail-info-card-divider" />}
+              </>
+            )}
+            {related.length > 0 && (
+              <div className="gear-detail-info-card-row">
+                <span className="gear-detail-info-row-label">Related Items</span>
+                <span className="gear-detail-info-row-value">{related.map((r) => r.name).join(', ')}</span>
+              </div>
+            )}
           </div>
         )}
 
