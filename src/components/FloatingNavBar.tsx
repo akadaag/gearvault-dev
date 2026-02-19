@@ -168,13 +168,9 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
     <>
       <AnimatePresence>
         <motion.div
-          className="floating-nav"
+          className={`floating-nav${scrollHidden && !inputFocused ? ' floating-nav--hidden' : ''}`}
           initial={false}
-          animate={{
-            y: scrollHidden ? 100 : 0,
-            opacity: scrollHidden ? 0 : 1,
-          }}
-          transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+          animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           <LayoutGroup>
