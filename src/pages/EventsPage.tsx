@@ -13,8 +13,8 @@ export function EventsPage() {
   const navigate = useNavigate();
 
   // ── URL-driven state ───────────────────────────────────────────────────────
-  const query          = searchParams.get('q')?.trim() ?? '';
-  const quickFilter    = searchParams.get('qf') ?? 'upcoming';
+  const query           = searchParams.get('q')?.trim() ?? '';
+  const quickFilter     = searchParams.get('qf') ?? '';           // '' = all
   const showFilterSheet = searchParams.get('filters') === '1';
   const showCreateForm  = searchParams.get('add') === '1';
   const showCalendar    = searchParams.get('calendar') === '1';
@@ -46,8 +46,12 @@ export function EventsPage() {
     navigate({ search: params.toString() }, { replace: true });
   }
 
-  // closeFilterSheet replaced by dismissFilter for animated close
-  function closeCreateForm()  { setParam('add', null); }
+  function closeCreateForm() { setParam('add', null); }
+
+  function toggleQuickFilter(filter: string) {
+    // Toggle: clicking the active filter deactivates it (show all)
+    setParam('qf', quickFilter === filter ? null : filter);
+  }
 
   function toggleEventTypeFilter(eventType: string) {
     const current = (searchParams.get('types') ?? '').split(',').filter(Boolean);
@@ -59,18 +63,22 @@ export function EventsPage() {
 
   function clearAllFilters() {
     const params = new URLSearchParams(searchParams);
-    ['types', 'client', 'location', 'sort'].forEach(k => params.delete(k));
+    ['types', 'client', 'location', 'sort', 'qf'].forEach(k => params.delete(k));
     navigate({ search: params.toString() }, { replace: true });
   }
+
+  // ── Counts for filter pills ────────────────────────────────────────────────
+  const now = new Date();
+  const upcomingCount = events.filter(e => e.dateTime && new Date(e.dateTime) >= now).length;
+  const pastCount     = events.filter(e => e.dateTime && new Date(e.dateTime) < now).length;
+  const weddingCount  = events.filter(e => e.type === 'Wedding').length;
+  const corpCount     = events.filter(e => e.type === 'Corporate Event').length;
+  const touristCount  = events.filter(e => e.type === 'Tourist portrait').length;
 
   // ── Derived values ─────────────────────────────────────────────────────────
   const eventTypes = Array.from(new Set(events.map(e => e.type))).sort();
   const clients    = Array.from(new Set(events.map(e => e.client).filter(Boolean))).sort();
   const locations  = Array.from(new Set(events.map(e => e.location).filter(Boolean))).sort();
-
-  const now = new Date();
-  const upcomingCount = events.filter(e => e.dateTime && new Date(e.dateTime) >= now).length;
-  const pastCount = events.filter(e => e.dateTime && new Date(e.dateTime) < now).length;
 
   const filtered = useMemo(() => {
     const now = new Date();
@@ -80,9 +88,13 @@ export function EventsPage() {
       if (selectedEventTypes.length > 0 && !selectedEventTypes.includes(e.type)) return false;
       if (clientFilter   && e.client   !== clientFilter)   return false;
       if (locationFilter && e.location !== locationFilter) return false;
+      // Quick filter pills
       if (quickFilter === 'upcoming') return e.dateTime ? new Date(e.dateTime) >= now : false;
       if (quickFilter === 'past')     return e.dateTime ? new Date(e.dateTime) <  now : false;
-      return true;
+      if (quickFilter === 'wedding')  return e.type === 'Wedding';
+      if (quickFilter === 'corporate') return e.type === 'Corporate Event';
+      if (quickFilter === 'tourist')  return e.type === 'Tourist portrait';
+      return true; // '' = show all
     });
   }, [events, query, selectedEventTypes, clientFilter, locationFilter, quickFilter]);
 
@@ -156,17 +168,30 @@ export function EventsPage() {
     );
   }
 
+  // ── Filter pills definition ────────────────────────────────────────────────
+  const filterPills = [
+    { key: 'upcoming',  label: 'Upcoming',  count: upcomingCount },
+    { key: 'past',      label: 'Past',      count: pastCount     },
+    { key: 'wedding',   label: 'Wedding',   count: weddingCount  },
+    { key: 'corporate', label: 'Corporate', count: corpCount     },
+    { key: 'tourist',   label: 'Tourist',   count: touristCount  },
+  ];
+
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <>
       <section className="events-page ios-theme">
-        {/* iOS Header */}
+
+        {/* ── iOS Header ─────────────────────────────────────────────── */}
         <header className="ev-ios-header">
+          {/* Row 1: Title + Toolbar pill */}
           <div className="ev-ios-header-top">
             <h1 className="ev-ios-large-title">Events</h1>
-            <div className="ev-ios-header-actions">
+
+            {/* Toolbar pill — calendar + add */}
+            <div className="ev-ios-toolbar" role="group" aria-label="Events actions">
               <button
-                className={`ev-ios-icon-btn${showCalendar ? ' active' : ''}`}
+                className={`ev-ios-toolbar-btn${showCalendar ? ' active' : ''}`}
                 onClick={() => setParam('calendar', showCalendar ? null : '1')}
                 aria-label="Toggle calendar view"
               >
@@ -178,7 +203,7 @@ export function EventsPage() {
                 </svg>
               </button>
               <button
-                className="ev-ios-icon-btn primary"
+                className="ev-ios-toolbar-btn"
                 onClick={() => setParam('add', '1')}
                 aria-label="Create new event"
               >
@@ -190,39 +215,20 @@ export function EventsPage() {
             </div>
           </div>
 
-          {/* Search Bar */}
-          {/* Quick Filter Pills */}
-          <div className="ev-ios-filter-scroll" role="group" aria-label="Quick event filters">
-            <button
-              className={`ev-ios-filter-pill${quickFilter === 'upcoming' ? ' active' : ''}`}
-              onClick={() => setParam('qf', 'upcoming')}
-            >
-              Upcoming
-              <span className="ev-ios-pill-count">{upcomingCount}</span>
-            </button>
-            <button
-              className={`ev-ios-filter-pill${quickFilter === 'past' ? ' active' : ''}`}
-              onClick={() => setParam('qf', 'past')}
-            >
-              Past
-              <span className="ev-ios-pill-count">{pastCount}</span>
-            </button>
-            <button
-              className={`ev-ios-filter-pill${quickFilter === 'all' ? ' active' : ''}`}
-              onClick={() => setParam('qf', 'all')}
-            >
-              All
-              <span className="ev-ios-pill-count">{events.length}</span>
-            </button>
+          {/* Event count */}
+          <div className="ev-ios-item-count">
+            {sorted.length} event{sorted.length !== 1 ? 's' : ''}
+          </div>
 
-            <span className="ev-ios-filter-divider" />
-
+          {/* Row 2: Filter circle + scrollable filter pills */}
+          <div className="ev-ios-filter-row">
+            {/* Fixed filter circle button */}
             <button
-              className={`ev-ios-filter-icon-btn${selectedEventTypes.length > 0 || clientFilter || locationFilter ? ' active' : ''}`}
+              className={`ev-ios-filter-circle-btn${selectedEventTypes.length > 0 || clientFilter || locationFilter ? ' active' : ''}`}
               aria-label="Open event filters"
               onClick={() => setParam('filters', '1')}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <line x1="4" y1="21" x2="4" y2="14" />
                 <line x1="4" y1="10" x2="4" y2="3" />
                 <line x1="12" y1="21" x2="12" y2="12" />
@@ -234,14 +240,24 @@ export function EventsPage() {
                 <line x1="17" y1="16" x2="23" y2="16" />
               </svg>
             </button>
-          </div>
 
-          <div className="ev-ios-item-count">
-            {sorted.length} event{sorted.length !== 1 ? 's' : ''}
+            {/* Horizontally scrollable pills */}
+            <div className="ev-ios-pills-scroll" role="group" aria-label="Quick event filters">
+              {filterPills.map(pill => (
+                <button
+                  key={pill.key}
+                  className={`ev-ios-filter-pill${quickFilter === pill.key ? ' active' : ''}`}
+                  onClick={() => toggleQuickFilter(pill.key)}
+                >
+                  <span className="ev-ios-pill-count">{pill.count}</span>
+                  {pill.label}
+                </button>
+              ))}
+            </div>
           </div>
         </header>
 
-        {/* Scrollable content area */}
+        {/* ── Scrollable content area ───────────────────────────────── */}
         <div className="ev-ios-content-scroll page-scroll-area">
           {/* Calendar */}
           {showCalendar && <MonthCalendar />}
@@ -272,7 +288,7 @@ export function EventsPage() {
           {/* Event Cards */}
           {sorted.map(event => {
             const dateObj = event.dateTime ? new Date(event.dateTime) : null;
-            const day = dateObj ? dateObj.getDate() : '';
+            const day   = dateObj ? dateObj.getDate() : '';
             const month = dateObj ? dateObj.toLocaleString('default', { month: 'short' }).toUpperCase() : '';
             const packed = event.packingChecklist.filter(i => i.packed).length;
             const total  = event.packingChecklist.length;
@@ -280,7 +296,7 @@ export function EventsPage() {
             const daysInfo = event.dateTime ? getDaysUntilEvent(event.dateTime) : null;
 
             return (
-              <Link key={event.id} to={`/events/${event.id}`} className="ios-glass-card ev-ios-event-item">
+              <Link key={event.id} to={`/events/${event.id}`} className="ev-ios-event-item">
                 {/* Date badge */}
                 {dateObj ? (
                   <div className="ev-ios-date-badge">
@@ -303,7 +319,7 @@ export function EventsPage() {
                   </div>
                   <div className="ev-ios-event-meta">
                     {event.type}
-                    {event.client && ` \u00B7 ${event.client}`}
+                    {event.client   && ` \u00B7 ${event.client}`}
                     {event.location && ` \u00B7 ${event.location}`}
                   </div>
                   {total > 0 && (
@@ -318,9 +334,6 @@ export function EventsPage() {
                     </div>
                   )}
                 </div>
-
-                {/* Chevron */}
-                <span className="ev-ios-chevron" aria-hidden="true">&#8250;</span>
               </Link>
             );
           })}

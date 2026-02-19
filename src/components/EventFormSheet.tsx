@@ -99,7 +99,8 @@ export function EventFormSheet({ mode, initialData, onClose, onSaved }: EventFor
       onSaved?.({ ...initialData, ...updated });
     }
 
-    onClose();
+    // Use dismiss() so the closing animation plays before unmounting
+    dismiss();
   }
 
   return (
