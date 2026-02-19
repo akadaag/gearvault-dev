@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { AnimatePresence, motion } from 'framer-motion';
 import { db } from '../db';
 import { makeId } from '../lib/ids';
 import { exportEventToPdf } from '../lib/pdf';
@@ -22,6 +23,8 @@ export function EventDetailPage() {
   const [showShareSheet, setShowShareSheet] = useState(false);
   const [selectedCatalogItems, setSelectedCatalogItems] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+  const optionsMenuRef = useRef<HTMLDivElement>(null);
 
   // Dismiss animation hooks for inline sheets
   const { closing: closingShare, dismiss: dismissShare, onAnimationEnd: onAnimationEndShare } =
@@ -38,6 +41,43 @@ export function EventDetailPage() {
     }
     return () => unlockSheetScroll();
   }, [showShareSheet, showAddSheet]);
+
+  // Close options menu on outside click
+  useEffect(() => {
+    if (!showOptionsMenu) return;
+    function handleOutsideClick(e: MouseEvent) {
+      if (optionsMenuRef.current && !optionsMenuRef.current.contains(e.target as Node)) {
+        setShowOptionsMenu(false);
+      }
+    }
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [showOptionsMenu]);
+
+  // Set status bar / notch to white while on this page
+  useEffect(() => {
+    const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    const originalMeta = meta?.content;
+    const originalBg = document.body.style.background;
+
+    function applyColor() {
+      const isDark = document.documentElement.classList.contains('dark');
+      const color = isDark ? '#000000' : '#ffffff';
+      if (meta) meta.content = color;
+      document.body.style.background = color;
+    }
+
+    applyColor();
+
+    const observer = new MutationObserver(applyColor);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+    return () => {
+      observer.disconnect();
+      if (meta) meta.content = originalMeta ?? '';
+      document.body.style.background = originalBg;
+    };
+  }, []);
 
   if (!event) {
     return (
@@ -180,52 +220,82 @@ export function EventDetailPage() {
   return (
     <section className="event-detail-page ios-theme">
 
-      {/* ── HEADER ── */}
-      <header className="ev-detail-header">
-        <button
-          onClick={() => navigate('/events')}
-          className="ev-detail-back-btn"
-          aria-label="Back to events"
-        >
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <polyline points="15 18 9 12 15 6" />
+      {/* ── Fixed Floating Buttons ── */}
+      <div className="ev-detail-floating-bar">
+        {/* Back pill */}
+        <button className="ev-detail-back-pill" onClick={() => navigate('/events')} aria-label="Back to events">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M15 18l-6-6 6-6" />
           </svg>
           Events
         </button>
-        <div className="ev-detail-header-actions">
+
+        {/* Options circle */}
+        <div className="ev-detail-options-wrap" ref={optionsMenuRef}>
           <button
-            className="ev-detail-icon-btn"
-            onClick={() => setShowShareSheet(true)}
-            aria-label="Share & export event"
+            className="ev-detail-options-btn"
+            onClick={() => setShowOptionsMenu(v => !v)}
+            aria-label="More options"
+            aria-expanded={showOptionsMenu}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
-              <polyline points="16 6 12 2 8 6" />
-              <line x1="12" y1="2" x2="12" y2="15" />
-            </svg>
+            <span className="ev-detail-options-dot" />
+            <span className="ev-detail-options-dot" />
+            <span className="ev-detail-options-dot" />
           </button>
-          <button
-            className="ev-detail-icon-btn"
-            onClick={() => setShowEditSheet(true)}
-            aria-label="Edit event"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12 20h9" />
-              <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
-            </svg>
-          </button>
-          <button
-            className="ev-detail-icon-btn destructive"
-            onClick={() => void deleteEvent()}
-            aria-label="Delete event"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <polyline points="3 6 5 6 21 6" />
-              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-            </svg>
-          </button>
+
+          <AnimatePresence>
+            {showOptionsMenu && (
+              <motion.div
+                className="ev-detail-options-menu"
+                role="menu"
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
+                style={{ transformOrigin: 'top right' }}
+              >
+                <button
+                  className="ev-detail-menu-item"
+                  role="menuitem"
+                  onClick={() => { setShowOptionsMenu(false); setShowShareSheet(true); }}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" />
+                    <polyline points="16 6 12 2 8 6" />
+                    <line x1="12" y1="2" x2="12" y2="15" />
+                  </svg>
+                  Share &amp; Export
+                </button>
+                <button
+                  className="ev-detail-menu-item"
+                  role="menuitem"
+                  onClick={() => { setShowOptionsMenu(false); setShowEditSheet(true); }}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M12 20h9" />
+                    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+                  </svg>
+                  Edit
+                </button>
+                <div className="ev-detail-menu-divider" />
+                <button
+                  className="ev-detail-menu-item destructive"
+                  role="menuitem"
+                  onClick={() => { setShowOptionsMenu(false); void deleteEvent(); }}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M3 6h18" />
+                    <path d="M8 6V4h8v2" />
+                    <path d="M19 6l-1 14H6L5 6" />
+                    <path d="M10 11v6M14 11v6" />
+                  </svg>
+                  Delete
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </header>
+      </div>
 
       {/* ── SCROLL CONTENT ── */}
       <div className="ev-detail-content">
