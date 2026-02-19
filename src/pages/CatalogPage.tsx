@@ -14,7 +14,6 @@ import { compressedImageToDataUrl, uploadCompressedGearPhoto } from '../lib/gear
 import { useAuth } from '../hooks/useAuth';
 import { classificationQueue } from '../lib/gearClassifier';
 import type { Category, Condition, GearItem, MaintenanceEntry } from '../types/models';
-import { ContentEditableInput } from '../components/ContentEditableInput';
 
 const initialDraft: GearFormDraft = {
   name: '',
@@ -272,49 +271,6 @@ export function CatalogPage() {
           <div className="ios-catalog-header-top">
             <h1 className="ios-catalog-title">Catalog</h1>
             <button
-              className="ios-catalog-add-btn"
-              onClick={() => updateSearchParams((p) => p.set('add', '1'))}
-              aria-label="Add Item"
-            >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-            </button>
-          </div>
-
-          <div className="ios-catalog-search-row">
-            <div className="ios-catalog-search-bar">
-              <svg className="ios-catalog-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-              </svg>
-              <ContentEditableInput
-                className="ios-catalog-search-input"
-                placeholder="Search"
-                value={query}
-                onChange={(val) => updateSearchParams((p) => {
-                  if (val) p.set('q', val);
-                  else p.delete('q');
-                })}
-                onFocus={() => document.documentElement.classList.add('keyboard-open')}
-                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
-                aria-label="Search gear"
-              />
-              {query && (
-                <button
-                  className="ios-catalog-search-clear"
-                  onClick={() => updateSearchParams((p) => p.delete('q'))}
-                  aria-label="Clear search"
-                >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-                    <circle cx="12" cy="12" r="10" opacity="0.25" />
-                    <path d="M15 9l-6 6M9 9l6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" fill="none" />
-                  </svg>
-                </button>
-              )}
-            </div>
-            <button
               className={`ios-catalog-filter-btn${showFilterSheet || tagFilter || conditionFilter !== 'all' || essentialOnly || selectedCategoryIds.length > 0 ? ' active' : ''}`}
               onClick={() => updateSearchParams((p) => p.set('filters', '1'))}
               aria-label="Filters"
@@ -329,6 +285,16 @@ export function CatalogPage() {
                 <line x1="1" y1="14" x2="7" y2="14" />
                 <line x1="9" y1="8" x2="15" y2="8" />
                 <line x1="17" y1="16" x2="23" y2="16" />
+              </svg>
+            </button>
+            <button
+              className="ios-catalog-add-btn"
+              onClick={() => updateSearchParams((p) => p.set('add', '1'))}
+              aria-label="Add Item"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
               </svg>
             </button>
           </div>

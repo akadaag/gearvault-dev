@@ -220,7 +220,7 @@ export function TabLayout() {
   return (
     <div className={`app-shell${isIosThemeRoute ? ' ios-theme' : ''}`}>
       {/* ── Global Profile Avatar (top-right) ─────────────────────────── */}
-      {!isGearDetailRoute && !isEventDetailRoute && (
+      {isHomeRoute && (
         <div className="global-profile-bar">
           <ProfileMenu />
         </div>

@@ -10469,7 +10469,7 @@ input[type="checkbox"].ios-toggle:checked::after {
    ────────────────────────────────────────────────────────────────────────────── */
 @media (prefers-color-scheme: dark) {
   .splash-screen {
-    background: #000000;
+    background: #F2F2F7;
   }
 }
 
