@@ -10591,21 +10591,21 @@ input[type="checkbox"].ios-toggle:checked::after {
   background: #fff;
   color: var(--ios-text-primary);
   justify-self: start;
-  box-shadow: 0 0.5px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
 }
 
 .ios-theme .ios-sheet-icon-btn--save {
   background: #fff;
   color: var(--ios-text-primary);
   justify-self: end;
-  box-shadow: 0 0.5px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
 }
 
 :root.dark .ios-theme .ios-sheet-icon-btn--cancel,
 :root.dark .ios-theme .ios-sheet-icon-btn--save {
   background: rgba(58, 58, 60, 1);
   color: var(--ios-text-primary);
-  box-shadow: 0 0.5px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.45), 0 0 0 0.5px rgba(255, 255, 255, 0.08);
 }
 
 .ios-theme .ios-sheet-icon-btn:disabled {
@@ -10628,7 +10628,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  box-shadow: 0 0.5px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
   transition: opacity 0.15s ease;
   min-height: auto;
   line-height: 1.3;
@@ -10638,13 +10638,13 @@ input[type="checkbox"].ios-toggle:checked::after {
 .ios-theme .ios-sheet-pill-btn:active {
   opacity: 0.75;
   transform: none;
-  box-shadow: 0 0.5px 2px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
 }
 
 :root.dark .ios-theme .ios-sheet-pill-btn {
   background: rgba(58, 58, 60, 1);
   color: var(--ios-text-primary);
-  box-shadow: 0 0.5px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.45), 0 0 0 0.5px rgba(255, 255, 255, 0.08);
 }
 
 /* ── Segmented Control ──────────────────────────────────────────── */
