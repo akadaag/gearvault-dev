@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
+import { AnimatePresence, motion } from 'framer-motion';
 import { db } from '../db';
 import { formatMoney } from '../lib/format';
 import { makeId } from '../lib/ids';
@@ -309,59 +310,66 @@ export function GearItemDetailPage() {
             <span className="gear-detail-options-dot" />
           </button>
 
-          {showOptionsMenu && (
-            <div className="gear-detail-options-menu" role="menu">
-              <button
-                className={`gear-detail-menu-item${isInAnyEvent ? ' active-event' : ''}`}
-                role="menuitem"
-                onClick={() => { setShowOptionsMenu(false); setShowAddToEvent(true); }}
+          <AnimatePresence>
+            {showOptionsMenu && (
+              <motion.div
+                className="gear-detail-options-menu"
+                role="menu"
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.5 }}
+                transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
+                style={{ transformOrigin: 'top right' }}
               >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="m8.7 12.2 2.1 2.2 4.6-4.6" />
-                </svg>
-                Add to Event
-              </button>
-              <div className="gear-detail-menu-divider" />
-              <button
-                className="gear-detail-menu-item"
-                role="menuitem"
-                onClick={() => { setShowOptionsMenu(false); setDraft(editDraft); setShowEditSheet(true); }}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                  <path d="M14 2v6h6" />
-                  <path d="m9 16 4.4-4.4a1.5 1.5 0 0 1 2.1 2.1L11.1 18.1 8 19z" />
-                </svg>
-                Edit
-              </button>
-              <div className="gear-detail-menu-divider" />
-              <button
-                className={`gear-detail-menu-item${currentItem.essential ? ' active' : ''}`}
-                role="menuitem"
-                onClick={() => { setShowOptionsMenu(false); void toggleEssential(); }}
-              >
-                <svg viewBox="0 0 24 24" fill={currentItem.essential ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
-                </svg>
-                {currentItem.essential ? 'Remove from Essentials' : 'Add to Essentials'}
-              </button>
-              <div className="gear-detail-menu-divider" />
-              <button
-                className="gear-detail-menu-item destructive"
-                role="menuitem"
-                onClick={() => { setShowOptionsMenu(false); void deleteItem(); }}
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M3 6h18" />
-                  <path d="M8 6V4h8v2" />
-                  <path d="M19 6l-1 14H6L5 6" />
-                  <path d="M10 11v6M14 11v6" />
-                </svg>
-                Delete
-              </button>
-            </div>
-          )}
+                <button
+                  className={`gear-detail-menu-item${isInAnyEvent ? ' active-event' : ''}`}
+                  role="menuitem"
+                  onClick={() => { setShowOptionsMenu(false); setShowAddToEvent(true); }}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="m8.7 12.2 2.1 2.2 4.6-4.6" />
+                  </svg>
+                  Add to Event
+                </button>
+                <button
+                  className="gear-detail-menu-item"
+                  role="menuitem"
+                  onClick={() => { setShowOptionsMenu(false); setDraft(editDraft); setShowEditSheet(true); }}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <path d="M14 2v6h6" />
+                    <path d="m9 16 4.4-4.4a1.5 1.5 0 0 1 2.1 2.1L11.1 18.1 8 19z" />
+                  </svg>
+                  Edit
+                </button>
+                <button
+                  className={`gear-detail-menu-item${currentItem.essential ? ' active' : ''}`}
+                  role="menuitem"
+                  onClick={() => { setShowOptionsMenu(false); void toggleEssential(); }}
+                >
+                  <svg viewBox="0 0 24 24" fill={currentItem.essential ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
+                  </svg>
+                  {currentItem.essential ? 'Remove from Essentials' : 'Add to Essentials'}
+                </button>
+                <button
+                  className="gear-detail-menu-item destructive"
+                  role="menuitem"
+                  onClick={() => { setShowOptionsMenu(false); void deleteItem(); }}
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <path d="M3 6h18" />
+                    <path d="M8 6V4h8v2" />
+                    <path d="M19 6l-1 14H6L5 6" />
+                    <path d="M10 11v6M14 11v6" />
+                  </svg>
+                  Delete
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 

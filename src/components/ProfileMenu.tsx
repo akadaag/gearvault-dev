@@ -100,10 +100,11 @@ export function ProfileMenu() {
         {open && (
           <motion.div
             className="profile-menu__dropdown"
-            initial={{ opacity: 0, scale: 0.92, y: -8 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.92, y: -8 }}
-            transition={{ duration: 0.18, ease: [0.32, 0.72, 0, 1] }}
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.5 }}
+            transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
+            style={{ transformOrigin: 'top right' }}
           >
             {/* User info header */}
             <div className="profile-menu__user-info">
@@ -113,8 +114,6 @@ export function ProfileMenu() {
                 {email && <span className="profile-menu__user-email">{email}</span>}
               </div>
             </div>
-
-            <div className="profile-menu__divider" />
 
             {/* Menu items */}
             <button
@@ -132,8 +131,6 @@ export function ProfileMenu() {
               <span className="profile-menu__item-icon">{exportIcon}</span>
               <span>Export Data</span>
             </button>
-
-            <div className="profile-menu__divider" />
 
             <button className="profile-menu__item profile-menu__item--danger" onClick={handleSignOut}>
               <span className="profile-menu__item-icon">{signOutIcon}</span>
