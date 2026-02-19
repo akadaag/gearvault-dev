@@ -7376,6 +7376,9 @@ input[type="checkbox"].ios-toggle:checked::after {
   margin-top: -8px;
   margin-bottom: -8px;
   padding-right: 8px;
+  /* Fade pills out on the left as they scroll behind the circle button */
+  -webkit-mask-image: linear-gradient(to right, transparent 0px, black 20px);
+  mask-image: linear-gradient(to right, transparent 0px, black 20px);
 }
 
 .ev-ios-pills-scroll::-webkit-scrollbar {
