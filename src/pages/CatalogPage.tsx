@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
 import { GearItemFormSheet, type GearFormDraft } from '../components/GearItemFormSheet';
-import { MaintenanceSheet } from '../components/MaintenanceSheet';
 import { formatMoney } from '../lib/format';
 import { makeId } from '../lib/ids';
 import { fuzzyIncludes } from '../lib/search';
@@ -13,7 +12,7 @@ import { useSheetDismiss } from '../hooks/useSheetDismiss';
 import { compressedImageToDataUrl, uploadCompressedGearPhoto } from '../lib/gearPhotos';
 import { useAuth } from '../hooks/useAuth';
 import { classificationQueue } from '../lib/gearClassifier';
-import type { Category, Condition, GearItem, MaintenanceEntry } from '../types/models';
+import type { Category, Condition, GearItem } from '../types/models';
 
 const initialDraft: GearFormDraft = {
   name: '',
@@ -54,14 +53,11 @@ export function CatalogPage() {
   const [draft, setDraft] = useState<GearFormDraft>(initialDraft);
   const [showAddItemForm, setShowAddItemForm] = useState(false);
   const [error, setError] = useState('');
-  const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-  const [maintenanceSheetItemId, setMaintenanceSheetItemId] = useState<string | null>(null);
 
-  // Closing animations for filter sheet and item detail sheet
+  // Closing animation for filter sheet
   const { closing: closingFilter, dismiss: dismissFilter, onAnimationEnd: onFilterAnimEnd } = useSheetDismiss(() => {
     updateSearchParams((params) => { params.delete('filters'); });
   });
-  const { closing: closingDetail, dismiss: dismissDetail, onAnimationEnd: onDetailAnimEnd } = useSheetDismiss(() => setSelectedItemId(null));
 
   useEffect(() => {
     if (searchParams.get('add') !== '1') return;
@@ -73,11 +69,11 @@ export function CatalogPage() {
   }, [searchParams, setSearchParams]);
 
   useEffect(() => {
-    const anySheetOpen = showFilterSheet || showAddItemForm || Boolean(selectedItemId) || Boolean(maintenanceSheetItemId);
+    const anySheetOpen = showFilterSheet || showAddItemForm;
     if (!anySheetOpen) return;
     lockSheetScroll();
     return () => unlockSheetScroll();
-  }, [showFilterSheet, showAddItemForm, selectedItemId, maintenanceSheetItemId]);
+  }, [showFilterSheet, showAddItemForm]);
 
   const tags = useMemo(() => {
     const set = new Set<string>();
@@ -231,38 +227,6 @@ export function CatalogPage() {
     setSortBy('name');
   }
 
-  async function saveMaintenanceEntry(itemId: string, entry: MaintenanceEntry) {
-    const target = gear.find((g) => g.id === itemId);
-    if (!target) return;
-
-    await db.gearItems.update(itemId, {
-      maintenanceHistory: [...(target.maintenanceHistory ?? []), entry],
-      updatedAt: new Date().toISOString(),
-    });
-  }
-
-  async function updateMaintenanceEntry(itemId: string, entry: MaintenanceEntry) {
-    const target = gear.find((g) => g.id === itemId);
-    if (!target) return;
-
-    await db.gearItems.update(itemId, {
-      maintenanceHistory: (target.maintenanceHistory ?? []).map((existing) => (
-        existing.id === entry.id ? { ...existing, ...entry } : existing
-      )),
-      updatedAt: new Date().toISOString(),
-    });
-  }
-
-  async function deleteMaintenanceEntry(itemId: string, entryId: string) {
-    const target = gear.find((g) => g.id === itemId);
-    if (!target) return;
-
-    await db.gearItems.update(itemId, {
-      maintenanceHistory: (target.maintenanceHistory ?? []).filter((existing) => existing.id !== entryId),
-      updatedAt: new Date().toISOString(),
-    });
-  }
-
   return (
     <>
       <section className="catalog-page ios-theme">
@@ -355,7 +319,7 @@ export function CatalogPage() {
                         <button
                           key={item.id}
                           className="ios-list-item"
-                          onClick={() => setSelectedItemId(item.id)}
+                          onClick={() => navigate(`/catalog/item/${item.id}`)}
                           tabIndex={category.collapsed ? -1 : undefined}
                         >
                           <div className="ios-list-icon">
@@ -504,127 +468,6 @@ export function CatalogPage() {
         onSubmit={() => void addItem()}
       />
 
-      {/* ── Item Detail Sheet ──────────────────────────────────────────── */}
-      {selectedItemId && (() => {
-        const item = gear.find((g) => g.id === selectedItemId);
-        if (!item) return null;
-
-        const category = categories.find((c) => c.id === item.categoryId);
-
-        return (
-          <>
-            <div className={`ios-sheet-backdrop${closingDetail ? ' closing' : ''}`} onClick={dismissDetail} />
-            <div className={`ios-sheet-modal${closingDetail ? ' closing' : ''}`} aria-label="Item details" onAnimationEnd={onDetailAnimEnd}>
-              <div className="ios-sheet-header ios-sheet-header--icon">
-                <button className="ios-sheet-icon-btn ios-sheet-icon-btn--cancel" onClick={dismissDetail} aria-label="Close">
-                  <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 2L16 16M16 2L2 16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/></svg>
-                </button>
-                <h3 className="ios-sheet-title">Details</h3>
-                <button className="ios-sheet-pill-btn" onClick={() => navigate(`/catalog/item/${item.id}`)}>More</button>
-              </div>
-
-              <div className="ios-sheet-content">
-                <div className="ios-detail-hero">
-                  {item.photo ? (
-                    <img src={item.photo} alt={item.name} className="ios-detail-img" />
-                  ) : (
-                    <div className="ios-detail-placeholder">
-                      <span>{item.name.charAt(0).toUpperCase()}</span>
-                    </div>
-                  )}
-                  <div className="ios-detail-titles">
-                    <h2>{item.name}</h2>
-                    <p>{[item.brand, item.model].filter(Boolean).join(' ') || 'No brand/model'}</p>
-                    <div className="ios-detail-badges">
-                      {item.essential && <span className="ios-badge star">Essential</span>}
-                      {category && <span className="ios-badge">{category.name}</span>}
-                      <span className={`ios-badge condition-${item.condition}`}>{item.condition}</span>
-                      {item.quantity > 1 && <span className="ios-badge">{'\u00D7'}{item.quantity}</span>}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="ios-form-group-title">Info</div>
-                <div className="ios-form-group">
-                  {item.purchasePrice && (
-                    <div className="ios-form-row">
-                      <span className="ios-form-label">Purchase Price</span>
-                      <span className="ios-form-value">{formatMoney(item.purchasePrice.amount, item.purchasePrice.currency)}</span>
-                    </div>
-                  )}
-                  {item.currentValue && (
-                    <div className="ios-form-row">
-                      <span className="ios-form-label">Current Value</span>
-                      <span className="ios-form-value">{formatMoney(item.currentValue.amount, item.currentValue.currency)}</span>
-                    </div>
-                  )}
-                  {item.serialNumber && (
-                    <div className="ios-form-row">
-                      <span className="ios-form-label">Serial Number</span>
-                      <span className="ios-form-value">{item.serialNumber}</span>
-                    </div>
-                  )}
-                  {item.purchaseDate && (
-                    <div className="ios-form-row">
-                      <span className="ios-form-label">Purchase Date</span>
-                      <span className="ios-form-value">{new Date(item.purchaseDate).toLocaleDateString()}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="ios-form-group">
-                  <div
-                    className="ios-form-row clickable"
-                    onClick={() => setMaintenanceSheetItemId(item.id)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => { if (e.key === 'Enter') setMaintenanceSheetItemId(item.id); }}
-                  >
-                    <span className="ios-form-label">Maintenance</span>
-                    <div className="ios-form-value-group">
-                      <span>{item.maintenanceHistory?.length ?? 0} records</span>
-                      <span className="ios-sheet-chevron" />
-                    </div>
-                  </div>
-                  <div className="ios-form-row">
-                    <span className="ios-form-label">Accessories</span>
-                    <span className="ios-form-value">{item.relatedItemIds?.length ?? 0} linked</span>
-                  </div>
-                </div>
-
-                {item.notes && (
-                  <>
-                    <div className="ios-form-group-title">Notes</div>
-                    <div className="ios-form-group">
-                      <div className="ios-form-row textarea-row">
-                        <span style={{ fontSize: '15px', color: 'var(--ios-text-primary)', whiteSpace: 'pre-wrap' }}>{item.notes}</span>
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          </>
-        );
-      })()}
-
-      {/* ── Maintenance Sheet ──────────────────────────────────────────── */}
-      {maintenanceSheetItemId && (() => {
-        const selected = gear.find((g) => g.id === maintenanceSheetItemId);
-        if (!selected) return null;
-
-        return (
-          <MaintenanceSheet
-            open={Boolean(selected)}
-            itemName={selected.name}
-            history={selected.maintenanceHistory ?? []}
-            onClose={() => setMaintenanceSheetItemId(null)}
-            onSaveEntry={(entry) => saveMaintenanceEntry(selected.id, entry)}
-            onUpdateEntry={(entry) => updateMaintenanceEntry(selected.id, entry)}
-            onDeleteEntry={(entryId) => deleteMaintenanceEntry(selected.id, entryId)}
-          />
-        );
-      })()}
     </>
   );
 }
