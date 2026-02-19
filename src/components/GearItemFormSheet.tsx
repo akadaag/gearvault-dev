@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import type { Category, Condition } from '../types/models';
 import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
 import { useSheetDismiss } from '../hooks/useSheetDismiss';
@@ -37,6 +37,8 @@ interface GearItemFormSheetProps {
   onSubmit: () => void;
 }
 
+type FormMode = 'quick' | 'full';
+
 export function GearItemFormSheet({
   open,
   title,
@@ -49,6 +51,8 @@ export function GearItemFormSheet({
   onClose,
   onSubmit,
 }: GearItemFormSheetProps) {
+  const [mode, setMode] = useState<FormMode>('quick');
+
   useEffect(() => {
     if (!open) return;
     lockSheetScroll();
@@ -94,19 +98,57 @@ export function GearItemFormSheet({
     onErrorChange('');
   }
 
+  const kbHandlers = {
+    onFocus: () => document.documentElement.classList.add('keyboard-open'),
+    onBlur: () => document.documentElement.classList.remove('keyboard-open'),
+  };
+
   return (
     <>
       <div className={`ios-sheet-backdrop${closing ? ' closing' : ''}`} onClick={dismiss} />
-      <div className={`ios-sheet-modal${closing ? ' closing' : ''}`} aria-label={title} onAnimationEnd={onAnimationEnd}>
+      <div
+        className={`ios-sheet-modal ios-sheet-modal--form${closing ? ' closing' : ''}`}
+        aria-label={title}
+        onAnimationEnd={onAnimationEnd}
+      >
         <div className="ios-sheet-handle" />
-        <div className="ios-sheet-header">
-          <button className="ios-sheet-btn secondary" onClick={dismiss}>Cancel</button>
+
+        {/* Header */}
+        <div className="ios-sheet-header ios-sheet-header--icon">
+          <button className="ios-sheet-icon-btn ios-sheet-icon-btn--cancel" onClick={dismiss} aria-label="Cancel">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M2 2L16 16M16 2L2 16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
+            </svg>
+          </button>
           <h3 className="ios-sheet-title">{title}</h3>
-          <button className="ios-sheet-btn primary" onClick={onSubmit}>{submitLabel}</button>
+          <button className="ios-sheet-icon-btn ios-sheet-icon-btn--save" onClick={onSubmit} aria-label={submitLabel}>
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none">
+              <path d="M2.5 9.5L7 14L15.5 4" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
         </div>
 
-        <div className="ios-sheet-content">
-          {/* Photo Section */}
+        {/* Segmented Control */}
+        <div className="ios-sheet-segment-wrap">
+          <div className="ios-sheet-segment">
+            <button
+              className={`ios-sheet-segment-btn${mode === 'quick' ? ' active' : ''}`}
+              onClick={() => setMode('quick')}
+            >
+              Quick Add
+            </button>
+            <button
+              className={`ios-sheet-segment-btn${mode === 'full' ? ' active' : ''}`}
+              onClick={() => setMode('full')}
+            >
+              Full Details
+            </button>
+          </div>
+        </div>
+
+        <div className="ios-sheet-content ios-sheet-content--form">
+
+          {/* Photo */}
           <div className="ios-detail-hero">
             <label className="ios-photo-upload-area">
               <input
@@ -145,20 +187,35 @@ export function GearItemFormSheet({
             </label>
           </div>
 
-          {/* Details Group */}
-          <div className="ios-form-group-title">Details</div>
-          <div className="ios-form-group">
-            <div className="ios-form-row">
-              <span className="ios-form-label">Name *</span>
-              <input
-                className="ios-form-input"
-                placeholder="Item name"
-                value={draft.name}
-                onChange={(e) => update('name', e.target.value)}
-                onFocus={() => document.documentElement.classList.add('keyboard-open')}
-                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
-              />
-            </div>
+          {/* Pill 1 — Name / Brand / Model */}
+          <div className="ios-form-pill">
+            <input
+              className="ios-pill-input"
+              placeholder="Item Name *"
+              value={draft.name}
+              onChange={(e) => update('name', e.target.value)}
+              {...kbHandlers}
+            />
+            <div className="ios-pill-divider" />
+            <input
+              className="ios-pill-input"
+              placeholder="Brand"
+              value={draft.brand}
+              onChange={(e) => update('brand', e.target.value)}
+              {...kbHandlers}
+            />
+            <div className="ios-pill-divider" />
+            <input
+              className="ios-pill-input"
+              placeholder="Model"
+              value={draft.model}
+              onChange={(e) => update('model', e.target.value)}
+              {...kbHandlers}
+            />
+          </div>
+
+          {/* Pill 2 — Category (always visible) */}
+          <div className="ios-form-pill">
             <label className="ios-form-row">
               <span className="ios-form-label">Category *</span>
               <select
@@ -172,68 +229,10 @@ export function GearItemFormSheet({
                 ))}
               </select>
             </label>
-            <div className="ios-form-row">
-              <span className="ios-form-label">Brand</span>
-              <input
-                className="ios-form-input"
-                placeholder="Brand"
-                value={draft.brand}
-                onChange={(e) => update('brand', e.target.value)}
-                onFocus={() => document.documentElement.classList.add('keyboard-open')}
-                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
-              />
-            </div>
-            <div className="ios-form-row">
-              <span className="ios-form-label">Model</span>
-              <input
-                className="ios-form-input"
-                placeholder="Model"
-                value={draft.model}
-                onChange={(e) => update('model', e.target.value)}
-                onFocus={() => document.documentElement.classList.add('keyboard-open')}
-                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
-              />
-            </div>
-            <div className="ios-form-row">
-              <span className="ios-form-label">Serial</span>
-              <input
-                className="ios-form-input"
-                placeholder="Optional"
-                value={draft.serialNumber}
-                onChange={(e) => update('serialNumber', e.target.value)}
-                onFocus={() => document.documentElement.classList.add('keyboard-open')}
-                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
-              />
-            </div>
           </div>
 
-          {/* Status Group */}
-          <div className="ios-form-group-title">Status</div>
-          <div className="ios-form-group">
-            <label className="ios-form-row">
-              <span className="ios-form-label">Condition</span>
-              <select
-                className="ios-form-input"
-                value={draft.condition}
-                onChange={(e) => update('condition', e.target.value as Condition)}
-              >
-                <option value="new">New</option>
-                <option value="good">Good</option>
-                <option value="worn">Worn</option>
-              </select>
-            </label>
-            <div className="ios-form-row">
-              <span className="ios-form-label">Quantity</span>
-              <input
-                type="number"
-                className="ios-form-input"
-                min={1}
-                value={draft.quantity}
-                onChange={(e) => update('quantity', Number(e.target.value || 1))}
-                onFocus={() => document.documentElement.classList.add('keyboard-open')}
-                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
-              />
-            </div>
+          {/* Pill 3 — Essential (always visible in quick) */}
+          <div className="ios-form-pill">
             <label className="ios-form-row">
               <span className="ios-form-label">Essential</span>
               <input
@@ -245,84 +244,116 @@ export function GearItemFormSheet({
             </label>
           </div>
 
-          {/* Value Group */}
-          <div className="ios-form-group-title">Value</div>
-          <div className="ios-form-group">
-            <div className="ios-form-row">
-              <span className="ios-form-label">Purchase Price</span>
-              <input
-                type="number"
-                className="ios-form-input"
-                placeholder="0.00"
-                value={draft.purchasePrice}
-                onChange={(e) => update('purchasePrice', e.target.value)}
-                onFocus={() => document.documentElement.classList.add('keyboard-open')}
-                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
-              />
-            </div>
-            <div className="ios-form-row">
-              <span className="ios-form-label">Current Value</span>
-              <input
-                type="number"
-                className="ios-form-input"
-                placeholder="0.00"
-                value={draft.currentValue}
-                onChange={(e) => update('currentValue', e.target.value)}
-                onFocus={() => document.documentElement.classList.add('keyboard-open')}
-                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
-              />
-            </div>
-            <div className="ios-form-row">
-              <span className="ios-form-label">Purchase Date</span>
-              <input
-                type="date"
-                className="ios-form-input"
-                value={draft.purchaseDate}
-                onChange={(e) => update('purchaseDate', e.target.value)}
-                onFocus={() => document.documentElement.classList.add('keyboard-open')}
-                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
-              />
-            </div>
-          </div>
+          {/* Full Details only fields */}
+          {mode === 'full' && (
+            <>
+              {/* Pill 4 — Condition / Quantity */}
+              <div className="ios-form-pill">
+                <label className="ios-form-row">
+                  <span className="ios-form-label">Condition</span>
+                  <select
+                    className="ios-form-input"
+                    value={draft.condition}
+                    onChange={(e) => update('condition', e.target.value as Condition)}
+                  >
+                    <option value="new">New</option>
+                    <option value="good">Good</option>
+                    <option value="worn">Worn</option>
+                  </select>
+                </label>
+                <div className="ios-pill-divider" />
+                <div className="ios-form-row">
+                  <span className="ios-form-label">Quantity</span>
+                  <input
+                    type="number"
+                    className="ios-form-input"
+                    min={1}
+                    value={draft.quantity}
+                    onChange={(e) => update('quantity', Number(e.target.value || 1))}
+                    {...kbHandlers}
+                  />
+                </div>
+              </div>
 
-          {/* Additional Group */}
-          <div className="ios-form-group-title">Additional</div>
-          <div className="ios-form-group">
-            <div className="ios-form-row">
-              <span className="ios-form-label">Tags</span>
-              <input
-                className="ios-form-input"
-                placeholder="camera, main"
-                value={draft.tagsText}
-                onChange={(e) => update('tagsText', e.target.value)}
-                onFocus={() => document.documentElement.classList.add('keyboard-open')}
-                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
-              />
-            </div>
-            <div className="ios-form-row textarea-row">
-              <span className="ios-form-label">Notes</span>
-              <textarea
-                className="ios-form-textarea"
-                rows={3}
-                placeholder="Add notes..."
-                value={draft.notes}
-                onChange={(e) => update('notes', e.target.value)}
-                onFocus={() => document.documentElement.classList.add('keyboard-open')}
-                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
-              />
-            </div>
-            <div className="ios-form-row textarea-row">
-              <span className="ios-form-label">Custom Fields (key:value)</span>
-              <textarea
-                className="ios-form-textarea"
-                rows={2}
-                placeholder="Insurance: Covered"
-                value={draft.customFieldsText}
-                onChange={(e) => update('customFieldsText', e.target.value)}
-                onFocus={() => document.documentElement.classList.add('keyboard-open')}
-                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
-              />
-            </div>
+              {/* Pill 5 — Value */}
+              <div className="ios-form-pill">
+                <input
+                  type="number"
+                  className="ios-pill-input"
+                  placeholder="Purchase Price"
+                  value={draft.purchasePrice}
+                  onChange={(e) => update('purchasePrice', e.target.value)}
+                  {...kbHandlers}
+                />
+                <div className="ios-pill-divider" />
+                <input
+                  type="number"
+                  className="ios-pill-input"
+                  placeholder="Current Value"
+                  value={draft.currentValue}
+                  onChange={(e) => update('currentValue', e.target.value)}
+                  {...kbHandlers}
+                />
+                <div className="ios-pill-divider" />
+                <div className="ios-form-row">
+                  <span className="ios-form-label">Purchase Date</span>
+                  <input
+                    type="date"
+                    className="ios-form-input"
+                    value={draft.purchaseDate}
+                    onChange={(e) => update('purchaseDate', e.target.value)}
+                    {...kbHandlers}
+                  />
+                </div>
+              </div>
+
+              {/* Pill 6 — Serial Number */}
+              <div className="ios-form-pill">
+                <input
+                  className="ios-pill-input"
+                  placeholder="Serial Number"
+                  value={draft.serialNumber}
+                  onChange={(e) => update('serialNumber', e.target.value)}
+                  {...kbHandlers}
+                />
+              </div>
+
+              {/* Pill 7 — Tags */}
+              <div className="ios-form-pill">
+                <input
+                  className="ios-pill-input"
+                  placeholder="Tags (comma-separated)"
+                  value={draft.tagsText}
+                  onChange={(e) => update('tagsText', e.target.value)}
+                  {...kbHandlers}
+                />
+              </div>
+            </>
+          )}
+
+          {/* Pill — Notes (always visible) */}
+          <div className="ios-form-pill ios-form-pill--notes">
+            <textarea
+              className="ios-pill-textarea"
+              rows={4}
+              placeholder="Notes"
+              value={draft.notes}
+              onChange={(e) => update('notes', e.target.value)}
+              {...kbHandlers}
+            />
+            {mode === 'full' && (
+              <>
+                <div className="ios-pill-divider" />
+                <textarea
+                  className="ios-pill-textarea"
+                  rows={2}
+                  placeholder="Custom Fields (key:value, e.g. Insurance: Covered)"
+                  value={draft.customFieldsText}
+                  onChange={(e) => update('customFieldsText', e.target.value)}
+                  {...kbHandlers}
+                />
+              </>
+            )}
           </div>
 
           {error && <p className="ios-sheet-error">{error}</p>}

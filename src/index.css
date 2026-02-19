@@ -10466,6 +10466,234 @@ input[type="checkbox"].ios-toggle:checked::after {
   flex-wrap: wrap;
 }
 
+/* ==========================================================================
+   Gear Form Sheet — Revamped iOS Calendar-style Design
+   ========================================================================== */
+
+/* ── Form Sheet Modal: solid gray background ────────────────────── */
+
+.ios-theme .ios-sheet-modal--form {
+  background: #F2F2F7;
+}
+
+:root.dark .ios-theme .ios-sheet-modal--form {
+  background: #1C1C1E;
+}
+
+/* ── Icon Header (circle buttons) ──────────────────────────────── */
+
+.ios-theme .ios-sheet-header--icon {
+  border-bottom: none;
+  padding: 8px 16px 4px;
+}
+
+.ios-theme .ios-sheet-icon-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  padding: 0;
+  min-height: auto;
+  box-shadow: none;
+  transition: opacity 0.15s ease;
+}
+
+.ios-theme .ios-sheet-icon-btn:hover,
+.ios-theme .ios-sheet-icon-btn:active {
+  box-shadow: none;
+  transform: none;
+  opacity: 0.75;
+}
+
+.ios-theme .ios-sheet-icon-btn--cancel {
+  background: rgba(60, 60, 67, 0.12);
+  color: var(--ios-text-primary);
+  justify-self: start;
+}
+
+.ios-theme .ios-sheet-icon-btn--save {
+  background: rgba(60, 60, 67, 0.12);
+  color: var(--ios-text-primary);
+  justify-self: end;
+}
+
+:root.dark .ios-theme .ios-sheet-icon-btn--cancel,
+:root.dark .ios-theme .ios-sheet-icon-btn--save {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--ios-text-primary);
+}
+
+/* ── Segmented Control ──────────────────────────────────────────── */
+
+.ios-theme .ios-sheet-segment-wrap {
+  padding: 4px 16px 12px;
+  flex-shrink: 0;
+}
+
+.ios-theme .ios-sheet-segment {
+  display: flex;
+  background: rgba(120, 120, 128, 0.16);
+  border-radius: 9px;
+  padding: 2px;
+  gap: 0;
+}
+
+:root.dark .ios-theme .ios-sheet-segment {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.ios-theme .ios-sheet-segment-btn {
+  flex: 1;
+  padding: 6px 0;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ios-text-secondary);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+  min-height: auto;
+  box-shadow: none;
+  line-height: 1.4;
+}
+
+.ios-theme .ios-sheet-segment-btn:hover,
+.ios-theme .ios-sheet-segment-btn:active {
+  box-shadow: none;
+  transform: none;
+}
+
+.ios-theme .ios-sheet-segment-btn.active {
+  background: #fff;
+  color: var(--ios-text-primary);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 0.5px 1px rgba(0, 0, 0, 0.06);
+}
+
+:root.dark .ios-theme .ios-sheet-segment-btn.active {
+  background: rgba(58, 58, 60, 1);
+  color: var(--ios-text-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+}
+
+/* ── Form content area on the form sheet ───────────────────────── */
+
+.ios-theme .ios-sheet-content--form {
+  padding: 0 16px 32px;
+}
+
+/* ── Form Pill (rounded white card) ─────────────────────────────── */
+
+.ios-theme .ios-form-pill {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+
+:root.dark .ios-theme .ios-form-pill {
+  background: rgba(44, 44, 46, 1);
+}
+
+/* ── Placeholder-only text input inside pill ────────────────────── */
+
+.ios-theme .ios-pill-input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 16px;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 17px;
+  color: var(--ios-text-primary);
+  font-family: inherit;
+  -webkit-appearance: none;
+  appearance: none;
+  min-height: 0;
+}
+
+.ios-theme .ios-pill-input::placeholder {
+  color: var(--ios-text-secondary);
+  opacity: 0.7;
+}
+
+.ios-theme .ios-pill-input:focus {
+  color: var(--ios-text-primary);
+}
+
+/* ── Thin divider inside pill ────────────────────────────────────── */
+
+.ios-theme .ios-pill-divider {
+  height: 0.5px;
+  background: rgba(60, 60, 67, 0.12);
+  margin: 0 16px;
+}
+
+:root.dark .ios-theme .ios-pill-divider {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ── Form row inside pill (label + value) ───────────────────────── */
+
+.ios-theme .ios-form-pill .ios-form-row {
+  border-bottom: none;
+  padding: 13px 16px;
+  min-height: 48px;
+}
+
+/* ── Notes pill: large textarea ─────────────────────────────────── */
+
+.ios-theme .ios-form-pill--notes {
+  margin-bottom: 12px;
+}
+
+.ios-theme .ios-pill-textarea {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 13px 16px;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  font-size: 17px;
+  color: var(--ios-text-primary);
+  font-family: inherit;
+  min-height: 100px;
+  line-height: 1.5;
+}
+
+.ios-theme .ios-pill-textarea::placeholder {
+  color: var(--ios-text-secondary);
+  opacity: 0.7;
+}
+
+/* ── Number input inside pill (hide spinners) ───────────────────── */
+
+.ios-theme .ios-form-pill input[type="number"].ios-pill-input {
+  -moz-appearance: textfield;
+}
+
+.ios-theme .ios-form-pill input[type="number"].ios-pill-input::-webkit-inner-spin-button,
+.ios-theme .ios-form-pill input[type="number"].ios-pill-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ── Photo hero spacing adjustments for form sheet ──────────────── */
+
+.ios-sheet-content--form .ios-detail-hero {
+  margin-bottom: 16px;
+  padding-top: 4px;
+}
+
 /* ──────────────────────────────────────────────────────────────────────────────
    Nested sheet z-index (used by MaintenanceSheet inner add/edit form)
    ────────────────────────────────────────────────────────────────────────────── */
