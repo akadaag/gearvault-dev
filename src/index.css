@@ -6249,6 +6249,10 @@ html {
   padding-top: env(safe-area-inset-top, 0px);
   padding-left: 0;
   padding-right: 0;
+  background: #ffffff;
+}
+
+:root.dark .ios-theme .content.content-catalog {
   background: var(--ios-bg);
 }
 
@@ -6272,11 +6276,15 @@ html {
 .ios-catalog-header {
   flex-shrink: 0;
   padding: 12px 16px 0;
-  background: var(--ios-bg);
+  background: #ffffff;
   position: sticky;
   top: 0;
   z-index: 40;
   border-bottom: 1px solid transparent;
+}
+
+:root.dark .ios-catalog-header {
+  background: var(--ios-bg);
 }
 
 .ios-catalog-header-top {
@@ -6307,10 +6315,9 @@ html {
   gap: 4px;
   padding: 4px;
   border-radius: 999px;
-  border: 0.75px solid color-mix(in srgb, var(--ios-text-primary) 12%, transparent);
-  background: color-mix(in srgb, var(--ios-text-primary) 8%, transparent);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  border: none;
+  background: #ffffff;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
 }
 
 .ios-catalog-toolbar-btn {
@@ -6340,8 +6347,12 @@ html {
 }
 
 :root.dark .ios-catalog-toolbar {
-  border-color: rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(44, 44, 46, 1);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.45), 0 0 0 0.5px rgba(255, 255, 255, 0.08);
+}
+
+:root.dark .ios-catalog-toolbar-btn {
+  color: #ffffff;
 }
 
 .ios-catalog-search-row {
@@ -6422,6 +6433,11 @@ html {
   padding: 0 16px;
   padding-bottom: var(--bottom-nav-clearance);
   min-height: 0;
+  background: #ffffff;
+}
+
+:root.dark .ios-catalog-scroll {
+  background: var(--ios-bg);
 }
 
 .ios-catalog-groups {
@@ -6454,10 +6470,10 @@ html {
 }
 
 .ios-catalog-group-label {
-  font-size: 22px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 600;
   text-transform: none;
-  letter-spacing: -0.005em;
+  letter-spacing: -0.003em;
   color: var(--ios-text-primary);
   flex: 1;
 }
@@ -6482,6 +6498,12 @@ html {
 .catalog-page.ios-theme .ios-list-group {
   border-radius: 22px;
   margin-bottom: 0;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
+  border: none;
+}
+
+:root.dark .catalog-page.ios-theme .ios-list-group {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
 }
 
 .catalog-page.ios-theme .ios-list-item {
