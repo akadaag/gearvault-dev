@@ -11266,8 +11266,6 @@ input[type="checkbox"].ios-toggle:checked::after {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
 }
 
 /* ── Hero Photo (pill container) ── */
@@ -11316,6 +11314,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   color: var(--ios-text-primary);
   line-height: 1.15;
   margin: 0;
+  padding: 0;
 }
 
 .gear-detail-page.ios-theme .gear-detail-subtitle {
@@ -11424,13 +11423,13 @@ input[type="checkbox"].ios-toggle:checked::after {
   background: #ffffff;
   border-radius: 22px;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
 }
 
 .gear-detail-page.ios-theme .gear-detail-info-card-header {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
   padding: 16px 18px 12px;
 }
 

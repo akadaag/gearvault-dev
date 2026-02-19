@@ -97,6 +97,28 @@ export function GearItemDetailPage() {
     return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, [showOptionsMenu]);
 
+  // Sync theme-color meta tag to white/black while on this page
+  useEffect(() => {
+    const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]');
+    if (!meta) return;
+    const original = meta.content;
+
+    function applyColor() {
+      if (!meta) return;
+      meta.content = document.documentElement.classList.contains('dark') ? '#000000' : '#ffffff';
+    }
+
+    applyColor();
+
+    const observer = new MutationObserver(applyColor);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+    return () => {
+      observer.disconnect();
+      if (meta) meta.content = original;
+    };
+  }, []);
+
   const related = useMemo(
     () => allItems.filter((g) => item?.relatedItemIds?.includes(g.id)),
     [allItems, item],
@@ -440,7 +462,8 @@ export function GearItemDetailPage() {
             </div>
             <div className="gear-detail-info-card-divider" />
             <div className="gear-detail-info-card-row">
-              <span className="gear-detail-info-row-label">{formatMoney(currentItem.purchasePrice.amount, currentItem.purchasePrice.currency)}</span>
+              <span className="gear-detail-info-row-label">Paid</span>
+              <span className="gear-detail-info-row-value">{formatMoney(currentItem.purchasePrice.amount, currentItem.purchasePrice.currency)}</span>
             </div>
           </div>
         )}
