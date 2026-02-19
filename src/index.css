@@ -11155,7 +11155,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 
 .floating-nav {
   position: fixed;
-  bottom: calc(6px + env(safe-area-inset-bottom));
+  bottom: calc(2px + env(safe-area-inset-bottom));
   left: 0;
   right: 0;
   z-index: 1000;
@@ -11168,7 +11168,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 }
 
 .floating-nav--hidden {
-  transform: translateY(calc(100% + 20px));
+  transform: translateY(calc(100% + 60px));
   opacity: 0;
   pointer-events: none;
 }
