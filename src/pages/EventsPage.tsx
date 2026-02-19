@@ -6,6 +6,7 @@ import { EventFormSheet } from '../components/EventFormSheet';
 import { getDaysUntilEvent } from '../lib/eventHelpers';
 import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
 import { useSheetDismiss } from '../hooks/useSheetDismiss';
+import { ContentEditableInput } from '../components/ContentEditableInput';
 
 export function EventsPage() {
   const events = useLiveQuery(() => db.events.orderBy('updatedAt').reverse().toArray(), [], []);
@@ -196,11 +197,10 @@ export function EventsPage() {
               <circle cx="11" cy="11" r="8" />
               <line x1="21" y1="21" x2="16.65" y2="16.65" />
             </svg>
-            <input
-              type="text"
+            <ContentEditableInput
               placeholder="Search events"
               value={query}
-              onChange={e => setParam('q', e.target.value || null)}
+              onChange={(val) => setParam('q', val || null)}
               aria-label="Search events"
               onFocus={() => document.documentElement.classList.add('keyboard-open')}
               onBlur={() => document.documentElement.classList.remove('keyboard-open')}

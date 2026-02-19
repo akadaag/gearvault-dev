@@ -14,6 +14,7 @@ import { compressedImageToDataUrl, uploadCompressedGearPhoto } from '../lib/gear
 import { useAuth } from '../hooks/useAuth';
 import { classificationQueue } from '../lib/gearClassifier';
 import type { Category, Condition, GearItem, MaintenanceEntry } from '../types/models';
+import { ContentEditableInput } from '../components/ContentEditableInput';
 
 const initialDraft: GearFormDraft = {
   name: '',
@@ -288,16 +289,17 @@ export function CatalogPage() {
                 <circle cx="11" cy="11" r="8" />
                 <line x1="21" y1="21" x2="16.65" y2="16.65" />
               </svg>
-              <input
-                type="text"
+              <ContentEditableInput
+                className="ios-catalog-search-input"
                 placeholder="Search"
                 value={query}
-                onChange={(e) => updateSearchParams((p) => {
-                  if (e.target.value) p.set('q', e.target.value);
+                onChange={(val) => updateSearchParams((p) => {
+                  if (val) p.set('q', val);
                   else p.delete('q');
                 })}
                 onFocus={() => document.documentElement.classList.add('keyboard-open')}
                 onBlur={() => document.documentElement.classList.remove('keyboard-open')}
+                aria-label="Search gear"
               />
               {query && (
                 <button

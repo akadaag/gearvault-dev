@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
+import { ContentEditableInput } from '../components/ContentEditableInput';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
@@ -904,10 +905,11 @@ export function AIAssistantPage() {
         <div className={`ai-ios-input-bar${inputBarHidden ? ' hidden' : ''}`}>
           {error && <p className="ai-input-error">{error}</p>}
           <div className="ai-ios-input-pill">
-            <textarea
+            <ContentEditableInput
               placeholder="Describe your shoot or ask a question..."
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={setInput}
+              multiline
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault();
@@ -917,7 +919,6 @@ export function AIAssistantPage() {
               onFocus={() => document.documentElement.classList.add('keyboard-open')}
               onBlur={() => document.documentElement.classList.remove('keyboard-open')}
               disabled={loading}
-              rows={1}
             />
             <button 
               className="ai-ios-send-btn"

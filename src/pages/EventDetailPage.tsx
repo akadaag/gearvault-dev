@@ -9,6 +9,7 @@ import { useSheetDismiss } from '../hooks/useSheetDismiss';
 import { EventFormSheet } from '../components/EventFormSheet';
 import { getDaysUntilEvent } from '../lib/eventHelpers';
 import type { PackingChecklistItem } from '../types/models';
+import { ContentEditableInput } from '../components/ContentEditableInput';
 
 export function EventDetailPage() {
   const { id } = useParams();
@@ -464,13 +465,13 @@ export function EventDetailPage() {
               <div className="ev-detail-search-container">
                 <div className="ev-detail-search-bar">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-                  <input
-                    type="text"
+                  <ContentEditableInput
                     placeholder="Search catalog..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={setSearchQuery}
                     onFocus={() => document.documentElement.classList.add('keyboard-open')}
                     onBlur={() => document.documentElement.classList.remove('keyboard-open')}
+                    aria-label="Search catalog"
                   />
                 </div>
               </div>

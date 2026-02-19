@@ -4,6 +4,7 @@ import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { useScrollDirection } from '../hooks/useScrollDirection';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
+import { ContentEditableInput, type ContentEditableInputHandle } from '../components/ContentEditableInput';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -74,7 +75,7 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [inputFocused, setInputFocused] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<ContentEditableInputHandle>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   // ── Data for global search ─────────────────────────────────────────────────
@@ -137,6 +138,13 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
       document.removeEventListener('touchstart', handleOutside);
     };
   }, [searchOpen]);
+
+  // ── Reset search when navigating to a new route ────────────────────────────
+  useEffect(() => {
+    setSearchOpen(false);
+    setSearchQuery('');
+    setInputFocused(false);
+  }, [location.pathname]);
 
   // ── Handlers ───────────────────────────────────────────────────────────────
   function openSearch() {
@@ -260,18 +268,18 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
                 >
                   <div className="floating-nav__search-input-wrap">
                     <span className="floating-nav__search-pill-icon">{searchSvg}</span>
-                    <input
+                    <ContentEditableInput
                       ref={inputRef}
                       className="floating-nav__search-input"
-                      type="text"
                       placeholder="Search gear, events, settings..."
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={setSearchQuery}
                       onFocus={() => setInputFocused(true)}
                       onBlur={() => setInputFocused(false)}
                       onKeyDown={(e) => {
                         if (e.key === 'Escape') closeSearch();
                       }}
+                      aria-label="Search gear, events, settings"
                     />
                     {searchQuery && (
                       <button
