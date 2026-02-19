@@ -149,7 +149,7 @@ export function GearItemFormSheet({
         <div className="ios-sheet-content ios-sheet-content--form">
 
           {/* Photo */}
-          <div className="ios-detail-hero">
+          <div className="ios-form-pill ios-form-pill--photo">
             <label className="ios-photo-upload-area">
               <input
                 type="file"

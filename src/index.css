@@ -9282,7 +9282,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   background: var(--ios-card-bg);
   backdrop-filter: blur(var(--ios-blur));
   -webkit-backdrop-filter: blur(var(--ios-blur));
-  border-radius: 14px 14px 0 0;
+  border-radius: 22px 22px 0 0;
   box-shadow: 0 -2px 24px rgba(0, 0, 0, 0.12);
   display: flex;
   flex-direction: column;
@@ -9306,7 +9306,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   .ios-theme .ios-sheet-modal {
     max-width: 480px;
     margin: 0 auto;
-    border-radius: 14px;
+    border-radius: 22px;
     bottom: 24px;
     left: 50%;
     right: auto;
@@ -9645,7 +9645,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 .ios-theme .ios-detail-img {
   width: 100px;
   height: 100px;
-  border-radius: 22px;
+  border-radius: 50%;
   object-fit: cover;
   margin: 0 auto 12px;
   display: block;
@@ -9655,7 +9655,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 .ios-theme .ios-detail-placeholder {
   width: 100px;
   height: 100px;
-  border-radius: 22px;
+  border-radius: 50%;
   background: color-mix(in srgb, var(--ios-text-secondary) 12%, transparent);
   margin: 0 auto 12px;
   display: flex;
@@ -10505,27 +10505,29 @@ input[type="checkbox"].ios-toggle:checked::after {
 
 .ios-theme .ios-sheet-icon-btn:hover,
 .ios-theme .ios-sheet-icon-btn:active {
-  box-shadow: none;
   transform: none;
   opacity: 0.75;
 }
 
 .ios-theme .ios-sheet-icon-btn--cancel {
-  background: rgba(60, 60, 67, 0.12);
+  background: #fff;
   color: var(--ios-text-primary);
   justify-self: start;
+  box-shadow: 0 0.5px 2px rgba(0, 0, 0, 0.1);
 }
 
 .ios-theme .ios-sheet-icon-btn--save {
-  background: rgba(60, 60, 67, 0.12);
+  background: #fff;
   color: var(--ios-text-primary);
   justify-self: end;
+  box-shadow: 0 0.5px 2px rgba(0, 0, 0, 0.1);
 }
 
 :root.dark .ios-theme .ios-sheet-icon-btn--cancel,
 :root.dark .ios-theme .ios-sheet-icon-btn--save {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(58, 58, 60, 1);
   color: var(--ios-text-primary);
+  box-shadow: 0 0.5px 2px rgba(0, 0, 0, 0.3);
 }
 
 /* ── Segmented Control ──────────────────────────────────────────── */
@@ -10538,7 +10540,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 .ios-theme .ios-sheet-segment {
   display: flex;
   background: rgba(120, 120, 128, 0.16);
-  border-radius: 9px;
+  border-radius: 12px;
   padding: 2px;
   gap: 0;
 }
@@ -10551,7 +10553,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   flex: 1;
   padding: 6px 0;
   border: none;
-  border-radius: 7px;
+  border-radius: 10px;
   background: transparent;
   font-size: 13px;
   font-weight: 500;
@@ -10592,7 +10594,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 
 .ios-theme .ios-form-pill {
   background: #fff;
-  border-radius: 14px;
+  border-radius: 16px;
   overflow: hidden;
   margin-bottom: 12px;
 }
@@ -10611,7 +10613,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   background: transparent;
   border: none;
   outline: none;
-  font-size: 17px;
+  font-size: 15px;
   color: var(--ios-text-primary);
   font-family: inherit;
   -webkit-appearance: none;
@@ -10648,6 +10650,14 @@ input[type="checkbox"].ios-toggle:checked::after {
   min-height: 48px;
 }
 
+.ios-theme .ios-form-pill .ios-form-label {
+  font-size: 15px;
+}
+
+.ios-theme .ios-form-pill .ios-form-input {
+  font-size: 15px;
+}
+
 /* ── Notes pill: large textarea ─────────────────────────────────── */
 
 .ios-theme .ios-form-pill--notes {
@@ -10663,7 +10673,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   border: none;
   outline: none;
   resize: none;
-  font-size: 17px;
+  font-size: 15px;
   color: var(--ios-text-primary);
   font-family: inherit;
   min-height: 100px;
@@ -10687,11 +10697,33 @@ input[type="checkbox"].ios-toggle:checked::after {
   margin: 0;
 }
 
-/* ── Photo hero spacing adjustments for form sheet ──────────────── */
+/* ── Photo pill (photo upload inside a rounded pill) ────────────── */
 
-.ios-sheet-content--form .ios-detail-hero {
-  margin-bottom: 16px;
-  padding-top: 4px;
+.ios-theme .ios-form-pill--photo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+}
+
+.ios-theme .ios-form-pill--photo .ios-photo-upload-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.ios-theme .ios-form-pill--photo .ios-photo-upload-label {
+  font-size: 14px;
+}
+
+.ios-theme .ios-form-pill--photo .ios-detail-img {
+  margin-bottom: 0;
+}
+
+.ios-theme .ios-form-pill--photo .ios-detail-placeholder {
+  margin-bottom: 0;
 }
 
 /* ──────────────────────────────────────────────────────────────────────────────
