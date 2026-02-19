@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
@@ -50,6 +50,8 @@ export function GearItemDetailPage() {
   const [editError, setEditError] = useState('');
   const [essentialNotice, setEssentialNotice] = useState('');
   const [draft, setDraft] = useState<GearFormDraft>(emptyDraft);
+  const [showOptionsMenu, setShowOptionsMenu] = useState(false);
+  const optionsMenuRef = useRef<HTMLDivElement>(null);
 
   // Closing animation for add-to-event sheet
   const { closing: closingAddEvent, dismiss: dismissAddEvent, onAnimationEnd: onAddEventAnimEnd } = useSheetDismiss(() => setShowAddToEvent(false));
@@ -82,6 +84,18 @@ export function GearItemDetailPage() {
     const timeoutId = window.setTimeout(() => setEssentialNotice(''), 2200);
     return () => window.clearTimeout(timeoutId);
   }, [essentialNotice]);
+
+  // Close options menu on outside click
+  useEffect(() => {
+    if (!showOptionsMenu) return;
+    function handleOutsideClick(e: MouseEvent) {
+      if (optionsMenuRef.current && !optionsMenuRef.current.contains(e.target as Node)) {
+        setShowOptionsMenu(false);
+      }
+    }
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
+  }, [showOptionsMenu]);
 
   const related = useMemo(
     () => allItems.filter((g) => item?.relatedItemIds?.includes(g.id)),
@@ -248,46 +262,73 @@ export function GearItemDetailPage() {
 
   return (
     <section className="gear-detail-page ios-theme">
-      {/* ── Header ── */}
-      <header className="gear-detail-header">
-        <button className="gear-detail-back-btn" onClick={() => navigate('/catalog')} aria-label="Back to catalog">
+      {/* ── Fixed Floating Buttons ── */}
+      <div className="gear-detail-floating-bar">
+        {/* Back pill */}
+        <button className="gear-detail-back-pill" onClick={() => navigate('/catalog')} aria-label="Back to catalog">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M15 18l-6-6 6-6" />
           </svg>
           Catalog
         </button>
-        <div className="gear-detail-header-actions">
+
+        {/* Options circle */}
+        <div className="gear-detail-options-wrap" ref={optionsMenuRef}>
           <button
-            className={`gear-detail-icon-btn${isInAnyEvent ? ' active' : ''}`}
-            onClick={() => setShowAddToEvent(true)}
-            aria-label="Add to event packing list"
+            className="gear-detail-options-btn"
+            onClick={() => setShowOptionsMenu(v => !v)}
+            aria-label="More options"
+            aria-expanded={showOptionsMenu}
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <circle cx="12" cy="12" r="9" />
-              <path d="m8.7 12.2 2.1 2.2 4.6-4.6" />
-            </svg>
+            <span className="gear-detail-options-dot" />
+            <span className="gear-detail-options-dot" />
+            <span className="gear-detail-options-dot" />
           </button>
-          <button
-            className="gear-detail-icon-btn"
-            onClick={() => { setDraft(editDraft); setShowEditSheet(true); }}
-            aria-label="Edit"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-              <path d="M14 2v6h6" />
-              <path d="m9 16 4.4-4.4a1.5 1.5 0 0 1 2.1 2.1L11.1 18.1 8 19z" />
-            </svg>
-          </button>
-          <button className="gear-detail-icon-btn destructive" onClick={() => void deleteItem()} aria-label="Delete">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M3 6h18" />
-              <path d="M8 6V4h8v2" />
-              <path d="M19 6l-1 14H6L5 6" />
-              <path d="M10 11v6M14 11v6" />
-            </svg>
-          </button>
+
+          {showOptionsMenu && (
+            <div className="gear-detail-options-menu" role="menu">
+              <button
+                className={`gear-detail-menu-item${isInAnyEvent ? ' active' : ''}`}
+                role="menuitem"
+                onClick={() => { setShowOptionsMenu(false); setShowAddToEvent(true); }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="m8.7 12.2 2.1 2.2 4.6-4.6" />
+                </svg>
+                Add to Event
+              </button>
+              <div className="gear-detail-menu-divider" />
+              <button
+                className="gear-detail-menu-item"
+                role="menuitem"
+                onClick={() => { setShowOptionsMenu(false); setDraft(editDraft); setShowEditSheet(true); }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <path d="M14 2v6h6" />
+                  <path d="m9 16 4.4-4.4a1.5 1.5 0 0 1 2.1 2.1L11.1 18.1 8 19z" />
+                </svg>
+                Edit
+              </button>
+              <div className="gear-detail-menu-divider" />
+              <button
+                className="gear-detail-menu-item destructive"
+                role="menuitem"
+                onClick={() => { setShowOptionsMenu(false); void deleteItem(); }}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M3 6h18" />
+                  <path d="M8 6V4h8v2" />
+                  <path d="M19 6l-1 14H6L5 6" />
+                  <path d="M10 11v6M14 11v6" />
+                </svg>
+                Delete
+              </button>
+            </div>
+          )}
         </div>
-      </header>
+      </div>
 
       {/* ── Scrollable Content ── */}
       <div className="gear-detail-content">
