@@ -9548,7 +9548,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   appearance: none;
   width: 56px;
   height: 28px;
-  border-radius: 8px;
+  border-radius: 12px;
   background: rgba(120, 120, 128, 0.16);
   position: relative;
   cursor: pointer;
@@ -9568,7 +9568,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   left: 3px;
   width: 24px;
   height: 22px;
-  border-radius: 6px;
+  border-radius: 10px;
   background: #fff;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
   transition: transform 0.25s ease;
@@ -10480,16 +10480,22 @@ input[type="checkbox"].ios-toggle:checked::after {
   background: #1C1C1E;
 }
 
+/* ── Hide handle inside form sheet ──────────────────────────────── */
+
+.ios-theme .ios-sheet-modal--form .ios-sheet-handle {
+  display: none;
+}
+
 /* ── Icon Header (circle buttons) ──────────────────────────────── */
 
 .ios-theme .ios-sheet-header--icon {
   border-bottom: none;
-  padding: 8px 16px 4px;
+  padding: 16px 16px 4px;
 }
 
 .ios-theme .ios-sheet-icon-btn {
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   border: none;
   display: flex;
@@ -10533,14 +10539,14 @@ input[type="checkbox"].ios-toggle:checked::after {
 /* ── Segmented Control ──────────────────────────────────────────── */
 
 .ios-theme .ios-sheet-segment-wrap {
-  padding: 4px 16px 12px;
+  padding: 2px 16px 8px;
   flex-shrink: 0;
 }
 
 .ios-theme .ios-sheet-segment {
   display: flex;
   background: rgba(120, 120, 128, 0.16);
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 2px;
   gap: 0;
 }
@@ -10551,11 +10557,11 @@ input[type="checkbox"].ios-toggle:checked::after {
 
 .ios-theme .ios-sheet-segment-btn {
   flex: 1;
-  padding: 6px 0;
+  padding: 4px 0;
   border: none;
-  border-radius: 18px;
+  border-radius: 14px;
   background: transparent;
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: var(--ios-text-secondary);
   cursor: pointer;
@@ -10590,13 +10596,27 @@ input[type="checkbox"].ios-toggle:checked::after {
   padding: 0 16px 32px;
 }
 
+/* ── Form Pill Group (spacing between sections) ─────────────────── */
+
+.ios-theme .ios-pill-group {
+  margin-bottom: 16px;
+}
+
+.ios-theme .ios-pill-group .ios-form-pill {
+  margin-bottom: 0;
+}
+
+.ios-theme .ios-pill-group .ios-form-pill + .ios-form-pill {
+  margin-top: 2px;
+}
+
 /* ── Form Pill (rounded white card) ─────────────────────────────── */
 
 .ios-theme .ios-form-pill {
   background: #fff;
-  border-radius: 24px;
+  border-radius: 18px;
   overflow: hidden;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
 }
 
 :root.dark .ios-theme .ios-form-pill {
@@ -10609,7 +10629,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   display: block;
   width: 100%;
   box-sizing: border-box;
-  padding: 13px 16px;
+  padding: 9px 16px;
   background: transparent;
   border: none;
   outline: none;
@@ -10646,8 +10666,8 @@ input[type="checkbox"].ios-toggle:checked::after {
 
 .ios-theme .ios-form-pill .ios-form-row {
   border-bottom: none;
-  padding: 13px 16px;
-  min-height: 48px;
+  padding: 9px 16px;
+  min-height: 40px;
 }
 
 .ios-theme .ios-form-pill .ios-form-label {
@@ -10720,8 +10740,8 @@ input[type="checkbox"].ios-toggle:checked::after {
 /* ── Toggle-only pill (Essential row) — compact height ─────────── */
 
 .ios-theme .ios-form-pill--toggle .ios-form-row {
-  padding: 10px 16px;
-  min-height: 44px;
+  padding: 8px 16px;
+  min-height: 40px;
 }
 
 /* ── "Add Photo" small capsule pill button ──────────────────────── */

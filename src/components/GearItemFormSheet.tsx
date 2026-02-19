@@ -185,152 +185,161 @@ export function GearItemFormSheet({
             </span>
           </label>
 
-          {/* Pill 1 — Name / Brand / Model */}
-          <div className="ios-form-pill">
-            <input
-              className="ios-pill-input"
-              placeholder="Item Name *"
-              value={draft.name}
-              onChange={(e) => update('name', e.target.value)}
-              {...kbHandlers}
-            />
-            <div className="ios-pill-divider" />
-            <input
-              className="ios-pill-input"
-              placeholder="Brand"
-              value={draft.brand}
-              onChange={(e) => update('brand', e.target.value)}
-              {...kbHandlers}
-            />
-            <div className="ios-pill-divider" />
-            <input
-              className="ios-pill-input"
-              placeholder="Model"
-              value={draft.model}
-              onChange={(e) => update('model', e.target.value)}
-              {...kbHandlers}
-            />
-          </div>
-
-          {/* Pill 2 — Category (always visible) */}
-          <div className="ios-form-pill">
-            <label className="ios-form-row">
-              <span className="ios-form-label">Category *</span>
-              <select
-                className="ios-form-input"
-                value={draft.categoryId}
-                onChange={(e) => update('categoryId', e.target.value)}
-              >
-                <option value="">Select</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
-            </label>
-          </div>
-
-          {/* Pill 3 — Essential (always visible in quick) */}
-          <div className="ios-form-pill ios-form-pill--toggle">
-            <label className="ios-form-row">
-              <span className="ios-form-label">Essential</span>
+          {/* Group 1 — Name / Brand / Model */}
+          <div className="ios-pill-group">
+            <div className="ios-form-pill">
               <input
-                type="checkbox"
-                className="ios-switch"
-                checked={draft.essential}
-                onChange={(e) => update('essential', e.target.checked)}
+                className="ios-pill-input"
+                placeholder="Item Name *"
+                value={draft.name}
+                onChange={(e) => update('name', e.target.value)}
+                {...kbHandlers}
               />
-            </label>
+              <div className="ios-pill-divider" />
+              <input
+                className="ios-pill-input"
+                placeholder="Brand"
+                value={draft.brand}
+                onChange={(e) => update('brand', e.target.value)}
+                {...kbHandlers}
+              />
+              <div className="ios-pill-divider" />
+              <input
+                className="ios-pill-input"
+                placeholder="Model"
+                value={draft.model}
+                onChange={(e) => update('model', e.target.value)}
+                {...kbHandlers}
+              />
+            </div>
+          </div>
+
+          {/* Group 2 — Category + Essential */}
+          <div className="ios-pill-group">
+            <div className="ios-form-pill">
+              <label className="ios-form-row">
+                <span className="ios-form-label">Category *</span>
+                <select
+                  className="ios-form-input"
+                  value={draft.categoryId}
+                  onChange={(e) => update('categoryId', e.target.value)}
+                >
+                  <option value="">Select</option>
+                  {categories.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
+            <div className="ios-form-pill ios-form-pill--toggle">
+              <label className="ios-form-row">
+                <span className="ios-form-label">Essential</span>
+                <input
+                  type="checkbox"
+                  className="ios-switch"
+                  checked={draft.essential}
+                  onChange={(e) => update('essential', e.target.checked)}
+                />
+              </label>
+            </div>
           </div>
 
           {/* Full Details only fields */}
           {mode === 'full' && (
             <>
-              {/* Pill 4 — Condition / Quantity */}
-              <div className="ios-form-pill">
-                <label className="ios-form-row">
-                  <span className="ios-form-label">Condition</span>
-                  <select
-                    className="ios-form-input"
-                    value={draft.condition}
-                    onChange={(e) => update('condition', e.target.value as Condition)}
-                  >
-                    <option value="new">New</option>
-                    <option value="good">Good</option>
-                    <option value="worn">Worn</option>
-                  </select>
-                </label>
-                <div className="ios-pill-divider" />
-                <div className="ios-form-row">
-                  <span className="ios-form-label">Quantity</span>
+              {/* Group 3 — Condition / Quantity */}
+              <div className="ios-pill-group">
+                <div className="ios-form-pill">
+                  <label className="ios-form-row">
+                    <span className="ios-form-label">Condition</span>
+                    <select
+                      className="ios-form-input"
+                      value={draft.condition}
+                      onChange={(e) => update('condition', e.target.value as Condition)}
+                    >
+                      <option value="new">New</option>
+                      <option value="good">Good</option>
+                      <option value="worn">Worn</option>
+                    </select>
+                  </label>
+                  <div className="ios-pill-divider" />
+                  <div className="ios-form-row">
+                    <span className="ios-form-label">Quantity</span>
+                    <input
+                      type="number"
+                      className="ios-form-input"
+                      min={1}
+                      value={draft.quantity}
+                      onChange={(e) => update('quantity', Number(e.target.value || 1))}
+                      {...kbHandlers}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Group 4 — Value */}
+              <div className="ios-pill-group">
+                <div className="ios-form-pill">
                   <input
                     type="number"
-                    className="ios-form-input"
-                    min={1}
-                    value={draft.quantity}
-                    onChange={(e) => update('quantity', Number(e.target.value || 1))}
+                    className="ios-pill-input"
+                    placeholder="Purchase Price"
+                    value={draft.purchasePrice}
+                    onChange={(e) => update('purchasePrice', e.target.value)}
                     {...kbHandlers}
                   />
-                </div>
-              </div>
-
-              {/* Pill 5 — Value */}
-              <div className="ios-form-pill">
-                <input
-                  type="number"
-                  className="ios-pill-input"
-                  placeholder="Purchase Price"
-                  value={draft.purchasePrice}
-                  onChange={(e) => update('purchasePrice', e.target.value)}
-                  {...kbHandlers}
-                />
-                <div className="ios-pill-divider" />
-                <input
-                  type="number"
-                  className="ios-pill-input"
-                  placeholder="Current Value"
-                  value={draft.currentValue}
-                  onChange={(e) => update('currentValue', e.target.value)}
-                  {...kbHandlers}
-                />
-                <div className="ios-pill-divider" />
-                <div className="ios-form-row">
-                  <span className="ios-form-label">Purchase Date</span>
+                  <div className="ios-pill-divider" />
                   <input
-                    type="date"
-                    className="ios-form-input"
-                    value={draft.purchaseDate}
-                    onChange={(e) => update('purchaseDate', e.target.value)}
+                    type="number"
+                    className="ios-pill-input"
+                    placeholder="Current Value"
+                    value={draft.currentValue}
+                    onChange={(e) => update('currentValue', e.target.value)}
                     {...kbHandlers}
                   />
+                  <div className="ios-pill-divider" />
+                  <div className="ios-form-row">
+                    <span className="ios-form-label">Purchase Date</span>
+                    <input
+                      type="date"
+                      className="ios-form-input"
+                      value={draft.purchaseDate}
+                      onChange={(e) => update('purchaseDate', e.target.value)}
+                      {...kbHandlers}
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* Pill 6 — Serial Number */}
-              <div className="ios-form-pill">
-                <input
-                  className="ios-pill-input"
-                  placeholder="Serial Number"
-                  value={draft.serialNumber}
-                  onChange={(e) => update('serialNumber', e.target.value)}
-                  {...kbHandlers}
-                />
-              </div>
+              {/* Group 5 — Serial + Tags */}
+              <div className="ios-pill-group">
+                <div className="ios-form-pill">
+                  <input
+                    className="ios-pill-input"
+                    placeholder="Serial Number"
+                    value={draft.serialNumber}
+                    onChange={(e) => update('serialNumber', e.target.value)}
+                    {...kbHandlers}
+                  />
+                </div>
 
-              {/* Pill 7 — Tags */}
-              <div className="ios-form-pill">
-                <input
-                  className="ios-pill-input"
-                  placeholder="Tags (comma-separated)"
-                  value={draft.tagsText}
-                  onChange={(e) => update('tagsText', e.target.value)}
-                  {...kbHandlers}
-                />
+                <div className="ios-form-pill">
+                  <input
+                    className="ios-pill-input"
+                    placeholder="Tags (comma-separated)"
+                    value={draft.tagsText}
+                    onChange={(e) => update('tagsText', e.target.value)}
+                    {...kbHandlers}
+                  />
+                </div>
               </div>
             </>
           )}
 
-          {/* Pill — Notes (always visible) */}
-          <div className="ios-form-pill ios-form-pill--notes">
+          {/* Group 6 — Notes (always visible) */}
+          <div className="ios-pill-group">
+            <div className="ios-form-pill ios-form-pill--notes">
             <textarea
               className="ios-pill-textarea"
               rows={4}
@@ -349,10 +358,11 @@ export function GearItemFormSheet({
                   value={draft.customFieldsText}
                   onChange={(e) => update('customFieldsText', e.target.value)}
                   {...kbHandlers}
-                />
+                 />
               </>
             )}
           </div>
+          </div>{/* end ios-pill-group notes */}
 
           {error && <p className="ios-sheet-error">{error}</p>}
         </div>
