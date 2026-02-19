@@ -10599,7 +10599,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 /* ── Form Pill Group (spacing between sections) ─────────────────── */
 
 .ios-theme .ios-pill-group {
-  margin-bottom: 24px;
+  margin-bottom: 28px;
 }
 
 .ios-theme .ios-pill-group .ios-form-pill {
@@ -10607,7 +10607,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 }
 
 .ios-theme .ios-pill-group .ios-form-pill + .ios-form-pill {
-  margin-top: 8px;
+  margin-top: 28px;
 }
 
 /* ── Form Pill (rounded white card) ─────────────────────────────── */
