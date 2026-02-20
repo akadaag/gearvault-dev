@@ -19,6 +19,7 @@ import {
 import { matchCatalogItem } from '../lib/catalogMatcher';
 import { groupBySection, priorityLabel } from '../lib/packingHelpers';
 import { classifyPendingItems } from '../lib/gearClassifier';
+import { compressImageForAI, generateChatThumbnail } from '../lib/gearPhotos';
 import {
   CatalogMatchReviewSheet,
   type ReviewItem,
@@ -65,6 +66,11 @@ export function AIAssistantPage() {
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const chatPhotoRef = useRef<HTMLInputElement>(null);
+
+  // Pending photo attachment for chat
+  const [pendingPhotoPreview, setPendingPhotoPreview] = useState<string>(''); // small preview for display
+  const [pendingPhotoDataUrl, setPendingPhotoDataUrl] = useState<string>(''); // full-res compressed for AI
 
 
   // Swipe-to-delete state for chat history
@@ -237,7 +243,7 @@ export function AIAssistantPage() {
   // Handle input submission
   // ---------------------------------------------------------------------------
   async function handleSubmit() {
-    if (!input.trim() || loading) return;
+    if ((!input.trim() && !pendingPhotoDataUrl) || loading) return;
 
 
     // Set loading FIRST — this protects the auth guard from wiping the page.
@@ -256,7 +262,8 @@ export function AIAssistantPage() {
     }
 
 
-    const detectedMode = detectMode(input);
+    // Force chat mode if photo is attached or if text matches chat pattern
+    const detectedMode = pendingPhotoDataUrl ? 'chat' : detectMode(input);
     setMode(detectedMode);
 
 
@@ -269,37 +276,80 @@ export function AIAssistantPage() {
 
 
   // ---------------------------------------------------------------------------
+  // Chat: Handle photo selection
+  // ---------------------------------------------------------------------------
+  async function handleChatPhotoSelected(file: File | undefined) {
+    if (!file) return;
+    if (file.size > 15_000_000) {
+      setError('Photo too large. Keep under 15MB.');
+      return;
+    }
+
+    try {
+      // Generate small thumbnail for display (200px) and full-res for AI (768px)
+      const [thumbnail, compressed] = await Promise.all([
+        generateChatThumbnail(file),
+        compressImageForAI(file),
+      ]);
+      setPendingPhotoPreview(thumbnail);
+      setPendingPhotoDataUrl(compressed);
+      setError('');
+    } catch {
+      setError('Could not process photo.');
+    }
+  }
+
+  function clearPendingPhoto() {
+    setPendingPhotoPreview('');
+    setPendingPhotoDataUrl('');
+  }
+
+
+  // ---------------------------------------------------------------------------
   // Chat: Send message
   // ---------------------------------------------------------------------------
   async function handleChatSubmit() {
-    if (!input.trim() || loading) return;
+    const hasText = input.trim().length > 0;
+    const hasImage = Boolean(pendingPhotoDataUrl);
+    if ((!hasText && !hasImage) || loading) return;
 
 
     setLoading(true);
     setError('');
     setIsTyping(true);
 
+    // Capture pending photo before clearing
+    const imageDataUrl = pendingPhotoDataUrl;
+    const imagePreview = pendingPhotoPreview;
+
+    // Clear pending photo immediately
+    setPendingPhotoPreview('');
+    setPendingPhotoDataUrl('');
 
     try {
       // Create or update session
       let session = currentSession;
       
       if (!session) {
-        const title = generateChatTitle(input);
+        const title = generateChatTitle(input.trim() || 'Photo identification');
         session = createChatSession(title);
         setCurrentSession(session);
       }
 
 
-      // Add user message
-      const userMessage = createChatMessage('user', input);
+      // Add user message (with optional thumbnail for display)
+      const messageText = input.trim() || (imagePreview ? 'What is this gear?' : '');
+      const userMessage = createChatMessage('user', messageText);
+      if (imagePreview) {
+        userMessage.imagePreview = imagePreview;
+      }
       session.messages.push(userMessage);
       setCurrentSession({ ...session });
       setInput('');
 
 
-      // Get AI response
-      const response = await sendChatMessage(session.messages, catalog);
+      // Get AI response — pass full-res image for vision
+      const response = await sendChatMessage(session.messages, catalog, imageDataUrl || undefined);
 
 
       // Add assistant message
@@ -871,6 +921,13 @@ export function AIAssistantPage() {
                   key={message.id}
                   className={`ai-ios-bubble ${message.role}`}
                 >
+                  {message.imagePreview && (
+                    <img
+                      src={message.imagePreview}
+                      alt="Attached photo"
+                      className="ai-ios-bubble-image"
+                    />
+                  )}
                   <div className="ai-ios-bubble-content">{message.content}</div>
                 </div>
               ))}
@@ -904,9 +961,35 @@ export function AIAssistantPage() {
       {!(mode === 'packing' && step === 'results') && (
         <div className={`ai-ios-input-bar${inputBarHidden ? ' hidden' : ''}`}>
           {error && <p className="ai-input-error">{error}</p>}
+          {pendingPhotoPreview && (
+            <div className="ai-ios-input-photo-preview">
+              <img src={pendingPhotoPreview} alt="Attached" />
+              <button
+                type="button"
+                className="ai-ios-input-photo-remove"
+                onClick={clearPendingPhoto}
+                aria-label="Remove photo"
+              >
+                &#10005;
+              </button>
+            </div>
+          )}
           <div className="ai-ios-input-pill">
+            <button
+              type="button"
+              className="ai-ios-photo-btn"
+              onClick={() => chatPhotoRef.current?.click()}
+              disabled={loading}
+              aria-label="Attach photo"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+                <circle cx="8.5" cy="8.5" r="1.5" />
+                <path d="m21 15-5-5L5 21" />
+              </svg>
+            </button>
             <ContentEditableInput
-              placeholder="Describe your shoot or ask a question..."
+              placeholder={pendingPhotoDataUrl ? "Ask about this photo..." : "Describe your shoot or ask a question..."}
               value={input}
               onChange={setInput}
               multiline
@@ -923,11 +1006,11 @@ export function AIAssistantPage() {
             <button 
               className="ai-ios-send-btn"
               onClick={() => void handleSubmit()}
-              disabled={loading || !input.trim()}
+              disabled={loading || (!input.trim() && !pendingPhotoDataUrl)}
               aria-label="Send message"
             >
               {loading ? (
-                <span className="ai-spinner-small">✦</span>
+                <span className="ai-spinner-small">&#10022;</span>
               ) : (
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M12 19V5M5 12l7-7 7 7" />
@@ -935,6 +1018,17 @@ export function AIAssistantPage() {
               )}
             </button>
           </div>
+          {/* Hidden file input for chat photo attachment */}
+          <input
+            ref={chatPhotoRef}
+            type="file"
+            accept="image/*"
+            style={{ display: 'none' }}
+            onChange={(e) => {
+              void handleChatPhotoSelected(e.target.files?.[0]);
+              e.target.value = '';
+            }}
+          />
         </div>
       )}
 

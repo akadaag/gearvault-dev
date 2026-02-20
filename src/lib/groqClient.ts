@@ -6,7 +6,7 @@ import type { GearItem, EventItem, Category } from '../types/models';
 import { GROQ_MODELS, AI_TASKS } from './groqConfig';
 import { db } from '../db';
 import { callLLMGatewayForPackingPlan } from './llmGatewayClient';
-import { callEdgeFunction, AuthExpiredError } from './edgeFunctionClient';
+import { callEdgeFunction, AuthExpiredError, type MessageContent } from './edgeFunctionClient';
 
 // ---------------------------------------------------------------------------
 // Packing plan generation (Gemini primary → Scout fallback via Edge Function)
@@ -336,7 +336,7 @@ Return ONLY valid JSON matching this exact structure. No markdown, no code block
 
 interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
-  content: string;
+  content: MessageContent;
 }
 
 export async function callGroqForChat(
@@ -388,20 +388,28 @@ Important:
 - Be concise and practical
 - If asked about something unrelated to photography/videography, politely redirect
 - If you don't know something, say so - don't make up information
+- If the user sends a photo, analyze the gear shown and provide relevant advice, identification, or comparison with their catalog
 
 Respond in a helpful, conversational tone.`;
 
-  const allMessages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }> = [
+  // Check if any user message contains multimodal content (images)
+  const hasVisionContent = cappedMessages.some(
+    m => Array.isArray(m.content) && m.content.some(p => p.type === 'image_url')
+  );
+
+  const allMessages: Array<{ role: 'system' | 'user' | 'assistant'; content: MessageContent }> = [
     { role: 'system', content: systemPrompt },
     ...cappedMessages.map(m => ({ role: m.role, content: m.content })),
   ];
   
   const taskConfig = AI_TASKS.CHAT;
-  const model = GROQ_MODELS[taskConfig.model];
+  // Use Gemini for vision (better multimodal support), Groq for text-only
+  const model = hasVisionContent ? 'gemini-2.0-flash-lite' : GROQ_MODELS[taskConfig.model];
+  const provider = hasVisionContent ? 'llm-gateway' as const : 'groq' as const;
   
   try {
     const response = await callEdgeFunction({
-      provider: 'groq',
+      provider,
       model,
       messages: allMessages,
       temperature: taskConfig.temperature,
@@ -412,6 +420,25 @@ Respond in a helpful, conversational tone.`;
     return response.choices[0]?.message?.content || 'Sorry, I could not generate a response.';
   } catch (error) {
     console.error('[Chat] Error:', error);
+    
+    // If vision failed with Gemini, try Groq as fallback (Groq supports vision too via Llama)
+    if (hasVisionContent && !(error instanceof AuthExpiredError)) {
+      console.warn('[Chat] Gemini vision failed, trying Groq fallback...');
+      try {
+        const response = await callEdgeFunction({
+          provider: 'groq',
+          model: GROQ_MODELS[taskConfig.model],
+          messages: allMessages,
+          temperature: taskConfig.temperature,
+          max_tokens: taskConfig.maxTokens,
+        });
+        return response.choices[0]?.message?.content || 'Sorry, I could not generate a response.';
+      } catch (fallbackError) {
+        if (fallbackError instanceof AuthExpiredError) throw fallbackError;
+        throw error; // throw original error
+      }
+    }
+    
     // Re-throw AuthExpiredError to be handled by the UI
     if (error instanceof AuthExpiredError) {
       throw error;

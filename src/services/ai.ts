@@ -1,11 +1,14 @@
 import { db } from '../db';
 import { callGroqForPackingPlan, callGroqForChat } from '../lib/groqClient';
 import { makeId } from '../lib/ids';
+import { gearRecognitionSchema, type GearRecognition } from '../lib/aiSchemas';
+import { callEdgeFunction, AuthExpiredError, type MessageContentPart, type MessageContent } from '../lib/edgeFunctionClient';
 import type {
   AIFeedback,
   AppSettings,
   ChatMessage,
   ChatSession,
+  Category,
   EventItem,
   GearItem,
   MissingItemSuggestion,
@@ -203,15 +206,35 @@ export async function storeSuggestionFeedback(
  * Send a message to the AI chat and get a response.
  * Includes the user's gear catalog for personalized advice.
  * Limits conversation history to last 20 messages.
+ * 
+ * @param pendingImageDataUrl - Full-res compressed image data URL to attach
+ *   to the LAST user message (for vision). Not persisted, in-memory only.
  */
 export async function sendChatMessage(
   messages: ChatMessage[],
   catalog: GearItem[],
+  pendingImageDataUrl?: string,
 ): Promise<string> {
   // Limit to last 20 messages (excluding system prompt)
   const recentMessages = messages.slice(-20);
   
-  const response = await callGroqForChat(recentMessages, catalog);
+  // Convert ChatMessage[] (content: string) → multimodal format when image present
+  const groqMessages = recentMessages.map((m, idx) => {
+    const isLastUserMessage = idx === recentMessages.length - 1 && m.role === 'user';
+
+    // Attach the pending image to the last user message
+    if (isLastUserMessage && pendingImageDataUrl) {
+      const parts: MessageContentPart[] = [
+        { type: 'text', text: m.content },
+        { type: 'image_url', image_url: { url: pendingImageDataUrl, detail: 'low' } },
+      ];
+      return { role: m.role, content: parts as MessageContent };
+    }
+
+    return { role: m.role, content: m.content as MessageContent };
+  });
+  
+  const response = await callGroqForChat(groqMessages, catalog);
   return response;
 }
 
@@ -296,3 +319,191 @@ export function createChatSession(title: string, initialMessages: ChatMessage[] 
 // ---------------------------------------------------------------------------
 // Internal helpers
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Gear Photo Recognition
+// ---------------------------------------------------------------------------
+
+/** Default category names for the recognition prompt */
+const CATEGORY_NAMES = [
+  'Camera bodies',
+  'Lenses',
+  'Tripods / supports',
+  'Lighting',
+  'Modifiers',
+  'Audio',
+  'Monitoring',
+  'Power',
+  'Media',
+  'Bags & cases',
+  'Cables & adapters',
+  'Drones',
+  'Gimbals / stabilizers',
+  'Filters',
+  'Cleaning / maintenance',
+  'Computer / ingest accessories',
+];
+
+/**
+ * Match an AI-returned category name to an actual category ID.
+ * Uses case-insensitive substring matching with fallback.
+ */
+export function matchCategoryByName(
+  aiCategory: string,
+  categories: Category[],
+): string {
+  if (!aiCategory) return '';
+  const lower = aiCategory.toLowerCase().trim();
+
+  // Exact match (case-insensitive)
+  const exact = categories.find(
+    (c) => c.name.toLowerCase() === lower,
+  );
+  if (exact) return exact.id;
+
+  // Substring match (AI might say "cables" instead of "Cables & adapters")
+  const partial = categories.find(
+    (c) =>
+      c.name.toLowerCase().includes(lower) ||
+      lower.includes(c.name.toLowerCase()),
+  );
+  if (partial) return partial.id;
+
+  // Word overlap: split both into words, find best overlap
+  const aiWords = lower.split(/[\s/&,]+/).filter(Boolean);
+  let bestScore = 0;
+  let bestId = '';
+  for (const cat of categories) {
+    const catWords = cat.name.toLowerCase().split(/[\s/&,]+/).filter(Boolean);
+    const overlap = aiWords.filter((w) =>
+      catWords.some((cw) => cw.includes(w) || w.includes(cw)),
+    ).length;
+    if (overlap > bestScore) {
+      bestScore = overlap;
+      bestId = cat.id;
+    }
+  }
+
+  return bestScore > 0 ? bestId : '';
+}
+
+/**
+ * Recognize gear from one or more photos using AI vision.
+ * Returns structured identification data for form auto-fill.
+ *
+ * @param photoDataUrls - 1 to 3 base64 data URLs (compressed for AI)
+ * @param categories - The user's category list for matching
+ */
+export async function recognizeGearFromPhotos(
+  photoDataUrls: string[],
+  categories: Category[],
+): Promise<GearRecognition & { categoryId: string }> {
+  if (photoDataUrls.length === 0) {
+    throw new Error('At least one photo is required for recognition.');
+  }
+
+  const categoryList = categories.length > 0
+    ? categories.map((c) => c.name)
+    : CATEGORY_NAMES;
+
+  const prompt = `You are a photography and videography equipment identifier.
+
+Analyze the photo(s) and identify this piece of gear or accessory.
+
+YOUR #1 PRIORITY is to identify the CATEGORY (type of item). Even if you cannot identify the exact brand or model, you MUST determine what type of item this is.
+
+CATEGORY — You MUST classify it into ONE of these exact categories:
+${categoryList.map((n) => `- ${n}`).join('\n')}
+
+IDENTIFICATION RULES:
+1. CATEGORY is REQUIRED — always pick the closest match from the list above
+2. NAME — Give a descriptive name (e.g., "LED Panel Light", "Shotgun Microphone", "HDMI Cable", "Mirrorless Camera")
+3. BRAND — Only if you can read it on the item or confidently recognize the product design. Leave empty string if unsure.
+4. MODEL — Only if you can read model text on the item. Leave empty string if unsure.
+5. If you see text printed on the item (model numbers, brand logos, serial numbers), READ IT and use it.
+6. If the item is NOT photography/videography equipment (e.g., food, furniture, pets, personal items), set confidence to "none" and category to the closest possible match or empty string.
+
+Return ONLY valid JSON with this exact structure:
+{
+  "item_name": "string — descriptive name",
+  "brand": "string — brand name or empty string",
+  "model": "string — model name/number or empty string",
+  "category": "string — one of the categories listed above",
+  "confidence": "high | medium | low | none",
+  "tags": ["optional", "descriptive", "tags"],
+  "notes": "optional notes about what you observe"
+}`;
+
+  // Build multimodal content: text prompt + all photos
+  const content: MessageContentPart[] = [
+    { type: 'text', text: prompt },
+    ...photoDataUrls.map(
+      (url): MessageContentPart => ({
+        type: 'image_url',
+        image_url: { url, detail: 'low' },
+      }),
+    ),
+  ];
+
+  try {
+    // Try Gemini first (primary)
+    const response = await callEdgeFunction({
+      provider: 'llm-gateway',
+      model: 'google-ai-studio/gemini-2.0-flash-lite',
+      messages: [{ role: 'user', content }],
+      temperature: 0.2,
+      max_tokens: 1000,
+      response_format: { type: 'json_object' },
+    });
+
+    const rawContent = response.choices[0]?.message?.content || '{}';
+    const cleaned = sanitizeJsonResponse(rawContent);
+    const json = JSON.parse(cleaned);
+    const parsed = gearRecognitionSchema.parse(json);
+
+    // Map category name to ID
+    const categoryId = matchCategoryByName(parsed.category, categories);
+
+    return { ...parsed, categoryId };
+  } catch (primaryError) {
+    // If auth error, don't try fallback
+    if (primaryError instanceof AuthExpiredError) throw primaryError;
+
+    console.warn('[Recognition] Gemini failed, trying Groq fallback:', primaryError);
+
+    // Fallback to Groq Llama 4 Scout
+    try {
+      const response = await callEdgeFunction({
+        provider: 'groq',
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        messages: [{ role: 'user', content }],
+        temperature: 0.2,
+        max_tokens: 1000,
+        response_format: { type: 'json_object' },
+      });
+
+      const rawContent = response.choices[0]?.message?.content || '{}';
+      const cleaned = sanitizeJsonResponse(rawContent);
+      const json = JSON.parse(cleaned);
+      const parsed = gearRecognitionSchema.parse(json);
+      const categoryId = matchCategoryByName(parsed.category, categories);
+
+      return { ...parsed, categoryId };
+    } catch (fallbackError) {
+      if (fallbackError instanceof AuthExpiredError) throw fallbackError;
+      throw new Error(
+        `Could not identify this item. ${fallbackError instanceof Error ? fallbackError.message : 'Please try again.'}`,
+      );
+    }
+  }
+}
+
+/** Strip markdown fences and extract JSON from messy AI responses */
+function sanitizeJsonResponse(raw: string): string {
+  let s = raw.trim();
+  s = s.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '').trim();
+  const start = s.indexOf('{');
+  const end = s.lastIndexOf('}');
+  if (start === -1 || end === -1 || end <= start) return s;
+  return s.slice(start, end + 1);
+}

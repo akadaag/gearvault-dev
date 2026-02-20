@@ -2,7 +2,9 @@ import { supabase } from './supabase';
 
 const PHOTO_BUCKET = 'gear-item-photos';
 const TARGET_MAX_EDGE = 1280;
+const TARGET_MAX_EDGE_AI = 768;
 const WEBP_QUALITY = 0.78;
+const AI_QUALITY = 0.72;
 
 interface CompressedImage {
   blob: Blob;
@@ -119,4 +121,84 @@ function blobToDataUrl(blob: Blob) {
     reader.onerror = () => reject(new Error('Could not read processed image.'));
     reader.readAsDataURL(blob);
   });
+}
+
+// ---------------------------------------------------------------------------
+// AI Vision — smaller compression for recognition requests (in-memory only)
+// ---------------------------------------------------------------------------
+
+/**
+ * Compress a File to a small base64 data URL for AI vision requests.
+ * Target: 768px max edge, lower quality — never stored, only sent to AI API.
+ */
+export async function compressImageForAI(file: File): Promise<string> {
+  const image = await loadImage(file);
+  return compressImageElementForAI(image);
+}
+
+/**
+ * Compress an existing image URL (Supabase public URL or data URI) for AI vision.
+ * Used when re-scanning a photo that's already on the item.
+ */
+export async function compressImageUrlForAI(imageUrl: string): Promise<string> {
+  const image = await loadImageFromUrl(imageUrl);
+  return compressImageElementForAI(image);
+}
+
+/**
+ * Generate a small thumbnail data URL for chat message display.
+ * Target: 200px max edge — stored in IndexedDB with chat messages.
+ */
+export async function generateChatThumbnail(file: File): Promise<string> {
+  const image = await loadImage(file);
+  const maxEdge = 200;
+  const scale = Math.min(1, maxEdge / Math.max(image.width, image.height));
+  const width = Math.max(1, Math.round(image.width * scale));
+  const height = Math.max(1, Math.round(image.height * scale));
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Could not process image for thumbnail.');
+  ctx.drawImage(image, 0, 0, width, height);
+
+  const blob = await canvasToBlob(canvas, 'image/webp', 0.6)
+    ?? await canvasToBlob(canvas, 'image/jpeg', 0.6);
+  if (!blob) throw new Error('Could not encode thumbnail.');
+  return blobToDataUrl(blob);
+}
+
+function loadImageFromUrl(url: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.crossOrigin = 'anonymous';
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error('Could not load image from URL.'));
+    image.src = url;
+  });
+}
+
+function compressImageElementForAI(image: HTMLImageElement): Promise<string> {
+  const scale = Math.min(1, TARGET_MAX_EDGE_AI / Math.max(image.width, image.height));
+  const width = Math.max(1, Math.round(image.width * scale));
+  const height = Math.max(1, Math.round(image.height * scale));
+
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('Could not process image for AI.');
+  ctx.drawImage(image, 0, 0, width, height);
+
+  return (async () => {
+    const webpBlob = await canvasToBlob(canvas, 'image/webp', AI_QUALITY);
+    if (webpBlob) return blobToDataUrl(webpBlob);
+
+    const jpgBlob = await canvasToBlob(canvas, 'image/jpeg', AI_QUALITY);
+    if (!jpgBlob) throw new Error('Could not encode image for AI.');
+    return blobToDataUrl(jpgBlob);
+  })();
 }

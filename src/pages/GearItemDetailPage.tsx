@@ -630,6 +630,7 @@ export function GearItemDetailPage() {
         categories={categories}
         draft={draft}
         error={editError}
+        isAuthenticated={Boolean(user && isConfigured)}
         onDraftChange={(nextDraft) => {
           setEditError('');
           setDraft(nextDraft);

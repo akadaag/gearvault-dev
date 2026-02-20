@@ -456,6 +456,7 @@ export function CatalogPage() {
         categories={categories}
         draft={draft}
         error={error}
+        isAuthenticated={Boolean(user && isConfigured)}
         onDraftChange={(nextDraft) => {
           setError('');
           setDraft(nextDraft);

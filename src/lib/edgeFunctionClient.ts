@@ -83,10 +83,18 @@ async function ensureFreshSession(): Promise<void> {
 
 export type AIProvider = 'llm-gateway' | 'groq';
 
+/** Multimodal content part for vision messages */
+export type MessageContentPart =
+  | { type: 'text'; text: string }
+  | { type: 'image_url'; image_url: { url: string; detail?: 'low' | 'high' } };
+
+/** Message content can be a plain string or an array of multimodal parts */
+export type MessageContent = string | MessageContentPart[];
+
 export interface EdgeFunctionRequest {
   provider: AIProvider;
   model: string;
-  messages: Array<{ role: 'system' | 'user' | 'assistant'; content: string }>;
+  messages: Array<{ role: 'system' | 'user' | 'assistant'; content: MessageContent }>;
   temperature?: number;
   max_tokens?: number;
   response_format?: { type: 'json_object' };

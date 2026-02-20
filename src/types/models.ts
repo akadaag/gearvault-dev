@@ -112,6 +112,8 @@ export interface ChatMessage {
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: string;
+  /** Small base64 thumbnail for display in chat (only for messages with photos) */
+  imagePreview?: string;
 }
 
 export interface ChatSession {

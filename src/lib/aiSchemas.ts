@@ -79,6 +79,32 @@ export type RecommendedItem = PackingPlan['recommended_items'][number];
 export type MissingItem = PackingPlan['missing_items'][number];
 
 // ---------------------------------------------------------------------------
+// Gear Recognition schema (AI photo identification)
+// ---------------------------------------------------------------------------
+
+function normalizeConfidence(val: unknown): string {
+  if (typeof val !== 'string') return 'low';
+  const lower = val.toLowerCase().trim();
+  if (['high', 'certain', 'definite', 'confident'].includes(lower)) return 'high';
+  if (['medium', 'moderate', 'likely', 'probable'].includes(lower)) return 'medium';
+  if (['low', 'uncertain', 'unsure', 'guess'].includes(lower)) return 'low';
+  if (['none', 'unknown', 'unrecognized', 'not_gear', 'not gear'].includes(lower)) return 'none';
+  return 'low';
+}
+
+export const gearRecognitionSchema = z.object({
+  item_name: z.string().default('Unknown Item'),
+  brand: z.string().optional().default(''),
+  model: z.string().optional().default(''),
+  category: z.string().default(''),
+  confidence: z.preprocess(normalizeConfidence, z.enum(['high', 'medium', 'low', 'none'])),
+  tags: z.array(z.string()).optional().default([]),
+  notes: z.string().optional().default(''),
+});
+
+export type GearRecognition = z.infer<typeof gearRecognitionSchema>;
+
+// ---------------------------------------------------------------------------
 // JSON Schema sent to Groq as response_format (structural enforcement)
 // ---------------------------------------------------------------------------
 
