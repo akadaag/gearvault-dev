@@ -517,6 +517,77 @@ export function AIAssistantPage() {
         }
       }
 
+      // ------------------------------------------------------------------
+      // Safety guard: Photo-only → strip all audio gear
+      // ------------------------------------------------------------------
+      if (isPhotoOnly) {
+        rawPlan.checklist = rawPlan.checklist.filter(item => item.section !== 'Audio');
+      }
+
+      // ------------------------------------------------------------------
+      // Safety guard: Corporate/interview/documentary → strip cinematic
+      // accessories (diffusion, mist, bloom filters)
+      // ------------------------------------------------------------------
+      const isCorporateClean = /corporate|interview|documentary/i.test(rawPlan.eventType ?? '');
+      if (isCorporateClean) {
+        rawPlan.checklist = rawPlan.checklist.filter(item => {
+          const gear = catalog.find(c => c.id === item.gearItemId);
+          return !(
+            gear?.inferredProfile === 'accessory' &&
+            gear?.strengths?.includes('cinematic-look')
+          );
+        });
+      }
+
+      // ------------------------------------------------------------------
+      // Safety guard: Swap APS-C lenses when primary body is full-frame
+      // ------------------------------------------------------------------
+      const primaryFFBodies = rawPlan.checklist.filter(item => {
+        const gear = catalog.find(c => c.id === item.gearItemId);
+        return item.section === 'Camera Bodies' &&
+          item.role === 'primary' &&
+          gear?.strengths?.includes('sensor-fullframe');
+      });
+      if (primaryFFBodies.length > 0) {
+        const primaryMounts = new Set(
+          primaryFFBodies.flatMap(item => {
+            const gear = catalog.find(c => c.id === item.gearItemId);
+            return (gear?.strengths ?? []).filter(s => s.startsWith('mount-'));
+          })
+        );
+        const usedIds = new Set(rawPlan.checklist.map(i => i.gearItemId).filter(Boolean) as string[]);
+        rawPlan.checklist = rawPlan.checklist.map(item => {
+          const gear = catalog.find(c => c.id === item.gearItemId);
+          if (item.section !== 'Lenses') return item;
+          if (!gear?.strengths?.includes('sensor-apsc')) return item;
+          const mount = gear.strengths.find(s => s.startsWith('mount-'));
+          if (!mount || !primaryMounts.has(mount)) return item;
+          // APS-C lens on a FF primary body — find a FF replacement
+          const ffReplacement = catalog.find(c =>
+            c.id !== item.gearItemId &&
+            !usedIds.has(c.id) &&
+            c.categoryId === gear.categoryId &&
+            c.strengths?.includes('sensor-fullframe') &&
+            c.strengths?.includes(mount)
+          );
+          if (ffReplacement) {
+            console.log(`[Safety Guard] Swapping APS-C lens ${gear.name} → ${ffReplacement.name}`);
+            usedIds.add(ffReplacement.id);
+            usedIds.delete(item.gearItemId!);
+            return { ...item, gearItemId: ffReplacement.id, name: ffReplacement.name };
+          }
+          return item;
+        });
+      }
+
+      // ------------------------------------------------------------------
+      // Safety guard: Discreet/invisible shooting → strip support gear
+      // ------------------------------------------------------------------
+      const isDiscreet = /invisible|discreet|unobtrusive|stealth/i.test(input);
+      if (isDiscreet) {
+        rawPlan.checklist = rawPlan.checklist.filter(item => item.section !== 'Support');
+      }
+
 
       // ------------------------------------------------------------------
       // Client-side catalog matcher

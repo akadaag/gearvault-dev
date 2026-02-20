@@ -451,7 +451,7 @@ Return ONLY valid JSON with this exact structure:
     // Try Gemini first (primary)
     const response = await callEdgeFunction({
       provider: 'llm-gateway',
-      model: 'google-ai-studio/gemini-2.0-flash',
+      model: 'google-ai-studio/gemini-2.5-flash-lite-preview-09-2025',
       messages: [{ role: 'user', content }],
       temperature: 0.2,
       max_tokens: 1000,

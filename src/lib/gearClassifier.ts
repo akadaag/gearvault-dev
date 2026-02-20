@@ -376,7 +376,7 @@ Return ONLY valid JSON with all four fields for each item.`;
       console.log('[Classification] Calling Gemini 2.0 Flash...');
       json = await callEdgeFunction({
         provider: 'llm-gateway',
-        model: 'google-ai-studio/gemini-2.0-flash',
+        model: 'google-ai-studio/gemini-2.5-flash-lite-preview-09-2025',
         ...callOptions,
       });
     } catch (geminiError) {
@@ -450,13 +450,12 @@ Return ONLY valid JSON with all four fields for each item.`;
 // Migration: Re-classify items missing sensor format tags
 // ---------------------------------------------------------------------------
 
-const CLASSIFIER_VERSION = '4'; // v4: Targeted reset for items with bad sensor tags or garbage eventFit
+const CLASSIFIER_VERSION = '5'; // v5: Full re-classify with Gemini 2.5 Flash Lite for higher-quality tags
 
 /**
- * Migration: selectively reset items with known classification defects:
- *   - Camera/lens items missing a sensor-* strength (e.g. 16-55mm f/2.8 G)
- *   - Items whose eventFit contains inferredProfile values instead of event types
- *     (e.g. Camera Cage A7III, whose eventFit was ["video_first", "photo_first", ...])
+ * Migration: full catalog reset to re-classify all items with Gemini 2.5 Flash Lite.
+ * v5: Model upgraded from gemini-2.0-flash to gemini-2.5-flash-lite-preview-09-2025,
+ *     which has better instruction-following for sensor format, mount, and eventFit tags.
  * Runs once per CLASSIFIER_VERSION (stored in localStorage).
  */
 async function migrateSensorFormatClassification(): Promise<void> {
@@ -467,30 +466,13 @@ async function migrateSensorFormatClassification(): Promise<void> {
   try {
     const allItems = await db.gearItems.toArray();
 
-    // Known inferredProfile enum values — if any appear in eventFit, the item has garbage classification
-    const profileValues = new Set([
-      'video_first', 'photo_first', 'hybrid', 'cinema',
-      'audio', 'lighting', 'support', 'power', 'media', 'accessory',
-    ]);
-
-    const itemsNeedingMigration = allItems.filter(item => {
-      if (item.classificationStatus !== 'done') return false;
-
-      // v4a: eventFit contains profile names instead of event types (garbage data)
-      if (item.eventFit?.some(e => profileValues.has(e))) return true;
-
-      // v4b: camera/lens items missing a sensor-* strength
-      if (
-        (item.categoryId === 'default-1' || item.categoryId === 'default-2') &&
-        ['photo_first', 'video_first', 'hybrid', 'cinema'].includes(item.inferredProfile ?? '') &&
-        !item.strengths?.some(s => s.startsWith('sensor-'))
-      ) return true;
-
-      return false;
-    });
+    // v5: Full reset — re-classify everything with the new model
+    const itemsNeedingMigration = allItems.filter(
+      item => item.classificationStatus === 'done' || item.classificationStatus === 'failed'
+    );
 
     if (itemsNeedingMigration.length > 0) {
-      console.log(`[Classifier Migration v4] Resetting ${itemsNeedingMigration.length} items:`, itemsNeedingMigration.map(i => i.name));
+      console.log(`[Classifier Migration v5] Resetting ${itemsNeedingMigration.length} items for Gemini 2.5 Flash Lite re-classification`);
       for (const item of itemsNeedingMigration) {
         await db.gearItems.update(item.id, { classificationStatus: 'pending' });
       }

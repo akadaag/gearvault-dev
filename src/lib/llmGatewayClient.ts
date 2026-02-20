@@ -5,7 +5,7 @@
  * API keys are kept server-side, never exposed to the client.
  * Requires Supabase authentication.
  * 
- * Primary model: google-ai-studio/gemini-2.0-flash
+ * Primary model: google-ai-studio/gemini-2.5-flash-lite-preview-09-2025
  * Fallback: Groq Scout 17B (handled in groqClient.ts)
  */
 
@@ -14,7 +14,7 @@ import { packingPlanSchema } from './aiSchemas';
 import { callEdgeFunction } from './edgeFunctionClient';
 
 // Primary model for packing lists
-const GEMINI_MODEL = 'google-ai-studio/gemini-2.0-flash';
+const GEMINI_MODEL = 'google-ai-studio/gemini-2.5-flash-lite-preview-09-2025';
 
 interface CallLLMGatewayOptions {
   eventDescription: string;
@@ -141,9 +141,12 @@ CRITICAL RULES FOR CONTEXT-AWARE SELECTION:
    - Music video → EXCLUDE ALL audio recording gear (mics, recorders, audio cables) — music is pre-recorded
    - "Natural light" specified → EXCLUDE ALL items with "powered-light" strength. ONLY include items with "natural-light-modifier" strength (reflectors, diffusers)
    - Photo-only session → EXCLUDE gimbals unless specifically requested
+   - Photo-only session → EXCLUDE ALL audio recording gear (mics, recorders, wireless audio systems, audio cables) — photos do not require sound capture
    - Photo-only session → (a) NEVER assign role "primary" to any camera with inferredProfile "video_first" or "cinema" — this is absolute, no exceptions. (b) ALWAYS select a "photo_first" or "hybrid" camera as primary; if the catalog contains a full-frame hybrid body (sensor-fullframe), it is the preferred primary for corporate/portrait photo work. (c) A "video_first" camera may appear ONLY as role "backup" if the user explicitly requested a second body. (d) A "video_first" camera as "primary" in a photo-only plan is ALWAYS wrong and will be rejected.
    - Video-primary events → cameras with inferredProfile "video_first" or "cinema" MUST be primary over "hybrid"
    - Bags, backpacks, and cases → EXCLUDE from recommended_items unless the user specifically asks about transport or gear carrying
+   - Corporate/interview/documentary → NEVER recommend diffusion, mist, or bloom filters (accessories with "cinematic-look" strength) — these events require clean, sharp journalism-style images
+   - "Invisible"/"discreet"/"unobtrusive" shooting → EXCLUDE tripods, light stands, boom poles, and all bulky support gear — prioritize handheld, compact equipment only
 
 2. **LENS-MOUNT COMPATIBILITY (NON-NEGOTIABLE)**:
    Only recommend lenses whose mount strength (mount-sony-e, mount-canon-rf, mount-fuji-x, mount-nikon-z, mount-l, mount-mft, mount-canon-ef) matches at least one selected camera body.
