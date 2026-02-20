@@ -1,10 +1,8 @@
 import { supabase } from './supabase';
 
 const PHOTO_BUCKET = 'gear-item-photos';
-const TARGET_MAX_EDGE = 1280;
-const TARGET_MAX_EDGE_AI = 768;
-const WEBP_QUALITY = 0.78;
-const AI_QUALITY = 0.72;
+const TARGET_MAX_EDGE = 768;   // unified for both item photos and AI — plenty for mobile display
+const WEBP_QUALITY = 0.72;
 
 interface CompressedImage {
   blob: Blob;
@@ -181,7 +179,7 @@ function loadImageFromUrl(url: string): Promise<HTMLImageElement> {
 }
 
 function compressImageElementForAI(image: HTMLImageElement): Promise<string> {
-  const scale = Math.min(1, TARGET_MAX_EDGE_AI / Math.max(image.width, image.height));
+  const scale = Math.min(1, TARGET_MAX_EDGE / Math.max(image.width, image.height));
   const width = Math.max(1, Math.round(image.width * scale));
   const height = Math.max(1, Math.round(image.height * scale));
 
@@ -194,10 +192,10 @@ function compressImageElementForAI(image: HTMLImageElement): Promise<string> {
   ctx.drawImage(image, 0, 0, width, height);
 
   return (async () => {
-    const webpBlob = await canvasToBlob(canvas, 'image/webp', AI_QUALITY);
+    const webpBlob = await canvasToBlob(canvas, 'image/webp', WEBP_QUALITY);
     if (webpBlob) return blobToDataUrl(webpBlob);
 
-    const jpgBlob = await canvasToBlob(canvas, 'image/jpeg', AI_QUALITY);
+    const jpgBlob = await canvasToBlob(canvas, 'image/jpeg', WEBP_QUALITY);
     if (!jpgBlob) throw new Error('Could not encode image for AI.');
     return blobToDataUrl(jpgBlob);
   })();

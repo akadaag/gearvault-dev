@@ -145,16 +145,31 @@ export function GearItemFormSheet({
     const reader = new FileReader();
     reader.onload = async () => {
       const preview = String(reader.result ?? '');
-      onDraftChange({
+      // Capture the draft-with-photo as a stable snapshot to avoid stale closure
+      const draftWithPhoto: GearFormDraft = {
         ...draft,
         photoFile: file,
         photoPreview: preview,
         removePhoto: false,
-      });
+      };
+      onDraftChange(draftWithPhoto);
       onErrorChange('');
 
-      // Now compress for AI and run recognition
-      await runRecognition(file);
+      // Inline recognition — pass draftWithPhoto as baseDraft so applyRecognitionResult
+      // spreads over it instead of the stale `draft` (which has no photo yet)
+      setScanning(true);
+      setScanMessage('Identifying gear...');
+      try {
+        const photoDataUrls: string[] = [await compressImageForAI(file)];
+        photoDataUrls.push(...extraPhotos);
+        const result = await recognizeGearFromPhotos(photoDataUrls, categories);
+        applyRecognitionResult(result, draftWithPhoto);
+      } catch (e) {
+        handleScanError(e);
+      } finally {
+        setScanning(false);
+        setScanMessage('');
+      }
     };
     reader.readAsDataURL(file);
   }
@@ -192,29 +207,11 @@ export function GearItemFormSheet({
     }
   }
 
-  async function runRecognition(file: File) {
-    setScanning(true);
-    setScanMessage('Identifying gear...');
-    onErrorChange('');
-
-    try {
-      const photoDataUrls: string[] = [];
-      photoDataUrls.push(await compressImageForAI(file));
-
-      // Include extra angle photos if any
-      photoDataUrls.push(...extraPhotos);
-
-      const result = await recognizeGearFromPhotos(photoDataUrls, categories);
-      applyRecognitionResult(result);
-    } catch (e) {
-      handleScanError(e);
-    } finally {
-      setScanning(false);
-      setScanMessage('');
-    }
-  }
-
-  function applyRecognitionResult(result: Awaited<ReturnType<typeof recognizeGearFromPhotos>>) {
+  function applyRecognitionResult(
+    result: Awaited<ReturnType<typeof recognizeGearFromPhotos>>,
+    baseDraft?: GearFormDraft,
+  ) {
+    const base = baseDraft ?? draft;
     if (result.confidence === 'none') {
       onErrorChange("This doesn't look like photo/video gear. Try a different photo.");
       return;
@@ -223,20 +220,20 @@ export function GearItemFormSheet({
     // Fill only empty fields — don't overwrite what the user already typed
     const updates: Partial<GearFormDraft> = {};
 
-    if (!draft.name.trim() && result.item_name) {
+    if (!base.name.trim() && result.item_name) {
       updates.name = result.item_name;
     }
-    if (!draft.brand.trim() && result.brand) {
+    if (!base.brand.trim() && result.brand) {
       updates.brand = result.brand;
     }
-    if (!draft.categoryId && result.categoryId) {
+    if (!base.categoryId && result.categoryId) {
       updates.categoryId = result.categoryId;
     }
-    if (!draft.tagsText.trim() && result.tags && result.tags.length > 0) {
+    if (!base.tagsText.trim() && result.tags && result.tags.length > 0) {
       updates.tagsText = result.tags.join(', ');
     }
 
-    onDraftChange({ ...draft, ...updates });
+    onDraftChange({ ...base, ...updates });
 
     // Show confidence feedback
     if (result.confidence === 'low') {
