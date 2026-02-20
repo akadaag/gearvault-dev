@@ -373,13 +373,50 @@ Return ONLY valid JSON with all four fields for each item.`;
     }
 
     const rawContent = json.choices?.[0]?.message?.content ?? '{}';
-    const parsed = classificationResponseSchema.safeParse(JSON.parse(rawContent));
+    console.log('[Classification] Raw response:', rawContent.slice(0, 500));
+
+    // Normalize Gemini's response — it sometimes returns a bare array or uses
+    // a different top-level key instead of the expected { items: [...] } wrapper.
+    let parsedJson: unknown;
+    try {
+      parsedJson = JSON.parse(rawContent);
+    } catch {
+      return { success: false, error: `JSON parse failed: ${rawContent.slice(0, 200)}` };
+    }
+
+    // Normalize to { items: [...] }
+    if (Array.isArray(parsedJson)) {
+      // Bare array — wrap it
+      parsedJson = { items: parsedJson };
+    } else if (parsedJson && typeof parsedJson === 'object') {
+      const obj = parsedJson as Record<string, unknown>;
+      if (!Array.isArray(obj.items)) {
+        // Find the first array-valued key and remap it to "items"
+        const arrayKey = Object.keys(obj).find(k => Array.isArray(obj[k]));
+        if (arrayKey) {
+          console.warn(`[Classification] Remapping "${arrayKey}" → "items"`);
+          parsedJson = { items: obj[arrayKey] };
+        }
+      }
+    }
+
+    const parsed = classificationResponseSchema.safeParse(parsedJson);
 
     if (parsed.success) {
       // Post-process: assign deterministic mounts
       const withMounts = await assignMountsToClassification(parsed.data);
+
+      // Partial-success guard: if Gemini returned fewer items than we sent,
+      // log which IDs were missing (they will stay "failed" and retry next time).
+      if (withMounts.items.length < items.length) {
+        const returnedIds = new Set(withMounts.items.map(i => i.id));
+        const missing = items.filter(i => !returnedIds.has(i.id)).map(i => i.name);
+        console.warn('[Classification] Missing items in response:', missing);
+      }
+
       return { success: true, data: withMounts };
     } else {
+      console.error('[Classification] Zod error:', JSON.stringify(parsed.error.format()));
       return { success: false, error: JSON.stringify(parsed.error.format()) };
     }
   } catch (error) {
