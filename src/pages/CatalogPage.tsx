@@ -465,6 +465,7 @@ export function CatalogPage() {
         onClose={() => {
           setShowAddItemForm(false);
           setError('');
+          setDraft(initialDraft);
         }}
         onSubmit={() => void addItem()}
       />

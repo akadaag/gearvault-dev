@@ -70,12 +70,13 @@ export function GearItemFormSheet({
     return () => unlockSheetScroll();
   }, [open]);
 
-  // Reset scan state when sheet closes
+  // Reset scan state and mode when sheet closes
   useEffect(() => {
     if (!open) {
       setScanning(false);
       setScanMessage('');
       setExtraPhotos([]);
+      setMode('quick');
     }
   }, [open]);
 
@@ -228,17 +229,11 @@ export function GearItemFormSheet({
     if (!draft.brand.trim() && result.brand) {
       updates.brand = result.brand;
     }
-    if (!draft.model.trim() && result.model) {
-      updates.model = result.model;
-    }
     if (!draft.categoryId && result.categoryId) {
       updates.categoryId = result.categoryId;
     }
     if (!draft.tagsText.trim() && result.tags && result.tags.length > 0) {
       updates.tagsText = result.tags.join(', ');
-    }
-    if (!draft.notes.trim() && result.notes) {
-      updates.notes = result.notes;
     }
 
     onDraftChange({ ...draft, ...updates });
@@ -344,12 +339,7 @@ export function GearItemFormSheet({
         <div className="ios-sheet-content ios-sheet-content--form">
 
           {/* Photo */}
-          <label className="ios-photo-upload-area ios-photo-upload-area--form">
-            <input
-              type="file"
-              accept="image/*"
-              onChange={(e) => handlePhotoUpload(e.target.files?.[0])}
-            />
+          <div className="ios-photo-upload-area ios-photo-upload-area--form">
             {hasPhoto ? (
               <div className="ios-detail-hero-photo-wrap">
                 <img
@@ -380,7 +370,7 @@ export function GearItemFormSheet({
                 <span aria-hidden="true">&#128247;</span>
               </div>
             )}
-          </label>
+          </div>
 
           {/* Photo Action Buttons — side by side, same pill style */}
           <div className="ios-photo-actions">
@@ -410,9 +400,8 @@ export function GearItemFormSheet({
               {scanning ? (
                 <span className="ai-spinner-small">&#10022;</span>
               ) : (
-                <svg className="ios-scan-icon" width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M12 3L14.5 8.5L12 14M4 3L1.5 8.5L4 14"/>
-                  <circle cx="8" cy="8.5" r="2.5"/>
+                <svg className="ios-scan-icon" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                  <path d="M9.813 15.904 9 18.75l-.813-2.846a4.5 4.5 0 0 0-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 0 0 3.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 0 0 3.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 0 0-3.09 3.09ZM18.259 8.715 18 9.75l-.259-1.035a3.375 3.375 0 0 0-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 0 0 2.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 0 0 2.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 0 0-2.456 2.456ZM16.894 20.567 16.5 21.75l-.394-1.183a2.25 2.25 0 0 0-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 0 0 1.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 0 0 1.423 1.423l1.183.394-1.183.394a2.25 2.25 0 0 0-1.423 1.423Z"/>
                 </svg>
               )}
               {' '}Scan with AI
@@ -482,7 +471,7 @@ export function GearItemFormSheet({
             </div>
           )}
 
-          {/* Group 1 — Name / Brand / Model */}
+          {/* Group 1 — Name / Brand */}
           <div className="ios-pill-group">
             <div className="ios-form-pill">
               <input
@@ -498,14 +487,6 @@ export function GearItemFormSheet({
                 placeholder="Brand"
                 value={draft.brand}
                 onChange={(e) => update('brand', e.target.value)}
-                {...kbHandlers}
-              />
-              <div className="ios-pill-divider" />
-              <input
-                className="ios-pill-input"
-                placeholder="Model"
-                value={draft.model}
-                onChange={(e) => update('model', e.target.value)}
                 {...kbHandlers}
               />
             </div>

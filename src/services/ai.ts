@@ -410,28 +410,28 @@ export async function recognizeGearFromPhotos(
 
 Analyze the photo(s) and identify this piece of gear or accessory.
 
-YOUR #1 PRIORITY is to identify the CATEGORY (type of item). Even if you cannot identify the exact brand or model, you MUST determine what type of item this is.
+YOUR #1 PRIORITY is to identify the CATEGORY (type of item). Even if you cannot identify the exact product, you MUST determine what type of item this is.
 
 CATEGORY — You MUST classify it into ONE of these exact categories:
 ${categoryList.map((n) => `- ${n}`).join('\n')}
 
 IDENTIFICATION RULES:
-1. CATEGORY is REQUIRED — always pick the closest match from the list above
-2. NAME — Give a descriptive name (e.g., "LED Panel Light", "Shotgun Microphone", "HDMI Cable", "Mirrorless Camera")
-3. BRAND — Only if you can read it on the item or confidently recognize the product design. Leave empty string if unsure.
-4. MODEL — Only if you can read model text on the item. Leave empty string if unsure.
-5. If you see text printed on the item (model numbers, brand logos, serial numbers), READ IT and use it.
-6. If the item is NOT photography/videography equipment (e.g., food, furniture, pets, personal items), set confidence to "none" and category to the closest possible match or empty string.
+1. CATEGORY is REQUIRED — always pick the closest match from the list above.
+2. NAME — The product/model identifier the owner would use to refer to this item.
+   - If you can identify the specific product: use the product name or model number (e.g. "FX30", "A7 IV", "VideoMic Pro+", "Ninja V", "MixPre-3 II").
+   - If you can read text printed on the item: READ IT and use that as the name.
+   - If you cannot identify the exact product but know the type: use a brief descriptive name (e.g. "Camera Cage", "LED Panel", "Shotgun Mic", "HDMI Cable", "V-Mount Battery").
+   - Do NOT use full sentences. Do NOT repeat the category (e.g. do NOT write "Mirrorless Camera Body" if the category is already "Camera bodies").
+3. BRAND — Only the brand name (e.g. "Sony", "Rode", "Atomos"). Leave empty string if you are not confident.
+4. If the item is NOT photography/videography equipment (e.g. food, furniture, pets, personal items), set confidence to "none".
 
 Return ONLY valid JSON with this exact structure:
 {
-  "item_name": "string — descriptive name",
-  "brand": "string — brand name or empty string",
-  "model": "string — model name/number or empty string",
+  "item_name": "string — product name or model (e.g. 'FX30', 'VideoMic Pro+', 'Camera Cage')",
+  "brand": "string — brand name only, or empty string",
   "category": "string — one of the categories listed above",
   "confidence": "high | medium | low | none",
-  "tags": ["optional", "descriptive", "tags"],
-  "notes": "optional notes about what you observe"
+  "tags": ["optional", "descriptive", "tags"]
 }`;
 
   // Build multimodal content: text prompt + all photos

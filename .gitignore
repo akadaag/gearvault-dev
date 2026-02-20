@@ -10,6 +10,7 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
+dev-dist
 *.local
 
 # Editor directories and files
@@ -23,3 +24,6 @@ dist-ssr
 *.sln
 *.sw?
 supabase/.temp/
+
+# OpenCode internal
+.opencode/

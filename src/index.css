@@ -11012,11 +11012,15 @@ input[type="checkbox"].ios-toggle:checked::after {
   min-height: 44px;
 }
 
-/* ── "Add Photo" small capsule pill button ──────────────────────── */
+/* ── "Add Photo" / "Scan with AI" small capsule buttons ────────── */
 
 .ios-theme .ios-form-pill--photo-btn {
+  /* Override pill card → lightweight tinted capsule (iOS system fill) */
+  background: rgba(118, 118, 128, 0.12) !important;
+  box-shadow: none !important;
+  border-radius: 20px;
   display: inline-block;
-  padding: 7px 20px;
+  padding: 7px 16px;
   font-size: 14px;
   font-weight: 500;
   color: var(--ios-text-primary);
@@ -11028,6 +11032,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 }
 
 :root.dark .ios-theme .ios-form-pill--photo-btn {
+  background: rgba(118, 118, 128, 0.24) !important;
   color: var(--ios-text-primary);
 }
 
@@ -11043,9 +11048,9 @@ input[type="checkbox"].ios-toggle:checked::after {
 /* ── "Scan with AI" pill modifier ───────────────────────────────────────── */
 
 .ios-theme .ios-form-pill--scan-btn {
-  display: inline-flex;
+  display: inline-flex !important;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   cursor: pointer;
 }
 
@@ -11056,6 +11061,8 @@ input[type="checkbox"].ios-toggle:checked::after {
 
 .ios-theme .ios-scan-icon {
   flex-shrink: 0;
+  width: 13px;
+  height: 13px;
 }
 
 /* ── Scan overlay (spinner on top of photo) ─────────────────────────────── */

@@ -95,11 +95,9 @@ function normalizeConfidence(val: unknown): string {
 export const gearRecognitionSchema = z.object({
   item_name: z.string().default('Unknown Item'),
   brand: z.string().optional().default(''),
-  model: z.string().optional().default(''),
   category: z.string().default(''),
   confidence: z.preprocess(normalizeConfidence, z.enum(['high', 'medium', 'low', 'none'])),
   tags: z.array(z.string()).optional().default([]),
-  notes: z.string().optional().default(''),
 });
 
 export type GearRecognition = z.infer<typeof gearRecognitionSchema>;
