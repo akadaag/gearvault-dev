@@ -2,7 +2,7 @@
  * AI Model Configuration
  * 
  * NEW ARCHITECTURE (Feb 2024):
- * - Primary: Gemini 2.0 Flash Lite via LLM Gateway (Supabase Edge Function proxy)
+ * - Primary: Gemini 2.5 Flash Lite via LLM Gateway (Supabase Edge Function proxy)
  * - Fallback: Groq Scout 17B (for when Gemini fails)
  * - Classification: Groq llama-3.1-8b-instant (fast, simple tasks)
  * 

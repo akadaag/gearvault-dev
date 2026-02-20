@@ -541,14 +541,26 @@ export function GearItemFormSheet({
                   <div className="ios-pill-divider" />
                   <div className="ios-form-row">
                     <span className="ios-form-label">Quantity</span>
-                    <input
-                      type="number"
-                      className="ios-form-input"
-                      min={1}
-                      value={draft.quantity}
-                      onChange={(e) => update('quantity', Number(e.target.value || 1))}
-                      {...kbHandlers}
-                    />
+                    <div className="ios-stepper">
+                      <button
+                        type="button"
+                        className="ios-stepper-btn"
+                        onClick={() => update('quantity', Math.max(1, draft.quantity - 1))}
+                        disabled={draft.quantity <= 1}
+                        aria-label="Decrease quantity"
+                      >
+                        −
+                      </button>
+                      <span className="ios-stepper-value">{draft.quantity}</span>
+                      <button
+                        type="button"
+                        className="ios-stepper-btn"
+                        onClick={() => update('quantity', draft.quantity + 1)}
+                        aria-label="Increase quantity"
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -1,11 +1,11 @@
 /**
  * LLM Gateway Client via Supabase Edge Function
  * 
- * Securely calls Gemini 2.0 Flash Lite through our Supabase Edge Function proxy.
+ * Securely calls Gemini 2.5 Flash Lite through our Supabase Edge Function proxy.
  * API keys are kept server-side, never exposed to the client.
  * Requires Supabase authentication.
  * 
- * Primary model: google-ai-studio/gemini-2.0-flash-lite
+ * Primary model: google-ai-studio/gemini-2.5-flash-lite
  * Fallback: Groq Scout 17B (handled in groqClient.ts)
  */
 
@@ -14,7 +14,7 @@ import { packingPlanSchema } from './aiSchemas';
 import { callEdgeFunction } from './edgeFunctionClient';
 
 // Primary model for packing lists
-const GEMINI_MODEL = 'google-ai-studio/gemini-2.0-flash-lite';
+const GEMINI_MODEL = 'google-ai-studio/gemini-2.5-flash-lite';
 
 interface CallLLMGatewayOptions {
   eventDescription: string;
@@ -37,7 +37,7 @@ export async function callLLMGatewayForPackingPlan(
       options.categories
     );
 
-    console.log('[LLM Gateway] Calling Gemini 2.0 Flash Lite for packing plan...');
+    console.log('[LLM Gateway] Calling Gemini 2.5 Flash Lite for packing plan...');
     
     const response = await callEdgeFunction({
       provider: 'llm-gateway',
@@ -124,6 +124,18 @@ ${pastSummary.length > 0 ? JSON.stringify(pastSummary) : 'No history yet'}
 
 CRITICAL RULES FOR CONTEXT-AWARE SELECTION:
 
+0. **USER EXPLICIT EXCLUSIONS — HIGHEST PRIORITY**:
+   If the user explicitly excludes any item, category, or gear type (e.g., "no tripod", "no flash", "without gimbal", "don't bring lights"), EXCLUDE those items from recommended_items.
+   User-stated exclusions OVERRIDE ALL other rules, including priority escalation (Rule 10) and completeness (Rule 11).
+   This rule cannot be overridden by any other rule. A "no tripod" instruction means zero tripods, even for indoor events.
+
+0b. **DISCREET / INVISIBLE SHOOTING STYLE**:
+   When the user mentions "invisible", "discreet", "unobtrusive", "low-profile", "blend in", "as invisible as possible", or "don't draw attention":
+   - EXCLUDE flash/strobe — using a flash is the opposite of discreet and draws everyone's attention to the photographer
+   - EXCLUDE large support equipment (tripods, large light stands) that makes the photographer conspicuous
+   - PREFER fast lenses (fast-aperture strength), high-ISO capable bodies, and compact/portability-focused gear
+   - This overrides Rule 10's flash escalation for indoor events — if the user wants to be invisible, NO flash regardless of venue
+
 1. **HARD EXCLUSIONS — CHECK THESE FIRST**:
    BEFORE generating your response, verify these critical exclusions:
    - Music video → EXCLUDE ALL audio recording gear (mics, recorders, audio cables) — music is pre-recorded
@@ -143,6 +155,12 @@ CRITICAL RULES FOR CONTEXT-AWARE SELECTION:
    (b) List the lens in missing_items with a note about mount incompatibility
    
    NEVER include a lens and camera body with different mounts in recommended_items.
+
+   **SENSOR FORMAT COMPATIBILITY (within same mount)**:
+   In addition to mount compatibility, prefer lenses that match the camera's sensor format:
+   - APS-C lenses (sensor-apsc) on full-frame bodies (sensor-fullframe) cause image circle vignetting/cropping — if a full-frame lens alternative (sensor-fullframe) exists in the catalog with the same mount, use it instead
+   - Full-frame lenses on APS-C bodies are fine (just apply crop factor — no optical penalty)
+   - Only recommend an APS-C lens on a full-frame body when NO full-frame alternative exists in the catalog for that mount, and in that case note the APS-C crop mode penalty in the reason field
 
 3. **AUDIO TYPE AWARENESS**:
    - For events with speech capture (wedding vows/speeches, interview, corporate presentation, documentary): include at least one item with "close-mic" strength as Must-have for primary audio
@@ -185,6 +203,12 @@ CRITICAL RULES FOR CONTEXT-AWARE SELECTION:
    
    If TWO OR MORE cameras are equally suited, assign BOTH as "primary" and explain what makes each unique in the "reason" field.
 
+   **MULTI-CAMERA SETUP**:
+   When the user says "dual camera", "double camera", "two camera setup", "multi-camera", or similar:
+   - Select 2 (or more) DIFFERENT camera bodies from the catalog — each one is a unique physical item
+   - NEVER use quantity > 1 for camera bodies — there is only ever one physical unit of each camera
+   - The quantity field should only exceed 1 for consumables/accessories the user owns multiples of (e.g., batteries, memory cards where catalog quantity > 1)
+
 9. **SECTION ASSIGNMENT** (STRICT):
    - Tripods, monopods, gimbals, sliders → ALWAYS "Support" (NEVER "Misc")
    - Bags, straps, cases → "Essentials" or "Misc" (but should be excluded per rule 1)
@@ -196,9 +220,10 @@ CRITICAL RULES FOR CONTEXT-AWARE SELECTION:
    Group in this order: Camera Bodies → Lenses → Lighting → Audio → Support → Power → Media → Cables → Misc
 
 10. **PRIORITY ESCALATION**:
+   NOTE: All escalation rules below are SUBJECT TO Rule 0 (user exclusions) and Rule 0b (discreet shooting). If the user excluded an item type or requested invisible/discreet shooting, do NOT escalate that item type regardless of event conditions.
    - Batteries and memory cards are ALWAYS "Must-have" for full-day events (wedding, corporate full-day)
    - The primary camera is ALWAYS "Must-have"
-   - Flash/strobe is "Must-have" for indoor/low-light events (dark church, reception)
+   - Flash/strobe is "Must-have" for indoor/low-light events (dark church, reception) — UNLESS the user requested discreet/invisible shooting (Rule 0b) or explicitly excluded flash (Rule 0)
    - Gimbal (smooth-motion) is "Must-have" when user explicitly requests smooth movement or stabilization
    - Backup camera body is "Must-have" for high-stakes events (wedding, corporate)
    - Close-mic audio is "Must-have" for weddings and interview-heavy events
@@ -244,6 +269,8 @@ Music video shoot in warehouse, 6 hours:
 - EXCLUDE: flash — video events use continuous lighting only
 
 BEFORE RETURNING YOUR RESPONSE, VERIFY:
+[ ] User said "no [item]" or excluded specific gear? → I excluded ALL matching items (overrides all other rules)
+[ ] User said "invisible", "discreet", or "unobtrusive"? → I excluded flash/strobe and large support gear
 [ ] Music video? → I removed ALL audio items (mics, recorders, audio cables)
 [ ] Natural light specified? → I removed ALL items with "powered-light" strength
 [ ] Photo-only session? → I removed gimbals
@@ -252,6 +279,8 @@ BEFORE RETURNING YOUR RESPONSE, VERIFY:
 [ ] Wedding event? → I included at least one "close-mic" audio item as Must-have
 [ ] Smooth movement mentioned? → I included at least one "smooth-motion" item as Must-have
 [ ] Every lens has a mount strength that matches at least one selected camera body
+[ ] No APS-C lens (sensor-apsc) on a full-frame body (sensor-fullframe) when a full-frame alternative exists
+[ ] Multi-camera setup? → I selected DIFFERENT camera bodies, NOT quantity > 1 of the same one
 [ ] Every item has a gear_item_id that matches an actual ID from the catalog above
 [ ] Every section assignment follows strict rules? (tripods/gimbals → Support, never Misc)
 [ ] Camera bodies are listed first, bags are Nice-to-have not Must-have

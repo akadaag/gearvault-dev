@@ -282,7 +282,8 @@ For each item, provide:
    directional-audio, multi-track, powered-light, natural-light-modifier,
    continuous-light, flash-strobe, smooth-motion, static-support,
    mount-sony-e, mount-canon-rf, mount-fuji-x, mount-nikon-z, mount-l,
-   mount-mft, mount-canon-ef, dual-card-slots, mid-range, fast-aperture
+   mount-mft, mount-canon-ef, dual-card-slots, mid-range, fast-aperture,
+   sensor-fullframe, sensor-apsc, sensor-mft, sensor-medium-format
    
    **MOUNT ASSIGNMENT RULES (for Camera Bodies and Lenses ONLY)**:
    You MUST include exactly ONE mount strength for all camera bodies and lenses.
@@ -297,6 +298,18 @@ For each item, provide:
    - Sigma DG DN / Tamron Di III → usually mount-sony-e (will be refined by post-processing)
    
    If the brand/model doesn't clearly indicate a mount, omit the mount strength and the system will assign it.
+
+   **SENSOR FORMAT ASSIGNMENT (for Camera Bodies and Lenses ONLY)**:
+   You MUST include exactly ONE sensor format strength for all camera bodies and lenses.
+   - Full-frame bodies (Sony A7/A9/A1 series, Canon R/EOS R series, Nikon Z series, Panasonic S series, Leica SL/M, etc.) → sensor-fullframe
+   - Full-frame lenses (Sony FE, Canon RF, Nikon Z, Sigma DG, Tamron Di III full-frame, etc.) → sensor-fullframe
+   - APS-C / Super 35 bodies (Sony A6xxx, FX30, Canon M/R7/R10/R50, Fujifilm X series, Nikon DX, Sigma fp L APS-C, etc.) → sensor-apsc
+   - APS-C lenses (Sony E (non-FE), Canon EF-S/EF-M/RF-S, Fujifilm XF/XC, Nikon DX, Tamron Di III-A, Sigma DC DN, etc.) → sensor-apsc
+   - Micro Four Thirds bodies and lenses (Olympus/OM System, Panasonic G series, etc.) → sensor-mft
+   - Medium format bodies and lenses (Hasselblad, Phase One, Fujifilm GFX/GF, etc.) → sensor-medium-format
+   
+   For lenses: assign based on the lens's designed image circle, NOT the body it might be used on.
+   For example: Sony 18-105mm f/4 G OSS is an APS-C lens (sensor-apsc) even though it has an E-mount.
 
 Items to classify:
 ${JSON.stringify(itemsForPrompt, null, 2)}
@@ -361,10 +374,56 @@ Return ONLY valid JSON with all four fields for each item.`;
 }
 
 // ---------------------------------------------------------------------------
+// Migration: Re-classify items missing sensor format tags
+// ---------------------------------------------------------------------------
+
+const CLASSIFIER_VERSION = '2'; // Increment when classifier prompt adds new required tags
+
+/**
+ * One-time migration: detect camera bodies and lenses that have been classified
+ * but are missing sensor format strength tags (sensor-fullframe, sensor-apsc, etc.).
+ * Resets them to 'pending' so the next classifyPendingItems() run re-classifies them.
+ * Uses localStorage to ensure this only runs once per version.
+ */
+async function migrateSensorFormatClassification(): Promise<void> {
+  const key = `classifier-version`;
+  const stored = localStorage.getItem(key);
+  if (stored === CLASSIFIER_VERSION) return; // Already migrated
+
+  try {
+    const allItems = await db.gearItems.toArray();
+    const itemsNeedingMigration = allItems.filter(item => {
+      // Only camera bodies (default-1) and lenses (default-2)
+      if (item.categoryId !== 'default-1' && item.categoryId !== 'default-2') return false;
+      // Only previously classified items
+      if (item.classificationStatus !== 'done') return false;
+      // Check if missing any sensor-* strength tag
+      const hasSensorTag = item.strengths?.some(s => s.startsWith('sensor-')) ?? false;
+      return !hasSensorTag;
+    });
+
+    if (itemsNeedingMigration.length > 0) {
+      console.log(`[Classifier Migration] Resetting ${itemsNeedingMigration.length} items for sensor format re-classification`);
+      for (const item of itemsNeedingMigration) {
+        await db.gearItems.update(item.id, { classificationStatus: 'pending' });
+      }
+    }
+
+    localStorage.setItem(key, CLASSIFIER_VERSION);
+  } catch (error) {
+    console.error('[Classifier Migration] Failed:', error);
+    // Don't set the version key so it retries next time
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Fallback: Classify all pending items immediately (for AI Assistant)
 // ---------------------------------------------------------------------------
 
 export async function classifyPendingItems(): Promise<void> {
+  // Run one-time migration for sensor format tags before checking pending items
+  await migrateSensorFormatClassification();
+
   const pending = await db.gearItems
     .filter(item => !item.classificationStatus || item.classificationStatus === 'pending' || item.classificationStatus === 'failed')
     .toArray();

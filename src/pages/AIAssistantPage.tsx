@@ -78,6 +78,11 @@ export function AIAssistantPage() {
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
   const [touchCurrentX, setTouchCurrentX] = useState<number | null>(null);
 
+  // Swipe-to-delete state for packing list items
+  const [openPackingItemKey, setOpenPackingItemKey] = useState<string | null>(null);
+  const [packTouchStartX, setPackTouchStartX] = useState<number | null>(null);
+  const [packTouchCurrentX, setPackTouchCurrentX] = useState<number | null>(null);
+
 
   // Auto-hide input bar on scroll (chat mode only)
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -236,6 +241,57 @@ export function AIAssistantPage() {
 
     setTouchStartX(null);
     setTouchCurrentX(null);
+  }
+
+
+  // ---------------------------------------------------------------------------
+  // Touch handlers for swipe-to-delete (packing list items)
+  // ---------------------------------------------------------------------------
+  function onPackTouchStart(e: React.TouchEvent<HTMLDivElement>) {
+    setPackTouchStartX(e.touches[0]?.clientX ?? null);
+    setPackTouchCurrentX(e.touches[0]?.clientX ?? null);
+  }
+
+  function onPackTouchMove(e: React.TouchEvent<HTMLDivElement>) {
+    setPackTouchCurrentX(e.touches[0]?.clientX ?? null);
+  }
+
+  function onPackTouchEnd(itemKey: string) {
+    if (packTouchStartX == null || packTouchCurrentX == null) {
+      setPackTouchStartX(null);
+      setPackTouchCurrentX(null);
+      return;
+    }
+
+    const deltaX = packTouchCurrentX - packTouchStartX;
+
+    // Full swipe left (>= 150px) — auto delete immediately
+    if (deltaX < -150) {
+      handleRemovePackingItem(itemKey);
+    } else if (deltaX < -40) {
+      // Partial swipe — reveal trash pill
+      setOpenPackingItemKey(itemKey);
+    } else if (deltaX > 40) {
+      // Swipe right — close actions
+      setOpenPackingItemKey(null);
+    }
+
+    setPackTouchStartX(null);
+    setPackTouchCurrentX(null);
+  }
+
+  function handleRemovePackingItem(itemKey: string) {
+    setPlan(prev =>
+      prev
+        ? {
+            ...prev,
+            checklist: prev.checklist.filter(
+              i => `${i.name}-${i.gearItemId ?? 'x'}` !== itemKey,
+            ),
+          }
+        : prev,
+    );
+    setOpenPackingItemKey(null);
   }
 
 
@@ -812,29 +868,57 @@ export function AIAssistantPage() {
                     const showRoleBadge = (section === 'Camera Bodies' || section === 'Audio') && 
                                           item.role && 
                                           item.role !== 'standard';
+                    const itemKey = `${item.name}-${item.gearItemId ?? 'x'}`;
+                    const isOpen = openPackingItemKey === itemKey;
                     
                     return (
-                      <div key={`${item.name}-${item.gearItemId ?? 'x'}`} className="ai-ios-list-item">
-                        <div className="ai-ios-item-content">
-                          <div className="row wrap" style={{ gap: '0.4rem', alignItems: 'center' }}>
-                            <span className="ai-ios-item-name">{item.name}</span>
-                            {item.quantity > 1 && (
-                              <span className="ai-ios-badge">×{item.quantity}</span>
-                            )}
-                            {showRoleBadge && (
-                              <span className={`ai-ios-badge role-${item.role}`}>
-                                {item.role}
-                              </span>
-                            )}
-                            {item.gearItemId && (
-                              <span className="ai-ios-badge success">✓ matched</span>
+                      <div
+                        key={itemKey}
+                        className="ai-packing-swipe-row"
+                        onTouchStart={onPackTouchStart}
+                        onTouchMove={onPackTouchMove}
+                        onTouchEnd={() => onPackTouchEnd(itemKey)}
+                      >
+                        {/* Background trash action */}
+                        <div className="ai-packing-swipe-actions">
+                          <button
+                            type="button"
+                            className="ai-packing-swipe-delete-btn"
+                            onClick={() => handleRemovePackingItem(itemKey)}
+                            aria-label="Remove item"
+                          >
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              <polyline points="3 6 5 6 21 6" />
+                              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6" />
+                              <path d="M10 11v6M14 11v6" />
+                              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                            </svg>
+                          </button>
+                        </div>
+
+                        {/* Foreground item content */}
+                        <div className={`ai-packing-swipe-foreground ai-ios-list-item${isOpen ? ' is-open' : ''}`}>
+                          <div className="ai-ios-item-content">
+                            <div className="row wrap" style={{ gap: '0.4rem', alignItems: 'center' }}>
+                              <span className="ai-ios-item-name">{item.name}</span>
+                              {item.quantity > 1 && (
+                                <span className="ai-ios-badge">×{item.quantity}</span>
+                              )}
+                              {showRoleBadge && (
+                                <span className={`ai-ios-badge role-${item.role}`}>
+                                  {item.role}
+                                </span>
+                              )}
+                              {item.gearItemId && (
+                                <span className="ai-ios-badge success">✓ matched</span>
+                              )}
+                            </div>
+                            {item.notes && (
+                              <p className="ai-ios-item-note">{item.notes}</p>
                             )}
                           </div>
-                          {item.notes && (
-                            <p className="ai-ios-item-note">{item.notes}</p>
-                          )}
+                          <span className={`ai-ios-priority-dot priority-${item.priority}`} />
                         </div>
-                        <span className={`ai-ios-priority-dot priority-${item.priority}`} />
                       </div>
                     );
                   })}

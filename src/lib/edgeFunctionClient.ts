@@ -261,7 +261,7 @@ export async function testEdgeFunctionConnection(provider: AIProvider = 'llm-gat
   try {
     const response = await callEdgeFunction({
       provider,
-      model: provider === 'llm-gateway' ? 'google-vertex/gemini-2.0-flash-lite' : 'llama-3.1-8b-instant',
+      model: provider === 'llm-gateway' ? 'google-vertex/gemini-2.5-flash-lite' : 'llama-3.1-8b-instant',
       messages: [{ role: 'user', content: 'Hello, respond with just "OK"' }],
       max_tokens: 10,
     });
