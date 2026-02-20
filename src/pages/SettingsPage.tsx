@@ -4,7 +4,7 @@ import { db, ensureBaseData } from '../db';
 import { defaultCategories } from '../constants/defaultCategories';
 import { useAuth } from '../hooks/useAuth';
 import { seedDemoData, removeDemoData } from '../lib/demoData';
-import { syncNow } from '../services/sync';
+import { pushCloudData, syncNow } from '../services/sync';
 import { classificationQueue } from '../lib/gearClassifier';
 import type { AppSettings, ExportBundle } from '../types/models';
 
@@ -53,6 +53,18 @@ export function SettingsPage() {
   async function clearDemoData() {
     if (!confirm('This will delete ALL gear items and events. Continue?')) return;
     await removeDemoData();
+    // Also flip the toggle off, since the data is now gone.
+    await update('demoDataEnabled', false);
+    // Immediately push the cleared state to the cloud so a refresh does not
+    // restore the old data from the cloud copy.
+    if (settings?.syncEnabled && user) {
+      try {
+        await pushCloudData(user.id);
+      } catch {
+        // Non-critical — the local change marker ensures the next periodic
+        // sync will push the cleared state.
+      }
+    }
     setStatus('All data cleared.');
   }
 

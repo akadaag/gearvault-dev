@@ -66,6 +66,43 @@ class GearVaultDB extends Dexie {
 
 export const db = new GearVaultDB();
 
+// ── Local change tracking ────────────────────────────────────────────────────
+// Stored in localStorage (survives IndexedDB clears) so the sync layer can
+// determine whether local data has been modified since the last cloud push.
+// We use localStorage instead of IndexedDB because it persists even after
+// db.gearItems.clear() / db.events.clear() calls.
+
+const LOCAL_CHANGE_KEY = 'gearvault_last_local_change';
+
+// Set to true during importBundle() so that the bulk-write from a cloud pull
+// does not itself mark local data as "changed" (which would cause an infinite
+// push-pull loop).
+export let suppressChangeTracking = false;
+
+export function markLocalDataChanged() {
+  if (!suppressChangeTracking) {
+    localStorage.setItem(LOCAL_CHANGE_KEY, new Date().toISOString());
+  }
+}
+
+export function getLastLocalChange(): string | null {
+  return localStorage.getItem(LOCAL_CHANGE_KEY);
+}
+
+export function clearLocalChangeMarker() {
+  localStorage.removeItem(LOCAL_CHANGE_KEY);
+}
+
+// Automatically mark local changes on every gearItems / events mutation.
+// Note: Dexie hooks do NOT fire for .clear(), so call-sites that use .clear()
+// must invoke markLocalDataChanged() manually.
+db.gearItems.hook('creating', function () { markLocalDataChanged(); });
+db.gearItems.hook('updating', function () { markLocalDataChanged(); });
+db.gearItems.hook('deleting', function () { markLocalDataChanged(); });
+db.events.hook('creating', function () { markLocalDataChanged(); });
+db.events.hook('updating', function () { markLocalDataChanged(); });
+db.events.hook('deleting', function () { markLocalDataChanged(); });
+
 export const defaultSettings: AppSettings = {
   id: 'app-settings',
   demoDataEnabled: false,
@@ -127,22 +164,30 @@ export async function exportBundle(): Promise<ExportBundle> {
 }
 
 export async function importBundle(bundle: ExportBundle) {
-  await db.transaction('rw', db.gearItems, db.categories, db.events, db.settings, async () => {
-    await db.gearItems.clear();
-    await db.categories.clear();
-    await db.events.clear();
-    await db.settings.clear();
+  // Suppress change tracking during import so that writing cloud data locally
+  // does not mark local data as "changed" (which would trigger an immediate
+  // re-push and cause a push-pull loop).
+  suppressChangeTracking = true;
+  try {
+    await db.transaction('rw', db.gearItems, db.categories, db.events, db.settings, async () => {
+      await db.gearItems.clear();
+      await db.categories.clear();
+      await db.events.clear();
+      await db.settings.clear();
 
-    await db.gearItems.bulkPut(bundle.data.gearItems ?? []);
-    await db.categories.bulkPut(bundle.data.categories ?? []);
-    await db.events.bulkPut(bundle.data.events ?? []);
-    await db.settings.bulkPut(bundle.data.settings ?? []);
-  });
+      await db.gearItems.bulkPut(bundle.data.gearItems ?? []);
+      await db.categories.bulkPut(bundle.data.categories ?? []);
+      await db.events.bulkPut(bundle.data.events ?? []);
+      await db.settings.bulkPut(bundle.data.settings ?? []);
+    });
 
-  await db.transaction('rw', db.aiFeedback, async () => {
-    await db.aiFeedback.clear();
-    await db.aiFeedback.bulkPut(bundle.data.aiFeedback ?? []);
-  });
+    await db.transaction('rw', db.aiFeedback, async () => {
+      await db.aiFeedback.clear();
+      await db.aiFeedback.bulkPut(bundle.data.aiFeedback ?? []);
+    });
+  } finally {
+    suppressChangeTracking = false;
+  }
 
   await ensureBaseData();
 }
@@ -158,6 +203,9 @@ export async function clearAllData() {
   await db.transaction('rw', db.aiFeedback, async () => {
     await db.aiFeedback.clear();
   });
+
+  // .clear() does not trigger Dexie hooks, so mark the change manually.
+  markLocalDataChanged();
 }
 
 export async function getLocalDataStats() {

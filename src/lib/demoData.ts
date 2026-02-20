@@ -1,4 +1,4 @@
-import { db } from '../db';
+import { db, markLocalDataChanged } from '../db';
 import { makeId } from './ids';
 import type { Category, GearItem } from '../types/models';
 
@@ -575,4 +575,7 @@ export async function removeDemoData() {
     await db.gearItems.clear();
     await db.events.clear();
   });
+  // .clear() does not trigger Dexie hooks, so mark the change manually so
+  // the sync layer knows to push the cleared state to the cloud.
+  markLocalDataChanged();
 }
