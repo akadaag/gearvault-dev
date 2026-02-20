@@ -137,8 +137,6 @@ export function GearItemDetailPage() {
     eventTarget
     && events.find((ev) => ev.id === eventTarget)?.packingChecklist.some((entry) => entry.gearItemId === currentItem.id),
   );
-  const hasItemInfo = Boolean(currentItem.serialNumber || currentItem.purchaseDate || currentItem.currentValue);
-  const hasWarrantyInfo = Boolean(currentItem.warranty?.provider || currentItem.warranty?.expirationDate || currentItem.warranty?.notes);
   const maintenanceSummary = getMaintenanceSummary(currentItem);
 
   async function save(patch: Partial<GearItem>) {
@@ -459,124 +457,116 @@ export function GearItemDetailPage() {
           </div>
         </div>
 
-        {/* Price Card */}
-        {currentItem.purchasePrice && (
-          <div className="gear-detail-info-card">
-            <div className="gear-detail-info-card-header">
-              <div className="gear-detail-info-icon green" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="12" y1="1" x2="12" y2="23" />
-                  <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-                </svg>
-              </div>
-              <strong className="gear-detail-info-card-title">Purchase Price</strong>
+        {/* Price Card — always shown */}
+        <div className="gear-detail-info-card">
+          <div className="gear-detail-info-card-header">
+            <div className="gear-detail-info-icon green" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="1" x2="12" y2="23" />
+                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
+              </svg>
             </div>
-            <div className="gear-detail-info-card-divider" />
-            <div className="gear-detail-info-card-row">
-              <span className="gear-detail-info-row-label">Paid</span>
-              <span className="gear-detail-info-row-value">{formatMoney(currentItem.purchasePrice.amount, currentItem.purchasePrice.currency)}</span>
-            </div>
+            <strong className="gear-detail-info-card-title">Purchase Price</strong>
           </div>
-        )}
+          <div className="gear-detail-info-card-divider" />
+          <div className="gear-detail-info-card-row">
+            <span className="gear-detail-info-row-label">Paid</span>
+            <span className={`gear-detail-info-row-value${!currentItem.purchasePrice ? ' gear-detail-info-row-value--empty' : ''}`}>
+              {currentItem.purchasePrice ? formatMoney(currentItem.purchasePrice.amount, currentItem.purchasePrice.currency) : '—'}
+            </span>
+          </div>
+        </div>
 
-        {/* Item Details Card (Notifiche style) */}
-        {hasItemInfo && (
-          <div className="gear-detail-info-card">
-            <div className="gear-detail-info-card-header">
-              <div className="gear-detail-info-icon blue" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="10" />
-                  <line x1="12" y1="16" x2="12" y2="12" />
-                  <line x1="12" y1="8" x2="12.01" y2="8" />
-                </svg>
-              </div>
-              <strong className="gear-detail-info-card-title">Item Details</strong>
+        {/* Item Details Card — always shown */}
+        <div className="gear-detail-info-card">
+          <div className="gear-detail-info-card-header">
+            <div className="gear-detail-info-icon blue" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <line x1="12" y1="16" x2="12" y2="12" />
+                <line x1="12" y1="8" x2="12.01" y2="8" />
+              </svg>
             </div>
-            <div className="gear-detail-info-card-divider" />
-            {currentItem.serialNumber && (
-              <>
-                <div className="gear-detail-info-card-row">
-                  <span className="gear-detail-info-row-label">Serial Number</span>
-                  <span className="gear-detail-info-row-value">{currentItem.serialNumber}</span>
-                </div>
-                {(currentItem.purchaseDate || currentItem.currentValue) && <div className="gear-detail-info-card-divider" />}
-              </>
-            )}
-            {currentItem.purchaseDate && (
-              <>
-                <div className="gear-detail-info-card-row">
-                  <span className="gear-detail-info-row-label">Purchase Date</span>
-                  <span className="gear-detail-info-row-value">{new Date(currentItem.purchaseDate).toLocaleDateString()}</span>
-                </div>
-                {currentItem.currentValue && <div className="gear-detail-info-card-divider" />}
-              </>
-            )}
-            {currentItem.currentValue && (
+            <strong className="gear-detail-info-card-title">Item Details</strong>
+          </div>
+          <div className="gear-detail-info-card-divider" />
+          <div className="gear-detail-info-card-row">
+            <span className="gear-detail-info-row-label">Serial Number</span>
+            <span className={`gear-detail-info-row-value${!currentItem.serialNumber ? ' gear-detail-info-row-value--empty' : ''}`}>
+              {currentItem.serialNumber ?? '—'}
+            </span>
+          </div>
+          <div className="gear-detail-info-card-divider" />
+          <div className="gear-detail-info-card-row">
+            <span className="gear-detail-info-row-label">Purchase Date</span>
+            <span className={`gear-detail-info-row-value${!currentItem.purchaseDate ? ' gear-detail-info-row-value--empty' : ''}`}>
+              {currentItem.purchaseDate ? new Date(currentItem.purchaseDate).toLocaleDateString() : '—'}
+            </span>
+          </div>
+          <div className="gear-detail-info-card-divider" />
+          <div className="gear-detail-info-card-row">
+            <span className="gear-detail-info-row-label">Current Value</span>
+            <span className={`gear-detail-info-row-value${!currentItem.currentValue ? ' gear-detail-info-row-value--empty' : ''}`}>
+              {currentItem.currentValue ? formatMoney(currentItem.currentValue.amount, currentItem.currentValue.currency) : '—'}
+            </span>
+          </div>
+        </div>
+
+        {/* More Info Card — always shown */}
+        <div className="gear-detail-info-card">
+          <div className="gear-detail-info-card-header">
+            <div className="gear-detail-info-icon gray" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="3" />
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+              </svg>
+            </div>
+            <strong className="gear-detail-info-card-title">More Info</strong>
+          </div>
+          <div className="gear-detail-info-card-divider" />
+          <div className="gear-detail-info-card-row">
+            <span className="gear-detail-info-row-label">Notes</span>
+            <span className={`gear-detail-info-row-value${!currentItem.notes ? ' gear-detail-info-row-value--empty' : ''}`}>
+              {currentItem.notes ?? '—'}
+            </span>
+          </div>
+          {currentItem.warranty?.provider && (
+            <>
+              <div className="gear-detail-info-card-divider" />
               <div className="gear-detail-info-card-row">
-                <span className="gear-detail-info-row-label">Current Value</span>
-                <span className="gear-detail-info-row-value">{formatMoney(currentItem.currentValue.amount, currentItem.currentValue.currency)}</span>
+                <span className="gear-detail-info-row-label">Warranty Provider</span>
+                <span className="gear-detail-info-row-value">{currentItem.warranty.provider}</span>
               </div>
-            )}
-          </div>
-        )}
-
-        {/* More Info Card (Impostazioni style) */}
-        {(currentItem.notes || hasWarrantyInfo || related.length > 0) && (
-          <div className="gear-detail-info-card">
-            <div className="gear-detail-info-card-header">
-              <div className="gear-detail-info-icon gray" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="12" cy="12" r="3" />
-                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-                </svg>
+            </>
+          )}
+          {currentItem.warranty?.expirationDate && (
+            <>
+              <div className="gear-detail-info-card-divider" />
+              <div className="gear-detail-info-card-row">
+                <span className="gear-detail-info-row-label">Warranty Expires</span>
+                <span className="gear-detail-info-row-value">{new Date(currentItem.warranty.expirationDate).toLocaleDateString()}</span>
               </div>
-              <strong className="gear-detail-info-card-title">More Info</strong>
-            </div>
-            <div className="gear-detail-info-card-divider" />
-            {currentItem.notes && (
-              <>
-                <div className="gear-detail-info-card-row">
-                  <span className="gear-detail-info-row-label">Notes</span>
-                  <span className="gear-detail-info-row-value">{currentItem.notes}</span>
-                </div>
-                {(hasWarrantyInfo || related.length > 0) && <div className="gear-detail-info-card-divider" />}
-              </>
-            )}
-            {currentItem.warranty?.provider && (
-              <>
-                <div className="gear-detail-info-card-row">
-                  <span className="gear-detail-info-row-label">Warranty Provider</span>
-                  <span className="gear-detail-info-row-value">{currentItem.warranty.provider}</span>
-                </div>
-                {(currentItem.warranty?.expirationDate || currentItem.warranty?.notes || related.length > 0) && <div className="gear-detail-info-card-divider" />}
-              </>
-            )}
-            {currentItem.warranty?.expirationDate && (
-              <>
-                <div className="gear-detail-info-card-row">
-                  <span className="gear-detail-info-row-label">Warranty Expires</span>
-                  <span className="gear-detail-info-row-value">{new Date(currentItem.warranty.expirationDate).toLocaleDateString()}</span>
-                </div>
-                {(currentItem.warranty?.notes || related.length > 0) && <div className="gear-detail-info-card-divider" />}
-              </>
-            )}
-            {currentItem.warranty?.notes && (
-              <>
-                <div className="gear-detail-info-card-row">
-                  <span className="gear-detail-info-row-label">Warranty Notes</span>
-                  <span className="gear-detail-info-row-value">{currentItem.warranty.notes}</span>
-                </div>
-                {related.length > 0 && <div className="gear-detail-info-card-divider" />}
-              </>
-            )}
-            {related.length > 0 && (
+            </>
+          )}
+          {currentItem.warranty?.notes && (
+            <>
+              <div className="gear-detail-info-card-divider" />
+              <div className="gear-detail-info-card-row">
+                <span className="gear-detail-info-row-label">Warranty Notes</span>
+                <span className="gear-detail-info-row-value">{currentItem.warranty.notes}</span>
+              </div>
+            </>
+          )}
+          {related.length > 0 && (
+            <>
+              <div className="gear-detail-info-card-divider" />
               <div className="gear-detail-info-card-row">
                 <span className="gear-detail-info-row-label">Related Items</span>
                 <span className="gear-detail-info-row-value">{related.map((r) => r.name).join(', ')}</span>
               </div>
-            )}
-          </div>
-        )}
+            </>
+          )}
+        </div>
 
         <div className="gear-detail-bottom-spacer" />
       </div>

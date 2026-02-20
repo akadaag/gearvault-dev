@@ -11879,6 +11879,10 @@ input[type="checkbox"].ios-toggle:checked::after {
   min-width: 0;
 }
 
+.gear-detail-page.ios-theme .gear-detail-info-row-value--empty {
+  opacity: 0.35;
+}
+
 /* ── Feedback Toast ── */
 .gear-detail-page.ios-theme .gear-detail-toast {
   position: fixed;

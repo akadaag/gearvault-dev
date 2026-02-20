@@ -422,6 +422,8 @@ IDENTIFICATION RULES:
    - If you can read text printed on the item: READ IT and use that as the name.
    - If you cannot identify the exact product but know the type: use a brief descriptive name (e.g. "Camera Cage", "LED Panel", "Shotgun Mic", "HDMI Cable", "V-Mount Battery").
    - Do NOT use full sentences. Do NOT repeat the category (e.g. do NOT write "Mirrorless Camera Body" if the category is already "Camera bodies").
+   - LENSES: Always start with the focal length, then aperture, then any suffix/series. E.g. "16-55mm f/2.8 G", "50mm f/1.2 L", "24-70mm f/2.8 GM II", "35mm f/1.8". Never start with "Lens" or the mount type.
+   - CABLES: If both ends have DIFFERENT connectors, name it as "X to Y Cable" (e.g. "HDMI to USB-C Cable", "XLR to 3.5mm Cable"). If both ends are the SAME connector, just say "X Cable" (e.g. "HDMI Cable", "USB-C Cable", "XLR Cable").
 3. BRAND — Only the brand name (e.g. "Sony", "Rode", "Atomos"). Leave empty string if you are not confident.
 4. If the item is NOT photography/videography equipment (e.g. food, furniture, pets, personal items), set confidence to "none".
 
