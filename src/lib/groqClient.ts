@@ -19,8 +19,8 @@ export async function callGroqForPackingPlan(
 ): Promise<PackingPlan> {
   const categories = await db.categories.toArray();
   
-  // Tier 1: Gemini 2.0 Flash Lite via LLM Gateway (Supabase Edge Function)
-  console.log('🟢 Attempt 1: Gemini 2.0 Flash Lite (via LLM Gateway)');
+  // Tier 1: Gemini 2.0 Flash via LLM Gateway (Supabase Edge Function)
+  console.log('🟢 Attempt 1: Gemini 2.0 Flash (via LLM Gateway)');
   const geminiResult = await callLLMGatewayForPackingPlan({
     eventDescription,
     catalog,
@@ -210,6 +210,7 @@ CRITICAL RULES FOR CONTEXT-AWARE SELECTION:
    - Music video → EXCLUDE ALL audio recording gear (mics, recorders, audio cables) — music is pre-recorded
    - "Natural light" specified → EXCLUDE ALL items with "powered-light" strength. ONLY include items with "natural-light-modifier" strength (reflectors, diffusers)
    - Photo-only session → EXCLUDE gimbals unless specifically requested
+   - Photo-only session → cameras with inferredProfile "video_first" or "cinema" must NOT be assigned role "primary". Prefer "photo_first" or "hybrid" cameras as primary. Only include a "video_first" camera if no suitable photo_first/hybrid alternative exists, and assign it role "backup" or "alternative"
    - Video-primary events → cameras with inferredProfile "video_first" or "cinema" MUST be primary over "hybrid"
    - Bags, backpacks, and cases → EXCLUDE from recommended_items unless the user specifically asks about transport or gear carrying
 
@@ -342,7 +343,7 @@ BEFORE RETURNING YOUR RESPONSE, VERIFY:
 [ ] User said "invisible", "discreet", or "unobtrusive"? → I excluded flash/strobe and large support gear
 [ ] Music video? → I removed ALL audio items (mics, recorders, audio cables)
 [ ] Natural light specified? → I removed ALL items with "powered-light" strength
-[ ] Photo-only session? → I removed gimbals
+[ ] Photo-only session? → I removed gimbals AND no "video_first"/"cinema" camera is assigned role "primary"
 [ ] Video event? → At least one camera with inferredProfile "video_first" or "cinema" is included as primary
 [ ] Full-day event (wedding, corporate full-day)? → I have at least 12 items total
 [ ] Wedding event? → I included at least one "close-mic" audio item as Must-have

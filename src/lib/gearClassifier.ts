@@ -1,6 +1,7 @@
 /**
  * Gear Classification System
- * Automatically classifies gear items using Groq AI to infer:
+ * Automatically classifies gear items using Gemini 2.0 Flash (primary) with
+ * Scout 17B as fallback, to infer:
  * - inferredProfile: video_first | photo_first | hybrid | cinema | audio | lighting | support | power | media | accessory
  * - capabilities: array of technical specs
  * - eventFit: array of event types this item is suited for
@@ -8,10 +9,10 @@
  */
 
 import { db } from '../db';
-import { GROQ_MODELS, AI_TASKS } from './groqConfig';
+import { GROQ_MODELS } from './groqConfig';
 import type { GearItem } from '../types/models';
 import { z } from 'zod';
-import { callEdgeFunction } from './edgeFunctionClient';
+import { callEdgeFunction, AuthExpiredError } from './edgeFunctionClient';
 
 // ---------------------------------------------------------------------------
 // Zod schema for classification response
@@ -32,7 +33,7 @@ const classificationResponseSchema = z.object({
 type ClassificationResponse = z.infer<typeof classificationResponseSchema>;
 
 // ---------------------------------------------------------------------------
-// Classification Queue — batches items, debounces, calls Groq
+// Classification Queue — batches items, debounces, calls Gemini (Scout fallback)
 // ---------------------------------------------------------------------------
 
 class ClassificationQueue {
@@ -78,7 +79,7 @@ class ClassificationQueue {
         await db.gearItems.update(item.id, { classificationStatus: 'pending' });
       }
 
-      // Call Groq for classification
+      // Call AI for classification
       const result = await classifyBatch(batch);
 
       // Update items with results
@@ -343,17 +344,33 @@ Examples:
 
 Return ONLY valid JSON with all four fields for each item.`;
 
-    const taskConfig = AI_TASKS.CLASSIFICATION;
-    const model = GROQ_MODELS[taskConfig.model];
+    const callOptions = {
+      messages: [{ role: 'user' as const, content: prompt }],
+      response_format: { type: 'json_object' as const },
+      temperature: 0.3,
+      max_tokens: 2000,
+    };
 
-    const json = await callEdgeFunction({
-      provider: 'groq',
-      model,
-      messages: [{ role: 'user', content: prompt }],
-      response_format: { type: 'json_object' },
-      temperature: taskConfig.temperature,
-      max_tokens: taskConfig.maxTokens,
-    });
+    // Tier 1: Gemini 2.0 Flash via LLM Gateway
+    let json;
+    try {
+      console.log('[Classification] Calling Gemini 2.0 Flash...');
+      json = await callEdgeFunction({
+        provider: 'llm-gateway',
+        model: 'google-ai-studio/gemini-2.0-flash',
+        ...callOptions,
+      });
+    } catch (geminiError) {
+      // Auth errors should not fall through to fallback
+      if (geminiError instanceof AuthExpiredError) throw geminiError;
+      // Tier 2: Scout 17B fallback
+      console.warn('[Classification] Gemini failed, falling back to Scout 17B:', geminiError);
+      json = await callEdgeFunction({
+        provider: 'groq',
+        model: GROQ_MODELS.SCOUT,
+        ...callOptions,
+      });
+    }
 
     const rawContent = json.choices?.[0]?.message?.content ?? '{}';
     const parsed = classificationResponseSchema.safeParse(JSON.parse(rawContent));
@@ -377,13 +394,13 @@ Return ONLY valid JSON with all four fields for each item.`;
 // Migration: Re-classify items missing sensor format tags
 // ---------------------------------------------------------------------------
 
-const CLASSIFIER_VERSION = '2'; // Increment when classifier prompt adds new required tags
+const CLASSIFIER_VERSION = '3'; // v3: Switched to Gemini 2.0 Flash classification (full re-classify)
 
 /**
- * One-time migration: detect camera bodies and lenses that have been classified
- * but are missing sensor format strength tags (sensor-fullframe, sensor-apsc, etc.).
- * Resets them to 'pending' so the next classifyPendingItems() run re-classifies them.
- * Uses localStorage to ensure this only runs once per version.
+ * Migration: reset all classified items so they are re-classified by Gemini.
+ * Runs once per CLASSIFIER_VERSION (stored in localStorage).
+ * v3: Full catalog reset — model changed from Groq llama-3.1-8b to Gemini 2.0 Flash,
+ *     which produces higher-quality eventFit and inferredProfile tags.
  */
 async function migrateSensorFormatClassification(): Promise<void> {
   const key = `classifier-version`;
@@ -392,18 +409,14 @@ async function migrateSensorFormatClassification(): Promise<void> {
 
   try {
     const allItems = await db.gearItems.toArray();
-    const itemsNeedingMigration = allItems.filter(item => {
-      // Only camera bodies (default-1) and lenses (default-2)
-      if (item.categoryId !== 'default-1' && item.categoryId !== 'default-2') return false;
-      // Only previously classified items
-      if (item.classificationStatus !== 'done') return false;
-      // Check if missing any sensor-* strength tag
-      const hasSensorTag = item.strengths?.some(s => s.startsWith('sensor-')) ?? false;
-      return !hasSensorTag;
-    });
+
+    // v3: Reset every item (done or failed) so Gemini re-classifies with better quality
+    const itemsNeedingMigration = allItems.filter(
+      item => item.classificationStatus === 'done' || item.classificationStatus === 'failed'
+    );
 
     if (itemsNeedingMigration.length > 0) {
-      console.log(`[Classifier Migration] Resetting ${itemsNeedingMigration.length} items for sensor format re-classification`);
+      console.log(`[Classifier Migration v3] Resetting ${itemsNeedingMigration.length} items for Gemini re-classification`);
       for (const item of itemsNeedingMigration) {
         await db.gearItems.update(item.id, { classificationStatus: 'pending' });
       }

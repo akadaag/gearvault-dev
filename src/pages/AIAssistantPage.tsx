@@ -461,9 +461,12 @@ export function AIAssistantPage() {
 
 
       // ------------------------------------------------------------------
-      // Safety guard: Ensure at least one video-first camera is PRIMARY for video events
+      // Safety guard: Ensure at least one video-first camera is PRIMARY for video events.
+      // NOTE: "corporate" is intentionally excluded from the video event check —
+      // corporate events can be photo-only. We rely on the prompt + photo-only rule instead.
       // ------------------------------------------------------------------
-      const isVideoEvent = /video|interview|corporate/i.test(rawPlan.eventType);
+      const isPhotoOnly = /photo[\s-]*(only|required)|only photo/i.test(input);
+      const isVideoEvent = !isPhotoOnly && /\bvideo\b|\binterview\b/i.test(rawPlan.eventType);
       if (isVideoEvent) {
         const cameraBodies = rawPlan.checklist.filter(item => item.section === 'Camera Bodies');
         const hasVideoFirstPrimary = cameraBodies.some(item => {
