@@ -226,6 +226,25 @@ async function assignMountsToClassification(
     }
   }
   
+  // Sensor format enforcement: inject sensor-apsc for known APS-C items that
+  // Gemini failed to tag. Runs after the mount loop so it doesn't interfere.
+  const KNOWN_APSC_PATTERNS = [
+    '16-55mm', '10-18mm', '18-105mm', '18-135mm', '18-50mm',
+    'fx30', 'a6700', 'a6600', 'a6500', 'a6400', 'a6100', 'a6000',
+    'x-t', 'x-s', 'x-h', 'x-e', 'x-pro',
+  ];
+  for (const item of classifications.items) {
+    const gearItem = catalog.find(g => g.id === item.id);
+    if (!gearItem) continue;
+    if (gearItem.categoryId !== 'default-1' && gearItem.categoryId !== 'default-2') continue;
+    if (item.strengths.some(s => s.startsWith('sensor-'))) continue;
+    const nameLower = `${gearItem.name} ${gearItem.model ?? ''}`.toLowerCase();
+    if (KNOWN_APSC_PATTERNS.some(p => nameLower.includes(p))) {
+      item.strengths.push('sensor-apsc');
+      console.log(`[Classification] Injected sensor-apsc for: ${gearItem.name}`);
+    }
+  }
+
   return classifications;
 }
 
@@ -431,13 +450,14 @@ Return ONLY valid JSON with all four fields for each item.`;
 // Migration: Re-classify items missing sensor format tags
 // ---------------------------------------------------------------------------
 
-const CLASSIFIER_VERSION = '3'; // v3: Switched to Gemini 2.0 Flash classification (full re-classify)
+const CLASSIFIER_VERSION = '4'; // v4: Targeted reset for items with bad sensor tags or garbage eventFit
 
 /**
- * Migration: reset all classified items so they are re-classified by Gemini.
+ * Migration: selectively reset items with known classification defects:
+ *   - Camera/lens items missing a sensor-* strength (e.g. 16-55mm f/2.8 G)
+ *   - Items whose eventFit contains inferredProfile values instead of event types
+ *     (e.g. Camera Cage A7III, whose eventFit was ["video_first", "photo_first", ...])
  * Runs once per CLASSIFIER_VERSION (stored in localStorage).
- * v3: Full catalog reset — model changed from Groq llama-3.1-8b to Gemini 2.0 Flash,
- *     which produces higher-quality eventFit and inferredProfile tags.
  */
 async function migrateSensorFormatClassification(): Promise<void> {
   const key = `classifier-version`;
@@ -447,13 +467,30 @@ async function migrateSensorFormatClassification(): Promise<void> {
   try {
     const allItems = await db.gearItems.toArray();
 
-    // v3: Reset every item (done or failed) so Gemini re-classifies with better quality
-    const itemsNeedingMigration = allItems.filter(
-      item => item.classificationStatus === 'done' || item.classificationStatus === 'failed'
-    );
+    // Known inferredProfile enum values — if any appear in eventFit, the item has garbage classification
+    const profileValues = new Set([
+      'video_first', 'photo_first', 'hybrid', 'cinema',
+      'audio', 'lighting', 'support', 'power', 'media', 'accessory',
+    ]);
+
+    const itemsNeedingMigration = allItems.filter(item => {
+      if (item.classificationStatus !== 'done') return false;
+
+      // v4a: eventFit contains profile names instead of event types (garbage data)
+      if (item.eventFit?.some(e => profileValues.has(e))) return true;
+
+      // v4b: camera/lens items missing a sensor-* strength
+      if (
+        (item.categoryId === 'default-1' || item.categoryId === 'default-2') &&
+        ['photo_first', 'video_first', 'hybrid', 'cinema'].includes(item.inferredProfile ?? '') &&
+        !item.strengths?.some(s => s.startsWith('sensor-'))
+      ) return true;
+
+      return false;
+    });
 
     if (itemsNeedingMigration.length > 0) {
-      console.log(`[Classifier Migration v3] Resetting ${itemsNeedingMigration.length} items for Gemini re-classification`);
+      console.log(`[Classifier Migration v4] Resetting ${itemsNeedingMigration.length} items:`, itemsNeedingMigration.map(i => i.name));
       for (const item of itemsNeedingMigration) {
         await db.gearItems.update(item.id, { classificationStatus: 'pending' });
       }

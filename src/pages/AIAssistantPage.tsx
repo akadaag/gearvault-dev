@@ -486,6 +486,37 @@ export function AIAssistantPage() {
         }
       }
 
+      // ------------------------------------------------------------------
+      // Safety guard: For photo-only events, demote video_first/cinema
+      // cameras from primary to backup. Gemini ignores the prompt rule
+      // reliably enough, so we enforce it deterministically here.
+      // ------------------------------------------------------------------
+      if (isPhotoOnly) {
+        rawPlan.checklist = rawPlan.checklist.map(item => {
+          const gear = catalog.find(c => c.id === item.gearItemId);
+          if (
+            item.section === 'Camera Bodies' &&
+            (gear?.inferredProfile === 'video_first' || gear?.inferredProfile === 'cinema') &&
+            item.role === 'primary'
+          ) {
+            return { ...item, role: 'backup' };
+          }
+          return item;
+        });
+
+        // After demotion, ensure at least one camera body is still primary
+        const cameraBodies = rawPlan.checklist.filter(i => i.section === 'Camera Bodies');
+        const hasPrimary = cameraBodies.some(i => i.role === 'primary');
+        if (!hasPrimary && cameraBodies.length > 0) {
+          const best =
+            cameraBodies.find(i => {
+              const gear = catalog.find(c => c.id === i.gearItemId);
+              return gear?.inferredProfile === 'hybrid' || gear?.inferredProfile === 'photo_first';
+            }) ?? cameraBodies[0];
+          best.role = 'primary';
+        }
+      }
+
 
       // ------------------------------------------------------------------
       // Client-side catalog matcher

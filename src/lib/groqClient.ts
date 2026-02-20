@@ -210,7 +210,7 @@ CRITICAL RULES FOR CONTEXT-AWARE SELECTION:
    - Music video → EXCLUDE ALL audio recording gear (mics, recorders, audio cables) — music is pre-recorded
    - "Natural light" specified → EXCLUDE ALL items with "powered-light" strength. ONLY include items with "natural-light-modifier" strength (reflectors, diffusers)
    - Photo-only session → EXCLUDE gimbals unless specifically requested
-   - Photo-only session → cameras with inferredProfile "video_first" or "cinema" must NOT be assigned role "primary". Prefer "photo_first" or "hybrid" cameras as primary. Only include a "video_first" camera if no suitable photo_first/hybrid alternative exists, and assign it role "backup" or "alternative"
+   - Photo-only session → (a) NEVER assign role "primary" to any camera with inferredProfile "video_first" or "cinema" — this is absolute, no exceptions. (b) ALWAYS select a "photo_first" or "hybrid" camera as primary; if the catalog contains a full-frame hybrid body (sensor-fullframe), it is the preferred primary for corporate/portrait photo work. (c) A "video_first" camera may appear ONLY as role "backup" if the user explicitly requested a second body. (d) A "video_first" camera as "primary" in a photo-only plan is ALWAYS wrong and will be rejected.
    - Video-primary events → cameras with inferredProfile "video_first" or "cinema" MUST be primary over "hybrid"
    - Bags, backpacks, and cases → EXCLUDE from recommended_items unless the user specifically asks about transport or gear carrying
 
