@@ -1,11 +1,11 @@
 /**
  * LLM Gateway Client via Supabase Edge Function
  * 
- * Securely calls Gemini 2.5 Flash Lite through our Supabase Edge Function proxy.
+ * Securely calls Gemini 2.0 Flash through our Supabase Edge Function proxy.
  * API keys are kept server-side, never exposed to the client.
  * Requires Supabase authentication.
  * 
- * Primary model: google-ai-studio/gemini-2.5-flash-lite
+ * Primary model: google-ai-studio/gemini-2.0-flash
  * Fallback: Groq Scout 17B (handled in groqClient.ts)
  */
 
@@ -14,7 +14,7 @@ import { packingPlanSchema } from './aiSchemas';
 import { callEdgeFunction } from './edgeFunctionClient';
 
 // Primary model for packing lists
-const GEMINI_MODEL = 'google-ai-studio/gemini-2.5-flash-lite';
+const GEMINI_MODEL = 'google-ai-studio/gemini-2.0-flash';
 
 interface CallLLMGatewayOptions {
   eventDescription: string;
@@ -24,7 +24,7 @@ interface CallLLMGatewayOptions {
 }
 
 /**
- * Generate packing list using Gemini 2.0 Flash Lite via LLM Gateway
+ * Generate packing list using Gemini 2.0 Flash via LLM Gateway
  */
 export async function callLLMGatewayForPackingPlan(
   options: CallLLMGatewayOptions

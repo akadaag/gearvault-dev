@@ -433,7 +433,7 @@ Respond in a helpful, conversational tone.`;
   
   const taskConfig = AI_TASKS.CHAT;
   // Use Gemini for vision (better multimodal support), Groq for text-only
-  const model = hasVisionContent ? 'gemini-2.5-flash-lite' : GROQ_MODELS[taskConfig.model];
+  const model = hasVisionContent ? 'gemini-2.0-flash' : GROQ_MODELS[taskConfig.model];
   const provider = hasVisionContent ? 'llm-gateway' as const : 'groq' as const;
   
   try {

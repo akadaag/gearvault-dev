@@ -8935,7 +8935,10 @@ input[type="checkbox"].ios-toggle:checked::after {
   position: relative;
   z-index: 1;
   transition: transform 160ms ease;
-  background: var(--ios-card-bg, var(--card-bg));
+  background: #ffffff;
+}
+:root.dark .ai-page.ios-theme .ai-packing-swipe-foreground {
+  background: #1c1c1e;
 }
 
 .ai-page.ios-theme .ai-packing-swipe-foreground.is-open {
