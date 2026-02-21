@@ -1,7 +1,7 @@
 /**
  * LLM Gateway Client via Supabase Edge Function
  * 
- * Securely calls Gemini 2.0 Flash through our Supabase Edge Function proxy.
+ * Securely calls Gemini 2.5 Flash Lite through our Supabase Edge Function proxy.
  * API keys are kept server-side, never exposed to the client.
  * Requires Supabase authentication.
  * 
@@ -24,7 +24,7 @@ interface CallLLMGatewayOptions {
 }
 
 /**
- * Generate packing list using Gemini 2.0 Flash via LLM Gateway
+ * Generate packing list using Gemini 2.5 Flash Lite via LLM Gateway
  */
 export async function callLLMGatewayForPackingPlan(
   options: CallLLMGatewayOptions
@@ -37,7 +37,7 @@ export async function callLLMGatewayForPackingPlan(
       options.categories
     );
 
-     console.log('[LLM Gateway] Calling Gemini 2.0 Flash for packing plan...');
+     console.log('[LLM Gateway] Calling Gemini 2.5 Flash Lite for packing plan...');
     
     const response = await callEdgeFunction({
       provider: 'llm-gateway',

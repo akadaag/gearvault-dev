@@ -461,6 +461,12 @@ export function AIAssistantPage() {
 
 
       // ------------------------------------------------------------------
+      // Snapshot checklist BEFORE guards run — used later to detect stripped items
+      // so we can remove pro tips that reference excluded gear.
+      // ------------------------------------------------------------------
+      const preGuardChecklist = [...rawPlan.checklist];
+
+      // ------------------------------------------------------------------
       // Safety guard: Ensure at least one video-first camera is PRIMARY for video events.
       // NOTE: "corporate" is intentionally excluded from the video event check —
       // corporate events can be photo-only. We rely on the prompt + photo-only rule instead.
@@ -588,6 +594,22 @@ export function AIAssistantPage() {
         rawPlan.checklist = rawPlan.checklist.filter(item => item.section !== 'Support');
       }
 
+      // ------------------------------------------------------------------
+      // Post-guard: Filter pro tips that reference gear stripped by guards.
+      // Gemini writes tips before guards run, so tips may mention excluded items.
+      // We remove any tip whose text contains the name of a stripped item.
+      // ------------------------------------------------------------------
+      if (rawPlan.tips && rawPlan.tips.length > 0) {
+        const keptIds = new Set(rawPlan.checklist.map(i => i.gearItemId).filter(Boolean));
+        const strippedNames = preGuardChecklist
+          .filter(item => item.gearItemId && !keptIds.has(item.gearItemId))
+          .map(item => item.name.toLowerCase());
+        if (strippedNames.length > 0) {
+          rawPlan.tips = rawPlan.tips.filter(tip =>
+            !strippedNames.some(name => tip.toLowerCase().includes(name))
+          );
+        }
+      }
 
       // ------------------------------------------------------------------
       // Client-side catalog matcher

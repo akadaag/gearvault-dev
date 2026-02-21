@@ -19,8 +19,8 @@ export async function callGroqForPackingPlan(
 ): Promise<PackingPlan> {
   const categories = await db.categories.toArray();
   
-  // Tier 1: Gemini 2.0 Flash via LLM Gateway (Supabase Edge Function)
-  console.log('🟢 Attempt 1: Gemini 2.0 Flash (via LLM Gateway)');
+  // Tier 1: Gemini 2.5 Flash Lite via LLM Gateway (Supabase Edge Function)
+  console.log('🟢 Attempt 1: Gemini 2.5 Flash Lite (via LLM Gateway)');
   const geminiResult = await callLLMGatewayForPackingPlan({
     eventDescription,
     catalog,
