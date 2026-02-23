@@ -85,7 +85,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSyncingData(false);
       }
     })();
-  }, [configured, session?.user]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [configured, session?.user?.id]);
 
   useEffect(() => {
     if (!configured || !session?.user) return;
@@ -115,30 +116,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.clearInterval(interval);
       window.removeEventListener('online', onOnline);
     };
-  }, [configured, session?.user]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [configured, session?.user?.id]);
 
   // Refresh session when app comes back to foreground (e.g., after backgrounding on mobile)
   // This prevents "session expired" errors when user locks phone or switches apps.
+  // We only refresh if the token is within 2 minutes of expiry to avoid triggering
+  // unnecessary onAuthStateChange events (which previously caused a full re-sync + splash).
   useEffect(() => {
     if (!configured) return;
 
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        // App came to foreground — proactively refresh session if we have one
-        void supabase.auth.getSession().then(({ data }) => {
-          if (data.session) {
-            console.log('[Auth] App foregrounded, refreshing session...');
+      if (document.visibilityState !== 'visible') return;
+      void supabase.auth.getSession().then(({ data }) => {
+        if (!data.session) return;
+        try {
+          const payload = JSON.parse(atob(data.session.access_token.split('.')[1]));
+          const msUntilExpiry = payload.exp * 1000 - Date.now();
+          if (msUntilExpiry < 120_000) {
+            // Token expires in < 2 minutes — refresh proactively
+            console.log('[Auth] Token near expiry, refreshing...');
             void supabase.auth.refreshSession().then(({ error }) => {
-              if (error) {
-                console.warn('[Auth] Foreground refresh failed:', error);
-                // Don't throw — let the user try their action, which will show proper error
-              } else {
-                console.log('[Auth] Foreground refresh successful');
-              }
+              if (error) console.warn('[Auth] Foreground refresh failed:', error);
+              else console.log('[Auth] Foreground refresh successful');
             });
           }
-        });
-      }
+          // Otherwise token is still valid — no refresh needed, no re-render triggered
+        } catch {
+          // Malformed token — ignore, let the next API call handle it
+        }
+      });
     };
 
     document.addEventListener('visibilitychange', handleVisibilityChange);
@@ -179,7 +186,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     () => ({
       session,
       user: session?.user ?? null,
-      loading: booting || syncingData,
+      loading: booting,           // splash only on cold boot — background syncs never unmount the UI
       isConfigured: configured,
       syncMessage,
       signIn,
