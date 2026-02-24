@@ -1,6 +1,6 @@
 /**
  * Gear Classification System
- * Automatically classifies gear items using Gemini 2.0 Flash (primary) with
+ * Automatically classifies gear items using Gemini 2.5 Flash Lite (primary) with
  * Scout 17B as fallback, to infer:
  * - inferredProfile: video_first | photo_first | hybrid | cinema | audio | lighting | support | power | media | accessory
  * - capabilities: array of technical specs
@@ -370,10 +370,10 @@ Return ONLY valid JSON with all four fields for each item.`;
       max_tokens: 2000,
     };
 
-    // Tier 1: Gemini 2.0 Flash via LLM Gateway
+    // Tier 1: Gemini 2.5 Flash Lite via LLM Gateway
     let json;
     try {
-      console.log('[Classification] Calling Gemini 2.0 Flash...');
+      console.log('[Classification] Calling Gemini 2.5 Flash Lite...');
       json = await callEdgeFunction({
         provider: 'llm-gateway',
         model: 'google-ai-studio/gemini-2.5-flash-lite-preview-09-2025',

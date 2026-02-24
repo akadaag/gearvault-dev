@@ -2,7 +2,7 @@
  * AI Model Configuration
  *
  * Architecture:
- * - Primary: Gemini 2.0 Flash via LLM Gateway (classification + packing plans + chat vision)
+ * - Primary: Gemini 2.5 Flash Lite via LLM Gateway (classification + packing plans + chat vision)
  * - Fallback: Groq Scout 17B (for when Gemini fails)
  *
  * ALL API keys are server-side only (Supabase Edge Function)
