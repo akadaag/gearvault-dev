@@ -8064,7 +8064,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 }
 
 .event-detail-page.ios-theme .ev-detail-title {
-  font-size: 34px;
+  font-size: 28px;
   font-weight: 700;
   color: var(--ios-text-primary);
   line-height: 1.1;
@@ -8081,18 +8081,19 @@ input[type="checkbox"].ios-toggle:checked::after {
   font-size: 13px;
   font-weight: 600;
   text-transform: uppercase;
-  color: var(--ios-text-secondary);
-  background: color-mix(in srgb, var(--ios-text-secondary) 10%, transparent);
-  padding: 4px 8px;
-  border-radius: 6px;
+  color: var(--ios-text-primary);
+  background: #ffffff;
+  border: 0.5px solid rgba(0, 0, 0, 0.10);
+  padding: 4px 10px;
+  border-radius: 999px;
 }
 
 /* Days-until tags — matches getDaysUntilEvent() colorClass values */
 .event-detail-page.ios-theme .ev-detail-days {
   font-size: 13px;
   font-weight: 600;
-  padding: 4px 8px;
-  border-radius: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
 }
 .event-detail-page.ios-theme .ev-detail-days.overdue  { background: rgba(255, 59, 48, 0.12); color: var(--ios-red); }
 .event-detail-page.ios-theme .ev-detail-days.today    { background: rgba(255, 149, 0, 0.12); color: #FF9500; }
@@ -8112,12 +8113,13 @@ input[type="checkbox"].ios-toggle:checked::after {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: color-mix(in srgb, var(--ios-text-secondary) 5%, transparent);
+  background: #ffffff;
   padding: 10px;
-  border-radius: 12px;
+  border-radius: 22px;
   border: none;
   cursor: default;
   text-align: left;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
 }
 
 .event-detail-page.ios-theme .ev-detail-meta-item-btn {
@@ -8169,6 +8171,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   padding: 12px;
   border-radius: 12px;
   border: 0.5px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
 }
 
 /* Glass Card */
@@ -8597,8 +8600,15 @@ input[type="checkbox"].ios-toggle:checked::after {
   border-color: rgba(255, 255, 255, 0.08);
 }
 
+:root.dark .event-detail-page.ios-theme .ev-detail-type-badge {
+  background: rgba(44, 44, 46, 1);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.10);
+}
+
 :root.dark .event-detail-page.ios-theme .ev-detail-notes {
   border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
 }
 
 :root.dark .event-detail-page.ios-theme .ev-detail-list-group {
@@ -8615,7 +8625,8 @@ input[type="checkbox"].ios-toggle:checked::after {
 }
 
 :root.dark .event-detail-page.ios-theme .ev-detail-meta-item {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(44, 44, 46, 1);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
 }
 
 :root.dark .event-detail-page.ios-theme .ev-detail-share-btn {
