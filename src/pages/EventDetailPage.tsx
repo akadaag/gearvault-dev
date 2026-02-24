@@ -230,10 +230,25 @@ export function EventDetailPage() {
           Events
         </button>
 
-        {/* Options circle */}
-        <div className="ev-detail-options-wrap" ref={optionsMenuRef}>
+        {/* Combined action pill: Add + Options */}
+        <div className="ev-detail-action-pill" ref={optionsMenuRef}>
+          {/* Add items button */}
           <button
-            className="ev-detail-options-btn"
+            className="ev-detail-action-pill-btn"
+            onClick={() => setShowAddSheet(true)}
+            aria-label="Add items to packing list"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" width="20" height="20">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
+
+          <div className="ev-detail-action-pill-divider" />
+
+          {/* Options (3 dots) button */}
+          <button
+            className="ev-detail-action-pill-btn"
             onClick={() => setShowOptionsMenu(v => !v)}
             aria-label="More options"
             aria-expanded={showOptionsMenu}
@@ -277,6 +292,20 @@ export function EventDetailPage() {
                   </svg>
                   Edit
                 </button>
+                <div className="ev-detail-menu-divider" />
+                {total > 0 && (
+                  <button
+                    className="ev-detail-menu-item"
+                    role="menuitem"
+                    onClick={() => { setShowOptionsMenu(false); void resetChecklist(); }}
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                      <path d="M3 3v5h5" />
+                    </svg>
+                    Reset Checklist
+                  </button>
+                )}
                 <div className="ev-detail-menu-divider" />
                 <button
                   className="ev-detail-menu-item destructive"
@@ -382,14 +411,6 @@ export function EventDetailPage() {
         <div className="ev-detail-checklist-section">
           <div className="ev-detail-section-header">
             <h3>Packing Checklist</h3>
-            <div className="ev-detail-section-actions">
-              {total > 0 && (
-                <button className="ev-detail-text-btn" onClick={() => void resetChecklist()}>Reset</button>
-              )}
-              <button className="ev-detail-add-btn" onClick={() => setShowAddSheet(true)} aria-label="Add item to packing list">
-                <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" fill="none"><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>
-              </button>
-            </div>
           </div>
 
           {total === 0 ? (
