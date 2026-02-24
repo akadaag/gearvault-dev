@@ -317,7 +317,7 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
                                 onClick={() => navigateFromSearch(`/catalog/item/${item.id}`)}
                               >
                                 <div className="floating-nav__search-item-icon gear">
-                                  {item.photo ? <img src={item.photo} alt="" /> : item.name.charAt(0)}
+                                  {item.photo ? <img src={item.photo} alt="" loading="lazy" decoding="async" /> : item.name.charAt(0)}
                                 </div>
                                 <div className="floating-nav__search-item-text">
                                   <span className="name">{item.name}</span>

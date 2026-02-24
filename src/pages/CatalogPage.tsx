@@ -324,7 +324,7 @@ export function CatalogPage() {
                         >
                           <div className="ios-list-icon">
                             {item.photo ? (
-                              <img src={item.photo} alt={item.name} />
+                              <img src={item.photo} alt={item.name} loading="lazy" decoding="async" />
                             ) : (
                               item.name.charAt(0).toUpperCase()
                             )}

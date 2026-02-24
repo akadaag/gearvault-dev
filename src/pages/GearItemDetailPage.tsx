@@ -86,6 +86,13 @@ export function GearItemDetailPage() {
     return () => window.clearTimeout(timeoutId);
   }, [essentialNotice]);
 
+  useEffect(() => {
+    if (!item?.photo) return;
+    const preloaded = new Image();
+    preloaded.decoding = 'async';
+    preloaded.src = item.photo;
+  }, [item?.photo]);
+
   // Close options menu on outside click
   useEffect(() => {
     if (!showOptionsMenu) return;
@@ -380,6 +387,9 @@ export function GearItemDetailPage() {
               src={currentItem.photo}
               alt={currentItem.name}
               className="gear-detail-hero-img"
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
               onClick={() => setShowImageViewer(true)}
             />
           ) : (
@@ -407,6 +417,8 @@ export function GearItemDetailPage() {
               src={currentItem.photo}
               alt={currentItem.name}
               className="image-viewer-image"
+              loading="eager"
+              decoding="async"
               onClick={(event) => event.stopPropagation()}
             />
           </div>

@@ -3,6 +3,7 @@ import { supabase } from './supabase';
 const PHOTO_BUCKET = 'gear-item-photos';
 const TARGET_MAX_EDGE = 768;   // unified for both item photos and AI — plenty for mobile display
 const WEBP_QUALITY = 0.72;
+const PHOTO_CACHE_CONTROL_SECONDS = 60 * 60 * 24 * 365;
 
 interface CompressedImage {
   blob: Blob;
@@ -23,6 +24,7 @@ export async function uploadCompressedGearPhoto(params: {
     .from(PHOTO_BUCKET)
     .upload(path, compressed.blob, {
       contentType: compressed.mimeType,
+      cacheControl: String(PHOTO_CACHE_CONTROL_SECONDS),
       upsert: false,
     });
 

@@ -305,7 +305,7 @@ export function HomePage() {
                 >
                   <div className="home-ios-carousel-thumb">
                     {item.photo ? (
-                      <img src={item.photo} alt={item.name} />
+                      <img src={item.photo} alt={item.name} loading="lazy" decoding="async" />
                     ) : (
                       <div className="placeholder">
                         {item.name.charAt(0)}
@@ -349,7 +349,7 @@ export function HomePage() {
                 >
                   <div className="home-ios-carousel-thumb">
                     {item.photo ? (
-                      <img src={item.photo} alt={item.name} />
+                      <img src={item.photo} alt={item.name} loading="lazy" decoding="async" />
                     ) : (
                       <div className="placeholder">
                         {item.name.charAt(0)}
