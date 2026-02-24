@@ -230,22 +230,8 @@ export function EventDetailPage() {
           Events
         </button>
 
-        {/* Combined action pill: Add + Options */}
+        {/* Combined action pill: Options + Add */}
         <div className="ev-detail-action-pill" ref={optionsMenuRef}>
-          {/* Add items button */}
-          <button
-            className="ev-detail-action-pill-btn"
-            onClick={() => setShowAddSheet(true)}
-            aria-label="Add items to packing list"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" width="20" height="20">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-          </button>
-
-          <div className="ev-detail-action-pill-divider" />
-
           {/* Options (3 dots) button */}
           <button
             className="ev-detail-action-pill-btn"
@@ -256,6 +242,18 @@ export function EventDetailPage() {
             <span className="ev-detail-options-dot" />
             <span className="ev-detail-options-dot" />
             <span className="ev-detail-options-dot" />
+          </button>
+
+          {/* Add items button */}
+          <button
+            className="ev-detail-action-pill-btn ev-detail-action-pill-btn--add"
+            onClick={() => setShowAddSheet(true)}
+            aria-label="Add items to packing list"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" width="20" height="20">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
           </button>
 
           <AnimatePresence>

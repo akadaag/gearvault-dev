@@ -7985,12 +7985,13 @@ input[type="checkbox"].ios-toggle:checked::after {
   transform: scale(0.92);
 }
 
-.event-detail-page.ios-theme .ev-detail-action-pill-divider {
-  width: 0.5px;
-  height: 22px;
-  background: rgba(0, 0, 0, 0.12);
+.event-detail-page.ios-theme .ev-detail-options-dot {
+  display: block;
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--ios-text-primary);
   flex-shrink: 0;
-  margin: 0 2px;
 }
 
 /* Options dropdown menu */
