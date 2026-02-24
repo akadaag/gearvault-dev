@@ -409,10 +409,15 @@ export function EventDetailPage() {
                     {item.packed && <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" fill="none"><polyline points="20 6 9 17 4 12" /></svg>}
                   </button>
                   <div className="ev-detail-item-info">
-                    <span className={`ev-detail-item-name${item.packed ? ' struck' : ''}`}>
-                      {item.name}
-                      {item.quantity > 1 && <span className="ev-detail-qty"> x{item.quantity}</span>}
-                    </span>
+                    <div className="ev-detail-item-info-text">
+                      <span className={`ev-detail-item-name${item.packed ? ' struck' : ''}`}>
+                        {item.name}
+                        {item.quantity > 1 && <span className="ev-detail-qty"> x{item.quantity}</span>}
+                      </span>
+                      {item.notes && (
+                        <span className="ev-detail-item-note">{item.notes}</span>
+                      )}
+                    </div>
                     {item.priority === 'must-have' && <span className="ev-detail-priority-dot" aria-label="Essential" />}
                   </div>
                   <button className="ev-detail-delete-row-btn" onClick={() => removeItem(item.id)} aria-label={`Remove ${item.name}`}>
