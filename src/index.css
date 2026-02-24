@@ -8125,10 +8125,9 @@ input[type="checkbox"].ios-toggle:checked::after {
 .event-detail-page.ios-theme .ev-detail-meta-item-btn {
   cursor: pointer;
   min-height: auto;
-  box-shadow: none;
 }
 .event-detail-page.ios-theme .ev-detail-meta-item-btn:active {
-  background: color-mix(in srgb, var(--ios-text-secondary) 10%, transparent);
+  opacity: 0.75;
 }
 
 .event-detail-page.ios-theme .ev-detail-meta-icon {
@@ -8167,22 +8166,20 @@ input[type="checkbox"].ios-toggle:checked::after {
   font-size: 15px;
   color: var(--ios-text-secondary);
   line-height: 1.5;
-  background: var(--ios-card-bg);
-  padding: 12px;
-  border-radius: 12px;
-  border: 0.5px solid rgba(0, 0, 0, 0.06);
+  background: #ffffff;
+  padding: 14px 16px;
+  border-radius: 22px;
+  border: none;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
 }
 
 /* Glass Card */
 .event-detail-page.ios-theme .ev-detail-glass-card {
-  background: var(--ios-card-bg);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-radius: 20px;
+  background: #ffffff;
+  border-radius: 22px;
   padding: 16px;
-  border: 0.5px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  border: none;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
 }
 
 /* Progress Section */
@@ -8295,10 +8292,11 @@ input[type="checkbox"].ios-toggle:checked::after {
 
 /* List Group */
 .event-detail-page.ios-theme .ev-detail-list-group {
-  background: var(--ios-card-bg);
-  border-radius: 12px;
+  background: #ffffff;
+  border-radius: 22px;
   overflow: hidden;
-  border: 0.5px solid rgba(0, 0, 0, 0.06);
+  border: none;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
 }
 
 .event-detail-page.ios-theme .ev-detail-item-row {
@@ -8596,8 +8594,8 @@ input[type="checkbox"].ios-toggle:checked::after {
 }
 
 :root.dark .event-detail-page.ios-theme .ev-detail-glass-card {
-  background: rgba(30, 30, 30, 0.6);
-  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(44, 44, 46, 1);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
 }
 
 :root.dark .event-detail-page.ios-theme .ev-detail-type-badge {
@@ -8607,13 +8605,13 @@ input[type="checkbox"].ios-toggle:checked::after {
 }
 
 :root.dark .event-detail-page.ios-theme .ev-detail-notes {
-  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(44, 44, 46, 1);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
 }
 
 :root.dark .event-detail-page.ios-theme .ev-detail-list-group {
-  background: rgba(28, 28, 30, 0.6);
-  border-color: rgba(255, 255, 255, 0.08);
+  background: rgba(44, 44, 46, 1);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
 }
 
 :root.dark .event-detail-page.ios-theme .ev-detail-item-row {
