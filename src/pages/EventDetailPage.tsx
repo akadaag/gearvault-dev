@@ -230,43 +230,31 @@ export function EventDetailPage() {
           Events
         </button>
 
-        {/* Combined action pill: Options + Add */}
-        <div className="ev-detail-action-pill" ref={optionsMenuRef}>
-          {/* Options (3 dots) button */}
-          <button
-            className="ev-detail-action-pill-btn"
-            onClick={() => setShowOptionsMenu(v => !v)}
-            aria-label="More options"
-            aria-expanded={showOptionsMenu}
-          >
-            <span className="ev-detail-options-dot" />
-            <span className="ev-detail-options-dot" />
-            <span className="ev-detail-options-dot" />
-          </button>
+        <div className="ev-detail-actions-wrap">
+          <div className="ev-detail-options-wrap" ref={optionsMenuRef}>
+            {/* Options (3 dots) button */}
+            <button
+              className="ev-detail-circle-btn"
+              onClick={() => setShowOptionsMenu(v => !v)}
+              aria-label="More options"
+              aria-expanded={showOptionsMenu}
+            >
+              <span className="ev-detail-options-dot" />
+              <span className="ev-detail-options-dot" />
+              <span className="ev-detail-options-dot" />
+            </button>
 
-          {/* Add items button */}
-          <button
-            className="ev-detail-action-pill-btn ev-detail-action-pill-btn--add"
-            onClick={() => setShowAddSheet(true)}
-            aria-label="Add items to packing list"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" width="20" height="20">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-          </button>
-
-          <AnimatePresence>
-            {showOptionsMenu && (
-              <motion.div
-                className="ev-detail-options-menu"
-                role="menu"
-                initial={{ opacity: 0, scale: 0.5 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.5 }}
-                transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
-                style={{ transformOrigin: 'top right' }}
-              >
+            <AnimatePresence>
+              {showOptionsMenu && (
+                <motion.div
+                  className="ev-detail-options-menu"
+                  role="menu"
+                  initial={{ opacity: 0, scale: 0.5 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.5 }}
+                  transition={{ duration: 0.22, ease: [0.32, 0.72, 0, 1] }}
+                  style={{ transformOrigin: 'top right' }}
+                >
                 <button
                   className="ev-detail-menu-item"
                   role="menuitem"
@@ -318,9 +306,21 @@ export function EventDetailPage() {
                   </svg>
                   Delete
                 </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <button
+            className="ev-detail-circle-btn"
+            onClick={() => setShowAddSheet(true)}
+            aria-label="Add items to packing list"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" width="20" height="20">
+              <line x1="12" y1="5" x2="12" y2="19" />
+              <line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+          </button>
         </div>
       </div>
 

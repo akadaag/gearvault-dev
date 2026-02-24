@@ -7951,25 +7951,24 @@ input[type="checkbox"].ios-toggle:checked::after {
   opacity: 0.7;
 }
 
-/* Options circle button wrapper */
-.event-detail-page.ios-theme .ev-detail-action-pill {
-  position: relative;
-  pointer-events: auto;
-  display: flex;
+/* Right-side action buttons */
+.event-detail-page.ios-theme .ev-detail-actions-wrap {
+  display: inline-flex;
   align-items: center;
-  gap: 0;
-  padding: 4px;
-  border-radius: 999px;
-  background: #ffffff;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+  gap: 8px;
+  pointer-events: auto;
 }
 
-.event-detail-page.ios-theme .ev-detail-action-pill-btn {
-  width: 38px;
-  height: 38px;
+.event-detail-page.ios-theme .ev-detail-options-wrap {
+  position: relative;
+}
+
+.event-detail-page.ios-theme .ev-detail-circle-btn {
+  width: 40px;
+  height: 40px;
   border-radius: 999px;
   border: none;
-  background: transparent;
+  background: #ffffff;
   color: var(--ios-text-primary);
   display: flex;
   align-items: center;
@@ -7978,10 +7977,10 @@ input[type="checkbox"].ios-toggle:checked::after {
   padding: 0;
   cursor: pointer;
   min-height: auto;
-  box-shadow: none;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
   transition: transform 0.12s ease, opacity 0.12s ease;
 }
-.event-detail-page.ios-theme .ev-detail-action-pill-btn:active {
+.event-detail-page.ios-theme .ev-detail-circle-btn:active {
   transform: scale(0.92);
 }
 
@@ -8594,17 +8593,10 @@ input[type="checkbox"].ios-toggle:checked::after {
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.45), 0 0 0 0.5px rgba(255, 255, 255, 0.08);
 }
 
-:root.dark .event-detail-page.ios-theme .ev-detail-action-pill {
+:root.dark .event-detail-page.ios-theme .ev-detail-circle-btn {
   background: rgba(44, 44, 46, 1);
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.45), 0 0 0 0.5px rgba(255, 255, 255, 0.08);
-}
-
-:root.dark .event-detail-page.ios-theme .ev-detail-action-pill-btn {
   color: #ffffff;
-}
-
-:root.dark .event-detail-page.ios-theme .ev-detail-action-pill-divider {
-  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.45), 0 0 0 0.5px rgba(255, 255, 255, 0.08);
 }
 
 :root.dark .event-detail-page.ios-theme .ev-detail-options-dot {
