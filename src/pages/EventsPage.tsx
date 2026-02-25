@@ -186,6 +186,7 @@ export function EventsPage() {
     onTouchMove,
     onTouchEnd,
     getTransform,
+    getActionsTransform,
     closeAll,
     isDragging,
     isOpen,
@@ -441,7 +442,14 @@ export function EventsPage() {
 
             return (
               <div key={event.id} className={`ev-ios-swipe-row${rowOpen ? ' is-open' : ''}`}>
-                <div className="ev-ios-swipe-actions" aria-hidden={!rowOpen}>
+                <div
+                  className="ev-ios-swipe-actions"
+                  aria-hidden={!rowOpen}
+                  style={{
+                    transform: getActionsTransform(event.id),
+                    transition: dragging ? 'none' : 'transform 160ms ease',
+                  }}
+                >
                   <button
                     type="button"
                     className="ev-ios-swipe-btn ev-ios-swipe-btn--share"

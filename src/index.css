@@ -6027,11 +6027,11 @@ html {
 }
 
 /* Inside a swipe row, use a solid active bg so pill buttons never bleed through */
-.catalog-swipe-row .ios-list-item:active {
+.ios-theme .catalog-swipe-row .ios-list-item:active {
   background: #f2f2f4;
 }
 
-:root.dark .catalog-swipe-row .ios-list-item:active {
+:root.dark .ios-theme .catalog-swipe-row .ios-list-item:active {
   background: #2c2c2e;
 }
 

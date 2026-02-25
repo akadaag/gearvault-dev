@@ -111,6 +111,17 @@ export function useSwipeReveal({
     return 'translateX(0px)';
   }
 
+  // Returns the transform for the action tray so pills slide in from the right
+  // in sync with the foreground card sliding left.
+  // At rest (closed): pills sit openOffset px off-screen to the right.
+  // While dragging: they follow the drag proportionally.
+  // When open (snapped): translateX(0) — fully visible.
+  function getActionsTransform(id: string) {
+    if (draggingId === id) return `translateX(${openOffset + dragOffset}px)`;
+    if (openId === id) return 'translateX(0px)';
+    return `translateX(${openOffset}px)`;
+  }
+
   function closeAll() {
     setOpenId(null);
     setDraggingId(null);
@@ -124,6 +135,7 @@ export function useSwipeReveal({
     onTouchMove,
     onTouchEnd,
     getTransform,
+    getActionsTransform,
     closeAll,
     isDragging: (id: string) => draggingId === id,
     isOpen: (id: string) => openId === id,

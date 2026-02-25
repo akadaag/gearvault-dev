@@ -234,6 +234,7 @@ export function CatalogPage() {
     onTouchMove,
     onTouchEnd,
     getTransform,
+    getActionsTransform,
     closeAll,
     isDragging,
     isOpen,
@@ -365,7 +366,14 @@ export function CatalogPage() {
 
                         return (
                           <div key={item.id} className={`catalog-swipe-row${rowOpen ? ' is-open' : ''}`}>
-                            <div className="catalog-swipe-actions" aria-hidden={!rowOpen}>
+                            <div
+                              className="catalog-swipe-actions"
+                              aria-hidden={!rowOpen}
+                              style={{
+                                transform: getActionsTransform(item.id),
+                                transition: dragging ? 'none' : 'transform 160ms ease',
+                              }}
+                            >
                             <button
                               type="button"
                               className="ev-ios-swipe-btn ev-ios-swipe-btn--share"
