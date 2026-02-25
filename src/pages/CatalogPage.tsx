@@ -9,6 +9,7 @@ import { fuzzyIncludes } from '../lib/search';
 import { gearItemSchema } from '../lib/validators';
 import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
 import { useSheetDismiss } from '../hooks/useSheetDismiss';
+import { useSwipeReveal } from '../hooks/useSwipeReveal';
 import { compressedImageToDataUrl, uploadCompressedGearPhoto } from '../lib/gearPhotos';
 import { useAuth } from '../hooks/useAuth';
 import { classificationQueue } from '../lib/gearClassifier';
@@ -227,6 +228,49 @@ export function CatalogPage() {
     setSortBy('name');
   }
 
+  const {
+    openId: openSwipeId,
+    onTouchStart,
+    onTouchMove,
+    onTouchEnd,
+    getTransform,
+    closeAll,
+    isDragging,
+    isOpen,
+  } = useSwipeReveal({ openOffset: 120, openThreshold: 55, closeThreshold: 40 });
+
+  async function deleteItemFromList(itemId: string) {
+    closeAll();
+    if (!window.confirm('Delete this gear item?')) return;
+    await db.gearItems.delete(itemId);
+  }
+
+  async function shareGearItem(item: GearItem) {
+    closeAll();
+    const itemUrl = `${window.location.origin}/catalog/item/${item.id}`;
+
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({
+          title: item.name,
+          text: [item.brand, item.model].filter(Boolean).join(' ').trim() || 'Gear item',
+          url: itemUrl,
+        });
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+      }
+    }
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      await navigator.clipboard.writeText(itemUrl);
+      window.alert('Item link copied to clipboard.');
+      return;
+    }
+
+    window.prompt('Copy this item link:', itemUrl);
+  }
+
   return (
     <>
       <section className="catalog-page ios-theme">
@@ -316,41 +360,85 @@ export function CatalogPage() {
                       className={`ios-list-group ios-catalog-group-panel${category.collapsed ? ' collapsed' : ''}`}
                     >
                       {items.map((item) => (
-                        <button
-                          key={item.id}
-                          className="ios-list-item"
-                          onClick={() => navigate(`/catalog/item/${item.id}`)}
-                          tabIndex={category.collapsed ? -1 : undefined}
-                        >
-                          <div className="ios-list-icon">
-                            {item.photo ? (
-                              <img src={item.photo} alt={item.name} loading="lazy" decoding="async" />
-                            ) : (
-                              item.name.charAt(0).toUpperCase()
-                            )}
-                          </div>
-                          <div className="ios-list-content">
-                            <span className="ios-list-title">
-                              {item.name}
-                            </span>
-                            <span className="ios-list-sub">
-                              {[item.brand, item.model].filter(Boolean).join(' ') || category.name}
-                              {item.quantity > 1 && ` \u00B7 x${item.quantity}`}
-                            </span>
-                          </div>
-                          <div className="ios-list-action">
-                            {item.currentValue && (
-                              <span className="ios-catalog-value">
-                                {formatMoney(item.currentValue.amount, item.currentValue.currency)}
-                              </span>
-                            )}
-                            {item.essential && (
-                              <svg className="ios-catalog-star ios-catalog-star--action" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-label="Essential">
-                                <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
+                        <div key={item.id} className={`catalog-swipe-row${isOpen(item.id) || isDragging(item.id) ? ' is-open' : ''}`}>
+                          <div className="catalog-swipe-actions" aria-hidden={!isOpen(item.id) && !isDragging(item.id)}>
+                            <button
+                              type="button"
+                              className="ev-ios-swipe-btn ev-ios-swipe-btn--share"
+                              aria-label="Share gear item"
+                              onClick={() => void shareGearItem(item)}
+                            >
+                              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M12 16V4" />
+                                <path d="m7 9 5-5 5 5" />
+                                <path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" />
                               </svg>
-                            )}
+                              <span>Share</span>
+                            </button>
+                            <button
+                              type="button"
+                              className="ev-ios-swipe-btn ev-ios-swipe-btn--delete"
+                              aria-label="Delete gear item"
+                              onClick={() => void deleteItemFromList(item.id)}
+                            >
+                              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M3 6h18" />
+                                <path d="M8 6V4h8v2" />
+                                <path d="M19 6l-1 14H6L5 6" />
+                                <path d="M10 11v6M14 11v6" />
+                              </svg>
+                              <span>Delete</span>
+                            </button>
                           </div>
-                        </button>
+
+                          <button
+                            className="ios-list-item catalog-swipe-foreground"
+                            style={{
+                              transform: getTransform(item.id),
+                              transition: isDragging(item.id) ? 'none' : 'transform 160ms ease',
+                            }}
+                            onTouchStart={(e) => onTouchStart(item.id, e)}
+                            onTouchMove={(e) => onTouchMove(item.id, e)}
+                            onTouchEnd={() => onTouchEnd(item.id)}
+                            onClick={() => {
+                              if (openSwipeId !== null) {
+                                closeAll();
+                                return;
+                              }
+                              navigate(`/catalog/item/${item.id}`);
+                            }}
+                            tabIndex={category.collapsed ? -1 : undefined}
+                          >
+                            <div className="ios-list-icon">
+                              {item.photo ? (
+                                <img src={item.photo} alt={item.name} loading="lazy" decoding="async" />
+                              ) : (
+                                item.name.charAt(0).toUpperCase()
+                              )}
+                            </div>
+                            <div className="ios-list-content">
+                              <span className="ios-list-title">
+                                {item.name}
+                              </span>
+                              <span className="ios-list-sub">
+                                {[item.brand, item.model].filter(Boolean).join(' ') || category.name}
+                                {item.quantity > 1 && ` \u00B7 x${item.quantity}`}
+                              </span>
+                            </div>
+                            <div className="ios-list-action">
+                              {item.currentValue && (
+                                <span className="ios-catalog-value">
+                                  {formatMoney(item.currentValue.amount, item.currentValue.currency)}
+                                </span>
+                              )}
+                              {item.essential && (
+                                <svg className="ios-catalog-star ios-catalog-star--action" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-label="Essential">
+                                  <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
+                                </svg>
+                              )}
+                            </div>
+                          </button>
+                        </div>
                       ))}
                     </div>
                   </section>

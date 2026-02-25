@@ -6507,6 +6507,26 @@ html {
   position: relative;
 }
 
+.catalog-swipe-row {
+  position: relative;
+}
+
+.catalog-swipe-row .ios-list-item::after {
+  display: none;
+}
+
+.catalog-swipe-row:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 88px;
+  right: 16px;
+  bottom: 0;
+  height: 0.5px;
+  background: rgba(60, 60, 67, 0.18);
+  z-index: 2;
+  pointer-events: none;
+}
+
 .catalog-page.ios-theme .ios-list-item:not(:last-child)::after {
   content: '';
   position: absolute;
@@ -6518,6 +6538,10 @@ html {
 }
 
 :root.dark .catalog-page.ios-theme .ios-list-item:not(:last-child)::after {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+:root.dark .catalog-swipe-row:not(:last-child)::after {
   background: rgba(255, 255, 255, 0.16);
 }
 
@@ -7447,11 +7471,105 @@ input[type="checkbox"].ios-toggle:checked::after {
 
 /* ── Event Cards ───────────────────────────────────────────────── */
 
+.ev-ios-swipe-row {
+  position: relative;
+  margin-bottom: 10px;
+  border-radius: 22px;
+  background: #ffffff;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
+}
+
+.ev-ios-swipe-row .ev-ios-event-item {
+  margin-bottom: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.ev-ios-swipe-actions,
+.catalog-swipe-actions {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.ev-ios-swipe-row.is-open .ev-ios-swipe-actions,
+.catalog-swipe-row.is-open .catalog-swipe-actions {
+  pointer-events: auto;
+}
+
+.ev-ios-swipe-btn {
+  width: 56px;
+  min-width: 56px;
+  height: 56px;
+  border: 0;
+  border-radius: 16px;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 6px 4px 5px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+  transform: scale(0);
+  opacity: 0;
+  transition: transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1), opacity 180ms ease;
+}
+
+.ev-ios-swipe-btn svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.ev-ios-swipe-btn span {
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.ev-ios-swipe-btn--share {
+  background: #1ca7a0;
+}
+
+.ev-ios-swipe-btn--delete {
+  background: var(--ios-red);
+}
+
+.ev-ios-swipe-row.is-open .ev-ios-swipe-btn,
+.catalog-swipe-row.is-open .ev-ios-swipe-btn {
+  transform: scale(1);
+  opacity: 1;
+}
+
+.ev-ios-swipe-row.is-open .ev-ios-swipe-btn--delete,
+.catalog-swipe-row.is-open .ev-ios-swipe-btn--delete {
+  transition-delay: 50ms;
+}
+
+.ev-ios-swipe-foreground,
+.catalog-swipe-foreground {
+  position: relative;
+  z-index: 1;
+  touch-action: pan-y;
+  will-change: transform;
+}
+
 .ev-ios-event-item {
   display: flex;
   align-items: center;
   padding: 14px 16px;
-  margin-bottom: 10px;
   text-decoration: none;
   color: inherit;
   position: relative;
@@ -7851,6 +7969,24 @@ input[type="checkbox"].ios-toggle:checked::after {
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
 }
 
+:root.dark .ev-ios-swipe-row {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+}
+
+:root.dark .ev-ios-swipe-row .ev-ios-event-item {
+  background: transparent;
+  box-shadow: none;
+}
+
+:root.dark .ev-ios-swipe-btn {
+  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.35), 0 0 0 0.5px rgba(255, 255, 255, 0.12);
+}
+
+:root.dark .ev-ios-swipe-btn--share {
+  background: #1d8f89;
+}
+
 :root.dark .ev-ios-date-badge {
   background: rgba(118, 118, 128, 0.24);
 }
@@ -7862,6 +7998,19 @@ input[type="checkbox"].ios-toggle:checked::after {
 :root.dark .ev-ios-cal-card {
   background: rgba(255, 255, 255, 0.08);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+}
+
+@media (min-width: 768px) {
+  .ev-ios-swipe-actions,
+  .catalog-swipe-actions {
+    display: none;
+  }
+
+  .ev-ios-swipe-foreground,
+  .catalog-swipe-foreground {
+    transform: none !important;
+    transition: none !important;
+  }
 }
 
 :root.dark .ev-ios-cal-nav-btn {

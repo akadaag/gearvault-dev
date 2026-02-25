@@ -6,6 +6,7 @@ import { EventFormSheet } from '../components/EventFormSheet';
 import { getDaysUntilEvent } from '../lib/eventHelpers';
 import { lockSheetScroll, unlockSheetScroll } from '../lib/sheetLock';
 import { useSheetDismiss } from '../hooks/useSheetDismiss';
+import { useSwipeReveal } from '../hooks/useSwipeReveal';
 import type { EventItem } from '../types/models';
 
 // ── MonthCalendar ────────────────────────────────────────────────────────────
@@ -177,6 +178,49 @@ export function EventsPage() {
     const params = new URLSearchParams(searchParams);
     ['types', 'client', 'location', 'sort', 'qf'].forEach(k => params.delete(k));
     navigate({ search: params.toString() }, { replace: true });
+  }
+
+  const {
+    openId: openSwipeId,
+    onTouchStart,
+    onTouchMove,
+    onTouchEnd,
+    getTransform,
+    closeAll,
+    isDragging,
+    isOpen,
+  } = useSwipeReveal({ openOffset: 120, openThreshold: 55, closeThreshold: 40 });
+
+  async function deleteEventFromList(eventId: string) {
+    closeAll();
+    if (!window.confirm('Delete this event?')) return;
+    await db.events.delete(eventId);
+  }
+
+  async function shareEvent(event: EventItem) {
+    closeAll();
+    const eventUrl = `${window.location.origin}/events/${event.id}`;
+
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({
+          title: event.title,
+          text: event.type,
+          url: eventUrl,
+        });
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+      }
+    }
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      await navigator.clipboard.writeText(eventUrl);
+      window.alert('Event link copied to clipboard.');
+      return;
+    }
+
+    window.prompt('Copy this event link:', eventUrl);
   }
 
   // ── Calendar month navigation ──────────────────────────────────────────────
@@ -394,45 +438,93 @@ export function EventsPage() {
             const daysInfo = event.dateTime ? getDaysUntilEvent(event.dateTime) : null;
 
             return (
-              <Link key={event.id} to={`/events/${event.id}`} className="ev-ios-event-item">
-                {/* Date badge */}
-                {dateObj ? (
-                  <div className="ev-ios-date-badge">
-                    <span className="ev-ios-date-month">{month}</span>
-                    <span className="ev-ios-date-day">{day}</span>
-                  </div>
-                ) : (
-                  <div className="ev-ios-date-badge placeholder">?</div>
-                )}
+              <div key={event.id} className={`ev-ios-swipe-row${isOpen(event.id) || isDragging(event.id) ? ' is-open' : ''}`}>
+                <div className="ev-ios-swipe-actions" aria-hidden={!isOpen(event.id) && !isDragging(event.id)}>
+                  <button
+                    type="button"
+                    className="ev-ios-swipe-btn ev-ios-swipe-btn--share"
+                    aria-label="Share event"
+                    onClick={() => void shareEvent(event)}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <path d="M12 16V4" />
+                      <path d="m7 9 5-5 5 5" />
+                      <path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" />
+                    </svg>
+                    <span>Share</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="ev-ios-swipe-btn ev-ios-swipe-btn--delete"
+                    aria-label="Delete event"
+                    onClick={() => void deleteEventFromList(event.id)}
+                  >
+                    <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                      <path d="M3 6h18" />
+                      <path d="M8 6V4h8v2" />
+                      <path d="M19 6l-1 14H6L5 6" />
+                      <path d="M10 11v6M14 11v6" />
+                    </svg>
+                    <span>Delete</span>
+                  </button>
+                </div>
 
-                {/* Info */}
-                <div className="ev-ios-event-info">
-                  <div className="ev-ios-event-row-top">
-                    <span className="ev-ios-event-title">{event.title}</span>
-                    {daysInfo && (
-                      <span className={`ev-ios-urgency-tag ${daysInfo.colorClass}`}>
-                        {daysInfo.text}
-                      </span>
+                <Link
+                  to={`/events/${event.id}`}
+                  className="ev-ios-event-item ev-ios-swipe-foreground"
+                  style={{
+                    transform: getTransform(event.id),
+                    transition: isDragging(event.id) ? 'none' : 'transform 160ms ease',
+                  }}
+                  onTouchStart={(e) => onTouchStart(event.id, e)}
+                  onTouchMove={(e) => onTouchMove(event.id, e)}
+                  onTouchEnd={() => onTouchEnd(event.id)}
+                  onClick={(e) => {
+                    if (openSwipeId !== null) {
+                      e.preventDefault();
+                      closeAll();
+                    }
+                  }}
+                >
+                  {/* Date badge */}
+                  {dateObj ? (
+                    <div className="ev-ios-date-badge">
+                      <span className="ev-ios-date-month">{month}</span>
+                      <span className="ev-ios-date-day">{day}</span>
+                    </div>
+                  ) : (
+                    <div className="ev-ios-date-badge placeholder">?</div>
+                  )}
+
+                  {/* Info */}
+                  <div className="ev-ios-event-info">
+                    <div className="ev-ios-event-row-top">
+                      <span className="ev-ios-event-title">{event.title}</span>
+                      {daysInfo && (
+                        <span className={`ev-ios-urgency-tag ${daysInfo.colorClass}`}>
+                          {daysInfo.text}
+                        </span>
+                      )}
+                    </div>
+                    <div className="ev-ios-event-meta">
+                      {event.type}
+                      {event.client   && ` \u00B7 ${event.client}`}
+                      {event.location && ` \u00B7 ${event.location}`}
+                    </div>
+                    {total > 0 && (
+                      <div className="ev-ios-event-packing">
+                        <div className="ev-ios-packing-bar" aria-hidden="true">
+                          <span
+                            className={`ev-ios-packing-fill${packed === total ? ' complete' : ''}`}
+                            style={{ width: `${packingPct}%` }}
+                          />
+                        </div>
+                        <span className="ev-ios-packing-label">{packed}/{total} packed</span>
+                      </div>
                     )}
                   </div>
-                  <div className="ev-ios-event-meta">
-                    {event.type}
-                    {event.client   && ` \u00B7 ${event.client}`}
-                    {event.location && ` \u00B7 ${event.location}`}
-                  </div>
-                  {total > 0 && (
-                    <div className="ev-ios-event-packing">
-                      <div className="ev-ios-packing-bar" aria-hidden="true">
-                        <span
-                          className={`ev-ios-packing-fill${packed === total ? ' complete' : ''}`}
-                          style={{ width: `${packingPct}%` }}
-                        />
-                      </div>
-                      <span className="ev-ios-packing-label">{packed}/{total} packed</span>
-                    </div>
-                  )}
-                </div>
-              </Link>
+                </Link>
+              </div>
             );
           })}
 
