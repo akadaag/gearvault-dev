@@ -39,6 +39,9 @@ export function useSwipeReveal({
 
     setOpenId((prev) => (prev && prev !== id ? null : prev));
     setDraggingId(id);
+    // If the item is already open, start dragOffset at -openOffset so the card
+    // doesn't jump from its current visual position (translateX(-168px)) to 0.
+    setDragOffset(openId === id ? -openOffset : 0);
     setTouchState({
       id,
       startX: touch.clientX,
@@ -122,6 +125,14 @@ export function useSwipeReveal({
     return `translateX(${openOffset}px)`;
   }
 
+  // Returns a 0–1 progress value representing how far the swipe has revealed.
+  // Used to drive the pill zoom-in scale animation.
+  function getActionsProgress(id: string) {
+    if (draggingId === id) return Math.min(1, Math.max(0, -dragOffset / openOffset));
+    if (openId === id) return 1;
+    return 0;
+  }
+
   function closeAll() {
     setOpenId(null);
     setDraggingId(null);
@@ -136,6 +147,7 @@ export function useSwipeReveal({
     onTouchEnd,
     getTransform,
     getActionsTransform,
+    getActionsProgress,
     closeAll,
     isDragging: (id: string) => draggingId === id,
     isOpen: (id: string) => openId === id,

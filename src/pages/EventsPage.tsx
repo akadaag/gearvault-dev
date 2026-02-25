@@ -187,6 +187,7 @@ export function EventsPage() {
     onTouchEnd,
     getTransform,
     getActionsTransform,
+    getActionsProgress,
     closeAll,
     isDragging,
     isOpen,
@@ -455,6 +456,10 @@ export function EventsPage() {
                     className="ev-ios-swipe-btn ev-ios-swipe-btn--share"
                     aria-label="Share event"
                     onClick={() => void shareEvent(event)}
+                    style={{
+                      transform: `scale(${0.3 + 0.7 * getActionsProgress(event.id)})`,
+                      transition: dragging ? 'none' : 'transform 160ms ease',
+                    }}
                   >
                     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                       <path d="M12 16V4" />
@@ -468,6 +473,10 @@ export function EventsPage() {
                     className="ev-ios-swipe-btn ev-ios-swipe-btn--delete"
                     aria-label="Delete event"
                     onClick={() => void deleteEventFromList(event.id)}
+                    style={{
+                      transform: `scale(${0.3 + 0.7 * getActionsProgress(event.id)})`,
+                      transition: dragging ? 'none' : 'transform 160ms ease',
+                    }}
                   >
                     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                       <path d="M3 6h18" />

@@ -235,6 +235,7 @@ export function CatalogPage() {
     onTouchEnd,
     getTransform,
     getActionsTransform,
+    getActionsProgress,
     closeAll,
     isDragging,
     isOpen,
@@ -379,6 +380,10 @@ export function CatalogPage() {
                               className="ev-ios-swipe-btn ev-ios-swipe-btn--share"
                               aria-label="Share gear item"
                               onClick={() => void shareGearItem(item)}
+                              style={{
+                                transform: `scale(${0.3 + 0.7 * getActionsProgress(item.id)})`,
+                                transition: dragging ? 'none' : 'transform 160ms ease',
+                              }}
                             >
                               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                                 <path d="M12 16V4" />
@@ -392,6 +397,10 @@ export function CatalogPage() {
                               className="ev-ios-swipe-btn ev-ios-swipe-btn--delete"
                               aria-label="Delete gear item"
                               onClick={() => void deleteItemFromList(item.id)}
+                              style={{
+                                transform: `scale(${0.3 + 0.7 * getActionsProgress(item.id)})`,
+                                transition: dragging ? 'none' : 'transform 160ms ease',
+                              }}
                             >
                               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                                 <path d="M3 6h18" />
