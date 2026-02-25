@@ -111,6 +111,11 @@ export function useSwipeReveal({
     return 'translateX(0px)';
   }
 
+  function getDragProgress(id: string) {
+    if (draggingId !== id) return 0;
+    return Math.min(1, Math.max(0, Math.abs(dragOffset) / openOffset));
+  }
+
   function closeAll() {
     setOpenId(null);
     setDraggingId(null);
@@ -124,6 +129,7 @@ export function useSwipeReveal({
     onTouchMove,
     onTouchEnd,
     getTransform,
+    getDragProgress,
     closeAll,
     isDragging: (id: string) => draggingId === id,
     isOpen: (id: string) => openId === id,

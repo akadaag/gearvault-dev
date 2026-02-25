@@ -234,6 +234,7 @@ export function CatalogPage() {
     onTouchMove,
     onTouchEnd,
     getTransform,
+    getDragProgress,
     closeAll,
     isDragging,
     isOpen,
@@ -359,13 +360,23 @@ export function CatalogPage() {
                       id={`catalog-group-${category.id}`}
                       className={`ios-list-group ios-catalog-group-panel${category.collapsed ? ' collapsed' : ''}`}
                     >
-                      {items.map((item) => (
-                        <div key={item.id} className={`catalog-swipe-row${isOpen(item.id) || isDragging(item.id) ? ' is-open' : ''}`}>
-                          <div className="catalog-swipe-actions" aria-hidden={!isOpen(item.id) && !isDragging(item.id)}>
+                      {items.map((item) => {
+                        const dragging = isDragging(item.id);
+                        const rowOpen = isOpen(item.id);
+                        const dragProgress = getDragProgress(item.id);
+
+                        return (
+                          <div key={item.id} className={`catalog-swipe-row${rowOpen ? ' is-open' : ''}`}>
+                            <div className="catalog-swipe-actions" aria-hidden={!rowOpen}>
                             <button
                               type="button"
                               className="ev-ios-swipe-btn ev-ios-swipe-btn--share"
                               aria-label="Share gear item"
+                              style={{
+                                transform: dragging ? `scale(${dragProgress})` : undefined,
+                                opacity: dragging ? dragProgress : undefined,
+                                transition: dragging ? 'none' : undefined,
+                              }}
                               onClick={() => void shareGearItem(item)}
                             >
                               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -379,6 +390,11 @@ export function CatalogPage() {
                               type="button"
                               className="ev-ios-swipe-btn ev-ios-swipe-btn--delete"
                               aria-label="Delete gear item"
+                              style={{
+                                transform: dragging ? `scale(${dragProgress})` : undefined,
+                                opacity: dragging ? dragProgress : undefined,
+                                transition: dragging ? 'none' : undefined,
+                              }}
                               onClick={() => void deleteItemFromList(item.id)}
                             >
                               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -389,57 +405,58 @@ export function CatalogPage() {
                               </svg>
                               <span>Delete</span>
                             </button>
-                          </div>
+                            </div>
 
-                          <button
-                            className="ios-list-item catalog-swipe-foreground"
-                            style={{
-                              transform: getTransform(item.id),
-                              transition: isDragging(item.id) ? 'none' : 'transform 160ms ease',
-                            }}
-                            onTouchStart={(e) => onTouchStart(item.id, e)}
-                            onTouchMove={(e) => onTouchMove(item.id, e)}
-                            onTouchEnd={() => onTouchEnd(item.id)}
-                            onClick={() => {
-                              if (openSwipeId !== null) {
-                                closeAll();
-                                return;
-                              }
-                              navigate(`/catalog/item/${item.id}`);
-                            }}
-                            tabIndex={category.collapsed ? -1 : undefined}
-                          >
-                            <div className="ios-list-icon">
-                              {item.photo ? (
-                                <img src={item.photo} alt={item.name} loading="lazy" decoding="async" />
-                              ) : (
-                                item.name.charAt(0).toUpperCase()
-                              )}
-                            </div>
-                            <div className="ios-list-content">
-                              <span className="ios-list-title">
-                                {item.name}
-                              </span>
-                              <span className="ios-list-sub">
-                                {[item.brand, item.model].filter(Boolean).join(' ') || category.name}
-                                {item.quantity > 1 && ` \u00B7 x${item.quantity}`}
-                              </span>
-                            </div>
-                            <div className="ios-list-action">
-                              {item.currentValue && (
-                                <span className="ios-catalog-value">
-                                  {formatMoney(item.currentValue.amount, item.currentValue.currency)}
+                            <button
+                              className="ios-list-item catalog-swipe-foreground"
+                              style={{
+                                transform: getTransform(item.id),
+                                transition: dragging ? 'none' : 'transform 160ms ease',
+                              }}
+                              onTouchStart={(e) => onTouchStart(item.id, e)}
+                              onTouchMove={(e) => onTouchMove(item.id, e)}
+                              onTouchEnd={() => onTouchEnd(item.id)}
+                              onClick={() => {
+                                if (openSwipeId !== null) {
+                                  closeAll();
+                                  return;
+                                }
+                                navigate(`/catalog/item/${item.id}`);
+                              }}
+                              tabIndex={category.collapsed ? -1 : undefined}
+                            >
+                              <div className="ios-list-icon">
+                                {item.photo ? (
+                                  <img src={item.photo} alt={item.name} loading="lazy" decoding="async" />
+                                ) : (
+                                  item.name.charAt(0).toUpperCase()
+                                )}
+                              </div>
+                              <div className="ios-list-content">
+                                <span className="ios-list-title">
+                                  {item.name}
                                 </span>
-                              )}
-                              {item.essential && (
-                                <svg className="ios-catalog-star ios-catalog-star--action" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-label="Essential">
-                                  <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
-                                </svg>
-                              )}
-                            </div>
-                          </button>
-                        </div>
-                      ))}
+                                <span className="ios-list-sub">
+                                  {[item.brand, item.model].filter(Boolean).join(' ') || category.name}
+                                  {item.quantity > 1 && ` \u00B7 x${item.quantity}`}
+                                </span>
+                              </div>
+                              <div className="ios-list-action">
+                                {item.currentValue && (
+                                  <span className="ios-catalog-value">
+                                    {formatMoney(item.currentValue.amount, item.currentValue.currency)}
+                                  </span>
+                                )}
+                                {item.essential && (
+                                  <svg className="ios-catalog-star ios-catalog-star--action" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-label="Essential">
+                                    <path d="m12 2.4 2.95 5.98 6.6.96-4.77 4.65 1.12 6.58L12 17.47l-5.9 3.1 1.12-6.58-4.77-4.65 6.6-.96z" />
+                                  </svg>
+                                )}
+                              </div>
+                            </button>
+                          </div>
+                        );
+                      })}
                     </div>
                   </section>
                 );

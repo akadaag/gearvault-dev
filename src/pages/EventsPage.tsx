@@ -186,6 +186,7 @@ export function EventsPage() {
     onTouchMove,
     onTouchEnd,
     getTransform,
+    getDragProgress,
     closeAll,
     isDragging,
     isOpen,
@@ -436,14 +437,22 @@ export function EventsPage() {
             const total  = event.packingChecklist.length;
             const packingPct = total > 0 ? Math.round((packed / total) * 100) : 0;
             const daysInfo = event.dateTime ? getDaysUntilEvent(event.dateTime) : null;
+            const dragging = isDragging(event.id);
+            const rowOpen = isOpen(event.id);
+            const dragProgress = getDragProgress(event.id);
 
             return (
-              <div key={event.id} className={`ev-ios-swipe-row${isOpen(event.id) || isDragging(event.id) ? ' is-open' : ''}`}>
-                <div className="ev-ios-swipe-actions" aria-hidden={!isOpen(event.id) && !isDragging(event.id)}>
+              <div key={event.id} className={`ev-ios-swipe-row${rowOpen ? ' is-open' : ''}`}>
+                <div className="ev-ios-swipe-actions" aria-hidden={!rowOpen}>
                   <button
                     type="button"
                     className="ev-ios-swipe-btn ev-ios-swipe-btn--share"
                     aria-label="Share event"
+                    style={{
+                      transform: dragging ? `scale(${dragProgress})` : undefined,
+                      opacity: dragging ? dragProgress : undefined,
+                      transition: dragging ? 'none' : undefined,
+                    }}
                     onClick={() => void shareEvent(event)}
                   >
                     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -457,6 +466,11 @@ export function EventsPage() {
                     type="button"
                     className="ev-ios-swipe-btn ev-ios-swipe-btn--delete"
                     aria-label="Delete event"
+                    style={{
+                      transform: dragging ? `scale(${dragProgress})` : undefined,
+                      opacity: dragging ? dragProgress : undefined,
+                      transition: dragging ? 'none' : undefined,
+                    }}
                     onClick={() => void deleteEventFromList(event.id)}
                   >
                     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -474,7 +488,7 @@ export function EventsPage() {
                   className="ev-ios-event-item ev-ios-swipe-foreground"
                   style={{
                     transform: getTransform(event.id),
-                    transition: isDragging(event.id) ? 'none' : 'transform 160ms ease',
+                    transition: dragging ? 'none' : 'transform 160ms ease',
                   }}
                   onTouchStart={(e) => onTouchStart(event.id, e)}
                   onTouchMove={(e) => onTouchMove(event.id, e)}
