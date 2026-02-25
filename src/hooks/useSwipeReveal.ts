@@ -18,8 +18,8 @@ interface TouchState {
 const MOBILE_MEDIA_QUERY = '(max-width: 767px)';
 
 export function useSwipeReveal({
-  openOffset = 120,
-  openThreshold = 55,
+  openOffset = 168,
+  openThreshold = 84,
   closeThreshold = 40,
 }: UseSwipeRevealOptions = {}) {
   const [openId, setOpenId] = useState<string | null>(null);
@@ -111,11 +111,6 @@ export function useSwipeReveal({
     return 'translateX(0px)';
   }
 
-  function getDragProgress(id: string) {
-    if (draggingId !== id) return 0;
-    return Math.min(1, Math.max(0, Math.abs(dragOffset) / openOffset));
-  }
-
   function closeAll() {
     setOpenId(null);
     setDraggingId(null);
@@ -129,7 +124,6 @@ export function useSwipeReveal({
     onTouchMove,
     onTouchEnd,
     getTransform,
-    getDragProgress,
     closeAll,
     isDragging: (id: string) => draggingId === id,
     isOpen: (id: string) => openId === id,

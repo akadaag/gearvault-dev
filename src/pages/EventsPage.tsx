@@ -186,11 +186,10 @@ export function EventsPage() {
     onTouchMove,
     onTouchEnd,
     getTransform,
-    getDragProgress,
     closeAll,
     isDragging,
     isOpen,
-  } = useSwipeReveal({ openOffset: 120, openThreshold: 55, closeThreshold: 40 });
+  } = useSwipeReveal({ openOffset: 168, openThreshold: 84, closeThreshold: 40 });
 
   async function deleteEventFromList(eventId: string) {
     closeAll();
@@ -439,7 +438,6 @@ export function EventsPage() {
             const daysInfo = event.dateTime ? getDaysUntilEvent(event.dateTime) : null;
             const dragging = isDragging(event.id);
             const rowOpen = isOpen(event.id);
-            const dragProgress = getDragProgress(event.id);
 
             return (
               <div key={event.id} className={`ev-ios-swipe-row${rowOpen ? ' is-open' : ''}`}>
@@ -448,11 +446,6 @@ export function EventsPage() {
                     type="button"
                     className="ev-ios-swipe-btn ev-ios-swipe-btn--share"
                     aria-label="Share event"
-                    style={{
-                      transform: dragging ? `scale(${dragProgress})` : undefined,
-                      opacity: dragging ? dragProgress : undefined,
-                      transition: dragging ? 'none' : undefined,
-                    }}
                     onClick={() => void shareEvent(event)}
                   >
                     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -466,11 +459,6 @@ export function EventsPage() {
                     type="button"
                     className="ev-ios-swipe-btn ev-ios-swipe-btn--delete"
                     aria-label="Delete event"
-                    style={{
-                      transform: dragging ? `scale(${dragProgress})` : undefined,
-                      opacity: dragging ? dragProgress : undefined,
-                      transition: dragging ? 'none' : undefined,
-                    }}
                     onClick={() => void deleteEventFromList(event.id)}
                   >
                     <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">

@@ -234,11 +234,10 @@ export function CatalogPage() {
     onTouchMove,
     onTouchEnd,
     getTransform,
-    getDragProgress,
     closeAll,
     isDragging,
     isOpen,
-  } = useSwipeReveal({ openOffset: 120, openThreshold: 55, closeThreshold: 40 });
+  } = useSwipeReveal({ openOffset: 168, openThreshold: 84, closeThreshold: 40 });
 
   async function deleteItemFromList(itemId: string) {
     closeAll();
@@ -363,7 +362,6 @@ export function CatalogPage() {
                       {items.map((item) => {
                         const dragging = isDragging(item.id);
                         const rowOpen = isOpen(item.id);
-                        const dragProgress = getDragProgress(item.id);
 
                         return (
                           <div key={item.id} className={`catalog-swipe-row${rowOpen ? ' is-open' : ''}`}>
@@ -372,11 +370,6 @@ export function CatalogPage() {
                               type="button"
                               className="ev-ios-swipe-btn ev-ios-swipe-btn--share"
                               aria-label="Share gear item"
-                              style={{
-                                transform: dragging ? `scale(${dragProgress})` : undefined,
-                                opacity: dragging ? dragProgress : undefined,
-                                transition: dragging ? 'none' : undefined,
-                              }}
                               onClick={() => void shareGearItem(item)}
                             >
                               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -390,11 +383,6 @@ export function CatalogPage() {
                               type="button"
                               className="ev-ios-swipe-btn ev-ios-swipe-btn--delete"
                               aria-label="Delete gear item"
-                              style={{
-                                transform: dragging ? `scale(${dragProgress})` : undefined,
-                                opacity: dragging ? dragProgress : undefined,
-                                transition: dragging ? 'none' : undefined,
-                              }}
                               onClick={() => void deleteItemFromList(item.id)}
                             >
                               <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
