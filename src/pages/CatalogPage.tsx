@@ -381,7 +381,7 @@ export function CatalogPage() {
                               aria-label="Share gear item"
                               onClick={() => void shareGearItem(item)}
                               style={{
-                                transform: `scale(${0.3 + 0.7 * getActionsProgress(item.id)})`,
+                                transform: `scale(${0.01 + 0.99 * Math.min(1, getActionsProgress(item.id) / 0.55)})`,
                                 transition: dragging ? 'none' : 'transform 160ms ease',
                               }}
                             >
@@ -398,7 +398,7 @@ export function CatalogPage() {
                               aria-label="Delete gear item"
                               onClick={() => void deleteItemFromList(item.id)}
                               style={{
-                                transform: `scale(${0.3 + 0.7 * getActionsProgress(item.id)})`,
+                                transform: `scale(${0.01 + 0.99 * Math.min(1, Math.max(0, (getActionsProgress(item.id) - 0.35) / 0.55))})`,
                                 transition: dragging ? 'none' : 'transform 160ms ease',
                               }}
                             >

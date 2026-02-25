@@ -457,7 +457,7 @@ export function EventsPage() {
                     aria-label="Share event"
                     onClick={() => void shareEvent(event)}
                     style={{
-                      transform: `scale(${0.3 + 0.7 * getActionsProgress(event.id)})`,
+                      transform: `scale(${0.01 + 0.99 * Math.min(1, getActionsProgress(event.id) / 0.55)})`,
                       transition: dragging ? 'none' : 'transform 160ms ease',
                     }}
                   >
@@ -474,7 +474,7 @@ export function EventsPage() {
                     aria-label="Delete event"
                     onClick={() => void deleteEventFromList(event.id)}
                     style={{
-                      transform: `scale(${0.3 + 0.7 * getActionsProgress(event.id)})`,
+                      transform: `scale(${0.01 + 0.99 * Math.min(1, Math.max(0, (getActionsProgress(event.id) - 0.35) / 0.55))})`,
                       transition: dragging ? 'none' : 'transform 160ms ease',
                     }}
                   >
