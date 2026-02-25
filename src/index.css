@@ -6026,6 +6026,15 @@ html {
   background: color-mix(in srgb, var(--ios-text-secondary) 8%, transparent);
 }
 
+/* Inside a swipe row, use a solid active bg so pill buttons never bleed through */
+.catalog-swipe-row .ios-list-item:active {
+  background: #f2f2f4;
+}
+
+:root.dark .catalog-swipe-row .ios-list-item:active {
+  background: #2c2c2e;
+}
+
 .ios-theme .ios-list-icon {
   width: 44px;
   height: 44px;
@@ -6511,6 +6520,11 @@ html {
 .catalog-swipe-row {
   position: relative;
   overflow: hidden;
+  background: #F2F2F7;
+}
+
+:root.dark .catalog-swipe-row {
+  background: #000000;
 }
 
 .catalog-swipe-row .ios-list-item {
@@ -7495,7 +7509,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   margin-bottom: 10px;
   border-radius: 22px;
   overflow: hidden;
-  background: #ffffff;
+  background: #F2F2F7;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
 }
 
@@ -7572,6 +7586,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   z-index: 1;
   touch-action: pan-y;
   will-change: transform;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .ev-ios-event-item {
@@ -7590,6 +7605,11 @@ input[type="checkbox"].ios-toggle:checked::after {
 
 .ev-ios-event-item:active {
   transform: scale(0.98);
+}
+
+/* Inside a swipe row, disable scale so the card never shrinks and reveals pills on tap */
+.ev-ios-swipe-row .ev-ios-event-item:active {
+  transform: none;
 }
 
 /* Date badge */
@@ -7978,7 +7998,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 }
 
 :root.dark .ev-ios-swipe-row {
-  background: rgba(255, 255, 255, 0.08);
+  background: #000000;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
 }
 
