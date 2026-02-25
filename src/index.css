@@ -6513,6 +6513,14 @@ html {
   overflow: hidden;
 }
 
+.catalog-swipe-row .ios-list-item {
+  background: #ffffff;
+}
+
+:root.dark .catalog-swipe-row .ios-list-item {
+  background: #1c1c1e;
+}
+
 .catalog-swipe-row .ios-list-action {
   transition: opacity 120ms ease;
 }
@@ -7493,9 +7501,9 @@ input[type="checkbox"].ios-toggle:checked::after {
 
 .ev-ios-swipe-row .ev-ios-event-item {
   margin-bottom: 0;
-  border-radius: 0;
+  border-radius: 22px;
   box-shadow: none;
-  background: transparent;
+  background: #ffffff;
 }
 
 .ev-ios-swipe-actions,
@@ -7975,7 +7983,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 }
 
 :root.dark .ev-ios-swipe-row .ev-ios-event-item {
-  background: transparent;
+  background: #1c1c1e;
   box-shadow: none;
 }
 
