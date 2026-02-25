@@ -234,7 +234,6 @@ export function CatalogPage() {
     onTouchMove,
     onTouchEnd,
     getTransform,
-    getActionsTransform,
     getActionsProgress,
     closeAll,
     isDragging,
@@ -370,10 +369,6 @@ export function CatalogPage() {
                             <div
                               className="catalog-swipe-actions"
                               aria-hidden={!rowOpen}
-                              style={{
-                                transform: getActionsTransform(item.id),
-                                transition: dragging ? 'none' : 'transform 160ms ease',
-                              }}
                             >
                             <button
                               type="button"

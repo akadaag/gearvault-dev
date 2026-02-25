@@ -186,7 +186,6 @@ export function EventsPage() {
     onTouchMove,
     onTouchEnd,
     getTransform,
-    getActionsTransform,
     getActionsProgress,
     closeAll,
     isDragging,
@@ -446,10 +445,6 @@ export function EventsPage() {
                 <div
                   className="ev-ios-swipe-actions"
                   aria-hidden={!rowOpen}
-                  style={{
-                    transform: getActionsTransform(event.id),
-                    transition: dragging ? 'none' : 'transform 160ms ease',
-                  }}
                 >
                   <button
                     type="button"
