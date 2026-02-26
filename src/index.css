@@ -7169,7 +7169,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 
 /* Reset padding for Assistant */
 .ios-theme .content.content-assistant {
-  padding-top: env(safe-area-inset-top, 0px);
+  padding-top: 0;
   padding-left: 0;
   padding-right: 0;
   background: var(--ios-bg);
@@ -10741,7 +10741,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   z-index: 50;
   display: flex;
   flex-direction: column;
-  padding-top: env(safe-area-inset-top);
+  padding-top: 0;
   padding-bottom: env(safe-area-inset-bottom);
   box-shadow: 4px 0 32px rgba(0, 0, 0, 0.18);
   animation: ai-sidebar-slide-in 0.28s cubic-bezier(0.32, 0.72, 0, 1) forwards;
