@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { ContentEditableInput } from '../components/ContentEditableInput';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
 import { 
@@ -84,7 +84,6 @@ function clearDraft() {
 // ---------------------------------------------------------------------------
 export function AIAssistantPage() {
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const catalog = useLiveQuery(() => db.gearItems.toArray(), [], [] as GearItem[]);
   const settings = useLiveQuery(() => db.settings.get('app-settings'), []);
@@ -135,33 +134,27 @@ export function AIAssistantPage() {
   const [inputBarHidden, setInputBarHidden] = useState(false);
   const lastScrollTopRef = useRef(0);
 
+  // Sidebar (chat history) state
+  const [showSidebar, setShowSidebar] = useState(false);
+  const [sidebarSearch, setSidebarSearch] = useState('');
 
   // Shared state
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
   const [error, setError] = useState('');
 
+  // Closing animation for sidebar
+  const { closing: closingSidebar, dismiss: dismissSidebar, onAnimationEnd: onSidebarAnimEnd } = useSheetDismiss(() => { setShowSidebar(false); setSidebarSearch(''); });
 
-  // History sheet controlled by URL param
-  const showHistorySheet = searchParams.get('history') === '1';
-
-  // Lock body scroll when history sheet is open
+  // Lock body scroll when sidebar is open
   useEffect(() => {
-    if (showHistorySheet) {
+    if (showSidebar) {
       lockSheetScroll();
     } else {
       unlockSheetScroll();
     }
     return () => unlockSheetScroll();
-  }, [showHistorySheet]);
-
-  // Closing animation for history sheet
-  const { closing: closingHistory, dismiss: dismissHistory, onAnimationEnd: onHistoryAnimEnd } = useSheetDismiss(closeHistorySheetImmediate);
-  function closeHistorySheetImmediate() {
-    const params = new URLSearchParams(searchParams);
-    params.delete('history');
-    setSearchParams(params);
-  }
+  }, [showSidebar]);
 
 
   // ---------------------------------------------------------------------------
@@ -854,10 +847,10 @@ export function AIAssistantPage() {
 
 
   // ---------------------------------------------------------------------------
-  // History sheet helpers
+  // History sidebar helpers
   // ---------------------------------------------------------------------------
   function closeHistorySheet() {
-    dismissHistory();
+    dismissSidebar();
   }
 
 
@@ -898,6 +891,16 @@ export function AIAssistantPage() {
       plan.checklist.map((i) => ({ ...i, section: i.section ?? 'Misc' })),
     );
   }, [plan]);
+
+
+  // ---------------------------------------------------------------------------
+  // Filtered sessions for sidebar search
+  // ---------------------------------------------------------------------------
+  const filteredSessions = useMemo(() => {
+    if (!sidebarSearch.trim()) return chatSessions;
+    const q = sidebarSearch.toLowerCase();
+    return chatSessions.filter(s => s.title.toLowerCase().includes(q));
+  }, [chatSessions, sidebarSearch]);
 
 
   // ---------------------------------------------------------------------------
@@ -978,26 +981,42 @@ export function AIAssistantPage() {
   // ---------------------------------------------------------------------------
   return (
     <section className="ai-page ios-theme">
-      {/* -- iOS HEADER -- */}
-      <header className="ai-ios-header">
-        <div className="ai-ios-header-top">
-          <h1 className="ai-ios-title">Assistant</h1>
-          <button
-            className="ai-ios-icon-btn"
-            onClick={() => {
-              const params = new URLSearchParams(searchParams);
-              params.set('history', '1');
-              setSearchParams(params);
-            }}
-            aria-label="Chat history"
-          >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="12" cy="12" r="10" />
-              <polyline points="12 6 12 12 16 14" />
-            </svg>
-          </button>
+      {/* -- FLOATING BAR -- */}
+      <div className="ai-floating-bar" style={{ pointerEvents: 'none' }}>
+        {/* Hamburger — opens sidebar */}
+        <button
+          className="ai-circle-btn"
+          style={{ pointerEvents: 'auto' }}
+          onClick={() => setShowSidebar(true)}
+          aria-label="Chat history"
+        >
+          {/* 3 staggered lines: long, medium, short */}
+          <svg width="18" height="14" viewBox="0 0 18 14" fill="none" aria-hidden="true">
+            <line x1="1" y1="2" x2="17" y2="2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+            <line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+            <line x1="1" y1="12" x2="9" y2="12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+          </svg>
+        </button>
+
+        {/* Title pill */}
+        <div className="ai-title-pill" style={{ pointerEvents: 'auto' }}>
+          <span>Assistant</span>
         </div>
-      </header>
+
+        {/* Temp-chat button — placeholder, no functionality yet */}
+        <button
+          className="ai-circle-btn ai-circle-btn--dashed"
+          style={{ pointerEvents: 'auto' }}
+          aria-label="Temporary chat (coming soon)"
+          disabled
+        >
+          {/* Circular arrows icon */}
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+          </svg>
+        </button>
+      </div>
 
 
       {/* -- SCROLL AREA -- */}
@@ -1310,73 +1329,94 @@ export function AIAssistantPage() {
       )}
 
 
-      {/* -- HISTORY BOTTOM SHEET -- */}
-      {showHistorySheet && (
+      {/* -- CHAT HISTORY SIDEBAR -- */}
+      {showSidebar && (
         <>
-          <div className={`ios-sheet-backdrop${closingHistory ? ' closing' : ''}`} onClick={dismissHistory} />
-          <div className={`ios-sheet-modal${closingHistory ? ' closing' : ''}`} aria-label="Chat history" onAnimationEnd={onHistoryAnimEnd}>
-            <div className="ios-sheet-header ios-sheet-header--icon">
-              <button className="ios-sheet-icon-btn ios-sheet-icon-btn--cancel" onClick={dismissHistory} aria-label="Close">
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M2 2L16 16M16 2L2 16" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/></svg>
-              </button>
-              <h3 className="ios-sheet-title">Chat History</h3>
-              <button className="ios-sheet-icon-btn ios-sheet-icon-btn--save" type="button" onClick={handleNewChat} aria-label="New chat">
-                <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 2v14M2 9h14" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/></svg>
+          <div
+            className={`ai-sidebar-backdrop${closingSidebar ? ' closing' : ''}`}
+            onClick={dismissSidebar}
+          />
+          <div
+            className={`ai-sidebar${closingSidebar ? ' closing' : ''}`}
+            aria-label="Chat history"
+            onAnimationEnd={onSidebarAnimEnd}
+          >
+            {/* Top row: search pill + new-chat button */}
+            <div className="ai-sidebar-top">
+              <div className="ai-sidebar-search-bar">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                </svg>
+                <input
+                  type="search"
+                  placeholder="Search"
+                  value={sidebarSearch}
+                  onChange={e => setSidebarSearch(e.target.value)}
+                  autoComplete="off"
+                />
+              </div>
+              <button
+                type="button"
+                className="ai-sidebar-new-btn"
+                onClick={handleNewChat}
+                aria-label="New chat"
+              >
+                <svg width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+                  <path d="M9 2v14M2 9h14" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"/>
+                </svg>
               </button>
             </div>
-            <div className="ios-sheet-content">
-              {chatSessions.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '2rem 1rem' }}>
-                  <p style={{ fontSize: '15px', color: 'var(--ios-text-secondary)' }}>No chat history yet</p>
+
+            {/* Session list */}
+            <div className="ai-sidebar-list">
+              {filteredSessions.length === 0 ? (
+                <div className="ai-sidebar-empty">
+                  <p>{sidebarSearch ? 'No matching chats' : 'No chat history yet'}</p>
                 </div>
               ) : (
-                <div>
-                  {chatSessions.map((session) => (
-                    <div
-                      key={session.id}
-                      className={`chat-session-swipe-row ${openSessionActionsId === session.id ? 'is-open' : ''}`}
-                    >
-                      {/* Background action button */}
-                      <div className="chat-session-swipe-actions" aria-hidden={openSessionActionsId !== session.id}>
-                        <button
-                          type="button"
-                          className="chat-session-action-btn chat-session-action-delete"
-                          onClick={() => void handleDeleteSession(session.id)}
-                          aria-label="Delete chat session"
-                        >
-                          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                            <path d="M3 6h18" />
-                            <path d="M8 6V4h8v2" />
-                            <path d="M19 6l-1 14H6L5 6" />
-                            <path d="M10 11v6M14 11v6" />
-                          </svg>
-                        </button>
-                      </div>
-
-                      {/* Foreground swipeable card */}
-                      <div
-                        className="chat-session-item chat-session-swipe-foreground"
-                        onTouchStart={onTouchStart}
-                        onTouchMove={onTouchMove}
-                        onTouchEnd={() => onTouchEnd(session.id)}
+                filteredSessions.map((session) => (
+                  <div
+                    key={session.id}
+                    className={`chat-session-swipe-row ${openSessionActionsId === session.id ? 'is-open' : ''}`}
+                  >
+                    {/* Background delete action */}
+                    <div className="chat-session-swipe-actions" aria-hidden={openSessionActionsId !== session.id}>
+                      <button
+                        type="button"
+                        className="chat-session-action-btn chat-session-action-delete"
+                        onClick={() => void handleDeleteSession(session.id)}
+                        aria-label="Delete chat session"
                       >
-                        <button
-                          type="button"
-                          className="chat-session-btn"
-                          onClick={() => void handleLoadSession(session.id)}
-                        >
-                          <div>
-                            <div className="chat-session-title">{session.title}</div>
-                            <div className="chat-session-meta">
-                              {session.messages.filter(m => m.role !== 'system').length} messages · {' '}
-                              {new Date(session.updatedAt).toLocaleDateString()}
-                            </div>
-                          </div>
-                        </button>
-                      </div>
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                          <path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/>
+                          <path d="M10 11v6M14 11v6"/>
+                        </svg>
+                      </button>
                     </div>
-                  ))}
-                </div>
+
+                    {/* Foreground swipeable card */}
+                    <div
+                      className={`chat-session-item chat-session-swipe-foreground${currentSession?.id === session.id ? ' active' : ''}`}
+                      onTouchStart={onTouchStart}
+                      onTouchMove={onTouchMove}
+                      onTouchEnd={() => onTouchEnd(session.id)}
+                    >
+                      <button
+                        type="button"
+                        className="chat-session-btn"
+                        onClick={() => void handleLoadSession(session.id)}
+                      >
+                        <div>
+                          <div className="chat-session-title">{session.title}</div>
+                          <div className="chat-session-meta">
+                            {session.messages.filter(m => m.role !== 'system').length} messages ·{' '}
+                            {new Date(session.updatedAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                      </button>
+                    </div>
+                  </div>
+                ))
               )}
             </div>
           </div>
