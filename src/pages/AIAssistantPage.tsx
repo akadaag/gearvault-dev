@@ -983,29 +983,28 @@ export function AIAssistantPage() {
     <section className="ai-page ios-theme">
       {/* -- FLOATING BAR -- */}
       <div className="ai-floating-bar" style={{ pointerEvents: 'none' }}>
-        {/* Hamburger — opens sidebar */}
-        <button
-          className="ai-circle-btn"
-          style={{ pointerEvents: 'auto' }}
-          onClick={() => setShowSidebar(true)}
-          aria-label="Chat history"
-        >
-          {/* 3 staggered lines: long, medium, short */}
-          <svg width="18" height="14" viewBox="0 0 18 14" fill="none" aria-hidden="true">
-            <line x1="1" y1="2" x2="17" y2="2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-            <line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-            <line x1="1" y1="12" x2="9" y2="12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-          </svg>
-        </button>
-
-        {/* Title pill */}
-        <div className="ai-title-pill" style={{ pointerEvents: 'auto' }}>
-          <span>Assistant</span>
+        {/* Left group: hamburger + title pill */}
+        <div className="ai-floating-bar-left" style={{ pointerEvents: 'auto' }}>
+          <button
+            className="ai-circle-btn"
+            onClick={() => setShowSidebar(true)}
+            aria-label="Chat history"
+          >
+            {/* 3 staggered lines: long, medium, short */}
+            <svg width="18" height="14" viewBox="0 0 18 14" fill="none" aria-hidden="true">
+              <line x1="1" y1="2" x2="17" y2="2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+              <line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+              <line x1="1" y1="12" x2="9" y2="12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+            </svg>
+          </button>
+          <div className="ai-title-pill">
+            <span>Assistant</span>
+          </div>
         </div>
 
         {/* Temp-chat button — placeholder, no functionality yet */}
         <button
-          className="ai-circle-btn ai-circle-btn--dashed"
+          className="ai-circle-btn"
           style={{ pointerEvents: 'auto' }}
           aria-label="Temporary chat (coming soon)"
           disabled

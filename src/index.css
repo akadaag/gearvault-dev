@@ -8866,7 +8866,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 .ai-page.ios-theme {
   display: flex;
   flex-direction: column;
-  background: var(--ios-bg);
+  background: #ffffff;
   min-height: 0;
   flex: 1;
   gap: 0;
@@ -8935,6 +8935,13 @@ input[type="checkbox"].ios-toggle:checked::after {
   pointer-events: none;
 }
 
+/* Left group: hamburger + title pill */
+.ai-page.ios-theme .ai-floating-bar-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* Circle buttons (hamburger + temp-chat) */
 .ai-page.ios-theme .ai-circle-btn {
   width: 40px;
@@ -8960,12 +8967,6 @@ input[type="checkbox"].ios-toggle:checked::after {
   opacity: 0.4;
   cursor: default;
 }
-/* Dashed variant for temp-chat placeholder */
-.ai-page.ios-theme .ai-circle-btn--dashed {
-  background: transparent;
-  box-shadow: none;
-  border: 1.5px dashed rgba(0, 0, 0, 0.25);
-}
 
 /* Title pill */
 .ai-page.ios-theme .ai-title-pill {
@@ -8989,8 +8990,8 @@ input[type="checkbox"].ios-toggle:checked::after {
   -webkit-overflow-scrolling: touch;
   padding: 0 16px;
   padding-bottom: 100px;
-  /* Clear the floating bar */
-  padding-top: calc(60px + env(safe-area-inset-top));
+  /* Clear the floating bar (no safe-area offset — content scrolls freely behind notch) */
+  padding-top: 60px;
 }
 
 /* ── Empty State ── */
@@ -10736,7 +10737,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   bottom: 0;
   width: 300px;
   max-width: 85vw;
-  background: var(--ios-bg, #f2f2f7);
+  background: #ffffff;
   z-index: 50;
   display: flex;
   flex-direction: column;
@@ -10891,11 +10892,6 @@ input[type="checkbox"].ios-toggle:checked::after {
   background: rgba(44, 44, 46, 1);
   color: #ffffff;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.30), 0 0 0 0.5px rgba(255, 255, 255, 0.08);
-}
-:root.dark .ai-page.ios-theme .ai-circle-btn--dashed {
-  background: transparent;
-  box-shadow: none;
-  border-color: rgba(255, 255, 255, 0.25);
 }
 :root.dark .ai-page.ios-theme .ai-title-pill {
   background: rgba(44, 44, 46, 1);
