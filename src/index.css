@@ -10718,7 +10718,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   align-items: center;
   gap: 8px;
   background: rgba(120, 120, 128, 0.12);
-  border-radius: 10px;
+  border-radius: 999px;
   padding: 8px 12px;
   border: none;
 }
@@ -10768,6 +10768,22 @@ input[type="checkbox"].ios-toggle:checked::after {
 .ios-theme .ios-sheet-modal .ev-detail-sheet-list {
   display: flex;
   flex-direction: column;
+  gap: 10px;
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-category-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.ios-theme .ios-sheet-modal .ev-detail-category-header {
+  font-size: 11px;
+  line-height: 1.2;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ios-text-secondary);
+  padding: 2px 16px 6px;
+  font-weight: 600;
 }
 
 .ios-theme .ios-sheet-modal .ev-detail-item-row {
@@ -10782,16 +10798,16 @@ input[type="checkbox"].ios-toggle:checked::after {
   background: rgba(255, 255, 255, 0.55);
 }
 
-.ios-theme .ios-sheet-modal .ev-detail-item-row:first-child {
+.ios-theme .ios-sheet-modal .ev-detail-category-group .ev-detail-item-row:first-of-type {
   border-radius: 12px 12px 0 0;
 }
 
-.ios-theme .ios-sheet-modal .ev-detail-item-row:last-child {
+.ios-theme .ios-sheet-modal .ev-detail-category-group .ev-detail-item-row:last-of-type {
   border-bottom: none;
   border-radius: 0 0 12px 12px;
 }
 
-.ios-theme .ios-sheet-modal .ev-detail-item-row:only-child {
+.ios-theme .ios-sheet-modal .ev-detail-category-group .ev-detail-item-row:only-of-type {
   border-radius: 12px;
 }
 
@@ -10856,7 +10872,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 }
 
 .ios-theme .ios-sheet-modal .ev-detail-item-name {
-  font-size: 17px;
+  font-size: 15px;
   color: var(--ios-text-primary);
   font-weight: 400;
 }

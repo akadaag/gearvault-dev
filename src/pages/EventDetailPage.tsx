@@ -17,6 +17,7 @@ export function EventDetailPage() {
   const navigate = useNavigate();
   const event = useLiveQuery(() => (id ? db.events.get(id) : undefined), [id]);
   const catalog = useLiveQuery(() => db.gearItems.toArray(), [], []);
+  const categories = useLiveQuery(() => db.categories.toArray(), [], []);
 
   const [showAddSheet, setShowAddSheet] = useState(false);
   const [showEditSheet, setShowEditSheet] = useState(false);
@@ -216,6 +217,41 @@ export function EventDetailPage() {
   const filteredAvailableItems = availableCatalogItems.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
+
+  const categoryById = new Map(categories.map((category) => [category.id, category]));
+  const groupedAvailableItems = filteredAvailableItems.reduce<Array<{
+    key: string;
+    label: string;
+    sortOrder: number;
+    items: typeof filteredAvailableItems;
+  }>>((groups, item) => {
+    const category = categoryById.get(item.categoryId);
+    const key = category?.id ?? 'uncategorized';
+    const existingGroup = groups.find((group) => group.key === key);
+
+    if (existingGroup) {
+      existingGroup.items.push(item);
+      return groups;
+    }
+
+    groups.push({
+      key,
+      label: category?.name ?? 'Uncategorized',
+      sortOrder: category?.sortOrder ?? Number.MAX_SAFE_INTEGER,
+      items: [item],
+    });
+
+    return groups;
+  }, []);
+
+  groupedAvailableItems.sort((a, b) => {
+    if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
+    return a.label.localeCompare(b.label);
+  });
+
+  groupedAvailableItems.forEach((group) => {
+    group.items.sort((a, b) => a.name.localeCompare(b.name));
+  });
 
   return (
     <section className="event-detail-page ios-theme">
@@ -578,18 +614,23 @@ export function EventDetailPage() {
                     <p>{searchQuery ? 'No items found matching your search.' : 'All catalog items are already in this list.'}</p>
                   </div>
                 ) : (
-                  filteredAvailableItems.map((item) => (
-                    <div key={item.id} className="ev-detail-item-row" onClick={() => toggleSelection(item.id)}>
-                      <button
-                        className={`ev-detail-check-circle${selectedCatalogItems.has(item.id) ? ' checked' : ''}`}
-                        aria-label={selectedCatalogItems.has(item.id) ? 'Deselect item' : 'Select item'}
-                      >
-                        {selectedCatalogItems.has(item.id) && <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" fill="none"><polyline points="20 6 9 17 4 12" /></svg>}
-                      </button>
-                      <div className="ev-detail-item-info">
-                        <span className="ev-detail-item-name">{item.name}</span>
-                        {item.brand && <span className="ev-detail-item-sub">{item.brand}</span>}
-                      </div>
+                  groupedAvailableItems.map((group) => (
+                    <div key={group.key} className="ev-detail-category-group">
+                      <div className="ev-detail-category-header">{group.label}</div>
+                      {group.items.map((item) => (
+                        <div key={item.id} className="ev-detail-item-row" onClick={() => toggleSelection(item.id)}>
+                          <button
+                            className={`ev-detail-check-circle${selectedCatalogItems.has(item.id) ? ' checked' : ''}`}
+                            aria-label={selectedCatalogItems.has(item.id) ? 'Deselect item' : 'Select item'}
+                          >
+                            {selectedCatalogItems.has(item.id) && <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="3" fill="none"><polyline points="20 6 9 17 4 12" /></svg>}
+                          </button>
+                          <div className="ev-detail-item-info">
+                            <span className="ev-detail-item-name">{item.name}</span>
+                            {item.brand && <span className="ev-detail-item-sub">{item.brand}</span>}
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   ))
                 )}
