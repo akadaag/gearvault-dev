@@ -8940,19 +8940,25 @@ body:has(.content-assistant) {
   pointer-events: none;
 }
 
-/* Fade gradient — extends up into the notch and fades out below buttons */
+/* Fade gradient — covers notch/status-bar fully, then lets content bleed
+   through behind the floating pills (ChatGPT-style), fading to transparent
+   below the bar. Percentages are intentionally device-agnostic because both
+   anchor points (top / bar position) already scale with env(safe-area-inset-top). */
 .ai-page.ios-theme .ai-floating-bar::before {
   content: '';
   position: absolute;
   top: calc(-12px - env(safe-area-inset-top));
   left: 0;
   right: 0;
-  bottom: -20px;
+  bottom: -40px;
   background: linear-gradient(
     to bottom,
-    rgba(255, 255, 255, 1) 0%,
-    rgba(255, 255, 255, 1) 60%,
-    rgba(255, 255, 255, 0) 100%
+    rgba(255, 255, 255, 1.0)  0%,
+    rgba(255, 255, 255, 1.0) 36%,   /* fully opaque through status bar / notch */
+    rgba(255, 255, 255, 0.9) 44%,   /* entering floating-bar zone */
+    rgba(255, 255, 255, 0.55) 58%,  /* mid-bar — content visible but faded */
+    rgba(255, 255, 255, 0.2) 72%,   /* lower bar edge */
+    rgba(255, 255, 255, 0.0) 100%   /* transparent below bar */
   );
   pointer-events: none;
   z-index: -1;
@@ -8961,9 +8967,12 @@ body:has(.content-assistant) {
 :root.dark .ai-page.ios-theme .ai-floating-bar::before {
   background: linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 1) 0%,
-    rgba(0, 0, 0, 1) 60%,
-    rgba(0, 0, 0, 0) 100%
+    rgba(0, 0, 0, 1.0)  0%,
+    rgba(0, 0, 0, 1.0) 36%,
+    rgba(0, 0, 0, 0.9) 44%,
+    rgba(0, 0, 0, 0.55) 58%,
+    rgba(0, 0, 0, 0.2) 72%,
+    rgba(0, 0, 0, 0.0) 100%
   );
 }
 
