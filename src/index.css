@@ -9007,6 +9007,29 @@ html:has(.content-assistant) #root {
   );
 }
 
+/* ===== DEBUG TEMPORARY — remove before merging =====
+   Kills the gradient so nothing is hidden. Red block in DOM
+   lets us see exactly where iOS clips scroll content. */
+.ai-page.ios-theme .ai-floating-bar::before,
+:root.dark .ai-page.ios-theme .ai-floating-bar::before {
+  background: transparent !important;
+}
+.debug-bleed {
+  height: 180px;
+  margin-top: -120px;
+  background: rgba(255, 0, 0, 0.85);
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding-bottom: 10px;
+  position: relative;
+  z-index: 1;
+}
+/* ===== END DEBUG ===== */
+
 /* Left group: hamburger + title pill */
 .ai-page.ios-theme .ai-floating-bar-left {
   display: flex;
