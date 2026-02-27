@@ -69,10 +69,7 @@ export default defineConfig({
                 maxAgeSeconds: 60 * 60 * 24 * 30,
               },
               cacheableResponse: {
-                statuses: [200],
-              },
-              fetchOptions: {
-                mode: 'cors',
+                statuses: [0, 200],
               },
             },
           },

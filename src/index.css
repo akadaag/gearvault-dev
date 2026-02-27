@@ -1,6 +1,6 @@
 :root {
   /* Claude-inspired color palette - Light mode */
-  --bg: #fafafa;
+  --bg: #ffffff;
   --bg-elevated: #ffffff;
   --bg-soft: #e9eef4;
   --card: #ffffff;
@@ -7172,6 +7172,11 @@ input[type="checkbox"].ios-toggle:checked::after {
   padding-top: 0;
   padding-left: 0;
   padding-right: 0;
+  background: #ffffff;
+}
+
+/* Ensure body background is white when assistant page is open */
+body:has(.content-assistant) {
   background: #ffffff;
 }
 
