@@ -7176,9 +7176,6 @@ input[type="checkbox"].ios-toggle:checked::after {
   padding-left: 0;
   padding-right: 0;
   background: #ffffff;
-  /* Remove overflow-y:auto clipping so .ai-ios-content is the sole
-     scroll container with no clipping ancestors above it */
-  overflow: visible !important;
 }
 
 /* Remove viewport-level overflow clip for assistant page only so that
@@ -7190,23 +7187,6 @@ input[type="checkbox"].ios-toggle:checked::after {
 /* Ensure body background is white when assistant page is open */
 body:has(.content-assistant) {
   background: #ffffff;
-}
-
-/* ── Flat-structure overflow removal for assistant page ──
-   Remove overflow:hidden from EVERY ancestor of .ai-ios-content so
-   the scroll container has no clipping wrapper between it and the
-   viewport. Required for iOS WebKit to let content scroll into the
-   Dynamic Island / notch zone behind the status bar.
-   Scoped via :has(.content-assistant) so other pages are unaffected. */
-html:has(.content-assistant),
-html:has(.content-assistant) body,
-html:has(.content-assistant) #root {
-  overflow: visible !important;
-  overscroll-behavior: none;
-}
-
-.app-shell:has(.content-assistant) {
-  overflow: visible !important;
 }
 
 /* Override ai-page background in ios-theme */
@@ -8905,8 +8885,6 @@ html:has(.content-assistant) #root {
   flex: 1;
   gap: 0;
   padding: 0;
-  /* Don't clip — .ai-ios-content is the sole scroll container */
-  overflow: visible;
 }
 
 /* ── Sticky Header ── */
@@ -8971,12 +8949,10 @@ html:has(.content-assistant) #root {
   pointer-events: none;
 }
 
-/* Gradient overlay — if iOS WebKit now allows content to scroll behind the
-   Dynamic Island, this becomes a true fade: transparent at the bottom so
-   message content is visible through it, fading to opaque at the very top
-   (behind the DI). If content still clips at the safe-area, the solid-white
-   top section hides the hard edge as before.
-   env() absolute stops ensure pixel-perfect alignment regardless of notch size. */
+/* Gradient overlay — iOS WebKit constrains scroll content to the safe area so content
+   physically stops at env(safe-area-inset-top). We use env() as absolute length stops
+   so the gradient is fully opaque white exactly at the clip boundary, hiding the hard
+   edge. Content appears to fade smoothly into the DI zone rather than hard-cutting. */
 .ai-page.ios-theme .ai-floating-bar::before {
   content: '';
   position: absolute;
@@ -8987,9 +8963,9 @@ html:has(.content-assistant) #root {
   background: linear-gradient(
     to bottom,
     rgba(255, 255, 255, 1.00)  0px,
-    rgba(255, 255, 255, 1.00)  calc(env(safe-area-inset-top, 59px) - 10px),
-    rgba(255, 255, 255, 0.70)  calc(env(safe-area-inset-top, 59px) + 25px),
-    rgba(255, 255, 255, 0.30)  calc(env(safe-area-inset-top, 59px) + 60px),
+    rgba(255, 255, 255, 1.00)  calc(env(safe-area-inset-top, 59px) + 15px),
+    rgba(255, 255, 255, 0.85)  calc(env(safe-area-inset-top, 59px) + 40px),
+    rgba(255, 255, 255, 0.50)  calc(env(safe-area-inset-top, 59px) + 65px),
     rgba(255, 255, 255, 0.00)  calc(env(safe-area-inset-top, 59px) + 95px)
   );
   pointer-events: none;
@@ -9000,35 +8976,12 @@ html:has(.content-assistant) #root {
   background: linear-gradient(
     to bottom,
     rgba(0, 0, 0, 1.00)  0px,
-    rgba(0, 0, 0, 1.00)  calc(env(safe-area-inset-top, 59px) - 10px),
-    rgba(0, 0, 0, 0.70)  calc(env(safe-area-inset-top, 59px) + 25px),
-    rgba(0, 0, 0, 0.30)  calc(env(safe-area-inset-top, 59px) + 60px),
+    rgba(0, 0, 0, 1.00)  calc(env(safe-area-inset-top, 59px) + 15px),
+    rgba(0, 0, 0, 0.85)  calc(env(safe-area-inset-top, 59px) + 40px),
+    rgba(0, 0, 0, 0.50)  calc(env(safe-area-inset-top, 59px) + 65px),
     rgba(0, 0, 0, 0.00)  calc(env(safe-area-inset-top, 59px) + 95px)
   );
 }
-
-/* ===== DEBUG TEMPORARY — remove before merging =====
-   Kills the gradient so nothing is hidden. Red block in DOM
-   lets us see exactly where iOS clips scroll content. */
-.ai-page.ios-theme .ai-floating-bar::before,
-:root.dark .ai-page.ios-theme .ai-floating-bar::before {
-  background: transparent !important;
-}
-.debug-bleed {
-  height: 180px;
-  margin-top: -120px;
-  background: rgba(255, 0, 0, 0.85);
-  color: white;
-  font-size: 18px;
-  font-weight: bold;
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-  padding-bottom: 10px;
-  position: relative;
-  z-index: 1;
-}
-/* ===== END DEBUG ===== */
 
 /* Left group: hamburger + title pill */
 .ai-page.ios-theme .ai-floating-bar-left {
@@ -9081,15 +9034,11 @@ html:has(.content-assistant) #root {
 /* ── Main Scroll Content ── */
 .ai-page.ios-theme .ai-ios-content {
   flex: 1;
-  /* Size directly against the viewport since all ancestors are overflow:visible */
-  height: 100dvh;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding: 0 16px;
   padding-bottom: 100px;
-  /* Start content below the floating bar + safe-area so it isn't hidden on load,
-     but scroll up will carry it into the notch zone */
-  padding-top: calc(env(safe-area-inset-top, 59px) + 70px);
+  padding-top: 60px;
 }
 
 /* ── Empty State ── */

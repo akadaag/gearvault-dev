@@ -1020,9 +1020,7 @@ export function AIAssistantPage() {
 
       {/* -- SCROLL AREA -- */}
       <div className="ai-ios-content page-scroll-area" ref={scrollAreaRef}>
-        {/* DEBUG — TEMPORARY: red bleed block to test if content can scroll behind Dynamic Island */}
-        <div className="debug-bleed">BLEED TEST</div>
-
+        
         {/* Initial empty state */}
         {mode === 'packing' && step === 'input' && !loading && !plan && (
           <div className="ai-ios-empty">
