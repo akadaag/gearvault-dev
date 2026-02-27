@@ -7178,6 +7178,18 @@ input[type="checkbox"].ios-toggle:checked::after {
   background: #ffffff;
 }
 
+/* Remove viewport-level overflow clip for assistant page only so that
+   position:fixed scroll container can extend behind the Dynamic Island.
+   overflow:hidden on html propagates to the viewport and clips fixed elements
+   to the safe area — removing it lets content scroll into the notch zone.
+   overscroll-behavior:none prevents iOS body rubber-band bounce. */
+html:has(.content-assistant),
+html:has(.content-assistant) body,
+html:has(.content-assistant) #root {
+  overflow: visible !important;
+  overscroll-behavior: none;
+}
+
 /* Ensure body background is white when assistant page is open */
 body:has(.content-assistant) {
   background: #ffffff;
