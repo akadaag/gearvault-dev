@@ -8958,8 +8958,8 @@ body:has(.content-assistant) {
   bottom: -40px;
   background: linear-gradient(
     to bottom,
-    rgba(255, 255, 255, 0.92)  0%,   /* behind Dynamic Island — content subtly visible */
-    rgba(255, 255, 255, 0.88) 20%,   /* status bar zone */
+    rgba(255, 255, 255, 0.60)  0%,   /* behind Dynamic Island — content more visible */
+    rgba(255, 255, 255, 0.55) 20%,   /* status bar zone */
     rgba(255, 255, 255, 0.78) 38%,   /* approaching floating bar */
     rgba(255, 255, 255, 0.52) 55%,   /* mid-bar — content clearly faded */
     rgba(255, 255, 255, 0.18) 72%,   /* below bar edge */
@@ -8972,8 +8972,8 @@ body:has(.content-assistant) {
 :root.dark .ai-page.ios-theme .ai-floating-bar::before {
   background: linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 0.92)  0%,
-    rgba(0, 0, 0, 0.88) 20%,
+    rgba(0, 0, 0, 0.60)  0%,
+    rgba(0, 0, 0, 0.55) 20%,
     rgba(0, 0, 0, 0.78) 38%,
     rgba(0, 0, 0, 0.52) 55%,
     rgba(0, 0, 0, 0.18) 72%,
