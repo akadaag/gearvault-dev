@@ -9039,8 +9039,8 @@ body:has(.content-assistant) {
   /* Clear the floating bar (no safe-area offset — content scrolls freely behind notch) */
   padding-top: 60px;
   /* Fade content into transparent at the top clip edge to eliminate the hard cut line */
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 50px);
-  mask-image: linear-gradient(to bottom, transparent 0px, black 50px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 20px);
+  mask-image: linear-gradient(to bottom, transparent 0px, black 20px);
 }
 
 /* ── Empty State ── */
