@@ -344,6 +344,9 @@ a {
   height: 100dvh;
   overflow: hidden;
   padding: 0;
+  /* Prevent body background (#fafafa) from peeking through on black-translucent
+     status bar when there's any sub-pixel viewport height mismatch on iOS */
+  background: var(--bg);
 }
 
 @media (min-width: 768px) {
@@ -8940,10 +8943,12 @@ body:has(.content-assistant) {
   pointer-events: none;
 }
 
-/* Fade gradient — covers notch/status-bar fully, then lets content bleed
-   through behind the floating pills (ChatGPT-style), fading to transparent
-   below the bar. Percentages are intentionally device-agnostic because both
-   anchor points (top / bar position) already scale with env(safe-area-inset-top). */
+/* Fade gradient — with black-translucent status bar the notch/Dynamic Island
+   area is transparent, so content scrolls visibly behind it. The gradient
+   creates a smooth ChatGPT-style fade: near-opaque at the very top (gives the
+   floating pills their backdrop), progressively transparent below the bar.
+   Both anchor points scale with env(safe-area-inset-top) so the effect is
+   proportionally correct on every iPhone model. */
 .ai-page.ios-theme .ai-floating-bar::before {
   content: '';
   position: absolute;
@@ -8953,12 +8958,12 @@ body:has(.content-assistant) {
   bottom: -40px;
   background: linear-gradient(
     to bottom,
-    rgba(255, 255, 255, 1.0)  0%,
-    rgba(255, 255, 255, 1.0) 36%,   /* fully opaque through status bar / notch */
-    rgba(255, 255, 255, 0.9) 44%,   /* entering floating-bar zone */
-    rgba(255, 255, 255, 0.55) 58%,  /* mid-bar — content visible but faded */
-    rgba(255, 255, 255, 0.2) 72%,   /* lower bar edge */
-    rgba(255, 255, 255, 0.0) 100%   /* transparent below bar */
+    rgba(255, 255, 255, 0.92)  0%,   /* behind Dynamic Island — content subtly visible */
+    rgba(255, 255, 255, 0.88) 20%,   /* status bar zone */
+    rgba(255, 255, 255, 0.78) 38%,   /* approaching floating bar */
+    rgba(255, 255, 255, 0.52) 55%,   /* mid-bar — content clearly faded */
+    rgba(255, 255, 255, 0.18) 72%,   /* below bar edge */
+    rgba(255, 255, 255, 0.00) 100%   /* fully transparent */
   );
   pointer-events: none;
   z-index: -1;
@@ -8967,12 +8972,12 @@ body:has(.content-assistant) {
 :root.dark .ai-page.ios-theme .ai-floating-bar::before {
   background: linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 1.0)  0%,
-    rgba(0, 0, 0, 1.0) 36%,
-    rgba(0, 0, 0, 0.9) 44%,
-    rgba(0, 0, 0, 0.55) 58%,
-    rgba(0, 0, 0, 0.2) 72%,
-    rgba(0, 0, 0, 0.0) 100%
+    rgba(0, 0, 0, 0.92)  0%,
+    rgba(0, 0, 0, 0.88) 20%,
+    rgba(0, 0, 0, 0.78) 38%,
+    rgba(0, 0, 0, 0.52) 55%,
+    rgba(0, 0, 0, 0.18) 72%,
+    rgba(0, 0, 0, 0.00) 100%
   );
 }
 
