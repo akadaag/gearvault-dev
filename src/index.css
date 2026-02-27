@@ -7186,7 +7186,7 @@ input[type="checkbox"].ios-toggle:checked::after {
 html:has(.content-assistant),
 html:has(.content-assistant) body,
 html:has(.content-assistant) #root {
-  overflow: visible !important;
+  overflow: clip !important;
   overscroll-behavior: none;
 }
 
