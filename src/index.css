@@ -8958,11 +8958,11 @@ body:has(.content-assistant) {
   bottom: -40px;
   background: linear-gradient(
     to bottom,
-    rgba(255, 255, 255, 0.60)  0%,   /* behind Dynamic Island — content more visible */
-    rgba(255, 255, 255, 0.55) 20%,   /* status bar zone */
-    rgba(255, 255, 255, 0.78) 38%,   /* approaching floating bar */
-    rgba(255, 255, 255, 0.52) 55%,   /* mid-bar — content clearly faded */
-    rgba(255, 255, 255, 0.18) 72%,   /* below bar edge */
+    rgba(255, 255, 255, 0.15)  0%,   /* Dynamic Island zone — content clearly visible */
+    rgba(255, 255, 255, 0.25) 25%,   /* below DI — still clearly visible */
+    rgba(255, 255, 255, 0.70) 45%,   /* behind floating bar pills — backdrop */
+    rgba(255, 255, 255, 0.45) 60%,   /* below bar edge */
+    rgba(255, 255, 255, 0.12) 78%,   /* fading out */
     rgba(255, 255, 255, 0.00) 100%   /* fully transparent */
   );
   pointer-events: none;
@@ -8972,11 +8972,11 @@ body:has(.content-assistant) {
 :root.dark .ai-page.ios-theme .ai-floating-bar::before {
   background: linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 0.60)  0%,
-    rgba(0, 0, 0, 0.55) 20%,
-    rgba(0, 0, 0, 0.78) 38%,
-    rgba(0, 0, 0, 0.52) 55%,
-    rgba(0, 0, 0, 0.18) 72%,
+    rgba(0, 0, 0, 0.15)  0%,
+    rgba(0, 0, 0, 0.25) 25%,
+    rgba(0, 0, 0, 0.70) 45%,
+    rgba(0, 0, 0, 0.45) 60%,
+    rgba(0, 0, 0, 0.12) 78%,
     rgba(0, 0, 0, 0.00) 100%
   );
 }
@@ -9039,8 +9039,8 @@ body:has(.content-assistant) {
   /* Clear the floating bar (no safe-area offset — content scrolls freely behind notch) */
   padding-top: 60px;
   /* Fade content into transparent at the top clip edge to eliminate the hard cut line */
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 20px);
-  mask-image: linear-gradient(to bottom, transparent 0px, black 20px);
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 5px);
+  mask-image: linear-gradient(to bottom, transparent 0px, black 5px);
 }
 
 /* ── Empty State ── */
