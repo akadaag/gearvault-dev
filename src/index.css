@@ -9030,17 +9030,27 @@ body:has(.content-assistant) {
 }
 
 /* ── Main Scroll Content ── */
+/* position: fixed bypasses all ancestor overflow:hidden clips (html/body/#root/.app-shell)
+   so the scroll area physically extends behind the Dynamic Island. Both the floating bar
+   and input bar are already position:fixed — this makes the scroll container consistent. */
 .ai-page.ios-theme .ai-ios-content {
-  flex: 1;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1; /* below floating bar and input bar (both z-index:40) */
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  padding: 0 16px;
-  padding-bottom: 100px;
-  /* Clear the floating bar (no safe-area offset — content scrolls freely behind notch) */
-  padding-top: 60px;
-  /* Fade content into transparent at the top clip edge to eliminate the hard cut line */
+  padding: calc(env(safe-area-inset-top, 0px) + 60px) 16px 100px;
+  background: #ffffff;
+  /* Smooth the hard top clip edge — content fades to transparent at y=0 */
   -webkit-mask-image: linear-gradient(to bottom, transparent 0px, black 5px);
   mask-image: linear-gradient(to bottom, transparent 0px, black 5px);
+}
+
+:root.dark .ai-page.ios-theme .ai-ios-content {
+  background: #000000;
 }
 
 /* ── Empty State ── */
