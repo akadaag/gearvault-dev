@@ -12910,7 +12910,7 @@ body:has(.content-assistant) {
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-radius: 32px;
-  padding: 5px 8px;
+  padding: 6px 9px;
   border: 0.5px solid rgba(0, 0, 0, 0.1);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.20);
 }
@@ -12927,7 +12927,7 @@ body:has(.content-assistant) {
   border: 0;
   background: transparent;
   border-radius: 25px;
-  min-height: 50px;
+  min-height: 52px;
   min-width: 0;
   flex: 1;
   padding: 7px 6px;
