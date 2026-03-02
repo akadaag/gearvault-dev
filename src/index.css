@@ -9486,7 +9486,7 @@ body:has(.content-assistant) {
 /* ── Fixed Input Bar ── */
 .ai-page.ios-theme .ai-ios-input-bar {
   position: fixed;
-  bottom: calc(var(--bottom-nav-clearance, 60px) - 33px);
+  bottom: calc(var(--bottom-nav-clearance, 60px) - 35px);
   left: 0;
   right: 0;
   z-index: 40;
@@ -12867,7 +12867,7 @@ body:has(.content-assistant) {
 
 .floating-nav {
   position: fixed;
-  bottom: calc(env(safe-area-inset-bottom) - 9px);
+  bottom: calc(env(safe-area-inset-bottom) - 11px);
   left: 0;
   right: 0;
   z-index: 1000;
