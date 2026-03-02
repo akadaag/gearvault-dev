@@ -9527,10 +9527,14 @@ body:has(.content-assistant) {
   display: flex;
   align-items: center;
   gap: 8px;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 /* Input Pill */
 .ai-page.ios-theme .ai-ios-input-pill {
+  flex: 1;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -13807,7 +13811,7 @@ body:has(.content-assistant) {
 }
 
 .pwa-standalone .ai-page.ios-theme .ai-ios-input-bar {
-  bottom: 71px !important;
+  bottom: 60px !important;
 }
 
 /* W3C fallback for Android/Chrome (iOS ignores this) */
@@ -13819,7 +13823,7 @@ body:has(.content-assistant) {
     bottom: 21px !important;
   }
   .ai-page.ios-theme .ai-ios-input-bar {
-    bottom: 71px !important;
+    bottom: 60px !important;
   }
 }
 
