@@ -13791,21 +13791,28 @@ body:has(.content-assistant) {
 /* ── PWA standalone: pull nav flush with the home indicator ─────────────── */
 /* JS adds .pwa-standalone to <html> via navigator.standalone (iOS reliable)  */
 
+.pwa-standalone .app-shell {
+  height: 100vh !important;
+}
+
 .pwa-standalone .floating-nav {
-  bottom: 0px;
+  bottom: 8px !important;
 }
 
 .pwa-standalone .ai-page.ios-theme .ai-ios-input-bar {
-  bottom: 60px;
+  bottom: 68px !important;
 }
 
 /* W3C fallback for Android/Chrome (iOS ignores this) */
 @media (display-mode: standalone) {
+  .app-shell {
+    height: 100vh !important;
+  }
   .floating-nav {
-    bottom: 0px;
+    bottom: 8px !important;
   }
   .ai-page.ios-theme .ai-ios-input-bar {
-    bottom: 60px;
+    bottom: 68px !important;
   }
 }
 
