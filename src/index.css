@@ -8992,8 +8992,8 @@ body:has(.content-assistant) {
 
 /* Circle buttons (hamburger + temp-chat) */
 .ai-page.ios-theme .ai-circle-btn {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 999px;
   border: none;
   background: #ffffff;
@@ -9020,11 +9020,11 @@ body:has(.content-assistant) {
 .ai-page.ios-theme .ai-title-pill {
   display: inline-flex;
   align-items: center;
-  padding: 8px 20px;
+  padding: 10px 22px;
   border-radius: 999px;
   background: #ffffff;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
   color: var(--ios-text-primary);
   letter-spacing: -0.01em;
@@ -9522,7 +9522,7 @@ body:has(.content-assistant) {
   border: none;
   background: none;
   outline: none;
-  font-size: 17px;
+  font-size: 15px;
   color: var(--ios-text-primary);
   resize: none;
   min-height: auto;

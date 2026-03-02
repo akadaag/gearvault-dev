@@ -1003,7 +1003,7 @@ export function AIAssistantPage() {
             aria-label="Chat history"
           >
             {/* 3 staggered lines: long, medium, short */}
-            <svg width="18" height="14" viewBox="0 0 18 14" fill="none" aria-hidden="true">
+            <svg width="20" height="16" viewBox="0 0 18 14" fill="none" aria-hidden="true">
               <line x1="1" y1="2" x2="17" y2="2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
               <line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
               <line x1="1" y1="12" x2="9" y2="12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
@@ -1019,10 +1019,9 @@ export function AIAssistantPage() {
           className="ai-circle-btn"
           style={{ pointerEvents: 'auto' }}
           aria-label="Temporary chat (coming soon)"
-          disabled
         >
           {/* Circular arrows icon */}
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
             <path d="M3 3v5h5"/>
           </svg>
