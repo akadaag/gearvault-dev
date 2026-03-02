@@ -9502,9 +9502,16 @@ body:has(.content-assistant) {
   left: 0;
   right: 0;
   z-index: 40;
-  padding: 6px 12px;
+  padding: 6px 1.25rem;
   padding-bottom: env(safe-area-inset-bottom, 6px);
   transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+@media (max-width: 430px) {
+  .ai-page.ios-theme .ai-ios-input-bar {
+    padding: 6px 1rem;
+    padding-bottom: env(safe-area-inset-bottom, 6px);
+  }
 }
 .ai-page.ios-theme .ai-ios-input-bar.hidden {
   transform: translateY(calc(100% + 2rem));
@@ -13800,7 +13807,7 @@ body:has(.content-assistant) {
 }
 
 .pwa-standalone .ai-page.ios-theme .ai-ios-input-bar {
-  bottom: 81px !important;
+  bottom: 71px !important;
 }
 
 /* W3C fallback for Android/Chrome (iOS ignores this) */
@@ -13812,7 +13819,7 @@ body:has(.content-assistant) {
     bottom: 21px !important;
   }
   .ai-page.ios-theme .ai-ios-input-bar {
-    bottom: 81px !important;
+    bottom: 71px !important;
   }
 }
 
