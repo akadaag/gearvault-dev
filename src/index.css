@@ -10782,7 +10782,7 @@ body:has(.content-assistant) {
   top: 0;
   left: 0;
   bottom: 0;
-  width: 300px;
+  width: 340px;
   max-width: 85vw;
   background: #ffffff;
   z-index: 50;
@@ -10934,6 +10934,65 @@ body:has(.content-assistant) {
   background: #FF3B30;
 }
 
+/* ── Sidebar section headers (dropdown toggles) ── */
+.ai-page.ios-theme .ai-sidebar-section-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 6px 4px 6px 2px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  min-height: auto;
+  box-shadow: none;
+  color: var(--ios-text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.ai-page.ios-theme .ai-sidebar-section-header:hover,
+.ai-page.ios-theme .ai-sidebar-section-header:active {
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+}
+.ai-page.ios-theme .ai-sidebar-section-arrow {
+  flex-shrink: 0;
+  opacity: 0.55;
+  transition: transform 0.18s ease;
+  transform: rotate(-90deg);
+}
+.ai-page.ios-theme .ai-sidebar-section-arrow.open {
+  transform: rotate(0deg);
+}
+.ai-page.ios-theme .ai-sidebar-section-count {
+  margin-left: auto;
+  background: rgba(0,0,0,0.07);
+  border-radius: 999px;
+  padding: 1px 7px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ios-text-secondary);
+}
+
+/* Draft badge in session meta row */
+.ai-page.ios-theme .ai-sidebar-draft-badge {
+  display: inline-block;
+  background: rgba(255, 149, 0, 0.15);
+  color: #c77000;
+  border-radius: 4px;
+  padding: 0 5px;
+  font-size: 11px;
+  font-weight: 600;
+}
+:root.dark .ai-page.ios-theme .ai-sidebar-draft-badge {
+  background: rgba(255, 159, 10, 0.18);
+  color: #ff9f0a;
+}
+
 /* ── Dark mode overrides ── */
 :root.dark .ai-page.ios-theme .ai-circle-btn {
   background: rgba(44, 44, 46, 1);
@@ -10971,6 +11030,13 @@ body:has(.content-assistant) {
 :root.dark .ai-page.ios-theme .ai-sidebar .chat-session-item.active {
   background: rgba(10, 132, 255, 0.18);
   box-shadow: 0 0 0 1px rgba(10, 132, 255, 0.35);
+}
+:root.dark .ai-page.ios-theme .ai-sidebar-section-header {
+  color: rgba(235, 235, 245, 0.55);
+}
+:root.dark .ai-page.ios-theme .ai-sidebar-section-count {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(235, 235, 245, 0.5);
 }
 
 /* ── Event Detail: Share options grid inside iOS sheet ──────────── */

@@ -107,6 +107,35 @@ export interface AIFeedback {
   createdAt: string;
 }
 
+export type ChatSessionType = 'qa' | 'event-draft';
+
+/**
+ * A serialisable snapshot of an AIPlan for persisting event drafts.
+ * Mirrors AIPlan from services/ai.ts but lives in models to avoid circular deps.
+ */
+export interface AIPlanSnapshot {
+  eventTitle: string;
+  eventType: string;
+  checklist: Array<{
+    name: string;
+    gearItemId: string | null;
+    quantity: number;
+    notes?: string;
+    priority: Priority;
+    section?: string;
+    role?: 'primary' | 'backup' | 'alternative' | 'standard';
+  }>;
+  missingItems: Array<{
+    name: string;
+    reason: string;
+    priority: Priority;
+    action: 'buy' | 'borrow' | 'rent';
+    notes?: string;
+    category?: string;
+  }>;
+  tips?: string[];
+}
+
 export interface ChatMessage {
   id: string;
   role: 'user' | 'assistant' | 'system';
@@ -118,8 +147,14 @@ export interface ChatMessage {
 
 export interface ChatSession {
   id: string;
+  /** 'qa' = normal Q&A chat; 'event-draft' = unsaved packing plan draft */
+  type: ChatSessionType;
   title: string;
   messages: ChatMessage[];
+  /** AIPlan snapshot stored when type='event-draft' */
+  draftPlan?: AIPlanSnapshot;
+  /** Original input text used to generate the draft plan */
+  draftInput?: string;
   createdAt: string;
   updatedAt: string;
 }

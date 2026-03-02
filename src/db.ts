@@ -61,6 +61,26 @@ class GearVaultDB extends Dexie {
       aiFeedback: 'id, eventType, useful, createdAt',
       chatSessions: 'id, updatedAt',
     });
+
+    // v5: add type index to chatSessions + backfill existing rows as 'qa'
+    this.version(5)
+      .stores({
+        gearItems: 'id, name, categoryId, essential, condition, updatedAt, *tags',
+        categories: 'id, sortOrder, name',
+        events: 'id, title, type, dateTime, client, updatedAt, createdBy',
+        settings: 'id',
+        aiFeedback: 'id, eventType, useful, createdAt',
+        chatSessions: 'id, type, updatedAt',
+      })
+      .upgrade(async tx => {
+        // Backfill all existing sessions without a type as 'qa'
+        const sessions = await tx.table('chatSessions').toArray();
+        for (const session of sessions) {
+          if (!session.type) {
+            await tx.table('chatSessions').update(session.id, { type: 'qa' });
+          }
+        }
+      });
   }
 }
 

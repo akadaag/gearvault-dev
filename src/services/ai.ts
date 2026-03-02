@@ -5,6 +5,7 @@ import { gearRecognitionSchema, type GearRecognition } from '../lib/aiSchemas';
 import { callEdgeFunction, AuthExpiredError, type MessageContentPart, type MessageContent } from '../lib/edgeFunctionClient';
 import type {
   AIFeedback,
+  AIPlanSnapshot,
   AppSettings,
   ChatMessage,
   ChatSession,
@@ -309,11 +310,53 @@ export function createChatSession(title: string, initialMessages: ChatMessage[] 
   const now = new Date().toISOString();
   return {
     id: makeId(),
+    type: 'qa',
     title,
     messages: initialMessages,
     createdAt: now,
     updatedAt: now,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Event Draft Service
+// ---------------------------------------------------------------------------
+
+/**
+ * Save an event draft (a packing plan that has not been turned into an event yet).
+ * If a draft with the same id already exists, it is replaced.
+ */
+export async function saveEventDraft(plan: AIPlanSnapshot, inputText: string, existingId?: string): Promise<ChatSession> {
+  const now = new Date().toISOString();
+  const draft: ChatSession = {
+    id: existingId ?? makeId(),
+    type: 'event-draft',
+    title: plan.eventTitle || 'Untitled Event',
+    messages: [],
+    draftPlan: plan,
+    draftInput: inputText,
+    createdAt: existingId ? (await db.chatSessions.get(existingId))?.createdAt ?? now : now,
+    updatedAt: now,
+  };
+  await db.chatSessions.put(draft);
+  return draft;
+}
+
+/**
+ * Delete an event draft by ID.
+ */
+export async function deleteEventDraft(draftId: string): Promise<void> {
+  await db.chatSessions.delete(draftId);
+}
+
+/**
+ * Load all sessions of a given type, sorted by most recent first.
+ */
+export async function loadChatSessionsByType(type: 'qa' | 'event-draft'): Promise<ChatSession[]> {
+  const sessions = await db.chatSessions.where('type').equals(type).toArray();
+  return sessions.sort((a, b) =>
+    new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+  );
 }
 
 // ---------------------------------------------------------------------------

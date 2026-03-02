@@ -14,6 +14,8 @@ import {
   loadAllChatSessions,
   deleteChatSession,
   generateChatTitle,
+  saveEventDraft,
+  deleteEventDraft,
   type AIPlan 
 } from '../services/ai';
 import { matchCatalogItem } from '../lib/catalogMatcher';
@@ -24,7 +26,7 @@ import {
   CatalogMatchReviewSheet,
   type ReviewItem,
 } from '../components/CatalogMatchReviewSheet';
-import type { GearItem, ChatSession } from '../types/models';
+import type { GearItem, ChatSession, AIPlanSnapshot } from '../types/models';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabase';
 import { AuthExpiredError } from '../lib/edgeFunctionClient';
@@ -137,7 +139,12 @@ export function AIAssistantPage() {
   // Sidebar (chat history) state
   const [showSidebar, setShowSidebar] = useState(false);
   const [sidebarSearch, setSidebarSearch] = useState('');
+  const [sidebarQAOpen, setSidebarQAOpen] = useState(true);
+  const [sidebarDraftsOpen, setSidebarDraftsOpen] = useState(true);
 
+  // Event drafts state
+  const [eventDrafts, setEventDrafts] = useState<ChatSession[]>([]);
+  const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
   // Shared state
   const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
@@ -161,7 +168,10 @@ export function AIAssistantPage() {
   // Load chat sessions on mount
   // ---------------------------------------------------------------------------
   useEffect(() => {
-    void loadAllChatSessions().then(setChatSessions);
+    void loadAllChatSessions().then(sessions => {
+      setChatSessions(sessions.filter(s => !s.type || s.type === 'qa'));
+      setEventDrafts(sessions.filter(s => s.type === 'event-draft'));
+    });
   }, []);
 
 
@@ -476,8 +486,7 @@ export function AIAssistantPage() {
       await saveChatSession(session);
       
       // Update sessions list
-      const sessions = await loadAllChatSessions();
-      setChatSessions(sessions);
+      await refreshSessions();
       
     } catch (e) {
       setError(friendlyError(e));
@@ -726,6 +735,14 @@ export function AIAssistantPage() {
         setStep('review');
       } else {
         setStep('results');
+        // Auto-save event draft immediately (will be deleted when event is created)
+        const draftSession = await saveEventDraft(
+          processedPlan as AIPlanSnapshot,
+          input,
+          currentDraftId ?? undefined
+        );
+        setCurrentDraftId(draftSession.id);
+        await refreshSessions();
       }
     } catch (e) {
       setError(friendlyError(e));
@@ -738,7 +755,7 @@ export function AIAssistantPage() {
   // ---------------------------------------------------------------------------
   // Apply user review selections → patch plan → show results
   // ---------------------------------------------------------------------------
-  function handleReviewConfirm() {
+  async function handleReviewConfirm() {
     if (!plan) return;
 
 
@@ -764,16 +781,24 @@ export function AIAssistantPage() {
       return { ...item, gearItemId: userChoice };
     });
 
-
-    setPlan({
+    const newPlan: AIPlan = {
       ...plan,
       checklist: updatedChecklist.filter((i): i is NonNullable<typeof i> => i !== null),
       missingItems: [...plan.missingItems, ...additionalMissing],
-    });
+    };
 
-
+    setPlan(newPlan);
     setReviewOpen(false);
     setStep('results');
+
+    // Auto-save event draft after review confirmation
+    const draftSession = await saveEventDraft(
+      newPlan as AIPlanSnapshot,
+      input,
+      currentDraftId ?? undefined
+    );
+    setCurrentDraftId(draftSession.id);
+    await refreshSessions();
   }
 
 
@@ -795,6 +820,14 @@ export function AIAssistantPage() {
 
 
       await db.events.add(event);
+
+      // Delete event draft now that the real event has been created
+      if (currentDraftId) {
+        await deleteEventDraft(currentDraftId);
+        setCurrentDraftId(null);
+        await refreshSessions();
+      }
+
       clearDraft();
       navigate(`/events/${event.id}`);
     } catch (e) {
@@ -838,8 +871,7 @@ export function AIAssistantPage() {
     if (!window.confirm('Delete this chat session?')) return;
     setOpenSessionActionsId(null);
     await deleteChatSession(sessionId);
-    const sessions = await loadAllChatSessions();
-    setChatSessions(sessions);
+    await refreshSessions();
     if (currentSession?.id === sessionId) {
       handleNewChat();
     }
@@ -851,6 +883,13 @@ export function AIAssistantPage() {
   // ---------------------------------------------------------------------------
   function closeHistorySheet() {
     dismissSidebar();
+  }
+
+  // Refresh both Q&A sessions and event drafts from DB
+  async function refreshSessions() {
+    const sessions = await loadAllChatSessions();
+    setChatSessions(sessions.filter(s => !s.type || s.type === 'qa'));
+    setEventDrafts(sessions.filter(s => s.type === 'event-draft'));
   }
 
 
@@ -867,6 +906,7 @@ export function AIAssistantPage() {
     setError('');
     setLoading(false);
     setMode('packing');
+    setCurrentDraftId(null);
   }
 
 
@@ -901,6 +941,41 @@ export function AIAssistantPage() {
     const q = sidebarSearch.toLowerCase();
     return chatSessions.filter(s => s.title.toLowerCase().includes(q));
   }, [chatSessions, sidebarSearch]);
+
+  const filteredDrafts = useMemo(() => {
+    if (!sidebarSearch.trim()) return eventDrafts;
+    const q = sidebarSearch.toLowerCase();
+    return eventDrafts.filter(s => s.title.toLowerCase().includes(q));
+  }, [eventDrafts, sidebarSearch]);
+
+
+  // ---------------------------------------------------------------------------
+  // Event draft: Load (restore plan from draft)
+  // ---------------------------------------------------------------------------
+  function handleLoadEventDraft(draft: ChatSession) {
+    if (!draft.draftPlan) return;
+    setPlan(draft.draftPlan as AIPlan);
+    setInput(draft.draftInput ?? '');
+    setStep('results');
+    setMode('packing');
+    setCurrentDraftId(draft.id);
+    setError('');
+    closeHistorySheet();
+  }
+
+
+  // ---------------------------------------------------------------------------
+  // Event draft: Delete
+  // ---------------------------------------------------------------------------
+  async function handleDeleteEventDraft(draftId: string) {
+    if (!window.confirm('Delete this event draft?')) return;
+    setOpenSessionActionsId(null);
+    await deleteEventDraft(draftId);
+    await refreshSessions();
+    if (currentDraftId === draftId) {
+      setCurrentDraftId(null);
+    }
+  }
 
 
   // ---------------------------------------------------------------------------
@@ -1366,56 +1441,148 @@ export function AIAssistantPage() {
               </button>
             </div>
 
-            {/* Session list */}
+            {/* Session list — two collapsible sections */}
             <div className="ai-sidebar-list">
-              {filteredSessions.length === 0 ? (
-                <div className="ai-sidebar-empty">
-                  <p>{sidebarSearch ? 'No matching chats' : 'No chat history yet'}</p>
-                </div>
-              ) : (
-                filteredSessions.map((session) => (
-                  <div
-                    key={session.id}
-                    className={`chat-session-swipe-row ${openSessionActionsId === session.id ? 'is-open' : ''}`}
-                  >
-                    {/* Background delete action */}
-                    <div className="chat-session-swipe-actions" aria-hidden={openSessionActionsId !== session.id}>
-                      <button
-                        type="button"
-                        className="chat-session-action-btn chat-session-action-delete"
-                        onClick={() => void handleDeleteSession(session.id)}
-                        aria-label="Delete chat session"
-                      >
-                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                          <path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/>
-                          <path d="M10 11v6M14 11v6"/>
-                        </svg>
-                      </button>
-                    </div>
 
-                    {/* Foreground swipeable card */}
-                    <div
-                      className={`chat-session-item chat-session-swipe-foreground${currentSession?.id === session.id ? ' active' : ''}`}
-                      onTouchStart={onTouchStart}
-                      onTouchMove={onTouchMove}
-                      onTouchEnd={() => onTouchEnd(session.id)}
-                    >
-                      <button
-                        type="button"
-                        className="chat-session-btn"
-                        onClick={() => void handleLoadSession(session.id)}
-                      >
-                        <div>
-                          <div className="chat-session-title">{session.title}</div>
-                          <div className="chat-session-meta">
-                            {session.messages.filter(m => m.role !== 'system').length} messages ·{' '}
-                            {new Date(session.updatedAt).toLocaleDateString()}
-                          </div>
-                        </div>
-                      </button>
+              {/* ── Q&A section ── */}
+              <button
+                type="button"
+                className="ai-sidebar-section-header"
+                onClick={() => setSidebarQAOpen(o => !o)}
+                aria-expanded={sidebarQAOpen}
+              >
+                <svg
+                  className={`ai-sidebar-section-arrow${sidebarQAOpen ? ' open' : ''}`}
+                  width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"
+                >
+                  <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span>Q&amp;A</span>
+                {chatSessions.length > 0 && (
+                  <span className="ai-sidebar-section-count">{chatSessions.length}</span>
+                )}
+              </button>
+
+              {sidebarQAOpen && (
+                <>
+                  {filteredSessions.length === 0 ? (
+                    <div className="ai-sidebar-empty">
+                      <p>{sidebarSearch ? 'No matching chats' : 'No Q&A history yet'}</p>
                     </div>
-                  </div>
-                ))
+                  ) : (
+                    filteredSessions.map((session) => (
+                      <div
+                        key={session.id}
+                        className={`chat-session-swipe-row ${openSessionActionsId === session.id ? 'is-open' : ''}`}
+                      >
+                        <div className="chat-session-swipe-actions" aria-hidden={openSessionActionsId !== session.id}>
+                          <button
+                            type="button"
+                            className="chat-session-action-btn chat-session-action-delete"
+                            onClick={() => void handleDeleteSession(session.id)}
+                            aria-label="Delete chat session"
+                          >
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                              <path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/>
+                              <path d="M10 11v6M14 11v6"/>
+                            </svg>
+                          </button>
+                        </div>
+                        <div
+                          className={`chat-session-item chat-session-swipe-foreground${currentSession?.id === session.id ? ' active' : ''}`}
+                          onTouchStart={onTouchStart}
+                          onTouchMove={onTouchMove}
+                          onTouchEnd={() => onTouchEnd(session.id)}
+                        >
+                          <button
+                            type="button"
+                            className="chat-session-btn"
+                            onClick={() => void handleLoadSession(session.id)}
+                          >
+                            <div>
+                              <div className="chat-session-title">{session.title}</div>
+                              <div className="chat-session-meta">
+                                {session.messages.filter(m => m.role !== 'system').length} messages ·{' '}
+                                {new Date(session.updatedAt).toLocaleDateString()}
+                              </div>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </>
+              )}
+
+              {/* ── Event Drafts section ── */}
+              <button
+                type="button"
+                className="ai-sidebar-section-header"
+                onClick={() => setSidebarDraftsOpen(o => !o)}
+                aria-expanded={sidebarDraftsOpen}
+                style={{ marginTop: sidebarQAOpen && filteredSessions.length > 0 ? 12 : 4 }}
+              >
+                <svg
+                  className={`ai-sidebar-section-arrow${sidebarDraftsOpen ? ' open' : ''}`}
+                  width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"
+                >
+                  <path d="M2 4l4 4 4-4" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span>Event Drafts</span>
+                {eventDrafts.length > 0 && (
+                  <span className="ai-sidebar-section-count">{eventDrafts.length}</span>
+                )}
+              </button>
+
+              {sidebarDraftsOpen && (
+                <>
+                  {filteredDrafts.length === 0 ? (
+                    <div className="ai-sidebar-empty">
+                      <p>{sidebarSearch ? 'No matching drafts' : 'No event drafts yet'}</p>
+                    </div>
+                  ) : (
+                    filteredDrafts.map((draft) => (
+                      <div
+                        key={draft.id}
+                        className={`chat-session-swipe-row ${openSessionActionsId === draft.id ? 'is-open' : ''}`}
+                      >
+                        <div className="chat-session-swipe-actions" aria-hidden={openSessionActionsId !== draft.id}>
+                          <button
+                            type="button"
+                            className="chat-session-action-btn chat-session-action-delete"
+                            onClick={() => void handleDeleteEventDraft(draft.id)}
+                            aria-label="Delete event draft"
+                          >
+                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                              <path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/>
+                              <path d="M10 11v6M14 11v6"/>
+                            </svg>
+                          </button>
+                        </div>
+                        <div
+                          className={`chat-session-item chat-session-swipe-foreground${currentDraftId === draft.id ? ' active' : ''}`}
+                          onTouchStart={onTouchStart}
+                          onTouchMove={onTouchMove}
+                          onTouchEnd={() => onTouchEnd(draft.id)}
+                        >
+                          <button
+                            type="button"
+                            className="chat-session-btn"
+                            onClick={() => handleLoadEventDraft(draft)}
+                          >
+                            <div>
+                              <div className="chat-session-title">{draft.title}</div>
+                              <div className="chat-session-meta">
+                                <span className="ai-sidebar-draft-badge">Draft</span>
+                                {' · '}{new Date(draft.updatedAt).toLocaleDateString()}
+                              </div>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </>
               )}
             </div>
           </div>
