@@ -124,9 +124,12 @@ body,
   text-size-adjust: 100%;
 }
 
-/* html's background paints the entire canvas including safe area regions —
-   without this the bottom safe area bar renders white on iOS PWA */
+/* html's background paints the entire canvas including safe area regions.
+   min-height forces the html box to physically reach the full screen height
+   (including the 34px home indicator zone) so the background actually covers it. */
 html {
+  min-height: -webkit-fill-available; /* older WebKit fallback */
+  min-height: 100dvh;                 /* iOS 26 / modern WebKit */
   background: var(--bg);
 }
 
