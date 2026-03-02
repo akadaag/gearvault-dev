@@ -32,7 +32,7 @@ export default defineConfig({
         short_name: 'PackShot',
         description: 'Local-first gear catalog and AI packing assistant for photographers and videographers.',
         theme_color: '#0a84ff',
-        background_color: '#ffffff',
+        background_color: '#fafafa',
         display: 'standalone',
         start_url: '/',
         scope: '/',
