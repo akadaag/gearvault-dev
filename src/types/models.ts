@@ -178,5 +178,6 @@ export interface ExportBundle {
     events: EventItem[];
     settings: AppSettings[];
     aiFeedback: AIFeedback[];
+    chatSessions?: ChatSession[];
   };
 }

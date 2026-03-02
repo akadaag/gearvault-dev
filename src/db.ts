@@ -122,6 +122,9 @@ db.gearItems.hook('deleting', function () { markLocalDataChanged(); });
 db.events.hook('creating', function () { markLocalDataChanged(); });
 db.events.hook('updating', function () { markLocalDataChanged(); });
 db.events.hook('deleting', function () { markLocalDataChanged(); });
+db.chatSessions.hook('creating', function () { markLocalDataChanged(); });
+db.chatSessions.hook('updating', function () { markLocalDataChanged(); });
+db.chatSessions.hook('deleting', function () { markLocalDataChanged(); });
 
 export const defaultSettings: AppSettings = {
   id: 'app-settings',
@@ -179,6 +182,7 @@ export async function exportBundle(): Promise<ExportBundle> {
       events: await db.events.toArray(),
       settings: await db.settings.toArray(),
       aiFeedback: await db.aiFeedback.toArray(),
+      chatSessions: await db.chatSessions.toArray(),
     },
   };
 }
@@ -189,16 +193,18 @@ export async function importBundle(bundle: ExportBundle) {
   // re-push and cause a push-pull loop).
   suppressChangeTracking = true;
   try {
-    await db.transaction('rw', db.gearItems, db.categories, db.events, db.settings, async () => {
+    await db.transaction('rw', [db.gearItems, db.categories, db.events, db.settings, db.chatSessions], async () => {
       await db.gearItems.clear();
       await db.categories.clear();
       await db.events.clear();
       await db.settings.clear();
+      await db.chatSessions.clear();
 
       await db.gearItems.bulkPut(bundle.data.gearItems ?? []);
       await db.categories.bulkPut(bundle.data.categories ?? []);
       await db.events.bulkPut(bundle.data.events ?? []);
       await db.settings.bulkPut(bundle.data.settings ?? []);
+      await db.chatSessions.bulkPut(bundle.data.chatSessions ?? []);
     });
 
     await db.transaction('rw', db.aiFeedback, async () => {
@@ -213,11 +219,12 @@ export async function importBundle(bundle: ExportBundle) {
 }
 
 export async function clearAllData() {
-  await db.transaction('rw', db.gearItems, db.categories, db.events, db.settings, async () => {
+  await db.transaction('rw', [db.gearItems, db.categories, db.events, db.settings, db.chatSessions], async () => {
     await db.gearItems.clear();
     await db.categories.clear();
     await db.events.clear();
     await db.settings.clear();
+    await db.chatSessions.clear();
   });
 
   await db.transaction('rw', db.aiFeedback, async () => {
@@ -229,16 +236,18 @@ export async function clearAllData() {
 }
 
 export async function getLocalDataStats() {
-  const [gearItems, events, aiFeedback] = await Promise.all([
+  const [gearItems, events, aiFeedback, chatSessions] = await Promise.all([
     db.gearItems.count(),
     db.events.count(),
     db.aiFeedback.count(),
+    db.chatSessions.count(),
   ]);
 
   return {
     gearItems,
     events,
     aiFeedback,
-    hasUserData: gearItems > 0 || events > 0 || aiFeedback > 0,
+    chatSessions,
+    hasUserData: gearItems > 0 || events > 0 || aiFeedback > 0 || chatSessions > 0,
   };
 }
