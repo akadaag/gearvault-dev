@@ -9486,7 +9486,7 @@ body:has(.content-assistant) {
 /* ── Fixed Input Bar ── */
 .ai-page.ios-theme .ai-ios-input-bar {
   position: fixed;
-  bottom: calc(var(--bottom-nav-clearance, 60px) - 22px);
+  bottom: calc(var(--bottom-nav-clearance, 60px) - 32px);
   left: 0;
   right: 0;
   z-index: 40;
@@ -9513,7 +9513,7 @@ body:has(.content-assistant) {
   -webkit-backdrop-filter: blur(var(--ios-blur));
   border: 0.5px solid rgba(0, 0, 0, 0.12);
   border-radius: 999px;
-  padding: 5px 5px 5px 12px;
+  padding: 7px 7px 7px 14px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
 }
 .ai-page.ios-theme .ai-ios-input-pill textarea,
@@ -9553,10 +9553,10 @@ body:has(.content-assistant) {
 
 /* Send Button */
 .ai-page.ios-theme .ai-ios-send-btn {
-  width: 30px;
-  height: 30px;
-  min-width: 30px;
-  min-height: 30px;
+  width: 33px;
+  height: 33px;
+  min-width: 33px;
+  min-height: 33px;
   border-radius: 50%;
   border: none;
   background: #000;
@@ -9571,8 +9571,8 @@ body:has(.content-assistant) {
   flex-shrink: 0;
 }
 .ai-page.ios-theme .ai-ios-send-btn svg {
-  width: 14px;
-  height: 14px;
+  width: 16px;
+  height: 16px;
 }
 .ai-page.ios-theme .ai-ios-send-btn:active:not(:disabled) {
   transform: scale(0.92);
@@ -12012,10 +12012,10 @@ body:has(.content-assistant) {
 /* ── Chat photo attachment button ───────────────────────────────────────── */
 
 .ai-page.ios-theme .ai-ios-photo-btn {
-  width: 30px;
-  height: 30px;
-  min-width: 30px;
-  min-height: 30px;
+  width: 33px;
+  height: 33px;
+  min-width: 33px;
+  min-height: 33px;
   border-radius: 50%;
   border: none;
   background: transparent;
@@ -12030,8 +12030,8 @@ body:has(.content-assistant) {
 }
 
 .ai-page.ios-theme .ai-ios-photo-btn svg {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
 }
 
 .ai-page.ios-theme .ai-ios-photo-btn:active:not(:disabled) {
