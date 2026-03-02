@@ -13796,11 +13796,11 @@ body:has(.content-assistant) {
 }
 
 .pwa-standalone .floating-nav {
-  bottom: 18px !important;
+  bottom: 21px !important;
 }
 
 .pwa-standalone .ai-page.ios-theme .ai-ios-input-bar {
-  bottom: 78px !important;
+  bottom: 81px !important;
 }
 
 /* W3C fallback for Android/Chrome (iOS ignores this) */
@@ -13809,10 +13809,10 @@ body:has(.content-assistant) {
     height: 100vh !important;
   }
   .floating-nav {
-    bottom: 18px !important;
+    bottom: 21px !important;
   }
   .ai-page.ios-theme .ai-ios-input-bar {
-    bottom: 78px !important;
+    bottom: 81px !important;
   }
 }
 
