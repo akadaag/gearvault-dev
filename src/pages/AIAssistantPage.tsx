@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
+import { useSwipeReveal } from '../hooks/useSwipeReveal';
 import { ContentEditableInput } from '../components/ContentEditableInput';
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -120,10 +121,9 @@ export function AIAssistantPage() {
   const [pendingPhotoDataUrl, setPendingPhotoDataUrl] = useState<string>(''); // full-res compressed for AI
 
 
-  // Swipe-to-delete state for chat history
-  const [openSessionActionsId, setOpenSessionActionsId] = useState<string | null>(null);
-  const [touchStartX, setTouchStartX] = useState<number | null>(null);
-  const [touchCurrentX, setTouchCurrentX] = useState<number | null>(null);
+  // iOS pill-swipe hooks for sidebar (replaces old flat-strip swipe state)
+  const sidebarQASwipe = useSwipeReveal({ openOffset: 168, openThreshold: 84, closeThreshold: 40 });
+  const sidebarDraftSwipe = useSwipeReveal({ openOffset: 84, openThreshold: 42, closeThreshold: 30 });
 
   // Swipe-to-delete state for packing list items
   const [openPackingItemKey, setOpenPackingItemKey] = useState<string | null>(null);
@@ -276,39 +276,7 @@ export function AIAssistantPage() {
 
 
   // ---------------------------------------------------------------------------
-  // Touch handlers for swipe-to-delete (chat history)
-  // ---------------------------------------------------------------------------
-  function onTouchStart(e: React.TouchEvent<HTMLDivElement>) {
-    setTouchStartX(e.touches[0]?.clientX ?? null);
-    setTouchCurrentX(e.touches[0]?.clientX ?? null);
-  }
 
-
-  function onTouchMove(e: React.TouchEvent<HTMLDivElement>) {
-    setTouchCurrentX(e.touches[0]?.clientX ?? null);
-  }
-
-
-  function onTouchEnd(sessionId: string) {
-    const isMobile = typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches;
-    if (!isMobile || touchStartX == null || touchCurrentX == null) {
-      setTouchStartX(null);
-      setTouchCurrentX(null);
-      return;
-    }
-
-
-    const deltaX = touchCurrentX - touchStartX;
-    if (deltaX < -40) {
-      setOpenSessionActionsId(sessionId);
-    } else if (deltaX > 40) {
-      setOpenSessionActionsId(null);
-    }
-
-
-    setTouchStartX(null);
-    setTouchCurrentX(null);
-  }
 
 
   // ---------------------------------------------------------------------------
@@ -869,7 +837,7 @@ export function AIAssistantPage() {
   // ---------------------------------------------------------------------------
   async function handleDeleteSession(sessionId: string) {
     if (!window.confirm('Delete this chat session?')) return;
-    setOpenSessionActionsId(null);
+    sidebarQASwipe.closeAll();
     await deleteChatSession(sessionId);
     await refreshSessions();
     if (currentSession?.id === sessionId) {
@@ -969,7 +937,7 @@ export function AIAssistantPage() {
   // ---------------------------------------------------------------------------
   async function handleDeleteEventDraft(draftId: string) {
     if (!window.confirm('Delete this event draft?')) return;
-    setOpenSessionActionsId(null);
+    sidebarDraftSwipe.closeAll();
     await deleteEventDraft(draftId);
     await refreshSessions();
     if (currentDraftId === draftId) {
@@ -979,8 +947,35 @@ export function AIAssistantPage() {
 
 
   // ---------------------------------------------------------------------------
-  // Empty catalog guard
+  // Share chat session transcript
   // ---------------------------------------------------------------------------
+  async function handleShareSession(session: ChatSession) {
+    sidebarQASwipe.closeAll();
+    const messages = session.messages.filter(m => m.role !== 'system');
+    const text = messages
+      .map(m => `${m.role === 'user' ? 'You' : 'GearVault AI'}: ${m.content}`)
+      .join('\n\n');
+    const title = session.title || 'GearVault Chat';
+
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({ title, text });
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+      }
+    }
+
+    if (typeof navigator !== 'undefined' && navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+      await navigator.clipboard.writeText(text);
+      window.alert('Chat transcript copied to clipboard.');
+      return;
+    }
+
+    window.prompt('Copy this chat transcript:', text);
+  }
+
+
   if (catalog.length === 0) {
     return (
       <section className="ai-page ios-theme">
@@ -1470,46 +1465,81 @@ export function AIAssistantPage() {
                       <p>{sidebarSearch ? 'No matching chats' : 'No Q&A history yet'}</p>
                     </div>
                   ) : (
-                    filteredSessions.map((session) => (
-                      <div
-                        key={session.id}
-                        className={`chat-session-swipe-row ${openSessionActionsId === session.id ? 'is-open' : ''}`}
-                      >
-                        <div className="chat-session-swipe-actions" aria-hidden={openSessionActionsId !== session.id}>
-                          <button
-                            type="button"
-                            className="chat-session-action-btn chat-session-action-delete"
-                            onClick={() => void handleDeleteSession(session.id)}
-                            aria-label="Delete chat session"
-                          >
-                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                              <path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/>
-                              <path d="M10 11v6M14 11v6"/>
-                            </svg>
-                          </button>
-                        </div>
+                    filteredSessions.map((session) => {
+                      const dragging = sidebarQASwipe.isDragging(session.id);
+                      const rowOpen = sidebarQASwipe.isOpen(session.id);
+                      return (
                         <div
-                          className={`chat-session-item chat-session-swipe-foreground${currentSession?.id === session.id ? ' active' : ''}`}
-                          onTouchStart={onTouchStart}
-                          onTouchMove={onTouchMove}
-                          onTouchEnd={() => onTouchEnd(session.id)}
+                          key={session.id}
+                          className={`ai-sidebar-swipe-row${rowOpen ? ' is-open' : ''}`}
                         >
-                          <button
-                            type="button"
-                            className="chat-session-btn"
-                            onClick={() => void handleLoadSession(session.id)}
+                          <div className="ai-sidebar-swipe-actions" aria-hidden={!rowOpen}>
+                            <button
+                              type="button"
+                              className="ev-ios-swipe-btn ev-ios-swipe-btn--share"
+                              aria-label="Share chat session"
+                              onClick={() => void handleShareSession(session)}
+                              style={{
+                                transform: `scale(${0.01 + 0.99 * Math.min(1, Math.max(0, (sidebarQASwipe.getActionsProgress(session.id) - 0.5) / 0.45))})`,
+                                transition: dragging ? 'none' : 'transform 160ms ease',
+                              }}
+                            >
+                              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M12 16V4" />
+                                <path d="m7 9 5-5 5 5" />
+                                <path d="M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" />
+                              </svg>
+                              <span>Share</span>
+                            </button>
+                            <button
+                              type="button"
+                              className="ev-ios-swipe-btn ev-ios-swipe-btn--delete"
+                              aria-label="Delete chat session"
+                              onClick={() => void handleDeleteSession(session.id)}
+                              style={{
+                                transform: `scale(${0.01 + 0.99 * Math.min(1, Math.max(0, (sidebarQASwipe.getActionsProgress(session.id) - 0.05) / 0.5))})`,
+                                transition: dragging ? 'none' : 'transform 160ms ease',
+                              }}
+                            >
+                              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M3 6h18" />
+                                <path d="M8 6V4h8v2" />
+                                <path d="M19 6l-1 14H6L5 6" />
+                                <path d="M10 11v6M14 11v6" />
+                              </svg>
+                              <span>Delete</span>
+                            </button>
+                          </div>
+                          <div
+                            className={`chat-session-item ai-sidebar-swipe-foreground${currentSession?.id === session.id ? ' active' : ''}`}
+                            style={{
+                              transform: sidebarQASwipe.getTransform(session.id),
+                              transition: dragging ? 'none' : 'transform 160ms ease',
+                            }}
+                            onTouchStart={(e) => sidebarQASwipe.onTouchStart(session.id, e)}
+                            onTouchMove={(e) => sidebarQASwipe.onTouchMove(session.id, e)}
+                            onTouchEnd={() => sidebarQASwipe.onTouchEnd(session.id)}
+                            onClick={() => {
+                              if (rowOpen) { sidebarQASwipe.closeAll(); return; }
+                            }}
                           >
-                            <div>
-                              <div className="chat-session-title">{session.title}</div>
-                              <div className="chat-session-meta">
-                                {session.messages.filter(m => m.role !== 'system').length} messages ·{' '}
-                                {new Date(session.updatedAt).toLocaleDateString()}
+                            <button
+                              type="button"
+                              className="chat-session-btn"
+                              onClick={() => void handleLoadSession(session.id)}
+                            >
+                              <div>
+                                <div className="chat-session-title">{session.title}</div>
+                                <div className="chat-session-meta">
+                                  {session.messages.filter(m => m.role !== 'system').length} messages ·{' '}
+                                  {new Date(session.updatedAt).toLocaleDateString()}
+                                </div>
                               </div>
-                            </div>
-                          </button>
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </>
               )}
@@ -1541,46 +1571,64 @@ export function AIAssistantPage() {
                       <p>{sidebarSearch ? 'No matching drafts' : 'No event drafts yet'}</p>
                     </div>
                   ) : (
-                    filteredDrafts.map((draft) => (
-                      <div
-                        key={draft.id}
-                        className={`chat-session-swipe-row ${openSessionActionsId === draft.id ? 'is-open' : ''}`}
-                      >
-                        <div className="chat-session-swipe-actions" aria-hidden={openSessionActionsId !== draft.id}>
-                          <button
-                            type="button"
-                            className="chat-session-action-btn chat-session-action-delete"
-                            onClick={() => void handleDeleteEventDraft(draft.id)}
-                            aria-label="Delete event draft"
-                          >
-                            <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-                              <path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/>
-                              <path d="M10 11v6M14 11v6"/>
-                            </svg>
-                          </button>
-                        </div>
+                    filteredDrafts.map((draft) => {
+                      const dragging = sidebarDraftSwipe.isDragging(draft.id);
+                      const rowOpen = sidebarDraftSwipe.isOpen(draft.id);
+                      return (
                         <div
-                          className={`chat-session-item chat-session-swipe-foreground${currentDraftId === draft.id ? ' active' : ''}`}
-                          onTouchStart={onTouchStart}
-                          onTouchMove={onTouchMove}
-                          onTouchEnd={() => onTouchEnd(draft.id)}
+                          key={draft.id}
+                          className={`ai-sidebar-swipe-row${rowOpen ? ' is-open' : ''}`}
                         >
-                          <button
-                            type="button"
-                            className="chat-session-btn"
-                            onClick={() => handleLoadEventDraft(draft)}
+                          <div className="ai-sidebar-swipe-actions" aria-hidden={!rowOpen}>
+                            <button
+                              type="button"
+                              className="ev-ios-swipe-btn ev-ios-swipe-btn--delete"
+                              aria-label="Delete event draft"
+                              onClick={() => void handleDeleteEventDraft(draft.id)}
+                              style={{
+                                transform: `scale(${0.01 + 0.99 * Math.min(1, Math.max(0, (sidebarDraftSwipe.getActionsProgress(draft.id) - 0.05) / 0.5))})`,
+                                transition: dragging ? 'none' : 'transform 160ms ease',
+                              }}
+                            >
+                              <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                                <path d="M3 6h18" />
+                                <path d="M8 6V4h8v2" />
+                                <path d="M19 6l-1 14H6L5 6" />
+                                <path d="M10 11v6M14 11v6" />
+                              </svg>
+                              <span>Delete</span>
+                            </button>
+                          </div>
+                          <div
+                            className={`chat-session-item ai-sidebar-swipe-foreground${currentDraftId === draft.id ? ' active' : ''}`}
+                            style={{
+                              transform: sidebarDraftSwipe.getTransform(draft.id),
+                              transition: dragging ? 'none' : 'transform 160ms ease',
+                            }}
+                            onTouchStart={(e) => sidebarDraftSwipe.onTouchStart(draft.id, e)}
+                            onTouchMove={(e) => sidebarDraftSwipe.onTouchMove(draft.id, e)}
+                            onTouchEnd={() => sidebarDraftSwipe.onTouchEnd(draft.id)}
+                            onClick={() => {
+                              if (rowOpen) { sidebarDraftSwipe.closeAll(); return; }
+                            }}
                           >
-                            <div>
-                              <div className="chat-session-title">{draft.title}</div>
-                              <div className="chat-session-meta">
-                                <span className="ai-sidebar-draft-badge">Draft</span>
-                                {' · '}{new Date(draft.updatedAt).toLocaleDateString()}
+                            <button
+                              type="button"
+                              className="chat-session-btn"
+                              onClick={() => handleLoadEventDraft(draft)}
+                            >
+                              <div>
+                                <div className="chat-session-title">{draft.title}</div>
+                                <div className="chat-session-meta">
+                                  <span className="ai-sidebar-draft-badge">Draft</span>
+                                  {' · '}{new Date(draft.updatedAt).toLocaleDateString()}
+                                </div>
                               </div>
-                            </div>
-                          </button>
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </>
               )}

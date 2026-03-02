@@ -10934,6 +10934,67 @@ body:has(.content-assistant) {
   background: #FF3B30;
 }
 
+/* ── iOS pill-swipe rows for sidebar (Q&A + Event Drafts) ── */
+.ai-page.ios-theme .ai-sidebar .ai-sidebar-swipe-row {
+  position: relative;
+  margin-bottom: 6px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #F2F2F7;
+}
+
+.ai-page.ios-theme .ai-sidebar .ai-sidebar-swipe-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0 8px;
+  z-index: 0;
+  pointer-events: none;
+}
+
+.ai-page.ios-theme .ai-sidebar .ai-sidebar-swipe-row.is-open .ai-sidebar-swipe-actions {
+  pointer-events: auto;
+}
+
+.ai-page.ios-theme .ai-sidebar .ai-sidebar-swipe-foreground {
+  position: relative;
+  z-index: 1;
+  touch-action: pan-y;
+  will-change: transform;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Compact pill height to match shorter sidebar rows */
+.ai-page.ios-theme .ai-sidebar .ev-ios-swipe-btn {
+  width: 64px;
+  min-width: 64px;
+  height: 52px;
+}
+
+/* Suppress :active scale so pills don't peek out on tap */
+.ai-page.ios-theme .ai-sidebar .ai-sidebar-swipe-foreground .chat-session-item:active {
+  transform: none;
+}
+
+:root.dark .ai-page.ios-theme .ai-sidebar .ai-sidebar-swipe-row {
+  background: #000000;
+}
+
+/* Desktop: hide swipe actions, force foreground to rest position */
+@media (min-width: 768px) {
+  .ai-page.ios-theme .ai-sidebar .ai-sidebar-swipe-actions {
+    display: none;
+  }
+  .ai-page.ios-theme .ai-sidebar .ai-sidebar-swipe-foreground {
+    transform: none !important;
+  }
+}
+
 /* ── Sidebar section headers (dropdown toggles) ── */
 .ai-page.ios-theme .ai-sidebar-section-header {
   display: flex;
