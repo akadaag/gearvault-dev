@@ -9486,7 +9486,7 @@ body:has(.content-assistant) {
 /* ── Fixed Input Bar ── */
 .ai-page.ios-theme .ai-ios-input-bar {
   position: fixed;
-  bottom: calc(var(--bottom-nav-clearance, 60px) - 34px);
+  bottom: calc(var(--bottom-nav-clearance, 60px) - 32px);
   left: 0;
   right: 0;
   z-index: 40;
@@ -12867,7 +12867,7 @@ body:has(.content-assistant) {
 
 .floating-nav {
   position: fixed;
-  bottom: calc(env(safe-area-inset-bottom) - 6px);
+  bottom: calc(env(safe-area-inset-bottom) - 8px);
   left: 0;
   right: 0;
   z-index: 1000;
@@ -12910,7 +12910,7 @@ body:has(.content-assistant) {
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-radius: 32px;
-  padding: 7px 10px;
+  padding: 5px 8px;
   border: 0.5px solid rgba(0, 0, 0, 0.1);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.20);
 }
@@ -12927,7 +12927,7 @@ body:has(.content-assistant) {
   border: 0;
   background: transparent;
   border-radius: 25px;
-  min-height: 54px;
+  min-height: 50px;
   min-width: 0;
   flex: 1;
   padding: 7px 6px;
