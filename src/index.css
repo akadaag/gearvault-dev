@@ -9519,6 +9519,7 @@ body:has(.content-assistant) {
 .ai-page.ios-theme .ai-ios-input-pill textarea,
 .ai-page.ios-theme .ai-ios-input-pill [contenteditable] {
   flex: 1;
+  min-width: 0;
   border: none;
   background: none;
   outline: none;
@@ -9541,6 +9542,9 @@ body:has(.content-assistant) {
 }
 .ai-page.ios-theme .ai-ios-input-pill [contenteditable][data-placeholder]:empty::before {
   color: var(--ios-text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  display: block;
 }
 .ai-page.ios-theme .ai-ios-input-pill textarea:disabled,
 .ai-page.ios-theme .ai-ios-input-pill [contenteditable][style*="pointer-events: none"] {

@@ -1295,7 +1295,7 @@ export function AIAssistantPage() {
               </svg>
             </button>
             <ContentEditableInput
-              placeholder={pendingPhotoDataUrl ? "Ask about this photo..." : "Describe your shoot or ask a question..."}
+              placeholder={pendingPhotoDataUrl ? "Ask about this photo…" : "Describe your shoot or ask…"}
               value={input}
               onChange={setInput}
               multiline
