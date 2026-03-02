@@ -5323,7 +5323,7 @@ html {
 .home-ios-hero-badge {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   padding: 3px 10px;
   border-radius: 20px;
   font-size: 12px;
@@ -6292,16 +6292,38 @@ html {
 
 .ios-catalog-header {
   flex-shrink: 0;
-  padding: 12px 16px 0;
-  background: #ffffff;
+  padding: 12px 16px 12px;
+  background: rgba(249, 249, 249, 0.85);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
   position: sticky;
   top: 0;
   z-index: 40;
-  border-bottom: 1px solid transparent;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 60px;
+}
+.ios-catalog-glass-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ios-text-primary);
+  margin: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+.ios-catalog-scrollable-header {
+  padding: 0 16px 12px;
 }
 
+
 :root.dark .ios-catalog-header {
-  background: var(--ios-bg);
+  background: rgba(28, 28, 30, 0.85);
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
 }
 
 .ios-catalog-header-top {
@@ -6329,7 +6351,7 @@ html {
 .ios-catalog-toolbar {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   padding: 4px;
   border-radius: 999px;
   border: none;
@@ -6735,7 +6757,7 @@ html {
 .ios-catalog-filter-field {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
 }
 
 .ios-catalog-filter-field span {
@@ -6832,7 +6854,8 @@ html {
 }
 
 :root.dark .ios-catalog-header {
-  background: var(--ios-bg);
+  background: rgba(28, 28, 30, 0.85);
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
 }
 
 :root.dark .ios-catalog-title {
@@ -7312,13 +7335,34 @@ body:has(.content-assistant) {
 
 .ev-ios-header {
   flex-shrink: 0;
-  padding: 12px 16px 0;
-  background: #ffffff;
+  padding: 12px 16px 12px;
+  background: rgba(249, 249, 249, 0.85);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
   position: sticky;
   top: 0;
   z-index: 40;
-  border-bottom: 1px solid transparent;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 60px; /* enough space for nav */
 }
+.ev-ios-glass-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ios-text-primary);
+  margin: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+.ev-ios-scrollable-header {
+  padding: 0 16px 12px;
+}
+
 
 .ev-ios-header-top {
   display: flex;
@@ -7341,7 +7385,7 @@ body:has(.content-assistant) {
 .ev-ios-toolbar {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   padding: 4px;
   border-radius: 999px;
   border: none;
@@ -7967,7 +8011,8 @@ body:has(.content-assistant) {
 }
 
 :root.dark .ev-ios-header {
-  background: var(--ios-bg);
+  background: rgba(28, 28, 30, 0.85);
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
 }
 
 :root.dark .ev-ios-large-title {
@@ -8129,7 +8174,7 @@ body:has(.content-assistant) {
 .event-detail-page.ios-theme .ev-detail-back-pill {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   padding: 8px 16px 8px 10px;
   border-radius: 999px;
   border: none;
@@ -9472,7 +9517,7 @@ body:has(.content-assistant) {
 /* ── Typing Indicator ── */
 .ai-page.ios-theme .ai-typing-dots {
   display: flex;
-  gap: 4px;
+  gap: 8px;
   align-items: center;
   padding: 4px 0;
 }
@@ -12376,7 +12421,7 @@ body:has(.content-assistant) {
 .gear-detail-page.ios-theme .gear-detail-back-pill {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 8px;
   padding: 8px 16px 8px 10px;
   border-radius: 999px;
   border: none;
@@ -12552,7 +12597,7 @@ body:has(.content-assistant) {
 .gear-detail-page.ios-theme .gear-detail-title-block {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
   padding-top: 4px;
 }
 
