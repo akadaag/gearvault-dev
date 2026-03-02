@@ -40,49 +40,6 @@ type Step = 'input' | 'review' | 'results';
 
 
 // ---------------------------------------------------------------------------
-// Draft persistence helpers (localStorage, 24h expiry)
-// ---------------------------------------------------------------------------
-const DRAFT_KEY = 'gv_assistant_draft';
-const DRAFT_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
-
-interface DraftState {
-  plan: AIPlan | null;
-  step: Step;
-  input: string;
-  reviewItems: ReviewItem[];
-  selections: [string, string][];
-  savedAt: number;
-}
-
-function readDraft(): DraftState | null {
-  try {
-    const raw = localStorage.getItem(DRAFT_KEY);
-    if (!raw) return null;
-    const draft: DraftState = JSON.parse(raw);
-    if (Date.now() - draft.savedAt > DRAFT_TTL_MS) {
-      localStorage.removeItem(DRAFT_KEY);
-      return null;
-    }
-    return draft;
-  } catch {
-    return null;
-  }
-}
-
-function writeDraft(state: Omit<DraftState, 'savedAt'>) {
-  try {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify({ ...state, savedAt: Date.now() }));
-  } catch {
-    // Quota exceeded or private mode — silently ignore
-  }
-}
-
-function clearDraft() {
-  localStorage.removeItem(DRAFT_KEY);
-}
-
-
-// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 export function AIAssistantPage() {
@@ -95,16 +52,13 @@ export function AIAssistantPage() {
   // Mode detection
   const [mode, setMode] = useState<Mode>('packing');
 
-  // Packing list state — lazy-initialised from localStorage draft (24h TTL)
-  const _draft = readDraft();
-  const [input, setInput] = useState(() => _draft?.input ?? '');
-  const [step, setStep] = useState<Step>(() => _draft?.step ?? 'input');
-  const [plan, setPlan] = useState<AIPlan | null>(() => _draft?.plan ?? null);
-  const [reviewItems, setReviewItems] = useState<ReviewItem[]>(() => _draft?.reviewItems ?? []);
+  // Packing list state
+  const [input, setInput] = useState('');
+  const [step, setStep] = useState<Step>('input');
+  const [plan, setPlan] = useState<AIPlan | null>(null);
+  const [reviewItems, setReviewItems] = useState<ReviewItem[]>([]);
   const [reviewOpen, setReviewOpen] = useState(false);
-  const [selections, setSelections] = useState<Map<string, string>>(
-    () => new Map(_draft?.selections ?? [])
-  );
+  const [selections, setSelections] = useState<Map<string, string>>(() => new Map());
   const [saving, setSaving] = useState(false);
   const [headerAnimating, setHeaderAnimating] = useState(false);
 
@@ -185,22 +139,6 @@ export function AIAssistantPage() {
   }, [mode, currentSession?.messages.length]);
 
 
-  // ---------------------------------------------------------------------------
-  // Persist packing draft to localStorage whenever relevant state changes
-  // ---------------------------------------------------------------------------
-  useEffect(() => {
-    if (step === 'input' && !plan && !input) {
-      // Nothing worth saving — avoid writing an empty draft
-      return;
-    }
-    writeDraft({
-      plan,
-      step,
-      input,
-      reviewItems,
-      selections: Array.from(selections.entries()),
-    });
-  }, [plan, step, input, reviewItems, selections]);
 
 
   // ---------------------------------------------------------------------------
@@ -222,6 +160,12 @@ export function AIAssistantPage() {
     return () => {
       document.documentElement.classList.remove('keyboard-open');
     };
+  }, []);
+
+  // One-time migration: remove any stale localStorage draft from the old
+  // 24h-persistence scheme so returning users don't see leftover state.
+  useEffect(() => {
+    localStorage.removeItem('gv_assistant_draft');
   }, []);
 
 
@@ -796,7 +740,6 @@ export function AIAssistantPage() {
         await refreshSessions();
       }
 
-      clearDraft();
       navigate(`/events/${event.id}`);
     } catch (e) {
       setError(friendlyError(e));
@@ -865,7 +808,6 @@ export function AIAssistantPage() {
   // Reset packing list
   // ---------------------------------------------------------------------------
   function handleReset() {
-    clearDraft();
     setStep('input');
     setInput('');
     setPlan(null);
@@ -941,7 +883,7 @@ export function AIAssistantPage() {
     await deleteEventDraft(draftId);
     await refreshSessions();
     if (currentDraftId === draftId) {
-      setCurrentDraftId(null);
+      handleReset();
     }
   }
 
