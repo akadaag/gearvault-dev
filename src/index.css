@@ -13776,6 +13776,14 @@ body:has(.content-assistant) {
   }
 }
 
+/* ── PWA standalone: pull nav flush with the home indicator ─────────────── */
+
+@media (display-mode: standalone) {
+  .floating-nav {
+    bottom: max(0px, calc(env(safe-area-inset-bottom) - 28px));
+  }
+}
+
 /* ═══════════════════════════════════════════════════════════════════════════
    DESKTOP OVERRIDES for Floating Nav
    ═══════════════════════════════════════════════════════════════════════════ */
