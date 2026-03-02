@@ -6,6 +6,15 @@ import App from './App';
 import { AuthProvider } from './hooks/useAuth';
 import './index.css';
 
+// Detect PWA standalone mode and add class to <html> before first paint.
+// navigator.standalone is the reliable iOS API; matchMedia is the W3C/Android fallback.
+const isStandalone =
+  (window.navigator as any).standalone === true ||
+  window.matchMedia('(display-mode: standalone)').matches;
+if (isStandalone) {
+  document.documentElement.classList.add('pwa-standalone');
+}
+
 // Register service worker with autoUpdate strategy
 registerSW({
   immediate: true,
