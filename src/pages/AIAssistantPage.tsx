@@ -1280,7 +1280,7 @@ export function AIAssistantPage() {
               </button>
             </div>
           )}
-          <div className="ai-ios-input-pill">
+          <div className="ai-ios-input-row">
             <button
               type="button"
               className="ai-ios-photo-btn"
@@ -1288,41 +1288,41 @@ export function AIAssistantPage() {
               disabled={loading}
               aria-label="Attach photo"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-                <circle cx="8.5" cy="8.5" r="1.5" />
-                <path d="m21 15-5-5L5 21" />
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 5v14M5 12h14" />
               </svg>
             </button>
-            <ContentEditableInput
-              placeholder={pendingPhotoDataUrl ? "Ask about this photo…" : "Describe your shoot or ask…"}
-              value={input}
-              onChange={setInput}
-              multiline
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  void handleSubmit();
-                }
-              }}
-              onFocus={() => document.documentElement.classList.add('keyboard-open')}
-              onBlur={() => document.documentElement.classList.remove('keyboard-open')}
-              disabled={loading}
-            />
-            <button 
-              className="ai-ios-send-btn"
-              onClick={() => void handleSubmit()}
-              disabled={loading || (!input.trim() && !pendingPhotoDataUrl)}
-              aria-label="Send message"
-            >
-              {loading ? (
-                <span className="ai-spinner-small">&#10022;</span>
-              ) : (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 19V5M5 12l7-7 7 7" />
-                </svg>
-              )}
-            </button>
+            <div className="ai-ios-input-pill">
+              <ContentEditableInput
+                placeholder={pendingPhotoDataUrl ? "Ask about this photo…" : "Describe your shoot or ask…"}
+                value={input}
+                onChange={setInput}
+                multiline
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    void handleSubmit();
+                  }
+                }}
+                onFocus={() => document.documentElement.classList.add('keyboard-open')}
+                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
+                disabled={loading}
+              />
+              <button 
+                className="ai-ios-send-btn"
+                onClick={() => void handleSubmit()}
+                disabled={loading || (!input.trim() && !pendingPhotoDataUrl)}
+                aria-label="Send message"
+              >
+                {loading ? (
+                  <span className="ai-spinner-small">&#10022;</span>
+                ) : (
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M12 19V5M5 12l7-7 7 7" />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
           {/* Hidden file input for chat photo attachment */}
           <input

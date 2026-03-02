@@ -9503,6 +9503,13 @@ body:has(.content-assistant) {
   bottom: 0;
 }
 
+/* Input Row (circle btn + pill side by side) */
+.ai-page.ios-theme .ai-ios-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 /* Input Pill */
 .ai-page.ios-theme .ai-ios-input-pill {
   display: flex;
@@ -9513,7 +9520,7 @@ body:has(.content-assistant) {
   -webkit-backdrop-filter: blur(var(--ios-blur));
   border: 0.5px solid rgba(0, 0, 0, 0.12);
   border-radius: 999px;
-  padding: 7px 7px 7px 14px;
+  padding: 7px 7px 7px 12px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
 }
 .ai-page.ios-theme .ai-ios-input-pill textarea,
@@ -9623,6 +9630,9 @@ body:has(.content-assistant) {
   color: #000;
 }
 :root.dark .ai-page.ios-theme .ai-ios-photo-btn {
+  background: rgba(28, 28, 30, 0.9);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.40), 0 0 0 0.5px rgba(255, 255, 255, 0.08);
   color: #fff;
 }
 :root.dark .ai-page.ios-theme .ai-ios-empty-icon {
@@ -12012,13 +12022,16 @@ body:has(.content-assistant) {
 /* ── Chat photo attachment button ───────────────────────────────────────── */
 
 .ai-page.ios-theme .ai-ios-photo-btn {
-  width: 33px;
-  height: 33px;
-  min-width: 33px;
-  min-height: 33px;
+  width: 47px;
+  height: 47px;
+  min-width: 47px;
+  min-height: 47px;
   border-radius: 50%;
-  border: none;
-  background: transparent;
+  border: 0.5px solid rgba(0, 0, 0, 0.12);
+  background: var(--ios-card-bg);
+  backdrop-filter: blur(var(--ios-blur));
+  -webkit-backdrop-filter: blur(var(--ios-blur));
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
   color: #000;
   display: flex;
   align-items: center;
