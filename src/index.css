@@ -9486,7 +9486,7 @@ body:has(.content-assistant) {
 /* ── Fixed Input Bar ── */
 .ai-page.ios-theme .ai-ios-input-bar {
   position: fixed;
-  bottom: calc(var(--bottom-nav-clearance, 60px) - 10px);
+  bottom: calc(var(--bottom-nav-clearance, 60px) - 16px);
   left: 0;
   right: 0;
   z-index: 40;
@@ -9512,9 +9512,9 @@ body:has(.content-assistant) {
   backdrop-filter: blur(var(--ios-blur));
   -webkit-backdrop-filter: blur(var(--ios-blur));
   border: 0.5px solid rgba(0, 0, 0, 0.12);
-  border-radius: 24px;
+  border-radius: 999px;
   padding: 8px 8px 8px 16px;
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
 }
 .ai-page.ios-theme .ai-ios-input-pill textarea,
 .ai-page.ios-theme .ai-ios-input-pill [contenteditable] {
@@ -9559,7 +9559,7 @@ body:has(.content-assistant) {
   min-height: 36px;
   border-radius: 50%;
   border: none;
-  background: var(--ios-blue);
+  background: #000;
   color: #fff;
   display: flex;
   align-items: center;
@@ -9616,7 +9616,14 @@ body:has(.content-assistant) {
 :root.dark .ai-page.ios-theme .ai-ios-input-pill {
   background: rgba(28, 28, 30, 0.9);
   border-color: rgba(255, 255, 255, 0.1);
-  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.40), 0 0 0 0.5px rgba(255, 255, 255, 0.08);
+}
+:root.dark .ai-page.ios-theme .ai-ios-send-btn {
+  background: #fff;
+  color: #000;
+}
+:root.dark .ai-page.ios-theme .ai-ios-photo-btn {
+  color: #fff;
 }
 :root.dark .ai-page.ios-theme .ai-ios-empty-icon {
   background: rgba(255, 255, 255, 0.06);
@@ -12012,7 +12019,7 @@ body:has(.content-assistant) {
   border-radius: 50%;
   border: none;
   background: transparent;
-  color: var(--ios-blue);
+  color: #000;
   display: flex;
   align-items: center;
   justify-content: center;
