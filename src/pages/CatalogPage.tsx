@@ -329,7 +329,8 @@ export function CatalogPage() {
         </header>
 
         {/* ── Scrollable content area ───────────────────────────────── */}
-        <div className="ios-catalog-scroll page-scroll-area" onScroll={handleScroll} style={{ paddingTop: '80px' }}>
+        <div className="ios-catalog-scroll page-scroll-area" onScroll={handleScroll}>
+          <div style={{ height: '70px' }} />
           <div className="ios-catalog-scrollable-header">
             <h1 className="ios-catalog-title" style={{ opacity: scrolled ? 0 : 1, transition: 'opacity 0.2s ease', marginBottom: 8 }}>
               Catalog

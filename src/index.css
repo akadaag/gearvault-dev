@@ -6482,17 +6482,18 @@ html {
   overflow-y: auto;
   overflow-x: clip;
   -webkit-overflow-scrolling: touch;
-  padding: 0 16px;
+  padding: 0;
   padding-bottom: var(--bottom-nav-clearance);
   min-height: 0;
-  background: #ffffff;
+  background: transparent;
 }
 
 :root.dark .ios-catalog-scroll {
-  background: var(--ios-bg);
+  background: transparent;
 }
 
 .ios-catalog-groups {
+  padding: 0 16px;
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -7590,10 +7591,16 @@ body:has(.content-assistant) {
   overflow-y: auto;
   overflow-x: clip;
   -webkit-overflow-scrolling: touch;
-  padding: 12px 16px 0;
+  padding: 0;
   padding-bottom: var(--bottom-nav-clearance);
   min-height: 0;
-  background: #ffffff;
+  background: transparent;
+}
+
+.ev-ios-list {
+  padding: 0 16px;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ── Event Cards ───────────────────────────────────────────────── */
@@ -7897,7 +7904,7 @@ body:has(.content-assistant) {
   border: none;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
   padding: 16px;
-  margin-bottom: 16px;
+  margin: 0 16px 16px;
 }
 
 .ev-ios-cal-header {
@@ -8081,7 +8088,7 @@ body:has(.content-assistant) {
 }
 
 :root.dark .ev-ios-content-scroll {
-  background: var(--ios-bg);
+  background: transparent;
 }
 
 :root.dark .ev-ios-event-item {
