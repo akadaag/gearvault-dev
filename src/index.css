@@ -6292,18 +6292,34 @@ html {
 
 .ios-catalog-header {
   position: fixed;
-  top: calc(12px + env(safe-area-inset-top));
+  top: 0; /* Use full height for background blur */
+  padding-top: calc(12px + env(safe-area-inset-top));
+  padding-bottom: 12px;
   left: 0;
   right: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding-left: 16px;
+  padding-right: 16px;
   z-index: 40;
   pointer-events: none;
   background: transparent;
-  border: none;
+  border-bottom: 0.5px solid transparent;
+  transition: background-color 0.3s ease, border-color 0.3s ease, backdrop-filter 0.3s ease;
 }
+
+.ios-catalog-header.is-scrolled {
+  background: rgba(249, 249, 249, 0.85);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+}
+:root.dark .ios-catalog-header.is-scrolled {
+  background: rgba(28, 28, 30, 0.85);
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+}
+
 .ios-catalog-glass-title {
   position: absolute;
   left: 50%;
@@ -7328,18 +7344,34 @@ body:has(.content-assistant) {
 
 .ev-ios-header {
   position: fixed;
-  top: calc(12px + env(safe-area-inset-top));
+  top: 0; /* Use full height for background blur */
+  padding-top: calc(12px + env(safe-area-inset-top));
+  padding-bottom: 12px;
   left: 0;
   right: 0;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
+  padding-left: 16px;
+  padding-right: 16px;
   z-index: 40;
   pointer-events: none;
   background: transparent;
-  border: none;
+  border-bottom: 0.5px solid transparent;
+  transition: background-color 0.3s ease, border-color 0.3s ease, backdrop-filter 0.3s ease;
 }
+
+.ev-ios-header.is-scrolled {
+  background: rgba(249, 249, 249, 0.85);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+}
+:root.dark .ev-ios-header.is-scrolled {
+  background: rgba(28, 28, 30, 0.85);
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+}
+
 .ev-ios-glass-title {
   position: absolute;
   left: 50%;

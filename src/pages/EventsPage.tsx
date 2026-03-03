@@ -317,11 +317,9 @@ export function EventsPage() {
       <section className="events-page ios-theme">
 
         {/* ── Floating Header ─────────────────────────────────────────────── */}
-        <header className="ev-ios-header">
-          {/* Left Pill */}
-          <div className="ios-title-pill" style={{ opacity: scrolled ? 0 : 1, transition: 'opacity 0.2s ease', pointerEvents: scrolled ? 'none' : 'auto' }}>
-            <span>Events</span>
-          </div>
+        <header className={`ev-ios-header${scrolled ? ' is-scrolled' : ''}`}>
+          {/* Spacer to balance flex layout */}
+          <div style={{ width: 80 }} />
 
           {/* Center Title */}
           <h2 className="ev-ios-glass-title" style={{ opacity: scrolled ? 1 : 0, pointerEvents: 'none' }}>
@@ -358,6 +356,9 @@ export function EventsPage() {
         {/* ── Scrollable content area ───────────────────────────────── */}
         <div className="ev-ios-content-scroll page-scroll-area" onScroll={handleScroll} style={{ paddingTop: '80px' }}>
           <div className="ev-ios-scrollable-header">
+            <h1 className="ev-ios-large-title" style={{ opacity: scrolled ? 0 : 1, transition: 'opacity 0.2s ease', marginBottom: 8 }}>
+              Events
+            </h1>
             <div className="ev-ios-item-count" style={{ marginTop: "-4px" }}>
               {sorted.length} event{sorted.length !== 1 ? 's' : ''}
             </div>

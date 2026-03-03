@@ -285,12 +285,10 @@ export function CatalogPage() {
     <>
       <section className="catalog-page ios-theme">
         {/* ── Floating Header ─────────────────────────────────────────────── */}
-        <header className="ios-catalog-header">
-          {/* Left Pill (fades out on scroll) */}
-          <div className="ios-title-pill" style={{ opacity: scrolled ? 0 : 1, transition: 'opacity 0.2s ease', pointerEvents: scrolled ? 'none' : 'auto' }}>
-            <span>Catalog</span>
-          </div>
-          
+        <header className={`ios-catalog-header${scrolled ? ' is-scrolled' : ''}`}>
+          {/* Spacer to balance flex layout */}
+          <div style={{ width: 80 }} />
+
           {/* Center Title (fades in on scroll) */}
           <h2 className="ios-catalog-glass-title" style={{ opacity: scrolled ? 1 : 0, pointerEvents: 'none' }}>
             Catalog
@@ -333,6 +331,9 @@ export function CatalogPage() {
         {/* ── Scrollable content area ───────────────────────────────── */}
         <div className="ios-catalog-scroll page-scroll-area" onScroll={handleScroll} style={{ paddingTop: '80px' }}>
           <div className="ios-catalog-scrollable-header">
+            <h1 className="ios-catalog-title" style={{ opacity: scrolled ? 0 : 1, transition: 'opacity 0.2s ease', marginBottom: 8 }}>
+              Catalog
+            </h1>
             <div className="ios-catalog-item-count" style={{ marginTop: "-4px" }}>
               {filtered.length} item{filtered.length !== 1 ? 's' : ''}
             </div>
