@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState, UIEvent } from 'react';
+import { useEffect, useMemo, useState} from 'react';
+import type { UIEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
@@ -325,10 +326,12 @@ export function CatalogPage() {
         {/* ── Scrollable content area ───────────────────────────────── */}
         <div className="ios-catalog-scroll page-scroll-area" onScroll={handleScroll}>
           <div className="ios-catalog-scrollable-header">
-            <h1 className="ios-catalog-title" style={{ opacity: scrolled ? 0 : 1, transition: 'opacity 0.2s ease', marginBottom: 8 }}>
-              Catalog
-            </h1>
-            <div className="ios-catalog-item-count">
+            <div className="ios-title-pill-container" style={{ opacity: scrolled ? 0 : 1, transition: 'opacity 0.2s ease', pointerEvents: scrolled ? 'none' : 'auto' }}>
+              <div className="ios-title-pill">
+                <span>Catalog</span>
+              </div>
+            </div>
+            <div className="ios-catalog-item-count" style={{ marginTop: "-4px" }}>
               {filtered.length} item{filtered.length !== 1 ? 's' : ''}
             </div>
           </div>

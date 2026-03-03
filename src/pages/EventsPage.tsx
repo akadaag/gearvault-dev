@@ -1,4 +1,5 @@
-import { useMemo, useEffect, useState, UIEvent } from 'react';
+import { useMemo, useEffect, useState} from 'react';
+import type { UIEvent } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
@@ -352,11 +353,13 @@ export function EventsPage() {
         {/* ── Scrollable content area ───────────────────────────────── */}
         <div className="ev-ios-content-scroll page-scroll-area" onScroll={handleScroll}>
           <div className="ev-ios-scrollable-header">
-            <h1 className="ev-ios-large-title" style={{ opacity: scrolled ? 0 : 1, transition: 'opacity 0.2s ease', marginBottom: 8 }}>
-              Events
-            </h1>
+            <div className="ios-title-pill-container" style={{ opacity: scrolled ? 0 : 1, transition: 'opacity 0.2s ease', pointerEvents: scrolled ? 'none' : 'auto' }}>
+              <div className="ios-title-pill">
+                <span>Events</span>
+              </div>
+            </div>
 
-            <div className="ev-ios-item-count">
+            <div className="ev-ios-item-count" style={{ marginTop: "-4px" }}>
               {sorted.length} event{sorted.length !== 1 ? 's' : ''}
             </div>
 
