@@ -316,15 +316,20 @@ export function EventsPage() {
     <>
       <section className="events-page ios-theme">
 
-        {/* ── iOS Liquid Glass Header ─────────────────────────────────────────────── */}
+        {/* ── Floating Header ─────────────────────────────────────────────── */}
         <header className="ev-ios-header">
-          {/* We keep empty left space or something else if needed, but flex-justify will push toolbar to right if left is empty. We'll use a placeholder div so title is center and toolbar is right */}
-          <div style={{ width: 80 }} /> 
-          <h2 className="ev-ios-glass-title" style={{ opacity: scrolled ? 1 : 0 }}>
+          {/* Left Pill */}
+          <div className="ios-title-pill" style={{ opacity: scrolled ? 0 : 1, transition: 'opacity 0.2s ease', pointerEvents: scrolled ? 'none' : 'auto' }}>
+            <span>Events</span>
+          </div>
+
+          {/* Center Title */}
+          <h2 className="ev-ios-glass-title" style={{ opacity: scrolled ? 1 : 0, pointerEvents: 'none' }}>
             Events
           </h2>
 
-          <div className="ev-ios-toolbar" role="group" aria-label="Events actions">
+          {/* Right Actions */}
+          <div className="ev-ios-toolbar" role="group" aria-label="Events actions" style={{ pointerEvents: 'auto' }}>
             <button
               className={`ev-ios-toolbar-btn${showCalendar ? ' active' : ''}`}
               onClick={() => setParam('calendar', showCalendar ? null : '1')}
@@ -351,14 +356,8 @@ export function EventsPage() {
         </header>
 
         {/* ── Scrollable content area ───────────────────────────────── */}
-        <div className="ev-ios-content-scroll page-scroll-area" onScroll={handleScroll}>
+        <div className="ev-ios-content-scroll page-scroll-area" onScroll={handleScroll} style={{ paddingTop: '80px' }}>
           <div className="ev-ios-scrollable-header">
-            <div className="ios-title-pill-container" style={{ opacity: scrolled ? 0 : 1, transition: 'opacity 0.2s ease', pointerEvents: scrolled ? 'none' : 'auto' }}>
-              <div className="ios-title-pill">
-                <span>Events</span>
-              </div>
-            </div>
-
             <div className="ev-ios-item-count" style={{ marginTop: "-4px" }}>
               {sorted.length} event{sorted.length !== 1 ? 's' : ''}
             </div>

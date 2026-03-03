@@ -6291,19 +6291,18 @@ html {
 /* ── Block B: Catalog Header & Search ───────────────────────────── */
 
 .ios-catalog-header {
-  flex-shrink: 0;
-  padding: 12px 16px 12px;
-  background: rgba(249, 249, 249, 0.85);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top));
+  left: 0;
+  right: 0;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  min-height: 60px;
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 40;
+  pointer-events: none;
+  background: transparent;
+  border: none;
 }
 .ios-catalog-glass-title {
   position: absolute;
@@ -6321,10 +6320,7 @@ html {
 }
 
 
-:root.dark .ios-catalog-header {
-  background: rgba(28, 28, 30, 0.85);
-  border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
-}
+/* removed dark background */
 
 .ios-catalog-header-top {
   display: flex;
@@ -6853,10 +6849,7 @@ html {
   background: var(--ios-bg);
 }
 
-:root.dark .ios-catalog-header {
-  background: rgba(28, 28, 30, 0.85);
-  border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
-}
+/* removed dark background */
 
 :root.dark .ios-catalog-title {
   color: var(--ios-text-primary);
@@ -7334,19 +7327,18 @@ body:has(.content-assistant) {
 /* ── Header ────────────────────────────────────────────────────── */
 
 .ev-ios-header {
-  flex-shrink: 0;
-  padding: 12px 16px 12px;
-  background: rgba(249, 249, 249, 0.85);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  position: sticky;
-  top: 0;
-  z-index: 40;
-  border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+  position: fixed;
+  top: calc(12px + env(safe-area-inset-top));
+  left: 0;
+  right: 0;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  min-height: 60px; /* enough space for nav */
+  justify-content: space-between;
+  padding: 0 16px;
+  z-index: 40;
+  pointer-events: none;
+  background: transparent;
+  border: none;
 }
 .ev-ios-glass-title {
   position: absolute;
@@ -8010,10 +8002,7 @@ body:has(.content-assistant) {
   background: var(--ios-bg);
 }
 
-:root.dark .ev-ios-header {
-  background: rgba(28, 28, 30, 0.85);
-  border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
-}
+/* removed dark background */
 
 :root.dark .ev-ios-large-title {
   color: var(--ios-text-primary);

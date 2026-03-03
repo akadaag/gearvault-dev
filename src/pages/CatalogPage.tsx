@@ -284,13 +284,20 @@ export function CatalogPage() {
   return (
     <>
       <section className="catalog-page ios-theme">
-        {/* ── iOS Liquid Glass Header ─────────────────────────────────────────────── */}
+        {/* ── Floating Header ─────────────────────────────────────────────── */}
         <header className="ios-catalog-header">
-          <div style={{ width: 80 }} /> 
-          <h2 className="ios-catalog-glass-title" style={{ opacity: scrolled ? 1 : 0 }}>
+          {/* Left Pill (fades out on scroll) */}
+          <div className="ios-title-pill" style={{ opacity: scrolled ? 0 : 1, transition: 'opacity 0.2s ease', pointerEvents: scrolled ? 'none' : 'auto' }}>
+            <span>Catalog</span>
+          </div>
+          
+          {/* Center Title (fades in on scroll) */}
+          <h2 className="ios-catalog-glass-title" style={{ opacity: scrolled ? 1 : 0, pointerEvents: 'none' }}>
             Catalog
           </h2>
-          <div className="ios-catalog-header-actions">
+
+          {/* Right Actions */}
+          <div className="ios-catalog-header-actions" style={{ pointerEvents: 'auto' }}>
             <div className="ios-catalog-toolbar" role="group" aria-label="Catalog actions">
               <button
                 className={`ios-catalog-toolbar-btn${showFilterSheet || tagFilter || conditionFilter !== 'all' || essentialOnly || selectedCategoryIds.length > 0 ? ' active' : ''}`}
@@ -324,13 +331,8 @@ export function CatalogPage() {
         </header>
 
         {/* ── Scrollable content area ───────────────────────────────── */}
-        <div className="ios-catalog-scroll page-scroll-area" onScroll={handleScroll}>
+        <div className="ios-catalog-scroll page-scroll-area" onScroll={handleScroll} style={{ paddingTop: '80px' }}>
           <div className="ios-catalog-scrollable-header">
-            <div className="ios-title-pill-container" style={{ opacity: scrolled ? 0 : 1, transition: 'opacity 0.2s ease', pointerEvents: scrolled ? 'none' : 'auto' }}>
-              <div className="ios-title-pill">
-                <span>Catalog</span>
-              </div>
-            </div>
             <div className="ios-catalog-item-count" style={{ marginTop: "-4px" }}>
               {filtered.length} item{filtered.length !== 1 ? 's' : ''}
             </div>
