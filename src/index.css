@@ -6564,7 +6564,7 @@ html {
 }
 
 .ios-catalog-group-panel {
-  border-radius: 0;
+  border-radius: 22px;
   margin-bottom: 0;
   max-height: 10000px;
   opacity: 1;
@@ -6581,9 +6581,9 @@ html {
 }
 
 .catalog-page.ios-theme .ios-list-group {
-  border-radius: 0;
+  border-radius: 22px;
   margin-bottom: 0;
-  box-shadow: none;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
   border: none;
   background: transparent;
   backdrop-filter: none;
@@ -6592,7 +6592,7 @@ html {
 }
 
 :root.dark .catalog-page.ios-theme .ios-list-group {
-  box-shadow: none;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
   background: transparent;
 }
 
@@ -6608,23 +6608,34 @@ html {
   position: relative;
   overflow: hidden;
   background: #F2F2F7;
-  border-radius: 22px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
-  margin-bottom: 10px;
 }
 
 :root.dark .catalog-swipe-row {
   background: #000000;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
 }
 
 .catalog-swipe-row .ios-list-item {
   background: #ffffff;
-  border-radius: 22px;
 }
 
 :root.dark .catalog-swipe-row .ios-list-item {
   background: #1c1c1e;
+}
+
+/* Grouped shape: first/last/only child border-radius */
+.catalog-swipe-row:first-child,
+.catalog-swipe-row:first-child .ios-list-item {
+  border-radius: 22px 22px 0 0;
+}
+
+.catalog-swipe-row:last-child,
+.catalog-swipe-row:last-child .ios-list-item {
+  border-radius: 0 0 22px 22px;
+}
+
+.catalog-swipe-row:only-child,
+.catalog-swipe-row:only-child .ios-list-item {
+  border-radius: 22px;
 }
 
 .catalog-swipe-row .ios-list-action {
@@ -6640,19 +6651,33 @@ html {
 }
 
 .catalog-swipe-row:not(:last-child)::after {
-  display: none;
+  content: '';
+  position: absolute;
+  left: 88px;
+  right: 16px;
+  bottom: 0;
+  height: 0.5px;
+  background: rgba(60, 60, 67, 0.18);
+  z-index: 2;
+  pointer-events: none;
 }
 
 .catalog-page.ios-theme .ios-list-item:not(:last-child)::after {
-  display: none;
+  content: '';
+  position: absolute;
+  left: 88px;
+  right: 16px;
+  bottom: 0;
+  height: 0.5px;
+  background: rgba(60, 60, 67, 0.18);
 }
 
 :root.dark .catalog-page.ios-theme .ios-list-item:not(:last-child)::after {
-  display: none;
+  background: rgba(255, 255, 255, 0.16);
 }
 
 :root.dark .catalog-swipe-row:not(:last-child)::after {
-  display: none;
+  background: rgba(255, 255, 255, 0.16);
 }
 
 .catalog-page.ios-theme .ios-list-icon {
@@ -8633,11 +8658,11 @@ body:has(.content-assistant) {
 
 /* List Group */
 .event-detail-page.ios-theme .ev-detail-list-group {
-  background: transparent;
-  border-radius: 0;
-  overflow: visible;
+  background: #ffffff;
+  border-radius: 22px;
+  overflow: hidden;
   border: none;
-  box-shadow: none;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
 }
 
 .event-detail-page.ios-theme .ev-detail-item-row {
@@ -8645,18 +8670,15 @@ body:has(.content-assistant) {
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  background: #ffffff;
-  border-bottom: none;
-  border-radius: 22px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
-  margin-bottom: 10px;
+  background: transparent;
+  border-bottom: 0.5px solid color-mix(in srgb, var(--ios-text-secondary) 15%, transparent);
   cursor: pointer;
 }
 .event-detail-page.ios-theme .ev-detail-item-row:last-child {
   border-bottom: none;
 }
 .event-detail-page.ios-theme .ev-detail-item-row:active {
-  background: #f2f2f4;
+  background: color-mix(in srgb, var(--ios-text-secondary) 5%, transparent);
 }
 
 .event-detail-page.ios-theme .ev-detail-check-circle {
@@ -8976,13 +8998,12 @@ body:has(.content-assistant) {
 }
 
 :root.dark .event-detail-page.ios-theme .ev-detail-list-group {
-  background: transparent;
-  box-shadow: none;
+  background: rgba(44, 44, 46, 1);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
 }
 
 :root.dark .event-detail-page.ios-theme .ev-detail-item-row {
-  background: rgba(44, 44, 46, 1);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+  background: transparent;
 }
 
 :root.dark .event-detail-page.ios-theme .ev-detail-empty-state {
@@ -11432,8 +11453,6 @@ body:has(.content-assistant) {
   min-height: 44px;
   transition: background 0.1s ease;
   background: rgba(255, 255, 255, 0.55);
-  box-shadow: none;
-  margin-bottom: 0;
 }
 
 .ios-theme .ios-sheet-modal .ev-detail-category-group .ev-detail-item-row:first-of-type {
