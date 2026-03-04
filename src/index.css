@@ -6564,7 +6564,7 @@ html {
 }
 
 .ios-catalog-group-panel {
-  border-radius: 22px;
+  border-radius: 0;
   margin-bottom: 0;
   max-height: 10000px;
   opacity: 1;
@@ -6581,14 +6581,19 @@ html {
 }
 
 .catalog-page.ios-theme .ios-list-group {
-  border-radius: 22px;
+  border-radius: 0;
   margin-bottom: 0;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
+  box-shadow: none;
   border: none;
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  overflow: visible;
 }
 
 :root.dark .catalog-page.ios-theme .ios-list-group {
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+  box-shadow: none;
+  background: transparent;
 }
 
 .catalog-page.ios-theme .ios-list-item {
@@ -6603,14 +6608,19 @@ html {
   position: relative;
   overflow: hidden;
   background: #F2F2F7;
+  border-radius: 22px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
+  margin-bottom: 10px;
 }
 
 :root.dark .catalog-swipe-row {
   background: #000000;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
 }
 
 .catalog-swipe-row .ios-list-item {
   background: #ffffff;
+  border-radius: 22px;
 }
 
 :root.dark .catalog-swipe-row .ios-list-item {
@@ -6630,33 +6640,19 @@ html {
 }
 
 .catalog-swipe-row:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  left: 88px;
-  right: 16px;
-  bottom: 0;
-  height: 0.5px;
-  background: rgba(60, 60, 67, 0.18);
-  z-index: 2;
-  pointer-events: none;
+  display: none;
 }
 
 .catalog-page.ios-theme .ios-list-item:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  left: 88px;
-  right: 16px;
-  bottom: 0;
-  height: 0.5px;
-  background: rgba(60, 60, 67, 0.18);
+  display: none;
 }
 
 :root.dark .catalog-page.ios-theme .ios-list-item:not(:last-child)::after {
-  background: rgba(255, 255, 255, 0.16);
+  display: none;
 }
 
 :root.dark .catalog-swipe-row:not(:last-child)::after {
-  background: rgba(255, 255, 255, 0.16);
+  display: none;
 }
 
 .catalog-page.ios-theme .ios-list-icon {
@@ -8637,11 +8633,11 @@ body:has(.content-assistant) {
 
 /* List Group */
 .event-detail-page.ios-theme .ev-detail-list-group {
-  background: #ffffff;
-  border-radius: 22px;
-  overflow: hidden;
+  background: transparent;
+  border-radius: 0;
+  overflow: visible;
   border: none;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
+  box-shadow: none;
 }
 
 .event-detail-page.ios-theme .ev-detail-item-row {
@@ -8649,15 +8645,18 @@ body:has(.content-assistant) {
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  background: transparent;
-  border-bottom: 0.5px solid color-mix(in srgb, var(--ios-text-secondary) 15%, transparent);
+  background: #ffffff;
+  border-bottom: none;
+  border-radius: 22px;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
+  margin-bottom: 10px;
   cursor: pointer;
 }
 .event-detail-page.ios-theme .ev-detail-item-row:last-child {
   border-bottom: none;
 }
 .event-detail-page.ios-theme .ev-detail-item-row:active {
-  background: color-mix(in srgb, var(--ios-text-secondary) 5%, transparent);
+  background: #f2f2f4;
 }
 
 .event-detail-page.ios-theme .ev-detail-check-circle {
@@ -8977,12 +8976,13 @@ body:has(.content-assistant) {
 }
 
 :root.dark .event-detail-page.ios-theme .ev-detail-list-group {
-  background: rgba(44, 44, 46, 1);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+  background: transparent;
+  box-shadow: none;
 }
 
 :root.dark .event-detail-page.ios-theme .ev-detail-item-row {
-  background: transparent;
+  background: rgba(44, 44, 46, 1);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
 }
 
 :root.dark .event-detail-page.ios-theme .ev-detail-empty-state {
@@ -11432,6 +11432,8 @@ body:has(.content-assistant) {
   min-height: 44px;
   transition: background 0.1s ease;
   background: rgba(255, 255, 255, 0.55);
+  box-shadow: none;
+  margin-bottom: 0;
 }
 
 .ios-theme .ios-sheet-modal .ev-detail-category-group .ev-detail-item-row:first-of-type {
