@@ -6306,26 +6306,40 @@ html {
   right: 0;
   z-index: 40;
   padding-top: max(4px, env(safe-area-inset-top));
-  padding-bottom: 12px;
+  padding-bottom: 6px;
   padding-left: 16px;
   padding-right: 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  pointer-events: none;
   background: transparent;
-  border-bottom: 0.5px solid transparent;
-  transition: background-color 0.2s ease, backdrop-filter 0.2s ease, border-bottom-color 0.2s ease;
 }
 
-.ios-catalog-header.is-scrolled {
-  background: var(--ios-card-bg);
-  backdrop-filter: blur(var(--ios-blur));
-  -webkit-backdrop-filter: blur(var(--ios-blur));
-  border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+/* Gradient fade — covers status bar + header, fades to transparent below */
+.ios-catalog-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: -40px;
+  background: linear-gradient(
+    to bottom,
+    #ffffff 0px,
+    #ffffff calc(100% - 40px),
+    rgba(255, 255, 255, 0) 100%
+  );
+  pointer-events: none;
+  z-index: -1;
 }
-
-:root.dark .ios-catalog-header.is-scrolled {
-  border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+:root.dark .ios-catalog-header::before {
+  background: linear-gradient(
+    to bottom,
+    #000000 0px,
+    #000000 calc(100% - 40px),
+    rgba(0, 0, 0, 0) 100%
+  );
 }
 
 .ios-catalog-glass-title {
@@ -7374,26 +7388,40 @@ body:has(.content-assistant) {
   right: 0;
   z-index: 40;
   padding-top: max(4px, env(safe-area-inset-top));
-  padding-bottom: 12px;
+  padding-bottom: 6px;
   padding-left: 16px;
   padding-right: 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  pointer-events: none;
   background: transparent;
-  border-bottom: 0.5px solid transparent;
-  transition: background-color 0.2s ease, backdrop-filter 0.2s ease, border-bottom-color 0.2s ease;
 }
 
-.ev-ios-header.is-scrolled {
-  background: var(--ios-card-bg);
-  backdrop-filter: blur(var(--ios-blur));
-  -webkit-backdrop-filter: blur(var(--ios-blur));
-  border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+/* Gradient fade — covers status bar + header, fades to transparent below */
+.ev-ios-header::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: -40px;
+  background: linear-gradient(
+    to bottom,
+    #ffffff 0px,
+    #ffffff calc(100% - 40px),
+    rgba(255, 255, 255, 0) 100%
+  );
+  pointer-events: none;
+  z-index: -1;
 }
-
-:root.dark .ev-ios-header.is-scrolled {
-  border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+:root.dark .ev-ios-header::before {
+  background: linear-gradient(
+    to bottom,
+    #000000 0px,
+    #000000 calc(100% - 40px),
+    rgba(0, 0, 0, 0) 100%
+  );
 }
 
 .ev-ios-glass-title {

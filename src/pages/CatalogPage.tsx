@@ -340,7 +340,7 @@ export function CatalogPage() {
 
         {/* ── Scrollable content area ───────────────────────────────── */}
         <div className="ios-catalog-scroll page-scroll-area" onScroll={handleScroll}>
-          <div style={{ height: 'calc(env(safe-area-inset-top) + 68px)' }} />
+          <div style={{ height: 'calc(env(safe-area-inset-top) + 56px)' }} />
           {gear.length === 0 ? (
             <div className="ios-catalog-empty">
               <div className="ios-catalog-empty-icon" aria-hidden="true">

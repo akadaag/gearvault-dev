@@ -364,7 +364,7 @@ export function EventsPage() {
 
         {/* ── Scrollable content area ───────────────────────────────── */}
         <div className="ev-ios-content-scroll page-scroll-area" onScroll={handleScroll}>
-          <div style={{ height: 'calc(env(safe-area-inset-top) + 68px)' }} />
+          <div style={{ height: 'calc(env(safe-area-inset-top) + 56px)' }} />
           <div className="ev-ios-scrollable-header">
             <div className="ev-ios-filter-row" style={{ marginTop: 0 }}>
               <button
