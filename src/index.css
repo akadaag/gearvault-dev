@@ -5200,20 +5200,15 @@ html {
 /* ── Sticky Header ──────────────────────────────────────────── */
 
 .home-ios-header {
-  position: fixed;
+  position: sticky;
   top: 0;
-  left: 0;
-  right: 0;
   z-index: 40;
-  padding: max(4px, env(safe-area-inset-top)) 1.25rem 0.75rem;
-  background: var(--ios-card-bg);
-  backdrop-filter: blur(var(--ios-blur));
-  -webkit-backdrop-filter: blur(var(--ios-blur));
-  border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+  padding: max(0.75rem, env(safe-area-inset-top)) 1.25rem 0.75rem;
+  background: #fff;
 }
 
 :root.dark .home-ios-header {
-  border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+  background: #000;
 }
 
 .home-ios-header .profile-menu {
@@ -6310,7 +6305,7 @@ html {
   padding-left: 16px;
   padding-right: 16px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   pointer-events: none;
   background: transparent;
@@ -6323,11 +6318,11 @@ html {
   top: 0;
   left: 0;
   right: 0;
-  bottom: -40px;
+  bottom: -24px;
   background: linear-gradient(
     to bottom,
     #ffffff 0px,
-    #ffffff calc(100% - 40px),
+    #ffffff calc(100% - 24px),
     rgba(255, 255, 255, 0) 100%
   );
   pointer-events: none;
@@ -6337,7 +6332,7 @@ html {
   background: linear-gradient(
     to bottom,
     #000000 0px,
-    #000000 calc(100% - 40px),
+    #000000 calc(100% - 24px),
     rgba(0, 0, 0, 0) 100%
   );
 }
@@ -6387,6 +6382,7 @@ html {
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  margin-top: 2px;
 }
 
 .ios-catalog-title {
@@ -7392,7 +7388,7 @@ body:has(.content-assistant) {
   padding-left: 16px;
   padding-right: 16px;
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   pointer-events: none;
   background: transparent;
@@ -7405,11 +7401,11 @@ body:has(.content-assistant) {
   top: 0;
   left: 0;
   right: 0;
-  bottom: -40px;
+  bottom: -24px;
   background: linear-gradient(
     to bottom,
     #ffffff 0px,
-    #ffffff calc(100% - 40px),
+    #ffffff calc(100% - 24px),
     rgba(255, 255, 255, 0) 100%
   );
   pointer-events: none;
@@ -7419,7 +7415,7 @@ body:has(.content-assistant) {
   background: linear-gradient(
     to bottom,
     #000000 0px,
-    #000000 calc(100% - 40px),
+    #000000 calc(100% - 24px),
     rgba(0, 0, 0, 0) 100%
   );
 }
@@ -7483,6 +7479,7 @@ body:has(.content-assistant) {
   border: none;
   background: #ffffff;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+  margin-top: 2px;
 }
 
 .ev-ios-toolbar-btn {
