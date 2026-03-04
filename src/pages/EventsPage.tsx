@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useState} from 'react';
+import { useMemo, useEffect, useRef, useState} from 'react';
 import type { UIEvent } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -278,10 +278,13 @@ export function EventsPage() {
   }, [events, query, selectedEventTypes, clientFilter, locationFilter, quickFilter, selectedCalDate]);
 
 
-  // ── Scroll state ───────────────────────────────────────────────────────────
-  const [scrolled, setScrolled] = useState(false);
+  // ── Scroll-driven title crossfade ────────────────────────────────────────
+  const largeTitleRef = useRef<HTMLDivElement>(null);
+  const glassTitleRef = useRef<HTMLHeadingElement>(null);
   const handleScroll = (e: UIEvent<HTMLDivElement>) => {
-    setScrolled(e.currentTarget.scrollTop > 10);
+    const progress = Math.min(1, Math.max(0, (e.currentTarget.scrollTop - 10) / 40));
+    if (largeTitleRef.current) largeTitleRef.current.style.opacity = String(1 - progress);
+    if (glassTitleRef.current) glassTitleRef.current.style.opacity = String(progress);
   };
   const sorted = useMemo(() => {
     const items = [...filtered];
@@ -317,19 +320,21 @@ export function EventsPage() {
       <section className="events-page ios-theme">
 
         {/* ── Floating Header ─────────────────────────────────────────────── */}
-        <header className={`ev-ios-header${scrolled ? ' is-scrolled' : ''}`}>
+        <header className="ev-ios-header">
           {/* Left: large title — fades out on scroll */}
           <div
+            ref={largeTitleRef}
             className="ev-ios-header-left"
-            style={{ opacity: scrolled ? 0 : 1, transition: 'opacity 0.2s ease', pointerEvents: 'none' }}
+            style={{ opacity: 1, pointerEvents: 'none' }}
           >
             <h1 className="ev-ios-large-title" style={{ margin: 0, fontSize: '32px', lineHeight: 1.2 }}>Events</h1>
           </div>
 
           {/* Center title — fades in on scroll */}
           <h2
+            ref={glassTitleRef}
             className="ev-ios-glass-title"
-            style={{ opacity: scrolled ? 1 : 0, pointerEvents: 'none' }}
+            style={{ opacity: 0, pointerEvents: 'none' }}
           >
             Events
           </h2>

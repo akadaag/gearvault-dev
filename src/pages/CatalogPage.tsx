@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState} from 'react';
+import { useEffect, useMemo, useRef, useState} from 'react';
 import type { UIEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
@@ -56,10 +56,13 @@ export function CatalogPage() {
   const [showAddItemForm, setShowAddItemForm] = useState(false);
   const [error, setError] = useState('');
 
-  // ── Scroll state ───────────────────────────────────────────────────────────
-  const [scrolled, setScrolled] = useState(false);
+  // ── Scroll-driven title crossfade ────────────────────────────────────────
+  const largeTitleRef = useRef<HTMLDivElement>(null);
+  const glassTitleRef = useRef<HTMLHeadingElement>(null);
   const handleScroll = (e: UIEvent<HTMLDivElement>) => {
-    setScrolled(e.currentTarget.scrollTop > 10);
+    const progress = Math.min(1, Math.max(0, (e.currentTarget.scrollTop - 10) / 40));
+    if (largeTitleRef.current) largeTitleRef.current.style.opacity = String(1 - progress);
+    if (glassTitleRef.current) glassTitleRef.current.style.opacity = String(progress);
   };
 
 
@@ -286,19 +289,21 @@ export function CatalogPage() {
     <>
       <section className="catalog-page ios-theme">
         {/* ── Floating Header ─────────────────────────────────────────────── */}
-        <header className={`ios-catalog-header${scrolled ? ' is-scrolled' : ''}`}>
+        <header className="ios-catalog-header">
           {/* Left: large title — fades out on scroll */}
           <div
+            ref={largeTitleRef}
             className="ios-catalog-header-left"
-            style={{ opacity: scrolled ? 0 : 1, transition: 'opacity 0.2s ease', pointerEvents: 'none' }}
+            style={{ opacity: 1, pointerEvents: 'none' }}
           >
             <h1 className="ios-catalog-title" style={{ margin: 0, fontSize: '32px', lineHeight: 1.2 }}>Catalog</h1>
           </div>
 
           {/* Center title — fades in on scroll */}
           <h2
+            ref={glassTitleRef}
             className="ios-catalog-glass-title"
-            style={{ opacity: scrolled ? 1 : 0, pointerEvents: 'none' }}
+            style={{ opacity: 0, pointerEvents: 'none' }}
           >
             Catalog
           </h2>

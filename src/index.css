@@ -6345,7 +6345,6 @@ html {
   font-weight: 600;
   color: var(--ios-text-primary);
   margin: 0;
-  transition: opacity 0.2s ease;
   pointer-events: none;
 }
 
@@ -7427,7 +7426,6 @@ body:has(.content-assistant) {
   font-weight: 600;
   color: var(--ios-text-primary);
   margin: 0;
-  transition: opacity 0.2s ease;
   pointer-events: none;
 }
 
