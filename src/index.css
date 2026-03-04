@@ -5205,7 +5205,7 @@ html {
   left: 0;
   right: 0;
   z-index: 40;
-  padding: max(0.75rem, env(safe-area-inset-top)) 1.25rem 0.75rem;
+  padding: max(4px, env(safe-area-inset-top)) 1.25rem 0.75rem;
   background: var(--ios-card-bg);
   backdrop-filter: blur(var(--ios-blur));
   -webkit-backdrop-filter: blur(var(--ios-blur));
@@ -6305,22 +6305,42 @@ html {
   left: 0;
   right: 0;
   z-index: 40;
-  padding-top: calc(12px + env(safe-area-inset-top));
+  padding-top: max(4px, env(safe-area-inset-top));
   padding-bottom: 12px;
   padding-left: 16px;
   padding-right: 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background: transparent;
+  border-bottom: 0.5px solid transparent;
+  transition: background-color 0.2s ease, backdrop-filter 0.2s ease, border-bottom-color 0.2s ease;
+}
+
+.ios-catalog-header.is-scrolled {
   background: var(--ios-card-bg);
   backdrop-filter: blur(var(--ios-blur));
   -webkit-backdrop-filter: blur(var(--ios-blur));
   border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
 }
 
-:root.dark .ios-catalog-header {
+:root.dark .ios-catalog-header.is-scrolled {
   border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
 }
+
+.ios-catalog-glass-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ios-text-primary);
+  margin: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+
 
 /* Left column: large title + item count stacked */
 .ios-catalog-header-left {
@@ -7353,22 +7373,42 @@ body:has(.content-assistant) {
   left: 0;
   right: 0;
   z-index: 40;
-  padding-top: calc(12px + env(safe-area-inset-top));
+  padding-top: max(4px, env(safe-area-inset-top));
   padding-bottom: 12px;
   padding-left: 16px;
   padding-right: 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  background: transparent;
+  border-bottom: 0.5px solid transparent;
+  transition: background-color 0.2s ease, backdrop-filter 0.2s ease, border-bottom-color 0.2s ease;
+}
+
+.ev-ios-header.is-scrolled {
   background: var(--ios-card-bg);
   backdrop-filter: blur(var(--ios-blur));
   -webkit-backdrop-filter: blur(var(--ios-blur));
   border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
 }
 
-:root.dark .ev-ios-header {
+:root.dark .ev-ios-header.is-scrolled {
   border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
 }
+
+.ev-ios-glass-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ios-text-primary);
+  margin: 0;
+  transition: opacity 0.2s ease;
+  pointer-events: none;
+}
+
+
 
 /* Left column: empty area if needed */
 .ev-ios-header-left {

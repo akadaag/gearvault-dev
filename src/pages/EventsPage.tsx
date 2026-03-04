@@ -1,4 +1,5 @@
 import { useMemo, useEffect, useState} from 'react';
+import type { UIEvent } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
@@ -276,6 +277,12 @@ export function EventsPage() {
     });
   }, [events, query, selectedEventTypes, clientFilter, locationFilter, quickFilter, selectedCalDate]);
 
+
+  // ── Scroll state ───────────────────────────────────────────────────────────
+  const [scrolled, setScrolled] = useState(false);
+  const handleScroll = (e: UIEvent<HTMLDivElement>) => {
+    setScrolled(e.currentTarget.scrollTop > 10);
+  };
   const sorted = useMemo(() => {
     const items = [...filtered];
     if (sortBy === 'title')  items.sort((a, b) => a.title.localeCompare(b.title));
@@ -310,9 +317,23 @@ export function EventsPage() {
       <section className="events-page ios-theme">
 
         {/* ── Floating Header ─────────────────────────────────────────────── */}
-        <header className="ev-ios-header">
-          {/* Left Actions */}
-          <div className="ev-ios-header-left"></div>
+        <header className={`ev-ios-header${scrolled ? ' is-scrolled' : ''}`}>
+          {/* Left: large title + count — both fade out on scroll */}
+          <div
+            className="ev-ios-header-left"
+            style={{ opacity: scrolled ? 0 : 1, transition: 'opacity 0.2s ease', pointerEvents: 'none' }}
+          >
+            <h1 className="ev-ios-large-title" style={{ margin: 0, fontSize: '32px', lineHeight: 1.2 }}>Events</h1>
+            <p className="ev-ios-item-count" style={{ margin: 0 }}>{sorted.length} event{sorted.length !== 1 ? 's' : ''}</p>
+          </div>
+
+          {/* Center title — fades in on scroll */}
+          <h2
+            className="ev-ios-glass-title"
+            style={{ opacity: scrolled ? 1 : 0, pointerEvents: 'none' }}
+          >
+            Events
+          </h2>
 
           {/* Right Actions */}
           <div className="ev-ios-toolbar" role="group" aria-label="Events actions" style={{ pointerEvents: 'auto' }}>
@@ -342,11 +363,8 @@ export function EventsPage() {
         </header>
 
         {/* ── Scrollable content area ───────────────────────────────── */}
-        <div className="ev-ios-content-scroll page-scroll-area">
-          <div className="ev-ios-header-title-area">
-            <h1 className="ev-ios-large-title">Events</h1>
-            <p className="ev-ios-item-count">{sorted.length} event{sorted.length !== 1 ? 's' : ''}</p>
-          </div>
+        <div className="ev-ios-content-scroll page-scroll-area" onScroll={handleScroll}>
+          <div style={{ height: 'calc(env(safe-area-inset-top) + 68px)' }} />
           <div className="ev-ios-scrollable-header">
             <div className="ev-ios-filter-row" style={{ marginTop: 0 }}>
               <button
