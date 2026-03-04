@@ -318,13 +318,12 @@ export function EventsPage() {
 
         {/* ── Floating Header ─────────────────────────────────────────────── */}
         <header className={`ev-ios-header${scrolled ? ' is-scrolled' : ''}`}>
-          {/* Left: large title + count — both fade out on scroll */}
+          {/* Left: large title — fades out on scroll */}
           <div
             className="ev-ios-header-left"
             style={{ opacity: scrolled ? 0 : 1, transition: 'opacity 0.2s ease', pointerEvents: 'none' }}
           >
             <h1 className="ev-ios-large-title" style={{ margin: 0, fontSize: '32px', lineHeight: 1.2 }}>Events</h1>
-            <p className="ev-ios-item-count" style={{ margin: 0 }}>{sorted.length} event{sorted.length !== 1 ? 's' : ''}</p>
           </div>
 
           {/* Center title — fades in on scroll */}
@@ -364,7 +363,8 @@ export function EventsPage() {
 
         {/* ── Scrollable content area ───────────────────────────────── */}
         <div className="ev-ios-content-scroll page-scroll-area" onScroll={handleScroll}>
-          <div style={{ height: 'calc(env(safe-area-inset-top) + 56px)' }} />
+          <div style={{ height: 'calc(env(safe-area-inset-top) + 70px)' }} />
+          <p className="ev-ios-item-count" style={{ margin: '0 0 8px', padding: '0 16px' }}>{sorted.length} event{sorted.length !== 1 ? 's' : ''}</p>
           <div className="ev-ios-scrollable-header">
             <div className="ev-ios-filter-row" style={{ marginTop: 0 }}>
               <button

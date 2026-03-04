@@ -287,13 +287,12 @@ export function CatalogPage() {
       <section className="catalog-page ios-theme">
         {/* ── Floating Header ─────────────────────────────────────────────── */}
         <header className={`ios-catalog-header${scrolled ? ' is-scrolled' : ''}`}>
-          {/* Left: large title + count — both fade out on scroll */}
+          {/* Left: large title — fades out on scroll */}
           <div
             className="ios-catalog-header-left"
             style={{ opacity: scrolled ? 0 : 1, transition: 'opacity 0.2s ease', pointerEvents: 'none' }}
           >
             <h1 className="ios-catalog-title" style={{ margin: 0, fontSize: '32px', lineHeight: 1.2 }}>Catalog</h1>
-            <p className="ios-catalog-item-count" style={{ margin: 0 }}>{filtered.length} item{filtered.length !== 1 ? 's' : ''}</p>
           </div>
 
           {/* Center title — fades in on scroll */}
@@ -340,7 +339,8 @@ export function CatalogPage() {
 
         {/* ── Scrollable content area ───────────────────────────────── */}
         <div className="ios-catalog-scroll page-scroll-area" onScroll={handleScroll}>
-          <div style={{ height: 'calc(env(safe-area-inset-top) + 56px)' }} />
+          <div style={{ height: 'calc(env(safe-area-inset-top) + 70px)' }} />
+          <p className="ios-catalog-item-count" style={{ margin: '0 0 16px', padding: '0 16px' }}>{filtered.length} item{filtered.length !== 1 ? 's' : ''}</p>
           {gear.length === 0 ? (
             <div className="ios-catalog-empty">
               <div className="ios-catalog-empty-icon" aria-hidden="true">

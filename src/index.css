@@ -6305,7 +6305,7 @@ html {
   padding-left: 16px;
   padding-right: 16px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   pointer-events: none;
   background: transparent;
@@ -6382,7 +6382,6 @@ html {
   display: flex;
   align-items: center;
   justify-content: flex-end;
-  margin-top: 2px;
 }
 
 .ios-catalog-title {
@@ -7388,7 +7387,7 @@ body:has(.content-assistant) {
   padding-left: 16px;
   padding-right: 16px;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   pointer-events: none;
   background: transparent;
@@ -7479,7 +7478,6 @@ body:has(.content-assistant) {
   border: none;
   background: #ffffff;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
-  margin-top: 2px;
 }
 
 .ev-ios-toolbar-btn {
