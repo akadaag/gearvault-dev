@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState} from 'react';
-import type { UIEvent } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
@@ -55,12 +54,6 @@ export function CatalogPage() {
   const [draft, setDraft] = useState<GearFormDraft>(initialDraft);
   const [showAddItemForm, setShowAddItemForm] = useState(false);
   const [error, setError] = useState('');
-
-    // ── Scroll state ───────────────────────────────────────────────────────────
-  const [scrolled, setScrolled] = useState(false);
-  const handleScroll = (e: UIEvent<HTMLDivElement>) => {
-    setScrolled(e.currentTarget.scrollTop > 30);
-  };
 
   function updateSearchParams(mutator: (params: URLSearchParams) => void) {
     const params = new URLSearchParams(searchParams);
@@ -285,23 +278,9 @@ export function CatalogPage() {
     <>
       <section className="catalog-page ios-theme">
         {/* ── Floating Header ─────────────────────────────────────────────── */}
-        <header className={`ios-catalog-header${scrolled ? ' is-scrolled' : ''}`}>
-          {/* Left: large title + count — both fade out on scroll */}
-          <div
-            className="ios-catalog-header-left"
-            style={{ opacity: scrolled ? 0 : 1, transition: 'opacity 0.2s ease', pointerEvents: 'none' }}
-          >
-            <h1 className="ios-catalog-title">Catalog</h1>
-            <p className="ios-catalog-item-count">{filtered.length} item{filtered.length !== 1 ? 's' : ''}</p>
-          </div>
-
-          {/* Center title — fades in on scroll */}
-          <h2
-            className="ios-catalog-glass-title"
-            style={{ opacity: scrolled ? 1 : 0, pointerEvents: 'none' }}
-          >
-            Catalog
-          </h2>
+        <header className="ios-catalog-header">
+          {/* Left Actions */}
+          <div className="ios-catalog-header-left"></div>
 
           {/* Right Actions */}
           <div className="ios-catalog-header-actions" style={{ pointerEvents: 'auto' }}>
@@ -338,8 +317,11 @@ export function CatalogPage() {
         </header>
 
         {/* ── Scrollable content area ───────────────────────────────── */}
-        <div className="ios-catalog-scroll page-scroll-area" onScroll={handleScroll}>
-          <div style={{ height: '104px' }} />
+        <div className="ios-catalog-scroll page-scroll-area">
+          <div className="ios-catalog-header-title-area">
+            <h1 className="ios-catalog-title">Catalog</h1>
+            <p className="ios-catalog-item-count">{filtered.length} item{filtered.length !== 1 ? 's' : ''}</p>
+          </div>
           {gear.length === 0 ? (
             <div className="ios-catalog-empty">
               <div className="ios-catalog-empty-icon" aria-hidden="true">

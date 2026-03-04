@@ -5200,11 +5200,20 @@ html {
 /* ── Sticky Header ──────────────────────────────────────────── */
 
 .home-ios-header {
-  position: sticky;
+  position: fixed;
   top: 0;
+  left: 0;
+  right: 0;
   z-index: 40;
   padding: max(0.75rem, env(safe-area-inset-top)) 1.25rem 0.75rem;
-  background: #fff;
+  background: var(--ios-card-bg);
+  backdrop-filter: blur(var(--ios-blur));
+  -webkit-backdrop-filter: blur(var(--ios-blur));
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+}
+
+:root.dark .home-ios-header {
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
 }
 
 .home-ios-header .profile-menu {
@@ -6293,45 +6302,24 @@ html {
 .ios-catalog-header {
   position: fixed;
   top: 0;
-  padding-top: calc(12px + env(safe-area-inset-top));
-  padding-bottom: 12px;
   left: 0;
   right: 0;
+  z-index: 40;
+  padding-top: calc(12px + env(safe-area-inset-top));
+  padding-bottom: 12px;
+  padding-left: 16px;
+  padding-right: 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-left: 16px;
-  padding-right: 16px;
-  z-index: 40;
-  pointer-events: none;
-  background: transparent;
-  border-bottom: none;
+  background: var(--ios-card-bg);
+  backdrop-filter: blur(var(--ios-blur));
+  -webkit-backdrop-filter: blur(var(--ios-blur));
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
 }
 
-/* Gradient fade — covers status bar + header, fades to transparent below */
-.ios-catalog-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: -40px;
-  background: linear-gradient(
-    to bottom,
-    #ffffff 0px,
-    #ffffff calc(100% - 40px),
-    rgba(255, 255, 255, 0) 100%
-  );
-  pointer-events: none;
-  z-index: -1;
-}
-:root.dark .ios-catalog-header::before {
-  background: linear-gradient(
-    to bottom,
-    #000000 0px,
-    #000000 calc(100% - 40px),
-    rgba(0, 0, 0, 0) 100%
-  );
+:root.dark .ios-catalog-header {
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Left column: large title + item count stacked */
@@ -6342,27 +6330,10 @@ html {
   gap: 1px;
 }
 
-.ios-catalog-header.is-scrolled {
-  background: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border-bottom: none;
-}
-:root.dark .ios-catalog-header.is-scrolled {
-  background: transparent;
-  border-bottom: none;
-}
-
-.ios-catalog-glass-title {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--ios-text-primary);
-  margin: 0;
-  transition: opacity 0.2s ease;
-  pointer-events: none;
+.ios-catalog-header-title-area {
+  margin-top: 16px;
+  margin-bottom: 24px;
+  padding: 0 16px;
 }
 .ios-catalog-scrollable-header {
   padding: 0 16px 8px;
@@ -7379,48 +7350,27 @@ body:has(.content-assistant) {
 .ev-ios-header {
   position: fixed;
   top: 0;
-  padding-top: calc(12px + env(safe-area-inset-top));
-  padding-bottom: 12px;
   left: 0;
   right: 0;
+  z-index: 40;
+  padding-top: calc(12px + env(safe-area-inset-top));
+  padding-bottom: 12px;
+  padding-left: 16px;
+  padding-right: 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-left: 16px;
-  padding-right: 16px;
-  z-index: 40;
-  pointer-events: none;
-  background: transparent;
-  border-bottom: none;
+  background: var(--ios-card-bg);
+  backdrop-filter: blur(var(--ios-blur));
+  -webkit-backdrop-filter: blur(var(--ios-blur));
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
 }
 
-/* Gradient fade — covers status bar + header, fades to transparent below */
-.ev-ios-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: -40px;
-  background: linear-gradient(
-    to bottom,
-    #ffffff 0px,
-    #ffffff calc(100% - 40px),
-    rgba(255, 255, 255, 0) 100%
-  );
-  pointer-events: none;
-  z-index: -1;
-}
-:root.dark .ev-ios-header::before {
-  background: linear-gradient(
-    to bottom,
-    #000000 0px,
-    #000000 calc(100% - 40px),
-    rgba(0, 0, 0, 0) 100%
-  );
+:root.dark .ev-ios-header {
+  border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Left column: large title + item count stacked */
+/* Left column: empty area if needed */
 .ev-ios-header-left {
   flex: 1;
   display: flex;
@@ -7428,27 +7378,10 @@ body:has(.content-assistant) {
   gap: 1px;
 }
 
-.ev-ios-header.is-scrolled {
-  background: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border-bottom: none;
-}
-:root.dark .ev-ios-header.is-scrolled {
-  background: transparent;
-  border-bottom: none;
-}
-
-.ev-ios-glass-title {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 17px;
-  font-weight: 600;
-  color: var(--ios-text-primary);
-  margin: 0;
-  transition: opacity 0.2s ease;
-  pointer-events: none;
+.ev-ios-header-title-area {
+  margin-top: 16px;
+  margin-bottom: 24px;
+  padding: 0 16px;
 }
 .ev-ios-scrollable-header {
   padding: 0 16px 12px;
