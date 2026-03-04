@@ -318,8 +318,14 @@ export function EventsPage() {
 
         {/* ── Floating Header ─────────────────────────────────────────────── */}
         <header className={`ev-ios-header${scrolled ? ' is-scrolled' : ''}`}>
-          {/* Spacer to balance flex layout */}
-          <div style={{ width: 80 }} />
+          {/* Left: large title + count — both fade out on scroll */}
+          <div
+            className="ev-ios-header-left"
+            style={{ opacity: scrolled ? 0 : 1, transition: 'opacity 0.2s ease', pointerEvents: 'none' }}
+          >
+            <h1 className="ev-ios-large-title">Events</h1>
+            <p className="ev-ios-item-count">{sorted.length} event{sorted.length !== 1 ? 's' : ''}</p>
+          </div>
 
           {/* Center Title */}
           <h2 className="ev-ios-glass-title" style={{ opacity: scrolled ? 1 : 0, pointerEvents: 'none' }}>
@@ -355,16 +361,9 @@ export function EventsPage() {
 
         {/* ── Scrollable content area ───────────────────────────────── */}
         <div className="ev-ios-content-scroll page-scroll-area" onScroll={handleScroll}>
-          <div style={{ height: '70px' }} />
+          <div style={{ height: '104px' }} />
           <div className="ev-ios-scrollable-header">
-            <h1 className="ev-ios-large-title" style={{ opacity: scrolled ? 0 : 1, transition: 'opacity 0.2s ease', marginBottom: 8 }}>
-              Events
-            </h1>
-            <div className="ev-ios-item-count" style={{ marginTop: "-4px" }}>
-              {sorted.length} event{sorted.length !== 1 ? 's' : ''}
-            </div>
-
-            <div className="ev-ios-filter-row" style={{ marginTop: 12 }}>
+            <div className="ev-ios-filter-row" style={{ marginTop: 0 }}>
               <button
                 className={`ev-ios-filter-circle-btn${selectedEventTypes.length > 0 || clientFilter || locationFilter ? ' active' : ''}`}
                 aria-label="Open event filters"
