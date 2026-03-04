@@ -6607,11 +6607,11 @@ html {
 .catalog-swipe-row {
   position: relative;
   overflow: hidden;
-  background: #F2F2F7;
+  background: transparent;
 }
 
 :root.dark .catalog-swipe-row {
-  background: #000000;
+  background: transparent;
 }
 
 .catalog-swipe-row .ios-list-item {
@@ -7691,7 +7691,7 @@ body:has(.content-assistant) {
   margin-bottom: 10px;
   border-radius: 22px;
   overflow: hidden;
-  background: #F2F2F7;
+  background: transparent;
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
 }
 
@@ -7735,7 +7735,7 @@ body:has(.content-assistant) {
   justify-content: center;
   gap: 3px;
   padding: 0 12px;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
 }
 
 .ev-ios-swipe-btn svg {
@@ -7755,11 +7755,13 @@ body:has(.content-assistant) {
 }
 
 .ev-ios-swipe-btn--share {
-  background: var(--ios-blue);
+  background: #ffffff;
+  color: var(--ios-blue);
 }
 
 .ev-ios-swipe-btn--delete {
-  background: var(--ios-red);
+  background: #ffffff;
+  color: var(--ios-red);
 }
 
 .ev-ios-swipe-foreground,
@@ -8178,7 +8180,7 @@ body:has(.content-assistant) {
 }
 
 :root.dark .ev-ios-swipe-row {
-  background: #000000;
+  background: transparent;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
 }
 
@@ -8188,7 +8190,8 @@ body:has(.content-assistant) {
 }
 
 :root.dark .ev-ios-swipe-btn {
-  box-shadow: 0 10px 18px rgba(0, 0, 0, 0.35), 0 0 0 0.5px rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35), 0 0 0 0.5px rgba(255, 255, 255, 0.12);
+  background: #2c2c2e;
 }
 
 :root.dark .ev-ios-swipe-btn--share {
