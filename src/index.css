@@ -6325,8 +6325,6 @@ html {
     rgba(255, 255, 255, 0.85) calc(100% - 24px),
     rgba(255, 255, 255, 0) 100%
   );
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   pointer-events: none;
   z-index: -1;
 }
@@ -7409,8 +7407,6 @@ body:has(.content-assistant) {
     rgba(255, 255, 255, 0.85) calc(100% - 24px),
     rgba(255, 255, 255, 0) 100%
   );
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
   pointer-events: none;
   z-index: -1;
 }
@@ -10037,7 +10033,9 @@ body:has(.content-assistant) {
 /* Disable outer scroll on home page — only .home-ios-content should scroll.
    Two nested overflow-y:auto containers cause double scrollbars on desktop
    and horizontal overflow on iOS Safari due to compositing bugs. */
-.ios-theme .content.content-home {
+.ios-theme .content.content-home,
+.ios-theme .content.content-catalog,
+.ios-theme .content.content-events {
   overflow-y: hidden;
 }
 
