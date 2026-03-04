@@ -6305,19 +6305,30 @@ html {
   z-index: 40;
   pointer-events: none;
   background: transparent;
-  border-bottom: 0.5px solid transparent;
-  transition: background-color 0.3s ease, border-color 0.3s ease, backdrop-filter 0.3s ease;
+  border-bottom: none;
+  transition: opacity 0.3s ease;
+}
+
+/* Large title inside the header bar */
+.ios-catalog-header-title {
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  color: var(--ios-text-primary);
+  line-height: 1.1;
+  margin: 0;
+  flex: 1;
 }
 
 .ios-catalog-header.is-scrolled {
-  background: rgba(249, 249, 249, 0.85);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
-  border-bottom: 0.5px solid rgba(0, 0, 0, 0.1);
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-bottom: none;
 }
 :root.dark .ios-catalog-header.is-scrolled {
-  background: rgba(28, 28, 30, 0.85);
-  border-bottom: 0.5px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  border-bottom: none;
 }
 
 .ios-catalog-glass-title {
@@ -6332,7 +6343,7 @@ html {
   pointer-events: none;
 }
 .ios-catalog-scrollable-header {
-  padding: 0 16px 12px;
+  padding: 0 16px 8px;
 }
 
 
