@@ -1004,13 +1004,21 @@ export function AIAssistantPage() {
   // ---------------------------------------------------------------------------
   return (
     <section className="ai-page ios-theme">
-      {/* -- FLOATING BAR -- gradient overlay only; buttons are in TabLayout glass toolbar */}
-      <div className="ai-floating-bar" style={{ pointerEvents: 'none' }} />
+      {/* -- HEADER -- large title + gradient overlay; glass toolbar buttons are in TabLayout */}
+      <header className="ai-ios-header">
+        {/* Left: large title — matches catalog/events pattern */}
+        <div className="ai-ios-header-left" style={{ pointerEvents: 'none' }}>
+          <h1 className="ai-ios-large-title" style={{ margin: 0, fontSize: '32px', lineHeight: 1.2 }}>Assistant</h1>
+        </div>
+        {/* Center title — fades in on scroll (kept invisible for now, same slot as catalog) */}
+        <h2 className="ai-ios-glass-title" style={{ opacity: 0, pointerEvents: 'none' }}>Assistant</h2>
+      </header>
 
 
       {/* -- SCROLL AREA -- */}
       <div className="ai-ios-content page-scroll-area" ref={scrollAreaRef}>
-        
+        {/* Spacer to push content below the fixed header */}
+        <div style={{ height: 'calc(env(safe-area-inset-top) + 70px)' }} />
         {/* Initial empty state */}
         {mode === 'packing' && step === 'input' && !loading && !plan && (
           <div className="ai-ios-empty">

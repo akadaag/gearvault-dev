@@ -9105,38 +9105,38 @@ body:has(.content-assistant) {
 }
 
 /* ── Floating Bar ── */
-.ai-page.ios-theme .ai-floating-bar {
+/* ── AI Assistant header (matches catalog / events header pattern) ── */
+.ai-page.ios-theme .ai-ios-header {
   position: fixed;
-  top: calc(12px + env(safe-area-inset-top));
+  top: 0;
   left: 0;
   right: 0;
+  z-index: 40;
+  padding-top: max(4px, env(safe-area-inset-top));
+  padding-bottom: 6px;
+  padding-left: 16px;
+  padding-right: 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px;
-  z-index: 40;
   pointer-events: none;
+  background: transparent;
 }
 
-/* Gradient overlay — iOS WebKit constrains scroll content to the safe area so content
-   physically stops at env(safe-area-inset-top). We use env() as absolute length stops
-   so the gradient is fully opaque white exactly at the clip boundary, hiding the hard
-   edge. Content appears to fade smoothly into the DI zone rather than hard-cutting.
-   The horizontal mask fades out on the right so the glass toolbar area is not covered. */
-.ai-page.ios-theme .ai-floating-bar::before {
+/* Gradient fade — covers status bar + header, fades to transparent below.
+   Horizontal mask cuts out the right side so the glass toolbar is not double-covered. */
+.ai-page.ios-theme .ai-ios-header::before {
   content: '';
   position: absolute;
-  top: calc(-12px - env(safe-area-inset-top));
+  top: 0;
   left: 0;
   right: 0;
-  bottom: -40px;
+  bottom: -24px;
   background: linear-gradient(
     to bottom,
-    rgba(255, 255, 255, 1.00)  0px,
-    rgba(255, 255, 255, 1.00)  calc(env(safe-area-inset-top, 59px) + 15px),
-    rgba(255, 255, 255, 0.85)  calc(env(safe-area-inset-top, 59px) + 40px),
-    rgba(255, 255, 255, 0.50)  calc(env(safe-area-inset-top, 59px) + 65px),
-    rgba(255, 255, 255, 0.00)  calc(env(safe-area-inset-top, 59px) + 95px)
+    rgba(255, 255, 255, 0.85) 0px,
+    rgba(255, 255, 255, 0.85) calc(100% - 24px),
+    rgba(255, 255, 255, 0) 100%
   );
   -webkit-mask-image: linear-gradient(to right, black calc(100% - 120px), transparent 100%);
   mask-image: linear-gradient(to right, black calc(100% - 120px), transparent 100%);
@@ -9144,15 +9144,36 @@ body:has(.content-assistant) {
   z-index: -1;
 }
 
-:root.dark .ai-page.ios-theme .ai-floating-bar::before {
+:root.dark .ai-page.ios-theme .ai-ios-header::before {
   background: linear-gradient(
     to bottom,
-    rgba(0, 0, 0, 1.00)  0px,
-    rgba(0, 0, 0, 1.00)  calc(env(safe-area-inset-top, 59px) + 15px),
-    rgba(0, 0, 0, 0.85)  calc(env(safe-area-inset-top, 59px) + 40px),
-    rgba(0, 0, 0, 0.50)  calc(env(safe-area-inset-top, 59px) + 65px),
-    rgba(0, 0, 0, 0.00)  calc(env(safe-area-inset-top, 59px) + 95px)
+    rgba(0, 0, 0, 0.85) 0px,
+    rgba(0, 0, 0, 0.85) calc(100% - 24px),
+    rgba(0, 0, 0, 0) 100%
   );
+}
+
+.ai-page.ios-theme .ai-ios-header-left {
+  display: flex;
+  align-items: center;
+}
+
+.ai-page.ios-theme .ai-ios-large-title {
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--ios-text-primary);
+  letter-spacing: -0.02em;
+}
+
+.ai-page.ios-theme .ai-ios-glass-title {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ios-text-primary);
+  margin: 0;
+  pointer-events: none;
 }
 
 /* ── AI Assistant glass toolbar (matches catalog / events toolbar pattern) ── */
@@ -9211,7 +9232,6 @@ body:has(.content-assistant) {
   -webkit-overflow-scrolling: touch;
   padding: 0 16px;
   padding-bottom: 100px;
-  padding-top: 60px;
 }
 
 /* ── Empty State ── */
