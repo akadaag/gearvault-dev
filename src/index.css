@@ -13161,12 +13161,12 @@ body:has(.content-assistant) {
 }
 
 :root.dark .floating-nav__tab {
-  color: #000000;
+  color: #ffffff;
 }
 
 :root.dark .floating-nav__tab:focus,
 :root.dark .floating-nav__tab:focus-visible {
-  color: #000000;
+  color: #ffffff;
   background: transparent;
 }
 
