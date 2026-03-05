@@ -9121,7 +9121,8 @@ body:has(.content-assistant) {
 /* Gradient overlay — iOS WebKit constrains scroll content to the safe area so content
    physically stops at env(safe-area-inset-top). We use env() as absolute length stops
    so the gradient is fully opaque white exactly at the clip boundary, hiding the hard
-   edge. Content appears to fade smoothly into the DI zone rather than hard-cutting. */
+   edge. Content appears to fade smoothly into the DI zone rather than hard-cutting.
+   The horizontal mask fades out on the right so the glass toolbar area is not covered. */
 .ai-page.ios-theme .ai-floating-bar::before {
   content: '';
   position: absolute;
@@ -9137,6 +9138,8 @@ body:has(.content-assistant) {
     rgba(255, 255, 255, 0.50)  calc(env(safe-area-inset-top, 59px) + 65px),
     rgba(255, 255, 255, 0.00)  calc(env(safe-area-inset-top, 59px) + 95px)
   );
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 120px), transparent 100%);
+  mask-image: linear-gradient(to right, black calc(100% - 120px), transparent 100%);
   pointer-events: none;
   z-index: -1;
 }
@@ -9152,52 +9155,53 @@ body:has(.content-assistant) {
   );
 }
 
-/* Left group: hamburger + title pill */
-.ai-page.ios-theme .ai-floating-bar-left {
+/* ── AI Assistant glass toolbar (matches catalog / events toolbar pattern) ── */
+.ai-ios-toolbar {
+  position: fixed;
+  top: max(4px, env(safe-area-inset-top));
+  right: 16px;
+  z-index: 41;
   display: flex;
   align-items: center;
   gap: 8px;
+  padding: 2px 4px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.40);
+  background: rgba(255, 255, 255, 0.21);
+  backdrop-filter: blur(4.9px);
+  -webkit-backdrop-filter: blur(4.9px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
-/* Circle buttons (hamburger + temp-chat) */
-.ai-page.ios-theme .ai-circle-btn {
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
+.ai-ios-toolbar-btn {
+  width: 38px;
+  height: 34px;
   border: none;
-  background: #ffffff;
-  color: var(--ios-text-primary);
+  border-radius: 999px;
+  background: transparent;
+  color: #000;
   display: flex;
   align-items: center;
   justify-content: center;
-  cursor: pointer;
   padding: 0;
   min-height: auto;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
-  transition: transform 0.12s ease, opacity 0.12s ease;
+  cursor: pointer;
+  box-shadow: none;
+  transition: transform 0.12s ease, color 0.12s ease, background 0.12s ease;
 }
-.ai-page.ios-theme .ai-circle-btn:active {
+
+.ai-ios-toolbar-btn:active {
   transform: scale(0.92);
-  opacity: 0.8;
 }
+
+:root.dark .ai-ios-toolbar-btn {
+  color: #ffffff;
+}
+
+/* Circle buttons (hamburger + temp-chat) */
 .ai-page.ios-theme .ai-circle-btn:disabled {
   opacity: 0.4;
   cursor: default;
-}
-
-/* Title pill */
-.ai-page.ios-theme .ai-title-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 10px 22px;
-  border-radius: 999px;
-  background: #ffffff;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--ios-text-primary);
-  letter-spacing: -0.01em;
-  pointer-events: auto;
 }
 
 /* ── Main Scroll Content ── */
@@ -11258,16 +11262,6 @@ body:has(.content-assistant) {
 }
 
 /* ── Dark mode overrides ── */
-:root.dark .ai-page.ios-theme .ai-circle-btn {
-  background: rgba(44, 44, 46, 1);
-  color: #ffffff;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.30), 0 0 0 0.5px rgba(255, 255, 255, 0.08);
-}
-:root.dark .ai-page.ios-theme .ai-title-pill {
-  background: rgba(44, 44, 46, 1);
-  color: #ffffff;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.30), 0 0 0 0.5px rgba(255, 255, 255, 0.08);
-}
 :root.dark .ai-page.ios-theme .ai-sidebar {
   background: #1c1c1e;
 }

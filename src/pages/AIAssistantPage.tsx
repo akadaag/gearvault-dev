@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useSwipeReveal } from '../hooks/useSwipeReveal';
 import { ContentEditableInput } from '../components/ContentEditableInput';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
 import { 
@@ -44,6 +44,7 @@ type Step = 'input' | 'review' | 'results';
 // ---------------------------------------------------------------------------
 export function AIAssistantPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { user, loading: authLoading } = useAuth();
   const catalog = useLiveQuery(() => db.gearItems.toArray(), [], [] as GearItem[]);
   const settings = useLiveQuery(() => db.settings.get('app-settings'), []);
@@ -116,6 +117,16 @@ export function AIAssistantPage() {
     }
     return () => unlockSheetScroll();
   }, [showSidebar]);
+
+  // Open sidebar when ?history=1 is in the URL (triggered by TabLayout toolbar)
+  useEffect(() => {
+    if (searchParams.get('history') === '1') {
+      setShowSidebar(true);
+      const params = new URLSearchParams(searchParams);
+      params.delete('history');
+      navigate({ pathname: '/assistant', search: params.toString() ? `?${params.toString()}` : '' }, { replace: true });
+    }
+  }, [searchParams, navigate]);
 
 
   // ---------------------------------------------------------------------------
@@ -993,40 +1004,8 @@ export function AIAssistantPage() {
   // ---------------------------------------------------------------------------
   return (
     <section className="ai-page ios-theme">
-      {/* -- FLOATING BAR -- */}
-      <div className="ai-floating-bar" style={{ pointerEvents: 'none' }}>
-        {/* Left group: hamburger + title pill */}
-        <div className="ai-floating-bar-left" style={{ pointerEvents: 'auto' }}>
-          <button
-            className="ai-circle-btn"
-            onClick={() => setShowSidebar(true)}
-            aria-label="Chat history"
-          >
-            {/* 3 staggered lines: long, medium, short */}
-            <svg width="20" height="16" viewBox="0 0 18 14" fill="none" aria-hidden="true">
-              <line x1="1" y1="2" x2="17" y2="2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-              <line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-              <line x1="1" y1="12" x2="9" y2="12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-            </svg>
-          </button>
-          <div className="ai-title-pill">
-            <span>Assistant</span>
-          </div>
-        </div>
-
-        {/* Temp-chat button — placeholder, no functionality yet */}
-        <button
-          className="ai-circle-btn"
-          style={{ pointerEvents: 'auto' }}
-          aria-label="Temporary chat (coming soon)"
-        >
-          {/* Circular arrows icon */}
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-            <path d="M3 3v5h5"/>
-          </svg>
-        </button>
-      </div>
+      {/* -- FLOATING BAR -- gradient overlay only; buttons are in TabLayout glass toolbar */}
+      <div className="ai-floating-bar" style={{ pointerEvents: 'none' }} />
 
 
       {/* -- SCROLL AREA -- */}

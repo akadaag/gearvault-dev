@@ -1,0 +1,44 @@
+--- src/index.css
++++ src/index.css
+@@ -9503,7 +9503,7 @@
+   right: 0;
+   z-index: 40;
+   padding: 6px 12px;
+-  padding-bottom: max(6px, env(safe-area-inset-bottom, 0px));
++  padding-bottom: env(safe-area-inset-bottom, 6px);
+   transition: transform 0.3s ease, opacity 0.3s ease;
+ }
+ .ai-page.ios-theme .ai-ios-input-bar.hidden {
+@@ -12892,7 +12892,7 @@
+ 
+ .floating-nav {
+   position: fixed;
+-  bottom: calc(env(safe-area-inset-bottom) - 11px);
++  bottom: env(safe-area-inset-bottom, 20px);
+   left: 0;
+   right: 0;
+   z-index: 1000;
+@@ -13792,20 +13792,20 @@
+ /* JS adds .pwa-standalone to <html> via navigator.standalone (iOS reliable)  */
+ 
+ .pwa-standalone .floating-nav {
+-  bottom: max(0px, calc(env(safe-area-inset-bottom) - 28px));
++  bottom: 0px;
+ }
+ 
+ .pwa-standalone .ai-page.ios-theme .ai-ios-input-bar {
+-  bottom: calc(var(--bottom-nav-clearance, 60px) - 52px);
++  bottom: 60px;
+ }
+ 
+ /* W3C fallback for Android/Chrome (iOS ignores this) */
+ @media (display-mode: standalone) {
+   .floating-nav {
+-    bottom: max(0px, calc(env(safe-area-inset-bottom) - 28px));
++    bottom: 0px;
+   }
+   .ai-page.ios-theme .ai-ios-input-bar {
+-    bottom: calc(var(--bottom-nav-clearance, 60px) - 52px);
++    bottom: 60px;
+   }
+ }
