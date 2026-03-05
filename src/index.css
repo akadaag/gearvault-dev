@@ -6325,6 +6325,8 @@ html {
     rgba(255, 255, 255, 0.85) calc(100% - 24px),
     rgba(255, 255, 255, 0) 100%
   );
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 120px), transparent 100%);
+  mask-image: linear-gradient(to right, black calc(100% - 120px), transparent 100%);
   pointer-events: none;
   z-index: -1;
 }
