@@ -288,11 +288,6 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
                   layoutId="ai-morph"
                   transition={aiMorphTransition}
                 >
-                  {/* Decorative sparkle */}
-                  <span className="floating-nav__ai-pill-sparkle" aria-hidden="true">
-                    {sparkleSvg}
-                  </span>
-
                   {/* Photo attachment button (+ icon) */}
                   <button
                     type="button"
