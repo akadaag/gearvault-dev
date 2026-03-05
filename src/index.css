@@ -6389,10 +6389,6 @@ html {
 }
 
 .ios-catalog-toolbar {
-  position: fixed;
-  top: max(4px, env(safe-area-inset-top));
-  right: 16px;
-  z-index: 41;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -6403,6 +6399,7 @@ html {
   backdrop-filter: blur(4.9px);
   -webkit-backdrop-filter: blur(4.9px);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
 .ios-catalog-toolbar-btn {
@@ -7545,10 +7542,6 @@ body:has(.content-assistant) {
 /* ── Toolbar Pill (calendar + add) ─────────────────────────────── */
 
 .ev-ios-toolbar {
-  position: fixed;
-  top: max(4px, env(safe-area-inset-top));
-  right: 16px;
-  z-index: 41;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -7559,6 +7552,7 @@ body:has(.content-assistant) {
   backdrop-filter: blur(4.9px);
   -webkit-backdrop-filter: blur(4.9px);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
 .ev-ios-toolbar-btn {
@@ -9348,10 +9342,6 @@ body:has(.content-assistant) {
 
 /* ── AI Assistant glass toolbar (matches catalog / events toolbar pattern) ── */
 .ai-ios-toolbar {
-  position: fixed;
-  top: max(4px, env(safe-area-inset-top));
-  right: 16px;
-  z-index: 41;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -9362,6 +9352,7 @@ body:has(.content-assistant) {
   backdrop-filter: blur(4.9px);
   -webkit-backdrop-filter: blur(4.9px);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
 .ai-ios-toolbar-btn {
@@ -13941,7 +13932,359 @@ body:has(.content-assistant) {
   background: rgba(255, 59, 48, 0.08);
 }
 
-/* ── Search Pill (expanded) ───────────────────────────────────────────── */
+/* ── Search Pill (expanded) — ORPHANED OLD STYLES (reference only) ─────── */
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   TOOLBAR AREA + UNIVERSAL SEARCH
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Container that wraps toolbar pill + search circle/pill */
+.toolbar-area {
+  position: fixed;
+  top: max(4px, env(safe-area-inset-top));
+  right: 16px;
+  z-index: 41;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Home page: only search, no toolbar pill */
+.toolbar-area--home {
+  right: 16px;
+}
+
+/* When search is open, fade out the toolbar pill */
+.toolbar-pill--search-open {
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.92);
+}
+
+/* ── Search circle (closed state) ────────────────────────────────────── */
+
+.toolbar-search {
+  position: relative;
+}
+
+.toolbar-search__circle {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.40);
+  background: rgba(255, 255, 255, 0.21);
+  backdrop-filter: blur(4.9px);
+  -webkit-backdrop-filter: blur(4.9px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #000000;
+  padding: 0;
+  transition: transform 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  outline: none;
+}
+
+.toolbar-search__circle:focus,
+.toolbar-search__circle:focus-visible {
+  outline: none;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar-search__circle:active {
+  transform: scale(0.92);
+}
+
+:root.dark .toolbar-search__circle {
+  color: #ffffff;
+}
+
+/* ── Search pill (open state) ────────────────────────────────────────── */
+
+.toolbar-search__pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  min-height: 38px;
+  width: calc(100vw - 32px);
+  max-width: calc(100vw - 32px);
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.40);
+  background: rgba(255, 255, 255, 0.21);
+  backdrop-filter: blur(4.9px);
+  -webkit-backdrop-filter: blur(4.9px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.toolbar-search__pill-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #000000;
+}
+
+:root.dark .toolbar-search__pill-icon {
+  color: #ffffff;
+}
+
+.toolbar-search__input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 17px;
+  color: #000000;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  padding: 0;
+  line-height: 1.3;
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.toolbar-search__input:focus,
+.toolbar-search__input:focus-visible {
+  outline: none;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}
+
+.toolbar-search__input::placeholder {
+  color: rgba(0, 0, 0, 0.35);
+}
+
+:root.dark .toolbar-search__input {
+  color: #ffffff;
+}
+
+:root.dark .toolbar-search__input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* Search clear / close button */
+.toolbar-search__close {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  background: transparent;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #000000;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  box-shadow: none;
+}
+
+.toolbar-search__close:focus,
+.toolbar-search__close:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+:root.dark .toolbar-search__close {
+  color: #ffffff;
+}
+
+/* ── Search results dropdown ─────────────────────────────────────────── */
+
+.toolbar-search__results {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: saturate(180%) blur(24px);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  border-radius: 16px;
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.12),
+    0 0 0 0.5px rgba(0, 0, 0, 0.06);
+  max-height: 360px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  z-index: 100;
+}
+
+:root.dark .toolbar-search__results {
+  background: rgba(44, 44, 46, 0.96);
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.3),
+    0 0 0 0.5px rgba(255, 255, 255, 0.08);
+}
+
+.toolbar-search__empty {
+  padding: 20px 16px;
+  text-align: center;
+  color: #8E8E93;
+  font-size: 15px;
+  margin: 0;
+}
+
+:root.dark .toolbar-search__empty {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.toolbar-search__section {
+  padding: 8px 0;
+}
+
+.toolbar-search__section + .toolbar-search__section {
+  border-top: 0.5px solid rgba(0, 0, 0, 0.06);
+}
+
+:root.dark .toolbar-search__section + .toolbar-search__section {
+  border-top-color: rgba(255, 255, 255, 0.08);
+}
+
+.toolbar-search__label {
+  padding: 4px 16px 6px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #8E8E93;
+  margin: 0;
+}
+
+:root.dark .toolbar-search__label {
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.toolbar-search__item {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  background: transparent;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  text-align: left;
+  outline: none;
+  box-shadow: none;
+}
+
+.toolbar-search__item:focus,
+.toolbar-search__item:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.toolbar-search__item:active {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+:root.dark .toolbar-search__item:active {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+/* Result icon */
+.toolbar-search__item-icon {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 600;
+  overflow: hidden;
+}
+
+.toolbar-search__item-icon.gear {
+  background: rgba(0, 122, 255, 0.1);
+  color: var(--ios-blue, #007AFF);
+}
+
+:root.dark .toolbar-search__item-icon.gear {
+  background: rgba(10, 132, 255, 0.15);
+  color: #0A84FF;
+}
+
+.toolbar-search__item-icon.gear img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.toolbar-search__item-icon.event {
+  background: rgba(255, 149, 0, 0.1);
+  color: #FF9500;
+}
+
+:root.dark .toolbar-search__item-icon.event {
+  background: rgba(255, 159, 10, 0.15);
+  color: #FF9F0A;
+}
+
+.toolbar-search__item-icon.chat {
+  background: rgba(142, 142, 147, 0.1);
+  color: #8E8E93;
+}
+
+:root.dark .toolbar-search__item-icon.chat {
+  background: rgba(142, 142, 147, 0.15);
+  color: #8E8E93;
+}
+
+.toolbar-search__item-icon.chat svg {
+  stroke: currentColor;
+  fill: none;
+}
+
+/* Result text */
+.toolbar-search__item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.toolbar-search__item-text .name {
+  font-size: 15px;
+  font-weight: 500;
+  color: #1C1C1E;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:root.dark .toolbar-search__item-text .name {
+  color: #fff;
+}
+
+.toolbar-search__item-text .sub {
+  font-size: 13px;
+  color: #8E8E93;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+:root.dark .toolbar-search__item-text .sub {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+/* ── Search Pill (expanded) — ORPHANED OLD STYLES (reference only) ─────── */
 
 .floating-nav__search-pill {
   flex: 1;
@@ -14548,6 +14891,12 @@ body:has(.content-assistant) {
 
   .floating-nav__row {
     max-width: 600px;
+  }
+
+  /* Toolbar search: limit pill width on desktop */
+  .toolbar-search__pill {
+    width: 400px;
+    max-width: 400px;
   }
 }
 

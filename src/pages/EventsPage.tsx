@@ -118,7 +118,6 @@ export function EventsPage() {
 
   // ── URL-driven state ───────────────────────────────────────────────────────
   const query           = searchParams.get('q')?.trim() ?? '';
-  const showSearch      = searchParams.get('search') === '1';
   const quickFilter     = searchParams.get('qf') ?? '';           // '' = all
   const showFilterSheet = searchParams.get('filters') === '1';
   const showCreateForm  = searchParams.get('add') === '1';
@@ -346,37 +345,6 @@ export function EventsPage() {
         <div className="ev-ios-content-scroll page-scroll-area" onScroll={handleScroll}>
           <div style={{ height: 'calc(env(safe-area-inset-top) + 70px)' }} />
 
-          {/* Slide-down search bar */}
-          {showSearch && (
-            <div className="ev-ios-search-bar">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="11" cy="11" r="7" />
-                <path d="M20 20l-4-4" />
-              </svg>
-              <input
-                type="search"
-                className="ev-ios-search-input"
-                placeholder="Search events..."
-                value={query}
-                onChange={(e) => setParam('q', e.target.value || null)}
-                autoFocus
-                autoComplete="off"
-              />
-              {query && (
-                <button
-                  type="button"
-                  className="ev-ios-search-clear"
-                  aria-label="Clear search"
-                  onClick={() => setParam('q', null)}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <circle cx="12" cy="12" r="10" opacity="0.25" fill="currentColor" stroke="none" />
-                    <path d="M15 9l-6 6M9 9l6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
-                </button>
-              )}
-            </div>
-          )}
 
           <p className="ev-ios-item-count" style={{ margin: '0 0 8px', padding: '0 16px' }}>{sorted.length} event{sorted.length !== 1 ? 's' : ''}</p>
           <div className="ev-ios-scrollable-header">

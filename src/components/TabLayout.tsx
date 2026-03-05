@@ -1,11 +1,12 @@
 import { Outlet, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db, ensureBaseData } from '../db';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
 import { resetSheetScrollLock } from '../lib/sheetLock';
 import { FloatingNavBar } from './FloatingNavBar';
+import { ToolbarSearch } from './ToolbarSearch';
 import { AIAssistantProvider } from '../contexts/AIAssistantContext';
 
 const homeIcon = (
@@ -171,31 +172,8 @@ export function TabLayout() {
     navigate({ pathname: '/assistant', search: params.toString() ? `?${params.toString()}` : '' });
   }
 
-  // ── Search handlers ───────────────────────────────────────────────────────
-  function toggleCatalogSearch() {
-    const params = new URLSearchParams(searchParams);
-    if (params.has('search')) {
-      params.delete('search');
-      params.delete('q');
-    } else {
-      params.set('search', '1');
-    }
-    navigate({ pathname: '/catalog', search: params.toString() ? `?${params.toString()}` : '' });
-  }
-
-  function toggleEventsSearch() {
-    const params = new URLSearchParams(searchParams);
-    if (params.has('search')) {
-      params.delete('search');
-      params.delete('q');
-    } else {
-      params.set('search', '1');
-    }
-    navigate({ pathname: '/events', search: params.toString() ? `?${params.toString()}` : '' });
-  }
-
-  const isCatalogSearchOpen = searchParams.has('search') && isCatalogRoute;
-  const isEventsSearchOpen = searchParams.has('search') && isEventsRoute;
+  // ── Search state (toolbar search open/close) ───────────────────────────────
+  const [searchOpen, setSearchOpen] = useState(false);
 
   // ── SVG icons ─────────────────────────────────────────────────────────────
 
@@ -362,10 +340,17 @@ export function TabLayout() {
         <Outlet />
       </main>
 
+      {/* Home toolbar — search only */}
+      {isHomeRoute && (
+        <div className="toolbar-area toolbar-area--home">
+          <ToolbarSearch onOpenChange={setSearchOpen} />
+        </div>
+      )}
+
       {/* Catalog action toolbar — outside <main> so glass backdrop-filter blurs real content */}
       {isCatalogRoute && (
-        <>
-          <div className="ios-catalog-toolbar" role="group" aria-label="Catalog actions">
+        <div className="toolbar-area">
+          <div className={`ios-catalog-toolbar${searchOpen ? ' toolbar-pill--search-open' : ''}`} role="group" aria-label="Catalog actions">
             <button
               className={`ios-catalog-toolbar-btn${isTopFilterActive ? ' active' : ''}`}
               onClick={openCatalogFilters}
@@ -394,24 +379,14 @@ export function TabLayout() {
               </svg>
             </button>
           </div>
-          <button
-            className={`ios-catalog-search-circle${isCatalogSearchOpen ? ' active' : ''}`}
-            onClick={toggleCatalogSearch}
-            aria-label="Search catalog"
-            aria-pressed={isCatalogSearchOpen}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="7" />
-              <path d="M20 20l-4-4" />
-            </svg>
-          </button>
-        </>
+          <ToolbarSearch onOpenChange={setSearchOpen} />
+        </div>
       )}
 
       {/* Events action toolbar — outside <main> so glass backdrop-filter blurs real content */}
       {isEventsRoute && (
-        <>
-          <div className="ev-ios-toolbar" role="group" aria-label="Events actions">
+        <div className="toolbar-area">
+          <div className={`ev-ios-toolbar${searchOpen ? ' toolbar-pill--search-open' : ''}`} role="group" aria-label="Events actions">
             <button
               className={`ev-ios-toolbar-btn${showEventsCalendar ? ' active' : ''}`}
               onClick={toggleEventsCalendar}
@@ -435,45 +410,38 @@ export function TabLayout() {
               </svg>
             </button>
           </div>
-          <button
-            className={`ev-ios-search-circle${isEventsSearchOpen ? ' active' : ''}`}
-            onClick={toggleEventsSearch}
-            aria-label="Search events"
-            aria-pressed={isEventsSearchOpen}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <circle cx="11" cy="11" r="7" />
-              <path d="M20 20l-4-4" />
-            </svg>
-          </button>
-        </>
+          <ToolbarSearch onOpenChange={setSearchOpen} />
+        </div>
       )}
 
       {/* Assistant action toolbar — outside <main> so glass backdrop-filter blurs real content */}
       {isAssistantRoute && (
-        <div className="ai-ios-toolbar" role="group" aria-label="Assistant actions">
-          <button
-            className="ai-ios-toolbar-btn"
-            onClick={openAssistantHistory}
-            aria-label="Chat history"
-          >
-            {/* 3 staggered lines: long, medium, short */}
-            <svg width="20" height="16" viewBox="0 0 18 14" fill="none" aria-hidden="true">
-              <line x1="1" y1="2" x2="17" y2="2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-              <line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-              <line x1="1" y1="12" x2="9" y2="12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
-            </svg>
-          </button>
-          <button
-            className="ai-ios-toolbar-btn"
-            aria-label="Temporary chat (coming soon)"
-          >
-            {/* Circular arrows icon */}
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-              <path d="M3 3v5h5"/>
-            </svg>
-          </button>
+        <div className="toolbar-area">
+          <div className={`ai-ios-toolbar${searchOpen ? ' toolbar-pill--search-open' : ''}`} role="group" aria-label="Assistant actions">
+            <button
+              className="ai-ios-toolbar-btn"
+              onClick={openAssistantHistory}
+              aria-label="Chat history"
+            >
+              {/* 3 staggered lines: long, medium, short */}
+              <svg width="20" height="16" viewBox="0 0 18 14" fill="none" aria-hidden="true">
+                <line x1="1" y1="2" x2="17" y2="2" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                <line x1="1" y1="7" x2="13" y2="7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+                <line x1="1" y1="12" x2="9" y2="12" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"/>
+              </svg>
+            </button>
+            <button
+              className="ai-ios-toolbar-btn"
+              aria-label="Temporary chat (coming soon)"
+            >
+              {/* Circular arrows icon */}
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+              </svg>
+            </button>
+          </div>
+          <ToolbarSearch onOpenChange={setSearchOpen} />
         </div>
       )}
 

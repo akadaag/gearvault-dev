@@ -45,7 +45,6 @@ export function CatalogPage() {
   const gear = useLiveQuery(() => db.gearItems.toArray(), [], []);
 
   const query = searchParams.get('q')?.trim() ?? '';
-  const showSearch = searchParams.get('search') === '1';
   const quickFilter = searchParams.get('qf') ?? 'all';
   const selectedCategoryIds = (searchParams.get('cats') ?? '').split(',').filter(Boolean);
   const showFilterSheet = searchParams.get('filters') === '1';
@@ -315,40 +314,6 @@ export function CatalogPage() {
         <div className="ios-catalog-scroll page-scroll-area" onScroll={handleScroll}>
           <div style={{ height: 'calc(env(safe-area-inset-top) + 70px)' }} />
 
-          {/* Slide-down search bar */}
-          {showSearch && (
-            <div className="ios-catalog-search-bar">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <circle cx="11" cy="11" r="7" />
-                <path d="M20 20l-4-4" />
-              </svg>
-              <input
-                type="search"
-                className="ios-catalog-search-input"
-                placeholder="Search gear..."
-                value={query}
-                onChange={(e) => updateSearchParams((p) => {
-                  if (e.target.value) p.set('q', e.target.value);
-                  else p.delete('q');
-                })}
-                autoFocus
-                autoComplete="off"
-              />
-              {query && (
-                <button
-                  type="button"
-                  className="ios-catalog-search-clear"
-                  aria-label="Clear search"
-                  onClick={() => updateSearchParams((p) => { p.delete('q'); })}
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                    <circle cx="12" cy="12" r="10" opacity="0.25" fill="currentColor" stroke="none" />
-                    <path d="M15 9l-6 6M9 9l6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                  </svg>
-                </button>
-              )}
-            </div>
-          )}
 
           <p className="ios-catalog-item-count" style={{ margin: '0 0 16px', padding: '0 16px' }}>{filtered.length} item{filtered.length !== 1 ? 's' : ''}</p>
           {gear.length === 0 ? (
