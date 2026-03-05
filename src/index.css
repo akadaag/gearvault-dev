@@ -13101,7 +13101,7 @@ body:has(.content-assistant) {
   align-items: center;
   gap: 0;
   flex: 1;
-  background: rgba(249, 249, 249, 0.52);
+  background: rgba(249, 249, 249, 0.32);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-radius: 32px;
@@ -13111,7 +13111,7 @@ body:has(.content-assistant) {
 }
 
 :root.dark .floating-nav__pill {
-  background: rgba(44, 44, 46, 0.52);
+  background: rgba(44, 44, 46, 0.32);
   border-color: rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55);
 }
@@ -13235,7 +13235,7 @@ body:has(.content-assistant) {
   min-width: 58px;
   border-radius: 50%;
   border: 0.5px solid rgba(0, 0, 0, 0.1);
-  background: rgba(249, 249, 249, 0.52);
+  background: rgba(249, 249, 249, 0.32);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.20);
@@ -13258,7 +13258,7 @@ body:has(.content-assistant) {
 }
 
 :root.dark .floating-nav__search-circle {
-  background: rgba(44, 44, 46, 0.52);
+  background: rgba(44, 44, 46, 0.32);
   border-color: rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.55);
   color: #8E8E93;
