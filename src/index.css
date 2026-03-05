@@ -13106,13 +13106,13 @@ body:has(.content-assistant) {
   -webkit-backdrop-filter: blur(2.5px);
   border-radius: 32px;
   padding: 6px 9px;
-  border: 1px solid rgba(255, 255, 255, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.40);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
 :root.dark .floating-nav__pill {
   background: rgba(255, 255, 255, 0.32);
-  border-color: rgba(255, 255, 255, 0.24);
+  border-color: rgba(255, 255, 255, 0.40);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
@@ -13234,7 +13234,7 @@ body:has(.content-assistant) {
   height: 58px;
   min-width: 58px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.40);
   background: rgba(255, 255, 255, 0.32);
   backdrop-filter: blur(2.5px);
   -webkit-backdrop-filter: blur(2.5px);
@@ -13259,7 +13259,7 @@ body:has(.content-assistant) {
 
 :root.dark .floating-nav__search-circle {
   background: rgba(255, 255, 255, 0.32);
-  border-color: rgba(255, 255, 255, 0.24);
+  border-color: rgba(255, 255, 255, 0.40);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   color: #ffffff;
 }
@@ -13300,7 +13300,7 @@ body:has(.content-assistant) {
   height: 58px;
   min-width: 58px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.40);
   background: rgba(255, 255, 255, 0.32);
   backdrop-filter: blur(2.5px);
   -webkit-backdrop-filter: blur(2.5px);
@@ -13325,7 +13325,7 @@ body:has(.content-assistant) {
 
 :root.dark .floating-nav__nav-circle {
   background: rgba(255, 255, 255, 0.32);
-  border-color: rgba(255, 255, 255, 0.24);
+  border-color: rgba(255, 255, 255, 0.40);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   color: #ffffff;
 }
@@ -13370,7 +13370,7 @@ body:has(.content-assistant) {
   height: 58px;
   min-width: 58px;
   border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.40);
   background: rgba(255, 255, 255, 0.32);
   backdrop-filter: blur(2.5px);
   -webkit-backdrop-filter: blur(2.5px);
@@ -13394,7 +13394,7 @@ body:has(.content-assistant) {
 
 :root.dark .floating-nav__close-circle {
   background: rgba(255, 255, 255, 0.32);
-  border-color: rgba(255, 255, 255, 0.24);
+  border-color: rgba(255, 255, 255, 0.40);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   color: #ffffff;
 }
@@ -13442,13 +13442,13 @@ body:has(.content-assistant) {
   backdrop-filter: blur(2.5px);
   -webkit-backdrop-filter: blur(2.5px);
   border-radius: 30px;
-  border: 1px solid rgba(255, 255, 255, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.40);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
 :root:not(.dark) .floating-nav__search-input-wrap {
   background: rgba(255, 255, 255, 0.32);
-  border: 1px solid rgba(255, 255, 255, 0.24);
+  border: 1px solid rgba(255, 255, 255, 0.40);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
