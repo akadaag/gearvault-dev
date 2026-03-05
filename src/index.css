@@ -6377,12 +6377,6 @@ html {
   margin-bottom: 8px;
 }
 
-.ios-catalog-header-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-}
-
 .ios-catalog-title {
   font-size: 34px;
   font-weight: 700;
@@ -6393,6 +6387,10 @@ html {
 }
 
 .ios-catalog-toolbar {
+  position: fixed;
+  top: max(4px, env(safe-area-inset-top));
+  right: 16px;
+  z-index: 41;
   display: flex;
   align-items: center;
   gap: 8px;
