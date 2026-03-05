@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useSwipeReveal } from '../hooks/useSwipeReveal';
-import { ContentEditableInput } from '../components/ContentEditableInput';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAIAssistant } from '../contexts/AIAssistantContext';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
 import { 
@@ -22,7 +22,7 @@ import {
 import { matchCatalogItem } from '../lib/catalogMatcher';
 import { groupBySection, priorityLabel } from '../lib/packingHelpers';
 import { classifyPendingItems } from '../lib/gearClassifier';
-import { compressImageForAI, generateChatThumbnail } from '../lib/gearPhotos';
+
 import {
   CatalogMatchReviewSheet,
   type ReviewItem,
@@ -53,8 +53,17 @@ export function AIAssistantPage() {
   // Mode detection
   const [mode, setMode] = useState<Mode>('packing');
 
+  // AI assistant context (shared with FloatingNavBar)
+  const {
+    input, setInput,
+    loading, setLoading,
+    error, setError,
+    pendingPhotoPreview, pendingPhotoDataUrl,
+    clearPhoto,
+    registerSubmitHandler,
+  } = useAIAssistant();
+
   // Packing list state
-  const [input, setInput] = useState('');
   const [step, setStep] = useState<Step>('input');
   const [plan, setPlan] = useState<AIPlan | null>(null);
   const [reviewItems, setReviewItems] = useState<ReviewItem[]>([]);
@@ -69,11 +78,6 @@ export function AIAssistantPage() {
   const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const chatPhotoRef = useRef<HTMLInputElement>(null);
-
-  // Pending photo attachment for chat
-  const [pendingPhotoPreview, setPendingPhotoPreview] = useState<string>(''); // small preview for display
-  const [pendingPhotoDataUrl, setPendingPhotoDataUrl] = useState<string>(''); // full-res compressed for AI
 
 
   // iOS pill-swipe hooks for sidebar (replaces old flat-strip swipe state)
@@ -86,10 +90,8 @@ export function AIAssistantPage() {
   const [packTouchCurrentX, setPackTouchCurrentX] = useState<number | null>(null);
 
 
-  // Auto-hide input bar on scroll (chat mode only)
+  // Scroll area ref for chat auto-scroll
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const [inputBarHidden, setInputBarHidden] = useState(false);
-  const lastScrollTopRef = useRef(0);
 
   // Sidebar (chat history) state
   const [showSidebar, setShowSidebar] = useState(false);
@@ -101,9 +103,7 @@ export function AIAssistantPage() {
   const [eventDrafts, setEventDrafts] = useState<ChatSession[]>([]);
   const [currentDraftId, setCurrentDraftId] = useState<string | null>(null);
   // Shared state
-  const [loading, setLoading] = useState(false);
   const [loadingMessage, setLoadingMessage] = useState('');
-  const [error, setError] = useState('');
 
   // Closing animation for sidebar
   const { closing: closingSidebar, dismiss: dismissSidebar, onAnimationEnd: onSidebarAnimEnd } = useSheetDismiss(() => { setShowSidebar(false); setSidebarSearch(''); });
@@ -180,38 +180,6 @@ export function AIAssistantPage() {
   }, []);
 
 
-  // ---------------------------------------------------------------------------
-  // Auto-hide input bar on scroll (chat mode only)
-  // ---------------------------------------------------------------------------
-  useEffect(() => {
-    const scrollArea = scrollAreaRef.current;
-    if (!scrollArea || mode !== 'chat' || !currentSession) return;
-
-
-    function handleScroll() {
-      // Don't hide when keyboard is open
-      if (document.documentElement.classList.contains('keyboard-open')) return;
-
-
-      const currentScrollTop = scrollAreaRef.current?.scrollTop ?? 0;
-      const delta = currentScrollTop - lastScrollTopRef.current;
-
-
-      // Show on scroll up (>10px), hide on scroll down (>10px)
-      if (delta > 10 && !inputBarHidden) {
-        setInputBarHidden(true);
-      } else if (delta < -10 && inputBarHidden) {
-        setInputBarHidden(false);
-      }
-
-
-      lastScrollTopRef.current = currentScrollTop;
-    }
-
-
-    scrollArea.addEventListener('scroll', handleScroll, { passive: true });
-    return () => scrollArea.removeEventListener('scroll', handleScroll);
-  }, [mode, currentSession, inputBarHidden]);
 
 
   // ---------------------------------------------------------------------------
@@ -320,35 +288,11 @@ export function AIAssistantPage() {
     }
   }
 
+  // Register handleSubmit on the shared context so FloatingNavBar can invoke it
+  useEffect(() => {
+    registerSubmitHandler(handleSubmit);
+  });
 
-  // ---------------------------------------------------------------------------
-  // Chat: Handle photo selection
-  // ---------------------------------------------------------------------------
-  async function handleChatPhotoSelected(file: File | undefined) {
-    if (!file) return;
-    if (file.size > 15_000_000) {
-      setError('Photo too large. Keep under 15MB.');
-      return;
-    }
-
-    try {
-      // Generate small thumbnail for display (200px) and full-res for AI (768px)
-      const [thumbnail, compressed] = await Promise.all([
-        generateChatThumbnail(file),
-        compressImageForAI(file),
-      ]);
-      setPendingPhotoPreview(thumbnail);
-      setPendingPhotoDataUrl(compressed);
-      setError('');
-    } catch {
-      setError('Could not process photo.');
-    }
-  }
-
-  function clearPendingPhoto() {
-    setPendingPhotoPreview('');
-    setPendingPhotoDataUrl('');
-  }
 
 
   // ---------------------------------------------------------------------------
@@ -369,8 +313,7 @@ export function AIAssistantPage() {
     const imagePreview = pendingPhotoPreview;
 
     // Clear pending photo immediately
-    setPendingPhotoPreview('');
-    setPendingPhotoDataUrl('');
+    clearPhoto();
 
     try {
       // Create or update session
@@ -1249,81 +1192,6 @@ export function AIAssistantPage() {
 
       </div>
 
-
-      {/* -- FIXED INPUT BAR -- */}
-      {!(mode === 'packing' && step === 'results') && (
-        <div className={`ai-ios-input-bar${inputBarHidden ? ' hidden' : ''}`}>
-          {error && <p className="ai-input-error">{error}</p>}
-          {pendingPhotoPreview && (
-            <div className="ai-ios-input-photo-preview">
-              <img src={pendingPhotoPreview} alt="Attached" />
-              <button
-                type="button"
-                className="ai-ios-input-photo-remove"
-                onClick={clearPendingPhoto}
-                aria-label="Remove photo"
-              >
-                &#10005;
-              </button>
-            </div>
-          )}
-          <div className="ai-ios-input-row">
-            <button
-              type="button"
-              className="ai-ios-photo-btn"
-              onClick={() => chatPhotoRef.current?.click()}
-              disabled={loading}
-              aria-label="Attach photo"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </button>
-            <div className="ai-ios-input-pill">
-              <ContentEditableInput
-                placeholder={pendingPhotoDataUrl ? "Ask about this photo…" : "Describe your shoot or ask…"}
-                value={input}
-                onChange={setInput}
-                multiline
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault();
-                    void handleSubmit();
-                  }
-                }}
-                onFocus={() => document.documentElement.classList.add('keyboard-open')}
-                onBlur={() => document.documentElement.classList.remove('keyboard-open')}
-                disabled={loading}
-              />
-              <button 
-                className="ai-ios-send-btn"
-                onClick={() => void handleSubmit()}
-                disabled={loading || (!input.trim() && !pendingPhotoDataUrl)}
-                aria-label="Send message"
-              >
-                {loading ? (
-                  <span className="ai-spinner-small">&#10022;</span>
-                ) : (
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M12 19V5M5 12l7-7 7 7" />
-                  </svg>
-                )}
-              </button>
-            </div>
-          </div>
-          {/* Hidden file input for chat photo attachment */}
-          <input
-            ref={chatPhotoRef}
-            type="file"
-            accept="image/*"
-            style={{ display: 'none' }}
-            onChange={(e) => {
-              void handleChatPhotoSelected(e.target.files?.[0]);
-              e.target.value = '';
-            }}
-          />
-        </div>
-      )}
 
 
       {/* -- CHAT HISTORY SIDEBAR -- */}

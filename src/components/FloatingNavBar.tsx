@@ -2,9 +2,8 @@ import { type ReactNode, useEffect, useRef, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { useScrollDirection } from '../hooks/useScrollDirection';
-import { useLiveQuery } from 'dexie-react-hooks';
-import { db } from '../db';
 import { ContentEditableInput, type ContentEditableInputHandle } from '../components/ContentEditableInput';
+import { useAIAssistant } from '../contexts/AIAssistantContext';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
@@ -27,17 +26,12 @@ function isPathActive(pathname: string, to: string) {
 
 // ── Icons ────────────────────────────────────────────────────────────────────
 
-const searchSvg = (
+/** Sparkle icon for AI circle & decorative pill element */
+const sparkleSvg = (
   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <circle cx="11" cy="11" r="7" />
-    <path d="M20 20l-4-4" />
-  </svg>
-);
-
-const clearSvg = (
-  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <circle cx="12" cy="12" r="10" opacity="0.25" fill="currentColor" stroke="none" />
-    <path d="M15 9l-6 6M9 9l6 6" />
+    <path d="M12 4l1.8 4.2L18 10l-4.2 1.8L12 16l-1.8-4.2L6 10l4.2-1.8L12 4z" />
+    <path d="M6.5 4.8l0.8 1.8 1.8 0.8-1.8 0.8-0.8 1.8-0.8-1.8-1.8-0.8 1.8-0.8 0.8-1.8z" />
+    <path d="M18 14.5l0.7 1.5 1.5 0.7-1.5 0.7-0.7 1.5-0.7-1.5-1.5-0.7 1.5-0.7 0.7-1.5z" />
   </svg>
 );
 
@@ -60,7 +54,7 @@ const navMorphTransition = {
   opacity: { duration: 0.15 },
 };
 
-const searchMorphTransition = {
+const aiMorphTransition = {
   layout: morphSpring,
   opacity: { duration: 0.2 },
 };
@@ -72,119 +66,130 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
   const navigate = useNavigate();
   const scrollHidden = useScrollDirection(10, '.page-scroll-area', location.pathname);
 
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
+  const {
+    input,
+    setInput,
+    loading,
+    error,
+    setError,
+    pendingPhotoPreview,
+    pendingPhotoDataUrl,
+    handlePhotoSelected,
+    clearPhoto,
+    photoInputRef,
+    submit,
+  } = useAIAssistant();
+
   const [inputFocused, setInputFocused] = useState(false);
   const inputRef = useRef<ContentEditableInputHandle>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // ── Data for global search ─────────────────────────────────────────────────
-  const gearItems = useLiveQuery(() => db.gearItems.toArray(), [], []);
-  const events = useLiveQuery(() => db.events.toArray(), [], []);
+  // ── AI expanded state ──────────────────────────────────────────────────────
+  // Driven by internal toggle, synced with route
+  const [aiExpanded, setAiExpanded] = useState(location.pathname === '/assistant');
 
-  // ── Search results ─────────────────────────────────────────────────────────
-  const q = searchQuery.trim().toLowerCase();
+  const isAssistantRoute = location.pathname === '/assistant';
 
-  const matchedGear = q
-    ? gearItems
-        .filter((item) => {
-          const text = [item.name, item.brand, item.model].filter(Boolean).join(' ').toLowerCase();
-          return text.includes(q);
-        })
-        .slice(0, 5)
-    : [];
+  // Sync: navigating TO /assistant auto-expands
+  useEffect(() => {
+    if (isAssistantRoute) {
+      setAiExpanded(true);
+    }
+  }, [isAssistantRoute]);
 
-  const matchedEvents = q
-    ? events
-        .filter((e) => {
-          const text = [e.title, e.type, e.location].filter(Boolean).join(' ').toLowerCase();
-          return text.includes(q);
-        })
-        .slice(0, 5)
-    : [];
-
-  const settingsSections = [
-    { label: 'Account', path: '/settings', keywords: 'account name email display profile' },
-    { label: 'Categories', path: '/settings', keywords: 'categories gear type' },
-    { label: 'Appearance', path: '/settings', keywords: 'appearance theme dark light mode' },
-    { label: 'Data', path: '/settings', keywords: 'data export import backup' },
-  ];
-  const matchedSettings = q ? settingsSections.filter((s) => s.keywords.includes(q)) : [];
-
-  const hasResults = matchedGear.length > 0 || matchedEvents.length > 0 || matchedSettings.length > 0;
-  const showDropdown = searchOpen && q.length > 0;
+  // Sync: navigating AWAY from /assistant auto-collapses
+  useEffect(() => {
+    if (!isAssistantRoute) {
+      setAiExpanded(false);
+    }
+  }, [isAssistantRoute]);
 
   // ── Active tab ─────────────────────────────────────────────────────────────
   const activeItem = items.find((item) =>
     item.match ? item.match(location.pathname) : isPathActive(location.pathname, item.to),
   );
 
-  // ── Click outside to close search ──────────────────────────────────────────
-  useEffect(() => {
-    if (!searchOpen) return;
-    function handleOutside(e: MouseEvent | TouchEvent) {
-      const target = e.target as Node;
-      if (dropdownRef.current?.contains(target)) return;
-      const navEl = document.querySelector('.floating-nav');
-      if (navEl?.contains(target)) return;
-      setSearchOpen(false);
-      setSearchQuery('');
-      setInputFocused(false);
-    }
-    document.addEventListener('mousedown', handleOutside);
-    document.addEventListener('touchstart', handleOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleOutside);
-      document.removeEventListener('touchstart', handleOutside);
-    };
-  }, [searchOpen]);
-
-  // ── Reset search when navigating to a new route ────────────────────────────
-  useEffect(() => {
-    setSearchOpen(false);
-    setSearchQuery('');
-    setInputFocused(false);
-  }, [location.pathname]);
-
   // ── Handlers ───────────────────────────────────────────────────────────────
-  function openSearch() {
-    setSearchOpen(true);
-    setSearchQuery('');
-    // Don't auto-focus — let the user tap the input to trigger the keyboard state
+
+  function openAI() {
+    navigate('/assistant');
+    // Route change will trigger setAiExpanded(true) via useEffect
   }
 
-  function closeSearch() {
-    setSearchOpen(false);
-    setSearchQuery('');
+  function collapseAI() {
+    setAiExpanded(false);
     setInputFocused(false);
     inputRef.current?.blur();
-  }
-
-  function navigateFromSearch(path: string) {
-    navigate(path);
-    closeSearch();
+    // Clear error when collapsing
+    setError('');
   }
 
   // ── Derived state ──────────────────────────────────────────────────────────
-  // In search mode (not typing), the nav circle should hide on scroll
-  const navCircleHidden = searchOpen && !inputFocused && scrollHidden;
-  // When the input is focused (keyboard open), hide the nav circle entirely
-  const showNavCircle = searchOpen && !inputFocused;
-  const showCloseCircle = searchOpen && inputFocused;
+  // Disable scroll-hide when on assistant route
+  const shouldHideOnScroll = scrollHidden && !isAssistantRoute;
+
+  // Left side visibility
+  const showNavPill = !aiExpanded;
+  const showNavCircle = aiExpanded && !inputFocused;
+  // Nav circle should hide on scroll (only when AI expanded but not typing)
+  const navCircleHidden = showNavCircle && scrollHidden && !isAssistantRoute;
+
+  // CSS class for keyboard handling
+  const aiActiveClass = isAssistantRoute && aiExpanded ? ' floating-nav--ai-active' : '';
+
+  // No tab highlighted when on /assistant with AI collapsed
+  const suppressActiveTab = isAssistantRoute && !aiExpanded;
 
   return (
     <>
       <AnimatePresence>
         <motion.div
-          className={`floating-nav${scrollHidden && !inputFocused ? ' floating-nav--hidden' : ''}`}
+          className={`floating-nav${shouldHideOnScroll && !inputFocused ? ' floating-nav--hidden' : ''}${aiActiveClass}`}
           initial={false}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           <LayoutGroup>
+            {/* Photo preview — floats above the nav bar when AI expanded */}
+            <AnimatePresence>
+              {aiExpanded && pendingPhotoPreview && (
+                <motion.div
+                  className="floating-nav__photo-preview"
+                  initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                  transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+                >
+                  <img src={pendingPhotoPreview} alt="Attached" />
+                  <button
+                    type="button"
+                    className="floating-nav__photo-remove"
+                    onClick={clearPhoto}
+                    aria-label="Remove photo"
+                  >
+                    &#10005;
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Error display — floats above nav bar */}
+            <AnimatePresence>
+              {aiExpanded && error && (
+                <motion.p
+                  className="floating-nav__error"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 6 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {error}
+                </motion.p>
+              )}
+            </AnimatePresence>
+
             <div className="floating-nav__row">
-              {/* ── Left: Nav Pill ↔ Nav Circle ────────────────────── */}
-              {!searchOpen ? (
+              {/* ── Left: Nav Pill ↔ Nav Circle ↔ Placeholder ──────── */}
+              {showNavPill ? (
                 <motion.div
                   className="floating-nav__pill"
                   layoutId="nav-morph"
@@ -192,9 +197,11 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
                   style={{ overflow: 'hidden' }}
                 >
                   {items.map((item) => {
-                    const active = item.match
-                      ? item.match(location.pathname)
-                      : isPathActive(location.pathname, item.to);
+                    const active = !suppressActiveTab && (
+                      item.match
+                        ? item.match(location.pathname)
+                        : isPathActive(location.pathname, item.to)
+                    );
                     return (
                       <button
                         key={item.to}
@@ -219,7 +226,7 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
                   layoutId="nav-morph"
                   type="button"
                   aria-label={activeItem?.label ?? 'Navigation'}
-                  onClick={closeSearch}
+                  onClick={collapseAI}
                   onPointerUp={(e) => e.currentTarget.blur()}
                   animate={{
                     opacity: navCircleHidden ? 0 : 1,
@@ -246,148 +253,108 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
                 />
               )}
 
-              {/* ── Right: Search Circle ↔ Search Pill ─────────────── */}
-              {!searchOpen ? (
+              {/* ── Right: AI Circle ↔ AI Input Pill ───────────────── */}
+              {!aiExpanded ? (
                 <motion.button
-                  className="floating-nav__search-circle"
-                  layoutId="search-morph"
+                  className="floating-nav__ai-circle"
+                  layoutId="ai-morph"
                   type="button"
-                  aria-label="Search"
-                  onClick={openSearch}
+                  aria-label="AI Assistant"
+                  onClick={openAI}
                   onPointerUp={(e) => e.currentTarget.blur()}
-                  transition={searchMorphTransition}
+                  transition={aiMorphTransition}
                 >
-                  <span className="floating-nav__search-icon">{searchSvg}</span>
+                  <span className="floating-nav__ai-icon">{sparkleSvg}</span>
                 </motion.button>
               ) : (
                 <motion.div
-                  className="floating-nav__search-pill"
-                  layoutId="search-morph"
-                  ref={dropdownRef}
-                  transition={searchMorphTransition}
+                  className="floating-nav__ai-pill"
+                  layoutId="ai-morph"
+                  transition={aiMorphTransition}
                 >
-                  <div className="floating-nav__search-input-wrap">
-                    <span className="floating-nav__search-pill-icon">{searchSvg}</span>
-                    <ContentEditableInput
-                      ref={inputRef}
-                      className="floating-nav__search-input"
-                      placeholder="Search gear, events, settings..."
-                      value={searchQuery}
-                      onChange={setSearchQuery}
-                      onFocus={() => setInputFocused(true)}
-                      onBlur={() => setInputFocused(false)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Escape') closeSearch();
-                      }}
-                      aria-label="Search gear, events, settings"
-                    />
-                    {searchQuery && (
-                      <button
-                        className="floating-nav__search-clear"
-                        type="button"
-                        aria-label="Clear search"
-                        onClick={() => setSearchQuery('')}
-                      >
-                        {clearSvg}
-                      </button>
+                  {/* Decorative sparkle */}
+                  <span className="floating-nav__ai-pill-sparkle" aria-hidden="true">
+                    {sparkleSvg}
+                  </span>
+
+                  {/* Photo attachment button (+ icon) */}
+                  <button
+                    type="button"
+                    className="floating-nav__ai-photo-btn"
+                    onClick={() => photoInputRef.current?.click()}
+                    disabled={loading}
+                    aria-label="Attach photo"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 5v14M5 12h14" />
+                    </svg>
+                  </button>
+
+                  {/* Text input */}
+                  <ContentEditableInput
+                    ref={inputRef}
+                    className="floating-nav__ai-input"
+                    placeholder={pendingPhotoDataUrl ? 'Ask about this photo...' : 'Describe your shoot or ask...'}
+                    value={input}
+                    onChange={setInput}
+                    multiline
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        void submit();
+                      }
+                    }}
+                    onFocus={() => {
+                      setInputFocused(true);
+                      document.documentElement.classList.add('keyboard-open');
+                    }}
+                    onBlur={() => {
+                      setInputFocused(false);
+                      document.documentElement.classList.remove('keyboard-open');
+                    }}
+                    disabled={loading}
+                    aria-label="AI assistant input"
+                  />
+
+                  {/* Send button */}
+                  <button
+                    className="floating-nav__ai-send-btn"
+                    type="button"
+                    onClick={() => void submit()}
+                    disabled={loading || (!input.trim() && !pendingPhotoDataUrl)}
+                    aria-label="Send message"
+                  >
+                    {loading ? (
+                      <span className="ai-spinner-small">&#10022;</span>
+                    ) : (
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 19V5M5 12l7-7 7 7" />
+                      </svg>
                     )}
-                  </div>
+                  </button>
 
-                  {/* Search Results Dropdown */}
-                  <AnimatePresence>
-                    {showDropdown && (
-                      <motion.div
-                        className="floating-nav__search-results"
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 8 }}
-                        transition={{ duration: 0.18 }}
-                      >
-                        {!hasResults && (
-                          <div className="floating-nav__search-empty">No results found</div>
-                        )}
-
-                        {matchedGear.length > 0 && (
-                          <div className="floating-nav__search-section">
-                            <div className="floating-nav__search-label">Gear</div>
-                            {matchedGear.map((item) => (
-                              <button
-                                key={item.id}
-                                className="floating-nav__search-item"
-                                onClick={() => navigateFromSearch(`/catalog/item/${item.id}`)}
-                              >
-                                <div className="floating-nav__search-item-icon gear">
-                                  {item.photo ? <img src={item.photo} alt="" loading="lazy" decoding="async" /> : item.name.charAt(0)}
-                                </div>
-                                <div className="floating-nav__search-item-text">
-                                  <span className="name">{item.name}</span>
-                                  <span className="sub">
-                                    {item.brand} {item.model}
-                                  </span>
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-
-                        {matchedEvents.length > 0 && (
-                          <div className="floating-nav__search-section">
-                            <div className="floating-nav__search-label">Events</div>
-                            {matchedEvents.map((event) => (
-                              <button
-                                key={event.id}
-                                className="floating-nav__search-item"
-                                onClick={() => navigateFromSearch(`/events/${event.id}`)}
-                              >
-                                <div className="floating-nav__search-item-icon event">
-                                  {event.title.charAt(0)}
-                                </div>
-                                <div className="floating-nav__search-item-text">
-                                  <span className="name">{event.title}</span>
-                                  <span className="sub">{event.type}</span>
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-
-                        {matchedSettings.length > 0 && (
-                          <div className="floating-nav__search-section">
-                            <div className="floating-nav__search-label">Settings</div>
-                            {matchedSettings.map((section) => (
-                              <button
-                                key={section.label}
-                                className="floating-nav__search-item"
-                                onClick={() => navigateFromSearch(section.path)}
-                              >
-                                <div className="floating-nav__search-item-icon settings">
-                                  <svg viewBox="0 0 24 24" width="18" height="18">
-                                    <circle cx="12" cy="12" r="3" />
-                                    <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z" />
-                                  </svg>
-                                </div>
-                                <div className="floating-nav__search-item-text">
-                                  <span className="name">{section.label}</span>
-                                  <span className="sub">Settings</span>
-                                </div>
-                              </button>
-                            ))}
-                          </div>
-                        )}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  {/* Hidden file input */}
+                  <input
+                    ref={photoInputRef}
+                    type="file"
+                    accept="image/*"
+                    style={{ display: 'none' }}
+                    onChange={(e) => {
+                      void handlePhotoSelected(e.target.files?.[0]);
+                      e.target.value = '';
+                    }}
+                  />
                 </motion.div>
               )}
 
               {/* ── X Close Circle (only when input focused / keyboard open) ── */}
               <AnimatePresence>
-                {showCloseCircle && (
+                {aiExpanded && inputFocused && (
                   <motion.button
                     className="floating-nav__close-circle"
                     type="button"
-                    aria-label="Close search"
-                    onClick={closeSearch}
+                    aria-label="Close AI input"
+                    onClick={collapseAI}
                     onPointerUp={(e) => e.currentTarget.blur()}
                     initial={{ opacity: 0, scale: 0.6 }}
                     animate={{ opacity: 1, scale: 1 }}

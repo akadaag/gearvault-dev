@@ -4,9 +4,9 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { db, ensureBaseData } from '../db';
 import { useAuth } from '../hooks/useAuth';
 import { useTheme } from '../hooks/useTheme';
-import { useKeyboardOpen } from '../hooks/useKeyboardOpen';
 import { resetSheetScrollLock } from '../lib/sheetLock';
 import { FloatingNavBar } from './FloatingNavBar';
+import { AIAssistantProvider } from '../contexts/AIAssistantContext';
 
 const homeIcon = (
   <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
@@ -31,27 +31,18 @@ const eventsIcon = (
   </svg>
 );
 
-const assistantIcon = (
-  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-    <path d="M12 4l1.8 4.2L18 10l-4.2 1.8L12 16l-1.8-4.2L6 10l4.2-1.8L12 4z" />
-    <path d="M6.5 4.8l0.8 1.8 1.8 0.8-1.8 0.8-0.8 1.8-0.8-1.8-1.8-0.8 1.8-0.8 0.8-1.8z" />
-    <path d="M18 14.5l0.7 1.5 1.5 0.7-1.5 0.7-0.7 1.5-0.7-1.5-1.5-0.7 1.5-0.7 0.7-1.5z" />
-  </svg>
-);
-
 // Settings icon removed from tabs — now lives in ProfileMenu
+// Assistant icon removed from tabs — now accessed via AI circle in FloatingNavBar
 
 const tabs = [
   { to: '/home', label: 'Home', icon: homeIcon },
   { to: '/catalog', label: 'Catalog', icon: catalogIcon },
   { to: '/events', label: 'Events', icon: eventsIcon },
-  { to: '/assistant', label: 'Assistant', icon: assistantIcon },
 ];
 
 export function TabLayout() {
   useTheme();
   const { syncMessage } = useAuth();
-  const isKeyboardOpen = useKeyboardOpen();
   const location = useLocation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -180,6 +171,32 @@ export function TabLayout() {
     navigate({ pathname: '/assistant', search: params.toString() ? `?${params.toString()}` : '' });
   }
 
+  // ── Search handlers ───────────────────────────────────────────────────────
+  function toggleCatalogSearch() {
+    const params = new URLSearchParams(searchParams);
+    if (params.has('search')) {
+      params.delete('search');
+      params.delete('q');
+    } else {
+      params.set('search', '1');
+    }
+    navigate({ pathname: '/catalog', search: params.toString() ? `?${params.toString()}` : '' });
+  }
+
+  function toggleEventsSearch() {
+    const params = new URLSearchParams(searchParams);
+    if (params.has('search')) {
+      params.delete('search');
+      params.delete('q');
+    } else {
+      params.set('search', '1');
+    }
+    navigate({ pathname: '/events', search: params.toString() ? `?${params.toString()}` : '' });
+  }
+
+  const isCatalogSearchOpen = searchParams.has('search') && isCatalogRoute;
+  const isEventsSearchOpen = searchParams.has('search') && isEventsRoute;
+
   // ── SVG icons ─────────────────────────────────────────────────────────────
 
   const filterIcon = (
@@ -217,6 +234,7 @@ export function TabLayout() {
   );
 
   return (
+    <AIAssistantProvider>
     <div className={`app-shell${isIosThemeRoute ? ' ios-theme' : ''}`}>
       {!isHomeRoute && !isGearDetailRoute && !isEventDetailRoute && !isSettingsRoute && !isAssistantRoute && (
         <header className={`topbar${isCatalogRoute || isEventsRoute ? ' topbar-catalog' : ''}`}>
@@ -346,63 +364,89 @@ export function TabLayout() {
 
       {/* Catalog action toolbar — outside <main> so glass backdrop-filter blurs real content */}
       {isCatalogRoute && (
-        <div className="ios-catalog-toolbar" role="group" aria-label="Catalog actions">
+        <>
+          <div className="ios-catalog-toolbar" role="group" aria-label="Catalog actions">
+            <button
+              className={`ios-catalog-toolbar-btn${isTopFilterActive ? ' active' : ''}`}
+              onClick={openCatalogFilters}
+              aria-label="Filters"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="4" y1="21" x2="4" y2="14" />
+                <line x1="4" y1="10" x2="4" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="12" />
+                <line x1="12" y1="8" x2="12" y2="3" />
+                <line x1="20" y1="21" x2="20" y2="16" />
+                <line x1="20" y1="12" x2="20" y2="3" />
+                <line x1="1" y1="14" x2="7" y2="14" />
+                <line x1="9" y1="8" x2="15" y2="8" />
+                <line x1="17" y1="16" x2="23" y2="16" />
+              </svg>
+            </button>
+            <button
+              className="ios-catalog-toolbar-btn"
+              onClick={openCatalogAdd}
+              aria-label="Add Item"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+          </div>
           <button
-            className={`ios-catalog-toolbar-btn${isTopFilterActive ? ' active' : ''}`}
-            onClick={openCatalogFilters}
-            aria-label="Filters"
+            className={`ios-catalog-search-circle${isCatalogSearchOpen ? ' active' : ''}`}
+            onClick={toggleCatalogSearch}
+            aria-label="Search catalog"
+            aria-pressed={isCatalogSearchOpen}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="4" y1="21" x2="4" y2="14" />
-              <line x1="4" y1="10" x2="4" y2="3" />
-              <line x1="12" y1="21" x2="12" y2="12" />
-              <line x1="12" y1="8" x2="12" y2="3" />
-              <line x1="20" y1="21" x2="20" y2="16" />
-              <line x1="20" y1="12" x2="20" y2="3" />
-              <line x1="1" y1="14" x2="7" y2="14" />
-              <line x1="9" y1="8" x2="15" y2="8" />
-              <line x1="17" y1="16" x2="23" y2="16" />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="7" />
+              <path d="M20 20l-4-4" />
             </svg>
           </button>
-          <button
-            className="ios-catalog-toolbar-btn"
-            onClick={openCatalogAdd}
-            aria-label="Add Item"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-          </button>
-        </div>
+        </>
       )}
 
       {/* Events action toolbar — outside <main> so glass backdrop-filter blurs real content */}
       {isEventsRoute && (
-        <div className="ev-ios-toolbar" role="group" aria-label="Events actions">
+        <>
+          <div className="ev-ios-toolbar" role="group" aria-label="Events actions">
+            <button
+              className={`ev-ios-toolbar-btn${showEventsCalendar ? ' active' : ''}`}
+              onClick={toggleEventsCalendar}
+              aria-label="Toggle calendar view"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                <line x1="16" y1="2" x2="16" y2="6" />
+                <line x1="8" y1="2" x2="8" y2="6" />
+                <line x1="3" y1="10" x2="21" y2="10" />
+              </svg>
+            </button>
+            <button
+              className="ev-ios-toolbar-btn"
+              onClick={openEventsAdd}
+              aria-label="Create new event"
+            >
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="12" y1="5" x2="12" y2="19" />
+                <line x1="5" y1="12" x2="19" y2="12" />
+              </svg>
+            </button>
+          </div>
           <button
-            className={`ev-ios-toolbar-btn${showEventsCalendar ? ' active' : ''}`}
-            onClick={toggleEventsCalendar}
-            aria-label="Toggle calendar view"
+            className={`ev-ios-search-circle${isEventsSearchOpen ? ' active' : ''}`}
+            onClick={toggleEventsSearch}
+            aria-label="Search events"
+            aria-pressed={isEventsSearchOpen}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-              <line x1="16" y1="2" x2="16" y2="6" />
-              <line x1="8" y1="2" x2="8" y2="6" />
-              <line x1="3" y1="10" x2="21" y2="10" />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="11" cy="11" r="7" />
+              <path d="M20 20l-4-4" />
             </svg>
           </button>
-          <button
-            className="ev-ios-toolbar-btn"
-            onClick={openEventsAdd}
-            aria-label="Create new event"
-          >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19" />
-              <line x1="5" y1="12" x2="19" y2="12" />
-            </svg>
-          </button>
-        </div>
+        </>
       )}
 
       {/* Assistant action toolbar — outside <main> so glass backdrop-filter blurs real content */}
@@ -433,8 +477,9 @@ export function TabLayout() {
         </div>
       )}
 
-      {!isKeyboardOpen && !isGearDetailRoute && !isEventDetailRoute && <FloatingNavBar items={tabs} />}
+      {!isGearDetailRoute && !isEventDetailRoute && <FloatingNavBar items={tabs} />}
     </div>
+    </AIAssistantProvider>
   );
 }
 

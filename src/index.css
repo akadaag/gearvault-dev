@@ -6435,6 +6435,62 @@ html {
   color: #ffffff;
 }
 
+/* ── Catalog Search Circle (toolbar companion) ─────────────────── */
+
+.ios-catalog-search-circle {
+  position: fixed;
+  top: max(4px, env(safe-area-inset-top));
+  right: calc(16px + 92px + 8px); /* 16px page margin + toolbar width ~92px + 8px gap */
+  z-index: 41;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.40);
+  background: rgba(255, 255, 255, 0.21);
+  backdrop-filter: blur(4.9px);
+  -webkit-backdrop-filter: blur(4.9px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #000000;
+  padding: 0;
+  transition: transform 0.12s ease, color 0.12s ease, background 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  outline: none;
+}
+
+.ios-catalog-search-circle:focus,
+.ios-catalog-search-circle:focus-visible {
+  outline: none;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.ios-catalog-search-circle:active {
+  transform: scale(0.92);
+}
+
+.ios-catalog-search-circle.active {
+  color: var(--ios-blue, #007AFF);
+  background: rgba(142, 142, 147, 0.22);
+}
+
+:root.dark .ios-catalog-search-circle {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.21);
+  border-color: rgba(255, 255, 255, 0.40);
+}
+
+:root.dark .ios-catalog-search-circle.active {
+  color: #0A84FF;
+  background: rgba(142, 142, 147, 0.22);
+}
+
 .ios-catalog-search-row {
   display: flex;
   align-items: center;
@@ -6452,6 +6508,7 @@ html {
   padding: 0 10px;
   height: 36px;
   min-height: 36px;
+  margin: 0 16px 8px;
 }
 
 .ios-catalog-search-bar input,
@@ -7528,6 +7585,119 @@ body:has(.content-assistant) {
 .ev-ios-toolbar-btn.active {
   color: var(--ios-blue, #007AFF);
   background: rgba(142, 142, 147, 0.22);
+}
+
+/* ── Events Search Circle (toolbar companion) ──────────────────── */
+
+.ev-ios-search-circle {
+  position: fixed;
+  top: max(4px, env(safe-area-inset-top));
+  right: calc(16px + 92px + 8px); /* 16px page margin + toolbar width ~92px + 8px gap */
+  z-index: 41;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.40);
+  background: rgba(255, 255, 255, 0.21);
+  backdrop-filter: blur(4.9px);
+  -webkit-backdrop-filter: blur(4.9px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #000000;
+  padding: 0;
+  transition: transform 0.12s ease, color 0.12s ease, background 0.12s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  outline: none;
+}
+
+.ev-ios-search-circle:focus,
+.ev-ios-search-circle:focus-visible {
+  outline: none;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.ev-ios-search-circle:active {
+  transform: scale(0.92);
+}
+
+.ev-ios-search-circle.active {
+  color: var(--ios-blue, #007AFF);
+  background: rgba(142, 142, 147, 0.22);
+}
+
+:root.dark .ev-ios-search-circle {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.21);
+  border-color: rgba(255, 255, 255, 0.40);
+}
+
+:root.dark .ev-ios-search-circle.active {
+  color: #0A84FF;
+  background: rgba(142, 142, 147, 0.22);
+}
+
+/* ── Events Search Bar (slide-down) ────────────────────────────── */
+
+.ev-ios-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: color-mix(in srgb, var(--ios-text-secondary) 12%, transparent);
+  border-radius: 10px;
+  padding: 0 10px;
+  height: 36px;
+  min-height: 36px;
+  margin: 0 16px 8px;
+}
+
+.ev-ios-search-bar svg {
+  flex-shrink: 0;
+  color: var(--ios-text-secondary);
+}
+
+.ev-ios-search-bar input,
+.ev-ios-search-bar [contenteditable] {
+  flex: 1;
+  border: none;
+  background: none;
+  outline: none;
+  font-size: 17px;
+  color: var(--ios-text-primary);
+  padding: 0;
+  min-height: auto;
+  height: auto;
+  line-height: 1.3;
+  word-break: break-word;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.ev-ios-search-bar input::placeholder,
+.ev-ios-search-bar [contenteditable][data-placeholder]:empty::before {
+  color: var(--ios-text-secondary);
+}
+
+.ev-ios-search-clear {
+  flex-shrink: 0;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ios-text-secondary);
+  min-height: auto;
+  width: 20px;
+  height: 20px;
+  box-shadow: none;
 }
 
 /* ── Item Count ────────────────────────────────────────────────── */
@@ -13091,8 +13261,12 @@ body:has(.content-assistant) {
   pointer-events: none;
 }
 
-:root.keyboard-open .floating-nav {
+:root.keyboard-open .floating-nav:not(.floating-nav--ai-active) {
   display: none;
+}
+
+:root.keyboard-open .floating-nav.floating-nav--ai-active {
+  bottom: 0;
 }
 
 /* ── Default state: Nav Pill + Search Circle ──────────────────────────── */
@@ -13435,6 +13609,332 @@ body:has(.content-assistant) {
   stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+/* ── AI Circle (default state, replaces search circle) ────────────────── */
+
+.floating-nav__ai-circle {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 58px;
+  height: 58px;
+  min-width: 58px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.40);
+  background: rgba(255, 255, 255, 0.21);
+  backdrop-filter: blur(4.9px);
+  -webkit-backdrop-filter: blur(4.9px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #000000;
+  transition: transform 0.15s ease, color 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  outline: none;
+  overflow: hidden;
+}
+
+.floating-nav__ai-circle:focus,
+.floating-nav__ai-circle:focus-visible {
+  outline: none;
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+:root.dark .floating-nav__ai-circle {
+  background: rgba(255, 255, 255, 0.21);
+  border-color: rgba(255, 255, 255, 0.40);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  color: #ffffff;
+}
+
+:root.dark .floating-nav__ai-circle:focus,
+:root.dark .floating-nav__ai-circle:focus-visible {
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+.floating-nav__ai-circle:active {
+  transform: scale(0.92);
+}
+
+.floating-nav__ai-icon {
+  width: 25px;
+  height: 25px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.floating-nav__ai-icon svg {
+  width: 25px;
+  height: 25px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* ── AI Pill (expanded) ──────────────────────────────────────────────── */
+
+.floating-nav__ai-pill {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 8px 8px 14px;
+  background: rgba(255, 255, 255, 0.21);
+  backdrop-filter: blur(4.9px);
+  -webkit-backdrop-filter: blur(4.9px);
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.40);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+:root.dark .floating-nav__ai-pill {
+  background: rgba(255, 255, 255, 0.21);
+  border-color: rgba(255, 255, 255, 0.40);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+}
+
+/* Decorative sparkle inside pill */
+.floating-nav__ai-pill-sparkle {
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.5;
+  color: #000000;
+}
+
+.floating-nav__ai-pill-sparkle svg {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+:root.dark .floating-nav__ai-pill-sparkle {
+  color: #ffffff;
+}
+
+/* Photo attachment button (+ icon) */
+.floating-nav__ai-photo-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  background: transparent;
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #000000;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  box-shadow: none;
+  border-radius: 50%;
+  transition: background 0.15s ease, transform 0.12s ease;
+}
+
+.floating-nav__ai-photo-btn:focus,
+.floating-nav__ai-photo-btn:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.floating-nav__ai-photo-btn:active {
+  transform: scale(0.88);
+  background: rgba(0, 0, 0, 0.06);
+}
+
+.floating-nav__ai-photo-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+:root.dark .floating-nav__ai-photo-btn {
+  color: #ffffff;
+}
+
+:root.dark .floating-nav__ai-photo-btn:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.floating-nav__ai-photo-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* Text input area */
+.floating-nav__ai-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 17px;
+  color: #000000;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
+  padding: 0;
+  line-height: 1.3;
+  min-width: 0;
+  max-height: 80px;
+  overflow-y: auto;
+  word-break: break-word;
+}
+
+.floating-nav__ai-input:focus,
+.floating-nav__ai-input:focus-visible {
+  outline: none;
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}
+
+.floating-nav__ai-input[data-placeholder]:empty::before {
+  color: rgba(0, 0, 0, 0.4);
+}
+
+:root.dark .floating-nav__ai-input {
+  color: #ffffff;
+}
+
+:root.dark .floating-nav__ai-input[data-placeholder]:empty::before {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+/* Send button (circle) */
+.floating-nav__ai-send-btn {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 0;
+  width: 33px;
+  height: 33px;
+  min-width: 33px;
+  border-radius: 50%;
+  background: #000000;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  box-shadow: none;
+  transition: background 0.15s ease, opacity 0.15s ease, transform 0.12s ease;
+}
+
+.floating-nav__ai-send-btn:focus,
+.floating-nav__ai-send-btn:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+.floating-nav__ai-send-btn:active {
+  transform: scale(0.9);
+}
+
+.floating-nav__ai-send-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+:root.dark .floating-nav__ai-send-btn {
+  background: #ffffff;
+  color: #000000;
+}
+
+.floating-nav__ai-send-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+/* ── Photo Preview (floats above nav bar) ─────────────────────────────── */
+
+.floating-nav__photo-preview {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  border: 2px solid rgba(255, 255, 255, 0.6);
+  z-index: 10;
+}
+
+:root.dark .floating-nav__photo-preview {
+  border-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+}
+
+.floating-nav__photo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.floating-nav__photo-remove {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 0;
+  background: rgba(0, 0, 0, 0.65);
+  color: #ffffff;
+  font-size: 12px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.floating-nav__photo-remove:active {
+  transform: scale(0.9);
+}
+
+/* ── Error Display (floats above nav bar) ─────────────────────────────── */
+
+.floating-nav__error {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 16px;
+  right: 16px;
+  text-align: center;
+  font-size: 13px;
+  font-weight: 500;
+  color: #FF453A;
+  background: rgba(255, 69, 58, 0.1);
+  border-radius: 10px;
+  padding: 8px 14px;
+  margin: 0;
+  z-index: 10;
+}
+
+:root:not(.dark) .floating-nav__error {
+  color: #FF3B30;
+  background: rgba(255, 59, 48, 0.08);
 }
 
 /* ── Search Pill (expanded) ───────────────────────────────────────────── */
@@ -14031,6 +14531,12 @@ body:has(.content-assistant) {
   }
 
   .floating-nav__close-circle {
+    width: 56px;
+    height: 56px;
+    min-width: 56px;
+  }
+
+  .floating-nav__ai-circle {
     width: 56px;
     height: 56px;
     min-width: 56px;
