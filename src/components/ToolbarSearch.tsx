@@ -29,9 +29,9 @@ const searchIcon = (
 );
 
 const closeIcon = (
-  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-    <circle cx="12" cy="12" r="10" opacity="0.25" fill="currentColor" stroke="none" />
-    <path d="M15 9l-6 6M9 9l6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <path d="M18 6L6 18" />
+    <path d="M6 6l12 12" />
   </svg>
 );
 
@@ -174,6 +174,11 @@ export function ToolbarSearch({ onOpenChange }: ToolbarSearchProps) {
 
   return (
     <div className="toolbar-search" ref={containerRef}>
+      {/* Dark backdrop when search is open */}
+      {open && (
+        <div className="toolbar-search__backdrop" onClick={closeSearch} />
+      )}
+
       <LayoutGroup>
         {!open ? (
           <motion.button

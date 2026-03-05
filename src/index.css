@@ -13967,12 +13967,46 @@ body:has(.content-assistant) {
   position: relative;
 }
 
+/* Dark backdrop overlay — covers the entire viewport when search is open */
+.toolbar-search__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.45) 0%,
+    rgba(0, 0, 0, 0.25) 35%,
+    rgba(0, 0, 0, 0.10) 70%,
+    transparent 100%
+  );
+  animation: toolbar-search-backdrop-in 0.22s ease-out both;
+}
+
+@keyframes toolbar-search-backdrop-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+:root.dark .toolbar-search__backdrop {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.60) 0%,
+    rgba(0, 0, 0, 0.40) 35%,
+    rgba(0, 0, 0, 0.20) 70%,
+    transparent 100%
+  );
+}
+
 .toolbar-search__circle {
   appearance: none;
   -webkit-appearance: none;
   width: 38px;
   height: 38px;
   min-width: 38px;
+  min-height: 38px;
+  max-height: 38px;
+  flex-shrink: 0;
+  aspect-ratio: 1;
   border-radius: 50%;
   border: 1px solid rgba(255, 255, 255, 0.40);
   background: rgba(255, 255, 255, 0.21);
@@ -14037,17 +14071,29 @@ body:has(.content-assistant) {
 
 .toolbar-search__input {
   flex: 1;
-  border: none;
-  outline: none;
-  background: transparent;
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
   font-size: 17px;
   color: #000000;
+  -webkit-text-fill-color: #000000;
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
   padding: 0;
   line-height: 1.3;
   min-width: 0;
   white-space: nowrap;
   overflow: hidden;
+  width: auto;
+  border-radius: 0;
+  box-shadow: none !important;
+}
+
+.toolbar-search__input::-webkit-search-decoration,
+.toolbar-search__input::-webkit-search-cancel-button,
+.toolbar-search__input::-webkit-search-results-button,
+.toolbar-search__input::-webkit-search-results-decoration {
+  display: none;
+  -webkit-appearance: none;
 }
 
 .toolbar-search__input:focus,
@@ -14064,6 +14110,7 @@ body:has(.content-assistant) {
 
 :root.dark .toolbar-search__input {
   color: #ffffff;
+  -webkit-text-fill-color: #ffffff;
 }
 
 :root.dark .toolbar-search__input::placeholder {
