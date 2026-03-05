@@ -13131,7 +13131,7 @@ body:has(.content-assistant) {
   align-items: center;
   justify-content: center;
   gap: 2px;
-  color: #8E8E93;
+  color: #000000;
   cursor: pointer;
   transition: color 0.2s ease, background 0.2s ease;
   -webkit-tap-highlight-color: transparent;
@@ -13145,7 +13145,7 @@ body:has(.content-assistant) {
 .floating-nav__tab:focus-visible {
   outline: none;
   box-shadow: none;
-  color: #8E8E93;
+  color: #000000;
   background: transparent;
 }
 
@@ -13161,12 +13161,12 @@ body:has(.content-assistant) {
 }
 
 :root.dark .floating-nav__tab {
-  color: #8E8E93;
+  color: #000000;
 }
 
 :root.dark .floating-nav__tab:focus,
 :root.dark .floating-nav__tab:focus-visible {
-  color: #8E8E93;
+  color: #000000;
   background: transparent;
 }
 
