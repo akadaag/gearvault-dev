@@ -8289,14 +8289,16 @@ body:has(.content-assistant) {
   gap: 8px;
   padding: 8px 16px 8px 10px;
   border-radius: 999px;
-  border: none;
-  background: #ffffff;
-  color: var(--ios-text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.40);
+  background: rgba(255, 255, 255, 0.21);
+  backdrop-filter: blur(4.9px);
+  -webkit-backdrop-filter: blur(4.9px);
+  color: #000;
   font-size: 15px;
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   transition: opacity 0.15s ease;
   min-height: auto;
   line-height: 1.3;
@@ -8327,9 +8329,11 @@ body:has(.content-assistant) {
   width: 40px;
   height: 40px;
   border-radius: 999px;
-  border: none;
-  background: #ffffff;
-  color: var(--ios-text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.40);
+  background: rgba(255, 255, 255, 0.21);
+  backdrop-filter: blur(4.9px);
+  -webkit-backdrop-filter: blur(4.9px);
+  color: #000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -8337,7 +8341,7 @@ body:has(.content-assistant) {
   padding: 0;
   cursor: pointer;
   min-height: auto;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   transition: transform 0.12s ease, opacity 0.12s ease;
 }
 .event-detail-page.ios-theme .ev-detail-circle-btn:active {
@@ -8948,15 +8952,11 @@ body:has(.content-assistant) {
 }
 
 :root.dark .event-detail-page.ios-theme .ev-detail-back-pill {
-  background: rgba(44, 44, 46, 1);
   color: #ffffff;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.45), 0 0 0 0.5px rgba(255, 255, 255, 0.08);
 }
 
 :root.dark .event-detail-page.ios-theme .ev-detail-circle-btn {
-  background: rgba(44, 44, 46, 1);
   color: #ffffff;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.45), 0 0 0 0.5px rgba(255, 255, 255, 0.08);
 }
 
 :root.dark .event-detail-page.ios-theme .ev-detail-options-dot {
@@ -12538,14 +12538,16 @@ body:has(.content-assistant) {
   gap: 8px;
   padding: 8px 16px 8px 10px;
   border-radius: 999px;
-  border: none;
-  background: #ffffff;
-  color: var(--ios-text-primary);
+  border: 1px solid rgba(255, 255, 255, 0.40);
+  background: rgba(255, 255, 255, 0.21);
+  backdrop-filter: blur(4.9px);
+  -webkit-backdrop-filter: blur(4.9px);
+  color: #000;
   font-size: 15px;
   font-weight: 500;
   font-family: inherit;
   cursor: pointer;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   transition: opacity 0.15s ease;
   min-height: auto;
   line-height: 1.3;
@@ -12575,10 +12577,12 @@ body:has(.content-assistant) {
   width: 40px;
   height: 40px;
   border-radius: 999px;
-  border: none;
-  background: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.40);
+  background: rgba(255, 255, 255, 0.21);
+  backdrop-filter: blur(4.9px);
+  -webkit-backdrop-filter: blur(4.9px);
   cursor: pointer;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
   transition: opacity 0.15s ease;
   min-height: auto;
   padding: 0;
@@ -12964,14 +12968,7 @@ body:has(.content-assistant) {
 }
 
 :root.dark .gear-detail-page.ios-theme .gear-detail-back-pill {
-  background: rgba(44, 44, 46, 1);
   color: #ffffff;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.45), 0 0 0 0.5px rgba(255, 255, 255, 0.08);
-}
-
-:root.dark .gear-detail-page.ios-theme .gear-detail-options-btn {
-  background: rgba(44, 44, 46, 1);
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.45), 0 0 0 0.5px rgba(255, 255, 255, 0.08);
 }
 
 :root.dark .gear-detail-page.ios-theme .gear-detail-options-dot {
