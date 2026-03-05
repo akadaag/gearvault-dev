@@ -83,6 +83,23 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
   const [inputFocused, setInputFocused] = useState(false);
   const inputRef = useRef<ContentEditableInputHandle>(null);
 
+  // ── Previous route tracking ────────────────────────────────────────────────
+  // Remember which page the user was on before navigating to /assistant
+  const previousRouteRef = useRef(
+    location.pathname === '/assistant' ? '/home' : location.pathname,
+  );
+
+  useEffect(() => {
+    if (location.pathname !== '/assistant') {
+      previousRouteRef.current = location.pathname;
+    }
+  }, [location.pathname]);
+
+  // Resolve the tab item that corresponds to the previous route
+  const previousItem = items.find((item) =>
+    item.match ? item.match(previousRouteRef.current) : isPathActive(previousRouteRef.current, item.to),
+  );
+
   // ── AI expanded state ──────────────────────────────────────────────────────
   // Driven by internal toggle, synced with route
   const [aiExpanded, setAiExpanded] = useState(location.pathname === '/assistant');
@@ -103,11 +120,6 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
     }
   }, [isAssistantRoute]);
 
-  // ── Active tab ─────────────────────────────────────────────────────────────
-  const activeItem = items.find((item) =>
-    item.match ? item.match(location.pathname) : isPathActive(location.pathname, item.to),
-  );
-
   // ── Handlers ───────────────────────────────────────────────────────────────
 
   function openAI() {
@@ -121,6 +133,10 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
     inputRef.current?.blur();
     // Clear error when collapsing
     setError('');
+    // Navigate back to the page the user came from
+    if (isAssistantRoute) {
+      navigate(previousRouteRef.current);
+    }
   }
 
   // ── Derived state ──────────────────────────────────────────────────────────
@@ -225,7 +241,7 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
                   className={`floating-nav__nav-circle${navCircleHidden ? ' is-hidden' : ''}`}
                   layoutId="nav-morph"
                   type="button"
-                  aria-label={activeItem?.label ?? 'Navigation'}
+                  aria-label={previousItem?.label ?? 'Navigation'}
                   onClick={collapseAI}
                   onPointerUp={(e) => e.currentTarget.blur()}
                   animate={{
@@ -241,7 +257,7 @@ export function FloatingNavBar({ items }: FloatingNavBarProps) {
                   }}
                 >
                   <span className="floating-nav__nav-circle-icon" aria-hidden="true">
-                    {activeItem?.icon ?? items[0]?.icon}
+                    {previousItem?.icon ?? items[0]?.icon}
                   </span>
                 </motion.button>
               ) : (
