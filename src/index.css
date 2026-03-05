@@ -6396,7 +6396,7 @@ html {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px;
+  padding: 2px 4px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.40);
   background: rgba(255, 255, 255, 0.21);
@@ -6407,7 +6407,7 @@ html {
 
 .ios-catalog-toolbar-btn {
   width: 38px;
-  height: 38px;
+  height: 34px;
   border: none;
   border-radius: 999px;
   background: transparent;
@@ -7495,7 +7495,7 @@ body:has(.content-assistant) {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 4px;
+  padding: 2px 4px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.40);
   background: rgba(255, 255, 255, 0.21);
@@ -7506,7 +7506,7 @@ body:has(.content-assistant) {
 
 .ev-ios-toolbar-btn {
   width: 38px;
-  height: 38px;
+  height: 34px;
   border: none;
   border-radius: 999px;
   background: transparent;
