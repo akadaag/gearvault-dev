@@ -7424,6 +7424,8 @@ body:has(.content-assistant) {
     rgba(255, 255, 255, 0.85) calc(100% - 24px),
     rgba(255, 255, 255, 0) 100%
   );
+  -webkit-mask-image: linear-gradient(to right, black calc(100% - 120px), transparent 100%);
+  mask-image: linear-gradient(to right, black calc(100% - 120px), transparent 100%);
   pointer-events: none;
   z-index: -1;
 }
@@ -7486,14 +7488,20 @@ body:has(.content-assistant) {
 /* ── Toolbar Pill (calendar + add) ─────────────────────────────── */
 
 .ev-ios-toolbar {
+  position: fixed;
+  top: max(4px, env(safe-area-inset-top));
+  right: 16px;
+  z-index: 41;
   display: flex;
   align-items: center;
   gap: 8px;
   padding: 4px;
   border-radius: 999px;
-  border: none;
-  background: #ffffff;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.10), 0 0 0 0.5px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.40);
+  background: rgba(255, 255, 255, 0.21);
+  backdrop-filter: blur(4.9px);
+  -webkit-backdrop-filter: blur(4.9px);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
 
 .ev-ios-toolbar-btn {
@@ -7502,7 +7510,7 @@ body:has(.content-assistant) {
   border: none;
   border-radius: 999px;
   background: transparent;
-  color: var(--ios-text-primary);
+  color: #000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -7518,8 +7526,8 @@ body:has(.content-assistant) {
 }
 
 .ev-ios-toolbar-btn.active {
-  color: var(--ios-blue);
-  background: color-mix(in srgb, var(--ios-blue) 16%, transparent);
+  color: var(--ios-blue, #007AFF);
+  background: rgba(142, 142, 147, 0.22);
 }
 
 /* ── Item Count ────────────────────────────────────────────────── */
@@ -8125,11 +8133,6 @@ body:has(.content-assistant) {
 
 :root.dark .ev-ios-large-title {
   color: var(--ios-text-primary);
-}
-
-:root.dark .ev-ios-toolbar {
-  background: rgba(44, 44, 46, 1);
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.45), 0 0 0 0.5px rgba(255, 255, 255, 0.08);
 }
 
 :root.dark .ev-ios-toolbar-btn {
