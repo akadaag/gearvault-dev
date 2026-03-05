@@ -13112,9 +13112,9 @@ body:has(.content-assistant) {
   align-items: center;
   gap: 0;
   flex: 1;
-  background: rgba(255, 255, 255, 0.21);
-  backdrop-filter: blur(4.9px);
-  -webkit-backdrop-filter: blur(4.9px);
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12.5px);
+  -webkit-backdrop-filter: blur(12.5px);
   border-radius: 32px;
   padding: 6px 9px;
   border: 1px solid rgba(255, 255, 255, 0.40);
@@ -13122,7 +13122,7 @@ body:has(.content-assistant) {
 }
 
 :root.dark .floating-nav__pill {
-  background: rgba(255, 255, 255, 0.21);
+  background: rgba(255, 255, 255, 0.65);
   border-color: rgba(255, 255, 255, 0.40);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
 }
