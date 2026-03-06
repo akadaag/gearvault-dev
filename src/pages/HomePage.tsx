@@ -1,7 +1,26 @@
-import { useMemo, useRef, useEffect, useState } from 'react';
+import { useMemo, useRef, useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
+
+// Color palette for event cards — cycles through by index
+const CARD_COLORS = [
+  'linear-gradient(145deg, #3a3d56, #2b2d42)',   // slate blue-grey
+  'linear-gradient(145deg, #2d4a5e, #1a3344)',   // deep teal
+  'linear-gradient(145deg, #4a3560, #2e1f42)',   // warm purple
+  'linear-gradient(145deg, #2d4a3a, #1a3328)',   // forest green
+  'linear-gradient(145deg, #4a3a2d, #332818)',   // warm brown
+  'linear-gradient(145deg, #3a2d4a, #241844)',   // indigo
+];
+
+const CARD_COLORS_DARK = [
+  'linear-gradient(145deg, #2a2c3e, #1c1d2e)',
+  'linear-gradient(145deg, #1e3a4a, #122630)',
+  'linear-gradient(145deg, #3a2550, #221535)',
+  'linear-gradient(145deg, #1e3a28, #12261a)',
+  'linear-gradient(145deg, #3a2a1e, #261a10)',
+  'linear-gradient(145deg, #2a1e3a, #1a1030)',
+];
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -39,11 +58,36 @@ export function HomePage() {
     [events]
   );
 
-  // ── Event Card Rail: active index + scroll-snap ────────────────────────────
+  // ── Event Card Rail: active index + scroll-snap + scale animation ──────────
   const railRef = useRef<HTMLDivElement>(null);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
 
-  // Dot indicator: track scroll position
+  // Detect dark mode for card colors
+  const isDark = document.documentElement.classList.contains('dark');
+
+  // Smooth scale animation on scroll
+  const updateCardScales = useCallback(() => {
+    const rail = railRef.current;
+    if (!rail || upcomingEvents.length <= 1) return;
+
+    const railRect = rail.getBoundingClientRect();
+    const railCenter = railRect.left + railRect.width / 2;
+
+    cardRefs.current.forEach((card) => {
+      if (!card) return;
+      const cardRect = card.getBoundingClientRect();
+      const cardCenter = cardRect.left + cardRect.width / 2;
+      const distance = Math.abs(railCenter - cardCenter);
+      const maxDistance = railRect.width * 0.6;
+      const ratio = Math.min(distance / maxDistance, 1);
+      // Scale: centered = 1, edges = 0.9
+      const scale = 1 - ratio * 0.1;
+      card.style.transform = `scale(${scale})`;
+    });
+  }, [upcomingEvents.length]);
+
+  // Dot indicator + scale: track scroll position
   useEffect(() => {
     const rail = railRef.current;
     if (!rail || upcomingEvents.length <= 1) return;
@@ -57,11 +101,16 @@ export function HomePage() {
       const gap = 14;
       const idx = Math.round(scrollLeft / (cardWidth + gap));
       setActiveCardIndex(Math.max(0, Math.min(idx, upcomingEvents.length - 1)));
+      updateCardScales();
     }
 
     rail.addEventListener('scroll', handleScroll, { passive: true });
+
+    // Initial scale set
+    requestAnimationFrame(updateCardScales);
+
     return () => rail.removeEventListener('scroll', handleScroll);
-  }, [upcomingEvents.length]);
+  }, [upcomingEvents.length, updateCardScales]);
 
   // ── Essential Items ────────────────────────────────────────────────────────
   const essentialItems = gearItems?.filter((item) => item.essential) ?? [];
@@ -112,16 +161,20 @@ export function HomePage() {
               className={`home-event-rail${upcomingEvents.length === 1 ? ' home-event-rail--single' : ''}`}
               ref={railRef}
             >
-              {upcomingEvents.map((event) => {
+              {upcomingEvents.map((event, idx) => {
                 const { urgencyClass, label: urgencyLabel } = getEventUrgency(event.dateTime!);
                 const total = event.packingChecklist.length;
                 const packed = event.packingChecklist.filter((i) => i.packed).length;
                 const progress = total > 0 ? Math.round((packed / total) * 100) : 0;
+                const colorIndex = idx % CARD_COLORS.length;
+                const bg = isDark ? CARD_COLORS_DARK[colorIndex] : CARD_COLORS[colorIndex];
 
                 return (
                   <div
                     key={event.id}
                     className="home-event-card"
+                    ref={(el) => { cardRefs.current[idx] = el; }}
+                    style={{ background: bg }}
                     onClick={() => navigate(`/events/${event.id}`)}
                   >
                     <div className="home-event-card__top">
@@ -191,64 +244,69 @@ export function HomePage() {
           </div>
         )}
 
-        {/* ── Quick Actions (2x2 grid) ────────────────────────────────── */}
-        <div className="home-actions-grid">
-          <button
-            className="home-action-tile"
-            onClick={() => navigate('/catalog?add=1')}
-          >
-            <div className="home-action-tile__icon home-action-tile__icon--blue">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="12" y1="5" x2="12" y2="19" />
-                <line x1="5" y1="12" x2="19" y2="12" />
-              </svg>
-            </div>
-            <span className="home-action-tile__label">Add Item</span>
-          </button>
+        {/* ── Quick Actions ───────────────────────────────────────────── */}
+        <div className="home-ios-section home-ios-section--actions">
+          <div className="home-section-header">
+            <h3 className="home-section-title">Quick Actions</h3>
+          </div>
+          <div className="home-actions-grid">
+            <button
+              className="home-action-tile"
+              onClick={() => navigate('/catalog?add=1')}
+            >
+              <div className="home-action-tile__icon home-action-tile__icon--blue">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="12" y1="5" x2="12" y2="19" />
+                  <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+              </div>
+              <span className="home-action-tile__label">Add Item</span>
+            </button>
 
-          <button
-            className="home-action-tile"
-            onClick={() => navigate('/events?add=1')}
-          >
-            <div className="home-action-tile__icon home-action-tile__icon--orange">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-              </svg>
-            </div>
-            <span className="home-action-tile__label">New Event</span>
-          </button>
+            <button
+              className="home-action-tile"
+              onClick={() => navigate('/events?add=1')}
+            >
+              <div className="home-action-tile__icon home-action-tile__icon--orange">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                </svg>
+              </div>
+              <span className="home-action-tile__label">New Event</span>
+            </button>
 
-          <button
-            className="home-action-tile"
-            onClick={() => navigate('/assistant')}
-          >
-            <div className="home-action-tile__icon home-action-tile__icon--purple">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M12 4l1.8 4.2L18 10l-4.2 1.8L12 16l-1.8-4.2L6 10l4.2-1.8L12 4z" />
-                <path d="M6.5 4.8l0.8 1.8 1.8 0.8-1.8 0.8-0.8 1.8-0.8-1.8-1.8-0.8 1.8-0.8 0.8-1.8z" />
-              </svg>
-            </div>
-            <span className="home-action-tile__label">Ask AI</span>
-          </button>
+            <button
+              className="home-action-tile"
+              onClick={() => navigate('/assistant')}
+            >
+              <div className="home-action-tile__icon home-action-tile__icon--purple">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M12 4l1.8 4.2L18 10l-4.2 1.8L12 16l-1.8-4.2L6 10l4.2-1.8L12 4z" />
+                  <path d="M6.5 4.8l0.8 1.8 1.8 0.8-1.8 0.8-0.8 1.8-0.8-1.8-1.8-0.8 1.8-0.8 0.8-1.8z" />
+                </svg>
+              </div>
+              <span className="home-action-tile__label">Ask AI</span>
+            </button>
 
-          <button
-            className="home-action-tile"
-            onClick={() => navigate('/events?calendar=1')}
-          >
-            <div className="home-action-tile__icon home-action-tile__icon--green">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
-                <line x1="16" y1="2" x2="16" y2="6" />
-                <line x1="8" y1="2" x2="8" y2="6" />
-                <line x1="3" y1="10" x2="21" y2="10" />
-                <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" />
-              </svg>
-            </div>
-            <span className="home-action-tile__label">Calendar</span>
-          </button>
+            <button
+              className="home-action-tile"
+              onClick={() => navigate('/events?calendar=1')}
+            >
+              <div className="home-action-tile__icon home-action-tile__icon--green">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="4" width="18" height="18" rx="2" ry="2" />
+                  <line x1="16" y1="2" x2="16" y2="6" />
+                  <line x1="8" y1="2" x2="8" y2="6" />
+                  <line x1="3" y1="10" x2="21" y2="10" />
+                  <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01" />
+                </svg>
+              </div>
+              <span className="home-action-tile__label">Calendar</span>
+            </button>
+          </div>
         </div>
 
         {/* ── Essential Items List ─────────────────────────────────────── */}
