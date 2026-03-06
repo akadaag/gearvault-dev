@@ -5211,11 +5211,7 @@ html {
   background: #000;
 }
 
-.home-ios-header .profile-menu {
-  position: absolute;
-  top: max(12px, env(safe-area-inset-top));
-  right: 16px;
-}
+/* Profile menu now lives in .toolbar-area--home (TabLayout), not in the header */
 
 .home-ios-date {
   font-size: 13px;
@@ -13949,16 +13945,18 @@ body:has(.content-assistant) {
   gap: 8px;
 }
 
-/* Home page: only search, no toolbar pill */
+/* Home page: search + profile, aligned in a row */
 .toolbar-area--home {
   right: 16px;
+  top: max(12px, env(safe-area-inset-top));
 }
 
-/* When search is open, fade out the toolbar pill */
+/* When search is open, fade out the toolbar pill / profile avatar */
 .toolbar-pill--search-open {
   opacity: 0;
   pointer-events: none;
   transform: scale(0.92);
+  transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
 /* ── Search circle (closed state) ────────────────────────────────────── */

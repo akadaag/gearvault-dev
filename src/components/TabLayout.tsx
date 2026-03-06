@@ -7,6 +7,7 @@ import { useTheme } from '../hooks/useTheme';
 import { resetSheetScrollLock } from '../lib/sheetLock';
 import { FloatingNavBar } from './FloatingNavBar';
 import { ToolbarSearch } from './ToolbarSearch';
+import { ProfileMenu } from './ProfileMenu';
 import { AIAssistantProvider } from '../contexts/AIAssistantContext';
 
 const homeIcon = (
@@ -340,10 +341,13 @@ export function TabLayout() {
         <Outlet />
       </main>
 
-      {/* Home toolbar — search only */}
+      {/* Home toolbar — search + profile */}
       {isHomeRoute && (
         <div className="toolbar-area toolbar-area--home">
           <ToolbarSearch onOpenChange={setSearchOpen} />
+          <div className={searchOpen ? 'toolbar-pill--search-open' : ''}>
+            <ProfileMenu />
+          </div>
         </div>
       )}
 
