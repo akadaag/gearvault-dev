@@ -819,7 +819,11 @@ a {
   padding-left: 0;
   padding-right: 0;
   overflow-x: hidden;
-  background: var(--ios-bg);
+  background: #ffffff;
+}
+
+:root.dark .content.content-home {
+  background: #000000;
 }
 
 .content-immersive {
@@ -5508,7 +5512,7 @@ html {
 .home-actions-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr 1fr;
-  gap: 10px;
+  gap: 6px;
   padding: 0;
 }
 
@@ -5533,8 +5537,8 @@ html {
 }
 
 .home-action-tile__icon {
-  width: 60px;
-  height: 60px;
+  width: 66px;
+  height: 66px;
   border-radius: 18px;
   display: flex;
   align-items: center;
@@ -5794,12 +5798,12 @@ html {
   }
 
   .home-actions-grid {
-    gap: 6px;
+    gap: 4px;
   }
 
   .home-action-tile__icon {
-    width: 52px;
-    height: 52px;
+    width: 56px;
+    height: 56px;
     border-radius: 16px;
   }
 

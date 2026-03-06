@@ -2,6 +2,7 @@ import { useMemo, useRef, useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
+import type { EventItem } from '../types/models';
 
 // Color palette for event cards — cycles through by index
 const CARD_COLORS = [
@@ -21,6 +22,16 @@ const CARD_COLORS_DARK = [
   'linear-gradient(145deg, #3a2a1e, #261a10)',
   'linear-gradient(145deg, #2a1e3a, #1a1030)',
 ];
+
+// Gap between cards in the rail (must match CSS)
+const CARD_GAP = 14;
+
+interface DisplayCard {
+  event: EventItem;
+  colorIdx: number;
+  isClone: boolean;
+  key: string;
+}
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -58,18 +69,76 @@ export function HomePage() {
     [events]
   );
 
+  // ── Display cards: real events + clones for infinite carousel ──────────────
+  const displayCards = useMemo(() => {
+    if (upcomingEvents.length === 0) return [];
+    if (upcomingEvents.length === 1) {
+      return [{
+        event: upcomingEvents[0],
+        colorIdx: 0,
+        isClone: false,
+        key: upcomingEvents[0].id!,
+      }] as DisplayCard[];
+    }
+
+    // 2+ events: clone last before first, clone first after last
+    const lastIdx = upcomingEvents.length - 1;
+    const cards: DisplayCard[] = [];
+
+    // Clone of last event (placed before first)
+    cards.push({
+      event: upcomingEvents[lastIdx],
+      colorIdx: lastIdx % CARD_COLORS.length,
+      isClone: true,
+      key: `clone-start-${upcomingEvents[lastIdx].id}`,
+    });
+
+    // All real events
+    upcomingEvents.forEach((ev, idx) => {
+      cards.push({
+        event: ev,
+        colorIdx: idx % CARD_COLORS.length,
+        isClone: false,
+        key: ev.id!,
+      });
+    });
+
+    // Clone of first event (placed after last)
+    cards.push({
+      event: upcomingEvents[0],
+      colorIdx: 0,
+      isClone: true,
+      key: `clone-end-${upcomingEvents[0].id}`,
+    });
+
+    return cards;
+  }, [upcomingEvents]);
+
   // ── Event Card Rail: active index + scroll-snap + scale animation ──────────
   const railRef = useRef<HTMLDivElement>(null);
   const [activeCardIndex, setActiveCardIndex] = useState(0);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const rafRef = useRef<number>(0);
+  const isJumping = useRef(false);
+  const scrollEndTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const eventCount = upcomingEvents.length;
+  const isMulti = eventCount >= 2;
 
   // Detect dark mode for card colors
   const isDark = document.documentElement.classList.contains('dark');
 
-  // Smooth scale animation on scroll
+  // Get card step (width + gap) for scroll position math
+  const getStep = useCallback(() => {
+    const rail = railRef.current;
+    if (!rail || !rail.firstElementChild) return 1;
+    return (rail.firstElementChild as HTMLElement).offsetWidth + CARD_GAP;
+  }, []);
+
+  // Smooth scale animation on scroll — reads DOM, no state updates
   const updateCardScales = useCallback(() => {
     const rail = railRef.current;
-    if (!rail || upcomingEvents.length <= 1) return;
+    if (!rail || eventCount <= 1) return;
 
     const railRect = rail.getBoundingClientRect();
     const railCenter = railRect.left + railRect.width / 2;
@@ -85,32 +154,108 @@ export function HomePage() {
       const scale = 1 - ratio * 0.1;
       card.style.transform = `scale(${scale})`;
     });
-  }, [upcomingEvents.length]);
+  }, [eventCount]);
 
-  // Dot indicator + scale: track scroll position
+  // Map display index → real event index (for dot indicators)
+  const displayIdxToRealIdx = useCallback(
+    (displayIdx: number) => {
+      if (!isMulti) return 0;
+      if (displayIdx <= 0) return eventCount - 1; // clone of last → last real
+      if (displayIdx > eventCount) return 0; // clone of first → first real
+      return displayIdx - 1; // offset by 1 due to leading clone
+    },
+    [isMulti, eventCount]
+  );
+
+  // Scroll to a specific display index (instant, no animation)
+  const scrollToDisplayIdx = useCallback(
+    (displayIdx: number) => {
+      const rail = railRef.current;
+      if (!rail) return;
+      const step = getStep();
+      rail.scrollTo({ left: displayIdx * step, behavior: 'instant' });
+    },
+    [getStep]
+  );
+
+  // rAF-throttled scroll handler
   useEffect(() => {
     const rail = railRef.current;
-    if (!rail || upcomingEvents.length <= 1) return;
+    if (!rail || eventCount <= 1) return;
 
     function handleScroll() {
-      if (!rail) return;
-      const scrollLeft = rail.scrollLeft;
-      const cardWidth = rail.firstElementChild
-        ? (rail.firstElementChild as HTMLElement).offsetWidth
-        : 1;
-      const gap = 14;
-      const idx = Math.round(scrollLeft / (cardWidth + gap));
-      setActiveCardIndex(Math.max(0, Math.min(idx, upcomingEvents.length - 1)));
-      updateCardScales();
+      if (isJumping.current) return;
+
+      // Cancel any pending rAF
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+
+      rafRef.current = requestAnimationFrame(() => {
+        if (!rail || isJumping.current) return;
+
+        const scrollLeft = rail.scrollLeft;
+        const step = getStep();
+        const displayIdx = Math.round(scrollLeft / step);
+        const realIdx = displayIdxToRealIdx(displayIdx);
+
+        // Only update state if changed
+        setActiveCardIndex((prev) => (prev !== realIdx ? realIdx : prev));
+
+        // Update scales visually
+        updateCardScales();
+      });
+
+      // Scroll-end debounce: detect if resting on a clone → jump to real
+      if (scrollEndTimer.current) clearTimeout(scrollEndTimer.current);
+      scrollEndTimer.current = setTimeout(() => {
+        if (!rail || !isMulti || isJumping.current) return;
+
+        const scrollLeft = rail.scrollLeft;
+        const step = getStep();
+        const displayIdx = Math.round(scrollLeft / step);
+
+        if (displayIdx <= 0) {
+          // On clone-of-last → jump to the real last card
+          isJumping.current = true;
+          scrollToDisplayIdx(eventCount); // real last is at displayIndex = eventCount
+          requestAnimationFrame(() => {
+            updateCardScales();
+            isJumping.current = false;
+          });
+        } else if (displayIdx > eventCount) {
+          // On clone-of-first → jump to the real first card
+          isJumping.current = true;
+          scrollToDisplayIdx(1); // real first is at displayIndex = 1
+          requestAnimationFrame(() => {
+            updateCardScales();
+            isJumping.current = false;
+          });
+        }
+      }, 150);
     }
 
     rail.addEventListener('scroll', handleScroll, { passive: true });
 
-    // Initial scale set
-    requestAnimationFrame(updateCardScales);
+    // Initial position: scroll to display index 1 (first real card)
+    if (isMulti) {
+      // Defer to ensure DOM is laid out
+      requestAnimationFrame(() => {
+        isJumping.current = true;
+        scrollToDisplayIdx(1);
+        requestAnimationFrame(() => {
+          updateCardScales();
+          isJumping.current = false;
+        });
+      });
+    } else {
+      requestAnimationFrame(updateCardScales);
+    }
 
-    return () => rail.removeEventListener('scroll', handleScroll);
-  }, [upcomingEvents.length, updateCardScales]);
+    return () => {
+      rail.removeEventListener('scroll', handleScroll);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (scrollEndTimer.current) clearTimeout(scrollEndTimer.current);
+    };
+  }, [eventCount, isMulti, updateCardScales, getStep, displayIdxToRealIdx, scrollToDisplayIdx]);
 
   // ── Essential Items ────────────────────────────────────────────────────────
   const essentialItems = gearItems?.filter((item) => item.essential) ?? [];
@@ -137,6 +282,65 @@ export function HomePage() {
     return { daysUntil, urgencyClass, label };
   }
 
+  // ── Render helper for a single event card ──────────────────────────────────
+  function renderEventCard(dc: DisplayCard, refIdx: number) {
+    const { event, colorIdx, key } = dc;
+    const { urgencyClass, label: urgencyLabel } = getEventUrgency(event.dateTime!);
+    const total = event.packingChecklist.length;
+    const packed = event.packingChecklist.filter((i) => i.packed).length;
+    const progress = total > 0 ? Math.round((packed / total) * 100) : 0;
+    const bg = isDark ? CARD_COLORS_DARK[colorIdx] : CARD_COLORS[colorIdx];
+
+    return (
+      <div
+        key={key}
+        className="home-event-card"
+        ref={(el) => { cardRefs.current[refIdx] = el; }}
+        style={{ background: bg }}
+        onClick={() => navigate(`/events/${event.id}`)}
+      >
+        <div className="home-event-card__top">
+          <span className="home-event-card__label">Upcoming Event</span>
+          <span className={`home-event-card__badge ${urgencyClass}`}>
+            {urgencyLabel}
+          </span>
+        </div>
+
+        <h3 className="home-event-card__title">{event.title}</h3>
+
+        <p className="home-event-card__date">
+          {new Date(event.dateTime!).toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+          })}
+        </p>
+
+        <div className="home-event-card__bottom">
+          <span className="home-event-card__meta">
+            {[event.client, event.location].filter(Boolean).join(' \u00B7 ') || event.type}
+          </span>
+          {total > 0 && (
+            <span className="home-event-card__packing">
+              {packed}/{total} packed
+            </span>
+          )}
+        </div>
+
+        {total > 0 && (
+          <div className="home-event-card__progress">
+            <div
+              className="home-event-card__progress-fill"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
+
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <section className="home-page ios-theme">
@@ -155,73 +359,17 @@ export function HomePage() {
       <div className="home-ios-content page-scroll-area">
 
         {/* ── Event Card Rail ─────────────────────────────────────────── */}
-        {upcomingEvents.length > 0 ? (
+        {displayCards.length > 0 ? (
           <>
             <div
-              className={`home-event-rail${upcomingEvents.length === 1 ? ' home-event-rail--single' : ''}`}
+              className={`home-event-rail${eventCount === 1 ? ' home-event-rail--single' : ''}`}
               ref={railRef}
             >
-              {upcomingEvents.map((event, idx) => {
-                const { urgencyClass, label: urgencyLabel } = getEventUrgency(event.dateTime!);
-                const total = event.packingChecklist.length;
-                const packed = event.packingChecklist.filter((i) => i.packed).length;
-                const progress = total > 0 ? Math.round((packed / total) * 100) : 0;
-                const colorIndex = idx % CARD_COLORS.length;
-                const bg = isDark ? CARD_COLORS_DARK[colorIndex] : CARD_COLORS[colorIndex];
-
-                return (
-                  <div
-                    key={event.id}
-                    className="home-event-card"
-                    ref={(el) => { cardRefs.current[idx] = el; }}
-                    style={{ background: bg }}
-                    onClick={() => navigate(`/events/${event.id}`)}
-                  >
-                    <div className="home-event-card__top">
-                      <span className="home-event-card__label">Upcoming Event</span>
-                      <span className={`home-event-card__badge ${urgencyClass}`}>
-                        {urgencyLabel}
-                      </span>
-                    </div>
-
-                    <h3 className="home-event-card__title">{event.title}</h3>
-
-                    <p className="home-event-card__date">
-                      {new Date(event.dateTime!).toLocaleDateString('en-US', {
-                        weekday: 'short',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: 'numeric',
-                        minute: '2-digit',
-                      })}
-                    </p>
-
-                    <div className="home-event-card__bottom">
-                      <span className="home-event-card__meta">
-                        {[event.client, event.location].filter(Boolean).join(' \u00B7 ') || event.type}
-                      </span>
-                      {total > 0 && (
-                        <span className="home-event-card__packing">
-                          {packed}/{total} packed
-                        </span>
-                      )}
-                    </div>
-
-                    {total > 0 && (
-                      <div className="home-event-card__progress">
-                        <div
-                          className="home-event-card__progress-fill"
-                          style={{ width: `${progress}%` }}
-                        />
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+              {displayCards.map((dc, idx) => renderEventCard(dc, idx))}
             </div>
 
-            {/* Dot indicators */}
-            {upcomingEvents.length > 1 && (
+            {/* Dot indicators — only count real events */}
+            {eventCount > 1 && (
               <div className="home-event-dots">
                 {upcomingEvents.map((_, idx) => (
                   <span
