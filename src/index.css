@@ -5262,32 +5262,36 @@ html {
    ================================================================ */
 
 .home-event-rail {
-  display: flex;
-  gap: 14px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  padding: 4px 16px 8px;
-  /* Extra space on right for peek of next card */
-  scroll-padding: 0 16px;
+  position: relative;
+  overflow: hidden;
+  padding: 4px 0 8px;
+  /* Height set by card min-height + vertical padding */
+  min-height: 216px;
+  touch-action: pan-y;
 }
 
-.home-event-rail::-webkit-scrollbar {
-  display: none;
+/* Inner track that gets translateX'd */
+.home-event-track {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
 }
 
-/* When only one card, center it and disable snapping */
+/* When only one card, just center it with padding */
 .home-event-rail--single {
-  scroll-snap-type: none;
+  padding: 4px 16px 8px;
+}
+
+.home-event-rail--single .home-event-track {
+  display: flex;
   justify-content: center;
 }
 
 /* ── Event Card ──────────────────────────────────────────────── */
 
 .home-event-card {
-  flex: 0 0 calc(100% - 48px);
-  scroll-snap-align: center;
+  position: relative;
   border-radius: 22px;
   background: linear-gradient(145deg, #3a3d56, #2b2d42);
   color: #fff;
@@ -5297,10 +5301,12 @@ html {
   flex-direction: column;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  position: relative;
   overflow: hidden;
   transform-origin: center center;
   will-change: transform;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
 }
 
 .home-event-card::before {
@@ -5331,9 +5337,10 @@ html {
   transform: scale(0.985) !important;
 }
 
-/* Single-card layout: full width minus padding */
+/* Single-card layout: static card with full width */
 .home-event-rail--single .home-event-card {
-  flex: 0 0 calc(100% - 32px);
+  position: relative;
+  width: 100%;
 }
 
 /* ── Event Card — Empty State ────────────────────────────────── */
@@ -5773,13 +5780,12 @@ html {
   }
 
   .home-event-card {
-    flex: 0 0 calc(100% - 40px);
     padding: 18px 16px;
     min-height: 180px;
   }
 
   .home-event-rail--single .home-event-card {
-    flex: 0 0 calc(100% - 32px);
+    width: 100%;
   }
 
   .home-event-card--empty {

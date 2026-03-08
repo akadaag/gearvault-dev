@@ -22,8 +22,16 @@ const CARD_COLORS_DARK = [
   'linear-gradient(145deg, #2a1e3a, #1a1030)',
 ];
 
-// Gap between cards in the rail (must match CSS)
+// Card sizing constants
 const CARD_GAP = 14;
+const PEEK_WIDTH = 24; // how much of neighboring cards is visible
+const SWIPE_THRESHOLD = 50; // min px to trigger card change
+const SWIPE_VELOCITY_THRESHOLD = 0.3; // px/ms to trigger card change even if distance is small
+
+/** Wraps index into [0, length) range */
+function wrapIndex(i: number, length: number): number {
+  return ((i % length) + length) % length;
+}
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -61,70 +69,142 @@ export function HomePage() {
     [events]
   );
 
-  // ── Event Card Rail: active index + scroll-snap + scale animation ──────────
-  const railRef = useRef<HTMLDivElement>(null);
-  const [activeCardIndex, setActiveCardIndex] = useState(0);
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const rafRef = useRef<number>(0);
-
   const eventCount = upcomingEvents.length;
+
+  // ── Infinite Carousel State ─────────────────────────────────────────────────
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const railRef = useRef<HTMLDivElement>(null);
+  const touchRef = useRef<{
+    startX: number;
+    startY: number;
+    startTime: number;
+    moved: boolean;
+    locked: boolean; // true = horizontal lock, false = not yet determined
+    cancelled: boolean; // true = vertical scroll detected, abort carousel drag
+  } | null>(null);
 
   // Detect dark mode for card colors
   const isDark = document.documentElement.classList.contains('dark');
 
-  // Smooth scale animation on scroll — reads DOM, no state updates
-  const updateCardScales = useCallback(() => {
+  // Calculate card width from container width
+  const getCardWidth = useCallback(() => {
     const rail = railRef.current;
-    if (!rail || eventCount <= 1) return;
+    if (!rail) return 300;
+    // Card takes full width minus 2x peek and 2x gap
+    return rail.offsetWidth - 2 * PEEK_WIDTH - 2 * CARD_GAP;
+  }, []);
 
-    const railRect = rail.getBoundingClientRect();
-    const railCenter = railRect.left + railRect.width / 2;
+  // Step = card width + gap
+  const getStep = useCallback(() => {
+    return getCardWidth() + CARD_GAP;
+  }, [getCardWidth]);
 
-    cardRefs.current.forEach((card) => {
-      if (!card) return;
-      const cardRect = card.getBoundingClientRect();
-      const cardCenter = cardRect.left + cardRect.width / 2;
-      const distance = Math.abs(railCenter - cardCenter);
-      const maxDistance = railRect.width * 0.6;
-      const ratio = Math.min(distance / maxDistance, 1);
-      const scale = 1 - ratio * 0.1;
-      card.style.transform = `scale(${scale})`;
-    });
-  }, [eventCount]);
+  // Navigate to a new index with animation
+  const goToIndex = useCallback((newIndex: number) => {
+    setIsAnimating(true);
+    setActiveIndex(newIndex);
+    setDragOffset(0);
+    // Remove animation flag after transition completes
+    setTimeout(() => setIsAnimating(false), 320);
+  }, []);
 
-  // rAF-throttled scroll handler — updates scales + dot indicator
+  // ── Touch handlers for swipe ────────────────────────────────────────────────
   useEffect(() => {
     const rail = railRef.current;
     if (!rail || eventCount <= 1) return;
 
-    function handleScroll() {
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
-
-      rafRef.current = requestAnimationFrame(() => {
-        if (!rail) return;
-
-        const scrollLeft = rail.scrollLeft;
-        const firstCard = rail.firstElementChild as HTMLElement | null;
-        if (!firstCard) return;
-        const step = firstCard.offsetWidth + CARD_GAP;
-        const idx = Math.round(scrollLeft / step);
-        const clamped = Math.max(0, Math.min(idx, eventCount - 1));
-
-        setActiveCardIndex((prev) => (prev !== clamped ? clamped : prev));
-        updateCardScales();
-      });
+    function handleTouchStart(e: TouchEvent) {
+      if (isAnimating) return;
+      const touch = e.touches[0];
+      touchRef.current = {
+        startX: touch.clientX,
+        startY: touch.clientY,
+        startTime: Date.now(),
+        moved: false,
+        locked: false,
+        cancelled: false,
+      };
     }
 
-    rail.addEventListener('scroll', handleScroll, { passive: true });
+    function handleTouchMove(e: TouchEvent) {
+      const info = touchRef.current;
+      if (!info || info.cancelled) return;
 
-    // Initial scale set
-    requestAnimationFrame(updateCardScales);
+      const touch = e.touches[0];
+      const dx = touch.clientX - info.startX;
+      const dy = touch.clientY - info.startY;
+
+      // Determine scroll direction lock if not yet decided
+      if (!info.locked && !info.moved) {
+        const absDx = Math.abs(dx);
+        const absDy = Math.abs(dy);
+        // Need at least 8px of movement to decide direction
+        if (absDx < 8 && absDy < 8) return;
+
+        if (absDy > absDx * 1.2) {
+          // Vertical scroll — cancel carousel drag
+          info.cancelled = true;
+          setDragOffset(0);
+          return;
+        }
+        info.locked = true;
+      }
+
+      if (info.cancelled) return;
+
+      // Horizontal drag — prevent vertical scroll
+      e.preventDefault();
+      info.moved = true;
+      setDragOffset(dx);
+    }
+
+    function handleTouchEnd(_e: TouchEvent) {
+      const info = touchRef.current;
+      if (!info || info.cancelled) {
+        touchRef.current = null;
+        setDragOffset(0);
+        return;
+      }
+
+      const elapsed = Date.now() - info.startTime;
+      const velocity = Math.abs(dragOffset) / elapsed;
+
+      let direction = 0; // -1 = prev, 0 = stay, 1 = next
+      if (Math.abs(dragOffset) > SWIPE_THRESHOLD || velocity > SWIPE_VELOCITY_THRESHOLD) {
+        direction = dragOffset > 0 ? -1 : 1;
+      }
+
+      touchRef.current = null;
+
+      if (direction !== 0) {
+        goToIndex(activeIndex + direction);
+      } else {
+        // Snap back
+        setIsAnimating(true);
+        setDragOffset(0);
+        setTimeout(() => setIsAnimating(false), 320);
+      }
+    }
+
+    rail.addEventListener('touchstart', handleTouchStart, { passive: true });
+    rail.addEventListener('touchmove', handleTouchMove, { passive: false });
+    rail.addEventListener('touchend', handleTouchEnd, { passive: true });
 
     return () => {
-      rail.removeEventListener('scroll', handleScroll);
-      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      rail.removeEventListener('touchstart', handleTouchStart);
+      rail.removeEventListener('touchmove', handleTouchMove);
+      rail.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [eventCount, updateCardScales]);
+  }, [eventCount, isAnimating, dragOffset, activeIndex, goToIndex]);
+
+  // ── Build visible cards (prev, current, next) ──────────────────────────────
+  // We render enough cards to fill the viewport: the active card centered,
+  // plus neighbors on both sides. For infinite loop we render 5 positions
+  // (-2, -1, 0, +1, +2) to ensure smooth peek during fast swipes.
+  const visiblePositions = eventCount >= 3 ? [-2, -1, 0, 1, 2] : 
+                           eventCount === 2 ? [-1, 0, 1] : [0];
 
   // ── Essential Items ────────────────────────────────────────────────────────
   const essentialItems = gearItems?.filter((item) => item.essential) ?? [];
@@ -151,6 +231,12 @@ export function HomePage() {
     return { daysUntil, urgencyClass, label };
   }
 
+  // Handle card tap — only navigate if not swiping
+  function handleCardClick(eventId: string) {
+    if (touchRef.current?.moved) return;
+    navigate(`/events/${eventId}`);
+  }
+
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <section className="home-page ios-theme">
@@ -168,70 +254,148 @@ export function HomePage() {
       {/* ── Scrollable Content ────────────────────────────────────────── */}
       <div className="home-ios-content page-scroll-area">
 
-        {/* ── Event Card Rail ─────────────────────────────────────────── */}
+        {/* ── Event Card Carousel ─────────────────────────────────────── */}
         {upcomingEvents.length > 0 ? (
           <>
             <div
               className={`home-event-rail${eventCount === 1 ? ' home-event-rail--single' : ''}`}
               ref={railRef}
             >
-              {upcomingEvents.map((event, idx) => {
-                const { urgencyClass, label: urgencyLabel } = getEventUrgency(event.dateTime!);
-                const total = event.packingChecklist.length;
-                const packed = event.packingChecklist.filter((i) => i.packed).length;
-                const progress = total > 0 ? Math.round((packed / total) * 100) : 0;
-                const colorIndex = idx % CARD_COLORS.length;
-                const bg = isDark ? CARD_COLORS_DARK[colorIndex] : CARD_COLORS[colorIndex];
+              <div
+                className="home-event-track"
+                style={{
+                  transform: `translateX(${-activeIndex * getStep() + dragOffset}px)`,
+                  transition: isAnimating ? 'transform 0.32s cubic-bezier(0.25, 1, 0.5, 1)' : 'none',
+                }}
+              >
+                {eventCount > 1 ? (
+                  visiblePositions.map((offset) => {
+                    const realIdx = wrapIndex(activeIndex + offset, eventCount);
+                    const event = upcomingEvents[realIdx];
+                    const { urgencyClass, label: urgencyLabel } = getEventUrgency(event.dateTime!);
+                    const total = event.packingChecklist.length;
+                    const packed = event.packingChecklist.filter((i) => i.packed).length;
+                    const progress = total > 0 ? Math.round((packed / total) * 100) : 0;
+                    const colorIndex = realIdx % CARD_COLORS.length;
+                    const bg = isDark ? CARD_COLORS_DARK[colorIndex] : CARD_COLORS[colorIndex];
 
-                return (
-                  <div
-                    key={event.id}
-                    className="home-event-card"
-                    ref={(el) => { cardRefs.current[idx] = el; }}
-                    style={{ background: bg }}
-                    onClick={() => navigate(`/events/${event.id}`)}
-                  >
-                    <div className="home-event-card__top">
-                      <span className="home-event-card__label">Upcoming Event</span>
-                      <span className={`home-event-card__badge ${urgencyClass}`}>
-                        {urgencyLabel}
-                      </span>
-                    </div>
+                    // Position in track: each card at (activeIndex + offset) * step
+                    const position = (activeIndex + offset) * getStep();
 
-                    <h3 className="home-event-card__title">{event.title}</h3>
+                    // Scale: center card = 1, neighbors = 0.92
+                    const distFromCenter = Math.abs(offset * getStep() + dragOffset) / getStep();
+                    const scale = 1 - Math.min(distFromCenter, 1) * 0.08;
 
-                    <p className="home-event-card__date">
-                      {new Date(event.dateTime!).toLocaleDateString('en-US', {
-                        weekday: 'short',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: 'numeric',
-                        minute: '2-digit',
-                      })}
-                    </p>
+                    return (
+                      <div
+                        key={`${offset}-${realIdx}`}
+                        className="home-event-card"
+                        style={{
+                          background: bg,
+                          position: 'absolute',
+                          left: 0,
+                          top: 0,
+                          width: `${getCardWidth()}px`,
+                          transform: `translateX(${position + PEEK_WIDTH + CARD_GAP}px) scale(${scale})`,
+                        }}
+                        onClick={() => handleCardClick(event.id)}
+                      >
+                        <div className="home-event-card__top">
+                          <span className="home-event-card__label">Upcoming Event</span>
+                          <span className={`home-event-card__badge ${urgencyClass}`}>
+                            {urgencyLabel}
+                          </span>
+                        </div>
 
-                    <div className="home-event-card__bottom">
-                      <span className="home-event-card__meta">
-                        {[event.client, event.location].filter(Boolean).join(' \u00B7 ') || event.type}
-                      </span>
-                      {total > 0 && (
-                        <span className="home-event-card__packing">
-                          {packed}/{total} packed
-                        </span>
-                      )}
-                    </div>
+                        <h3 className="home-event-card__title">{event.title}</h3>
 
-                    {total > 0 && (
-                      <div className="home-event-card__progress">
-                        <div
-                          className="home-event-card__progress-fill"
-                          style={{ width: `${progress}%` }}
-                        />
+                        <p className="home-event-card__date">
+                          {new Date(event.dateTime!).toLocaleDateString('en-US', {
+                            weekday: 'short',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                          })}
+                        </p>
+
+                        <div className="home-event-card__bottom">
+                          <span className="home-event-card__meta">
+                            {[event.client, event.location].filter(Boolean).join(' \u00B7 ') || event.type}
+                          </span>
+                          {total > 0 && (
+                            <span className="home-event-card__packing">
+                              {packed}/{total} packed
+                            </span>
+                          )}
+                        </div>
+
+                        {total > 0 && (
+                          <div className="home-event-card__progress">
+                            <div
+                              className="home-event-card__progress-fill"
+                              style={{ width: `${progress}%` }}
+                            />
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                );
-              })}
+                    );
+                  })
+                ) : (
+                  // Single card — no carousel mechanics
+                  (() => {
+                    const event = upcomingEvents[0];
+                    const { urgencyClass, label: urgencyLabel } = getEventUrgency(event.dateTime!);
+                    const total = event.packingChecklist.length;
+                    const packed = event.packingChecklist.filter((i) => i.packed).length;
+                    const progress = total > 0 ? Math.round((packed / total) * 100) : 0;
+                    const bg = isDark ? CARD_COLORS_DARK[0] : CARD_COLORS[0];
+
+                    return (
+                      <div
+                        className="home-event-card"
+                        style={{ background: bg }}
+                        onClick={() => navigate(`/events/${event.id}`)}
+                      >
+                        <div className="home-event-card__top">
+                          <span className="home-event-card__label">Upcoming Event</span>
+                          <span className={`home-event-card__badge ${urgencyClass}`}>
+                            {urgencyLabel}
+                          </span>
+                        </div>
+                        <h3 className="home-event-card__title">{event.title}</h3>
+                        <p className="home-event-card__date">
+                          {new Date(event.dateTime!).toLocaleDateString('en-US', {
+                            weekday: 'short',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: 'numeric',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                        <div className="home-event-card__bottom">
+                          <span className="home-event-card__meta">
+                            {[event.client, event.location].filter(Boolean).join(' \u00B7 ') || event.type}
+                          </span>
+                          {total > 0 && (
+                            <span className="home-event-card__packing">
+                              {packed}/{total} packed
+                            </span>
+                          )}
+                        </div>
+                        {total > 0 && (
+                          <div className="home-event-card__progress">
+                            <div
+                              className="home-event-card__progress-fill"
+                              style={{ width: `${progress}%` }}
+                            />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })()
+                )}
+              </div>
             </div>
 
             {/* Dot indicators */}
@@ -240,7 +404,7 @@ export function HomePage() {
                 {upcomingEvents.map((_, idx) => (
                   <span
                     key={idx}
-                    className={`home-event-dot${idx === activeCardIndex ? ' active' : ''}`}
+                    className={`home-event-dot${wrapIndex(activeIndex, eventCount) === idx ? ' active' : ''}`}
                   />
                 ))}
               </div>
