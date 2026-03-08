@@ -120,7 +120,6 @@ export function HomePage() {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const rafRef = useRef<number>(0);
   const isJumping = useRef(false);
-  const scrollEndTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const eventCount = upcomingEvents.length;
   const isMulti = eventCount >= 2;
@@ -178,11 +177,12 @@ export function HomePage() {
     [getStep]
   );
 
-  // rAF-throttled scroll handler
+  // rAF-throttled scroll handler + scrollend for clone jumps
   useEffect(() => {
     const rail = railRef.current;
     if (!rail || eventCount <= 1) return;
 
+    // --- Continuous scroll: update scales + dot indicator ---
     function handleScroll() {
       if (isJumping.current) return;
 
@@ -203,47 +203,57 @@ export function HomePage() {
         // Update scales visually
         updateCardScales();
       });
+    }
 
-      // Scroll-end debounce: detect if resting on a clone → jump to real
-      if (scrollEndTimer.current) clearTimeout(scrollEndTimer.current);
-      scrollEndTimer.current = setTimeout(() => {
-        if (!rail || !isMulti || isJumping.current) return;
+    // --- Scroll-end: detect if resting on a clone → jump to real ---
+    // Uses native scrollend (fires once after scroll-snap finishes)
+    function handleScrollEnd() {
+      if (!rail || !isMulti || isJumping.current) return;
 
-        const scrollLeft = rail.scrollLeft;
-        const step = getStep();
-        const displayIdx = Math.round(scrollLeft / step);
+      const scrollLeft = rail.scrollLeft;
+      const step = getStep();
+      const displayIdx = Math.round(scrollLeft / step);
 
-        if (displayIdx <= 0) {
-          // On clone-of-last → jump to the real last card
-          isJumping.current = true;
-          scrollToDisplayIdx(eventCount); // real last is at displayIndex = eventCount
+      let targetIdx: number | null = null;
+      if (displayIdx <= 0) {
+        targetIdx = eventCount; // clone-of-last → real last card
+      } else if (displayIdx > eventCount) {
+        targetIdx = 1; // clone-of-first → real first card
+      }
+
+      if (targetIdx !== null) {
+        isJumping.current = true;
+        // Disable scroll-snap so the browser doesn't fight our jump
+        rail.style.scrollSnapType = 'none';
+        rail.scrollTo({ left: targetIdx * step, behavior: 'instant' });
+
+        // Double-rAF: let the position settle, then re-enable snap
+        requestAnimationFrame(() => {
           requestAnimationFrame(() => {
+            rail.style.scrollSnapType = 'x mandatory';
             updateCardScales();
             isJumping.current = false;
           });
-        } else if (displayIdx > eventCount) {
-          // On clone-of-first → jump to the real first card
-          isJumping.current = true;
-          scrollToDisplayIdx(1); // real first is at displayIndex = 1
-          requestAnimationFrame(() => {
-            updateCardScales();
-            isJumping.current = false;
-          });
-        }
-      }, 150);
+        });
+      }
     }
 
     rail.addEventListener('scroll', handleScroll, { passive: true });
+    rail.addEventListener('scrollend', handleScrollEnd);
 
     // Initial position: scroll to display index 1 (first real card)
     if (isMulti) {
       // Defer to ensure DOM is laid out
       requestAnimationFrame(() => {
         isJumping.current = true;
+        rail.style.scrollSnapType = 'none';
         scrollToDisplayIdx(1);
         requestAnimationFrame(() => {
-          updateCardScales();
-          isJumping.current = false;
+          requestAnimationFrame(() => {
+            rail.style.scrollSnapType = 'x mandatory';
+            updateCardScales();
+            isJumping.current = false;
+          });
         });
       });
     } else {
@@ -252,8 +262,8 @@ export function HomePage() {
 
     return () => {
       rail.removeEventListener('scroll', handleScroll);
+      rail.removeEventListener('scrollend', handleScrollEnd);
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
-      if (scrollEndTimer.current) clearTimeout(scrollEndTimer.current);
     };
   }, [eventCount, isMulti, updateCardScales, getStep, displayIdxToRealIdx, scrollToDisplayIdx]);
 
