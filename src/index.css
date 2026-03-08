@@ -5299,7 +5299,6 @@ html {
   -webkit-tap-highlight-color: transparent;
   position: relative;
   overflow: hidden;
-  transition: transform 0.15s ease;
   transform-origin: center center;
   will-change: transform;
 }
@@ -13804,6 +13803,8 @@ body:has(.content-assistant) {
   pointer-events: none;
   transform: scale(0.92);
   transition: opacity 0.18s ease, transform 0.18s ease;
+  position: absolute;
+  right: 0;
 }
 
 /* ── Search circle (closed state) ────────────────────────────────────── */
