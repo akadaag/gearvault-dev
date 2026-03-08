@@ -23,10 +23,10 @@ const CARD_COLORS_DARK = [
 ];
 
 // Card sizing constants
-const CARD_GAP = 14;
 const PEEK_WIDTH = 24; // how much of neighboring cards is visible
+const CARD_GAP = 14;
 const SWIPE_THRESHOLD = 50; // min px to trigger card change
-const SWIPE_VELOCITY_THRESHOLD = 0.3; // px/ms to trigger card change even if distance is small
+const SWIPE_VELOCITY_THRESHOLD = 0.3; // px/ms
 
 /** Wraps index into [0, length) range */
 function wrapIndex(i: number, length: number): number {
@@ -72,17 +72,20 @@ export function HomePage() {
   const eventCount = upcomingEvents.length;
 
   // ── Infinite Carousel State ─────────────────────────────────────────────────
+  // activeIndex can grow unbounded (negative or positive) for infinite looping.
+  // We use wrapIndex(activeIndex, eventCount) to map to actual event data.
   const [activeIndex, setActiveIndex] = useState(0);
-  const [dragOffset, setDragOffset] = useState(0);
-  const [isAnimating, setIsAnimating] = useState(false);
+  const dragOffsetRef = useRef(0);
+  const [, forceRender] = useState(0);
+  const isAnimatingRef = useRef(false);
   const railRef = useRef<HTMLDivElement>(null);
   const touchRef = useRef<{
     startX: number;
     startY: number;
     startTime: number;
     moved: boolean;
-    locked: boolean; // true = horizontal lock, false = not yet determined
-    cancelled: boolean; // true = vertical scroll detected, abort carousel drag
+    locked: boolean;
+    cancelled: boolean;
   } | null>(null);
 
   // Detect dark mode for card colors
@@ -92,7 +95,6 @@ export function HomePage() {
   const getCardWidth = useCallback(() => {
     const rail = railRef.current;
     if (!rail) return 300;
-    // Card takes full width minus 2x peek and 2x gap
     return rail.offsetWidth - 2 * PEEK_WIDTH - 2 * CARD_GAP;
   }, []);
 
@@ -101,22 +103,13 @@ export function HomePage() {
     return getCardWidth() + CARD_GAP;
   }, [getCardWidth]);
 
-  // Navigate to a new index with animation
-  const goToIndex = useCallback((newIndex: number) => {
-    setIsAnimating(true);
-    setActiveIndex(newIndex);
-    setDragOffset(0);
-    // Remove animation flag after transition completes
-    setTimeout(() => setIsAnimating(false), 320);
-  }, []);
-
   // ── Touch handlers for swipe ────────────────────────────────────────────────
   useEffect(() => {
     const rail = railRef.current;
     if (!rail || eventCount <= 1) return;
 
     function handleTouchStart(e: TouchEvent) {
-      if (isAnimating) return;
+      if (isAnimatingRef.current) return;
       const touch = e.touches[0];
       touchRef.current = {
         startX: touch.clientX,
@@ -136,17 +129,16 @@ export function HomePage() {
       const dx = touch.clientX - info.startX;
       const dy = touch.clientY - info.startY;
 
-      // Determine scroll direction lock if not yet decided
+      // Direction lock
       if (!info.locked && !info.moved) {
         const absDx = Math.abs(dx);
         const absDy = Math.abs(dy);
-        // Need at least 8px of movement to decide direction
         if (absDx < 8 && absDy < 8) return;
 
         if (absDy > absDx * 1.2) {
-          // Vertical scroll — cancel carousel drag
           info.cancelled = true;
-          setDragOffset(0);
+          dragOffsetRef.current = 0;
+          forceRender((n) => n + 1);
           return;
         }
         info.locked = true;
@@ -154,37 +146,48 @@ export function HomePage() {
 
       if (info.cancelled) return;
 
-      // Horizontal drag — prevent vertical scroll
       e.preventDefault();
       info.moved = true;
-      setDragOffset(dx);
+      dragOffsetRef.current = dx;
+      forceRender((n) => n + 1);
     }
 
-    function handleTouchEnd(_e: TouchEvent) {
+    function handleTouchEnd() {
       const info = touchRef.current;
+      const currentDrag = dragOffsetRef.current;
+
       if (!info || info.cancelled) {
         touchRef.current = null;
-        setDragOffset(0);
+        dragOffsetRef.current = 0;
+        forceRender((n) => n + 1);
         return;
       }
 
       const elapsed = Date.now() - info.startTime;
-      const velocity = Math.abs(dragOffset) / elapsed;
+      const velocity = Math.abs(currentDrag) / elapsed;
 
-      let direction = 0; // -1 = prev, 0 = stay, 1 = next
-      if (Math.abs(dragOffset) > SWIPE_THRESHOLD || velocity > SWIPE_VELOCITY_THRESHOLD) {
-        direction = dragOffset > 0 ? -1 : 1;
+      let direction = 0;
+      if (Math.abs(currentDrag) > SWIPE_THRESHOLD || velocity > SWIPE_VELOCITY_THRESHOLD) {
+        direction = currentDrag > 0 ? -1 : 1;
       }
 
       touchRef.current = null;
+      dragOffsetRef.current = 0;
 
       if (direction !== 0) {
-        goToIndex(activeIndex + direction);
+        isAnimatingRef.current = true;
+        setActiveIndex((prev) => prev + direction);
+        forceRender((n) => n + 1);
+        setTimeout(() => {
+          isAnimatingRef.current = false;
+        }, 320);
       } else {
         // Snap back
-        setIsAnimating(true);
-        setDragOffset(0);
-        setTimeout(() => setIsAnimating(false), 320);
+        isAnimatingRef.current = true;
+        forceRender((n) => n + 1);
+        setTimeout(() => {
+          isAnimatingRef.current = false;
+        }, 320);
       }
     }
 
@@ -197,14 +200,7 @@ export function HomePage() {
       rail.removeEventListener('touchmove', handleTouchMove);
       rail.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [eventCount, isAnimating, dragOffset, activeIndex, goToIndex]);
-
-  // ── Build visible cards (prev, current, next) ──────────────────────────────
-  // We render enough cards to fill the viewport: the active card centered,
-  // plus neighbors on both sides. For infinite loop we render 5 positions
-  // (-2, -1, 0, +1, +2) to ensure smooth peek during fast swipes.
-  const visiblePositions = eventCount >= 3 ? [-2, -1, 0, 1, 2] : 
-                           eventCount === 2 ? [-1, 0, 1] : [0];
+  }, [eventCount, getStep]);
 
   // ── Essential Items ────────────────────────────────────────────────────────
   const essentialItems = gearItems?.filter((item) => item.essential) ?? [];
@@ -237,6 +233,97 @@ export function HomePage() {
     navigate(`/events/${eventId}`);
   }
 
+  // ── Compute card positions ─────────────────────────────────────────────────
+  // Render cards at positions relative to the active card.
+  // Each card's translateX = (offset from active) * step + centerOffset + dragOffset
+  // The "center offset" places the active card (offset=0) in the center of the rail.
+  const step = getStep();
+  const cardWidth = getCardWidth();
+  const dragOffset = dragOffsetRef.current;
+  const isAnimating = isAnimatingRef.current;
+
+  // Center offset: position where the active card's left edge should be
+  const centerOffset = PEEK_WIDTH + CARD_GAP;
+
+  // Which offsets to render: enough to cover the viewport
+  const visibleOffsets = eventCount >= 3 ? [-2, -1, 0, 1, 2] :
+                         eventCount === 2 ? [-1, 0, 1] : [0];
+
+  // ── Render card at a given offset from activeIndex ─────────────────────────
+  function renderCard(offset: number) {
+    const realIdx = wrapIndex(activeIndex + offset, eventCount);
+    const event = upcomingEvents[realIdx];
+    const { urgencyClass, label: urgencyLabel } = getEventUrgency(event.dateTime!);
+    const total = event.packingChecklist.length;
+    const packed = event.packingChecklist.filter((i) => i.packed).length;
+    const progress = total > 0 ? Math.round((packed / total) * 100) : 0;
+    const colorIndex = realIdx % CARD_COLORS.length;
+    const bg = isDark ? CARD_COLORS_DARK[colorIndex] : CARD_COLORS[colorIndex];
+
+    // Position: offset * step from center + drag
+    const x = centerOffset + offset * step + dragOffset;
+
+    // Scale: center card = 1, neighbors shrink
+    const distFromCenter = Math.abs(offset * step + dragOffset) / step;
+    const scale = 1 - Math.min(distFromCenter, 1) * 0.08;
+
+    return (
+      <div
+        key={`pos-${offset}`}
+        className="home-event-card"
+        style={{
+          background: bg,
+          position: 'absolute',
+          left: 0,
+          top: 0,
+          width: `${cardWidth}px`,
+          transform: `translateX(${x}px) scale(${scale})`,
+          transition: isAnimating ? 'transform 0.32s cubic-bezier(0.25, 1, 0.5, 1)' : 'none',
+        }}
+        onClick={() => handleCardClick(event.id)}
+      >
+        <div className="home-event-card__top">
+          <span className="home-event-card__label">Upcoming Event</span>
+          <span className={`home-event-card__badge ${urgencyClass}`}>
+            {urgencyLabel}
+          </span>
+        </div>
+
+        <h3 className="home-event-card__title">{event.title}</h3>
+
+        <p className="home-event-card__date">
+          {new Date(event.dateTime!).toLocaleDateString('en-US', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+          })}
+        </p>
+
+        <div className="home-event-card__bottom">
+          <span className="home-event-card__meta">
+            {[event.client, event.location].filter(Boolean).join(' \u00B7 ') || event.type}
+          </span>
+          {total > 0 && (
+            <span className="home-event-card__packing">
+              {packed}/{total} packed
+            </span>
+          )}
+        </div>
+
+        {total > 0 && (
+          <div className="home-event-card__progress">
+            <div
+              className="home-event-card__progress-fill"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        )}
+      </div>
+    );
+  }
+
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <section className="home-page ios-theme">
@@ -261,141 +348,62 @@ export function HomePage() {
               className={`home-event-rail${eventCount === 1 ? ' home-event-rail--single' : ''}`}
               ref={railRef}
             >
-              <div
-                className="home-event-track"
-                style={{
-                  transform: `translateX(${-activeIndex * getStep() + dragOffset}px)`,
-                  transition: isAnimating ? 'transform 0.32s cubic-bezier(0.25, 1, 0.5, 1)' : 'none',
-                }}
-              >
-                {eventCount > 1 ? (
-                  visiblePositions.map((offset) => {
-                    const realIdx = wrapIndex(activeIndex + offset, eventCount);
-                    const event = upcomingEvents[realIdx];
-                    const { urgencyClass, label: urgencyLabel } = getEventUrgency(event.dateTime!);
-                    const total = event.packingChecklist.length;
-                    const packed = event.packingChecklist.filter((i) => i.packed).length;
-                    const progress = total > 0 ? Math.round((packed / total) * 100) : 0;
-                    const colorIndex = realIdx % CARD_COLORS.length;
-                    const bg = isDark ? CARD_COLORS_DARK[colorIndex] : CARD_COLORS[colorIndex];
+              {eventCount > 1 ? (
+                visibleOffsets.map((offset) => renderCard(offset))
+              ) : (
+                // Single card — static, centered
+                (() => {
+                  const event = upcomingEvents[0];
+                  const { urgencyClass, label: urgencyLabel } = getEventUrgency(event.dateTime!);
+                  const total = event.packingChecklist.length;
+                  const packed = event.packingChecklist.filter((i) => i.packed).length;
+                  const progress = total > 0 ? Math.round((packed / total) * 100) : 0;
+                  const bg = isDark ? CARD_COLORS_DARK[0] : CARD_COLORS[0];
 
-                    // Position in track: each card at (activeIndex + offset) * step
-                    const position = (activeIndex + offset) * getStep();
-
-                    // Scale: center card = 1, neighbors = 0.92
-                    const distFromCenter = Math.abs(offset * getStep() + dragOffset) / getStep();
-                    const scale = 1 - Math.min(distFromCenter, 1) * 0.08;
-
-                    return (
-                      <div
-                        key={`${offset}-${realIdx}`}
-                        className="home-event-card"
-                        style={{
-                          background: bg,
-                          position: 'absolute',
-                          left: 0,
-                          top: 0,
-                          width: `${getCardWidth()}px`,
-                          transform: `translateX(${position + PEEK_WIDTH + CARD_GAP}px) scale(${scale})`,
-                        }}
-                        onClick={() => handleCardClick(event.id)}
-                      >
-                        <div className="home-event-card__top">
-                          <span className="home-event-card__label">Upcoming Event</span>
-                          <span className={`home-event-card__badge ${urgencyClass}`}>
-                            {urgencyLabel}
-                          </span>
-                        </div>
-
-                        <h3 className="home-event-card__title">{event.title}</h3>
-
-                        <p className="home-event-card__date">
-                          {new Date(event.dateTime!).toLocaleDateString('en-US', {
-                            weekday: 'short',
-                            month: 'short',
-                            day: 'numeric',
-                            hour: 'numeric',
-                            minute: '2-digit',
-                          })}
-                        </p>
-
-                        <div className="home-event-card__bottom">
-                          <span className="home-event-card__meta">
-                            {[event.client, event.location].filter(Boolean).join(' \u00B7 ') || event.type}
-                          </span>
-                          {total > 0 && (
-                            <span className="home-event-card__packing">
-                              {packed}/{total} packed
-                            </span>
-                          )}
-                        </div>
-
+                  return (
+                    <div
+                      className="home-event-card"
+                      style={{ background: bg }}
+                      onClick={() => navigate(`/events/${event.id}`)}
+                    >
+                      <div className="home-event-card__top">
+                        <span className="home-event-card__label">Upcoming Event</span>
+                        <span className={`home-event-card__badge ${urgencyClass}`}>
+                          {urgencyLabel}
+                        </span>
+                      </div>
+                      <h3 className="home-event-card__title">{event.title}</h3>
+                      <p className="home-event-card__date">
+                        {new Date(event.dateTime!).toLocaleDateString('en-US', {
+                          weekday: 'short',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                        })}
+                      </p>
+                      <div className="home-event-card__bottom">
+                        <span className="home-event-card__meta">
+                          {[event.client, event.location].filter(Boolean).join(' \u00B7 ') || event.type}
+                        </span>
                         {total > 0 && (
-                          <div className="home-event-card__progress">
-                            <div
-                              className="home-event-card__progress-fill"
-                              style={{ width: `${progress}%` }}
-                            />
-                          </div>
+                          <span className="home-event-card__packing">
+                            {packed}/{total} packed
+                          </span>
                         )}
                       </div>
-                    );
-                  })
-                ) : (
-                  // Single card — no carousel mechanics
-                  (() => {
-                    const event = upcomingEvents[0];
-                    const { urgencyClass, label: urgencyLabel } = getEventUrgency(event.dateTime!);
-                    const total = event.packingChecklist.length;
-                    const packed = event.packingChecklist.filter((i) => i.packed).length;
-                    const progress = total > 0 ? Math.round((packed / total) * 100) : 0;
-                    const bg = isDark ? CARD_COLORS_DARK[0] : CARD_COLORS[0];
-
-                    return (
-                      <div
-                        className="home-event-card"
-                        style={{ background: bg }}
-                        onClick={() => navigate(`/events/${event.id}`)}
-                      >
-                        <div className="home-event-card__top">
-                          <span className="home-event-card__label">Upcoming Event</span>
-                          <span className={`home-event-card__badge ${urgencyClass}`}>
-                            {urgencyLabel}
-                          </span>
+                      {total > 0 && (
+                        <div className="home-event-card__progress">
+                          <div
+                            className="home-event-card__progress-fill"
+                            style={{ width: `${progress}%` }}
+                          />
                         </div>
-                        <h3 className="home-event-card__title">{event.title}</h3>
-                        <p className="home-event-card__date">
-                          {new Date(event.dateTime!).toLocaleDateString('en-US', {
-                            weekday: 'short',
-                            month: 'short',
-                            day: 'numeric',
-                            hour: 'numeric',
-                            minute: '2-digit',
-                          })}
-                        </p>
-                        <div className="home-event-card__bottom">
-                          <span className="home-event-card__meta">
-                            {[event.client, event.location].filter(Boolean).join(' \u00B7 ') || event.type}
-                          </span>
-                          {total > 0 && (
-                            <span className="home-event-card__packing">
-                              {packed}/{total} packed
-                            </span>
-                          )}
-                        </div>
-                        {total > 0 && (
-                          <div className="home-event-card__progress">
-                            <div
-                              className="home-event-card__progress-fill"
-                              style={{ width: `${progress}%` }}
-                            />
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })()
-                )}
-              </div>
+                      )}
+                    </div>
+                  );
+                })()
+              )}
             </div>
 
             {/* Dot indicators */}
