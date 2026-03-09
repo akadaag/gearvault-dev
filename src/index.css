@@ -5222,7 +5222,7 @@ html {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--ios-text-secondary);
-  margin-bottom: 1px;
+  margin-bottom: 10px;
   line-height: 1.2;
 }
 
