@@ -23,7 +23,7 @@ const CARD_COLORS_DARK = [
 ];
 
 // Card sizing constants
-const PEEK_WIDTH = 16; // how much of neighboring cards is visible
+const PEEK_WIDTH = 20; // how much of neighboring cards is visible
 const CARD_GAP = 10;
 const SWIPE_THRESHOLD = 50; // min px to trigger card change
 const SWIPE_VELOCITY_THRESHOLD = 0.3; // px/ms
