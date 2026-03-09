@@ -5264,7 +5264,7 @@ html {
 .home-event-rail {
   position: relative;
   overflow: hidden;
-  padding: 4px 0 8px;
+  padding: 12px 0 8px;
   /* Height set by card min-height + vertical padding */
   min-height: 216px;
   touch-action: pan-y;
@@ -5574,7 +5574,7 @@ html {
 .home-essentials-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .home-essentials-row {
@@ -5582,7 +5582,7 @@ html {
   align-items: center;
   gap: 14px;
   width: 100%;
-  padding: 14px 16px;
+  padding: 16px 18px;
   border: none;
   background: #ffffff;
   cursor: pointer;
@@ -5600,8 +5600,8 @@ html {
 }
 
 .home-essentials-row__thumb {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
   border-radius: 14px;
   overflow: hidden;
   background: rgba(142, 142, 147, 0.08);
@@ -5699,17 +5699,12 @@ html {
 }
 
 .home-section-title {
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 20px;
+  font-weight: 800;
   color: var(--ios-text-primary);
 }
 
 /* ── Bottom Spacer ──────────────────────────────────────────── */
-
-.home-ios-bottom-spacer {
-  height: 24px;
-  flex-shrink: 0;
-}
 
 /* ============================================================
    HOME — Dark Mode
@@ -5804,16 +5799,16 @@ html {
   }
 
   .home-section-title {
-    font-size: 17px;
+    font-size: 19px;
   }
 
   .home-essentials-row {
-    padding: 12px 14px;
+    padding: 14px 16px;
   }
 
   .home-essentials-row__thumb {
-    width: 44px;
-    height: 44px;
+    width: 48px;
+    height: 48px;
   }
 
   .home-essentials-row__name {

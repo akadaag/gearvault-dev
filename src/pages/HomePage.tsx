@@ -586,7 +586,6 @@ export function HomePage() {
           </div>
         )}
 
-        <div className="home-ios-bottom-spacer" />
       </div>
     </section>
   );
