@@ -75,14 +75,12 @@ export function HomePage() {
   // activeIndex can grow unbounded (negative or positive) for infinite looping.
   // We use wrapIndex(activeIndex, eventCount) to map to actual event data.
   const [activeIndex, setActiveIndex] = useState(0);
-  const dragOffsetRef = useRef(0);
-  const [, forceRender] = useState(0);
-  // Phase: 'idle' | 'dragging' | 'snapping' | 'settling'
-  // idle = no interaction, dragging = finger down + moving,
-  // snapping = animating to target, settling = transition disabled before data swap
-  const phaseRef = useRef<'idle' | 'dragging' | 'snapping' | 'settling'>('idle');
+  const [dragOffset, setDragOffset] = useState(0);
+  // Phase: 'idle' | 'dragging' | 'snapping'
+  const [phase, setPhase] = useState<'idle' | 'dragging' | 'snapping'>('idle');
   // Direction pending during snap: which way activeIndex should shift when snap completes
   const snapDirectionRef = useRef(0);
+  const isSnapPendingRef = useRef(false);
   const railRef = useRef<HTMLDivElement>(null);
   const touchRef = useRef<{
     startX: number;
@@ -92,8 +90,6 @@ export function HomePage() {
     locked: boolean;
     cancelled: boolean;
   } | null>(null);
-  const snapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   // Detect dark mode for card colors
   const isDark = document.documentElement.classList.contains('dark');
 
@@ -109,12 +105,20 @@ export function HomePage() {
     return getCardWidth() + CARD_GAP;
   }, [getCardWidth]);
 
+  useEffect(() => {
+    if (eventCount <= 0) {
+      setActiveIndex(0);
+      setDragOffset(0);
+      setPhase('idle');
+      snapDirectionRef.current = 0;
+      isSnapPendingRef.current = false;
+      return;
+    }
+    setActiveIndex((prev) => wrapIndex(prev, eventCount));
+  }, [eventCount]);
+
   // ── Touch handlers for swipe ────────────────────────────────────────────────
-  // Two-phase animation model:
-  // Phase 1 (drag): finger moves cards via dragOffset, no CSS transition
-  // Phase 2 (snap): on touchEnd, animate dragOffset to the snap target (+/-step or 0)
-  //                 via CSS transition. When transition ends, update activeIndex and
-  //                 reset dragOffset to 0 in one frame — no visible jump.
+  // Snap completion is driven by transitionend (not timeout) to avoid races.
   useEffect(() => {
     const rail = railRef.current;
     if (!rail || eventCount <= 1) return;
@@ -122,15 +126,7 @@ export function HomePage() {
     const step = getStep();
 
     function handleTouchStart(e: TouchEvent) {
-      // If snapping or settling, finish it immediately so user can start a new gesture
-      if (phaseRef.current === 'snapping' || phaseRef.current === 'settling') {
-        if (snapTimerRef.current) clearTimeout(snapTimerRef.current);
-        // Settle immediately: apply pending index change, reset drag
-        setActiveIndex((prev) => prev + snapDirectionRef.current);
-        dragOffsetRef.current = 0;
-        snapDirectionRef.current = 0;
-        phaseRef.current = 'idle';
-      }
+      if (isSnapPendingRef.current || phase === 'snapping') return;
 
       const touch = e.touches[0];
       touchRef.current = {
@@ -141,7 +137,7 @@ export function HomePage() {
         locked: false,
         cancelled: false,
       };
-      phaseRef.current = 'dragging';
+      setPhase('dragging');
     }
 
     function handleTouchMove(e: TouchEvent) {
@@ -152,18 +148,15 @@ export function HomePage() {
       const dx = touch.clientX - info.startX;
       const dy = touch.clientY - info.startY;
 
-      // Direction lock
       if (!info.locked && !info.moved) {
         const absDx = Math.abs(dx);
         const absDy = Math.abs(dy);
         if (absDx < 8 && absDy < 8) return;
 
         if (absDy > absDx * 1.2) {
-          // Vertical scroll — cancel carousel drag
           info.cancelled = true;
-          dragOffsetRef.current = 0;
-          phaseRef.current = 'idle';
-          forceRender((n) => n + 1);
+          setDragOffset(0);
+          setPhase('idle');
           return;
         }
         info.locked = true;
@@ -173,80 +166,78 @@ export function HomePage() {
 
       e.preventDefault();
       info.moved = true;
-      dragOffsetRef.current = dx;
-      forceRender((n) => n + 1);
+      setDragOffset(dx);
     }
 
     function handleTouchEnd() {
       const info = touchRef.current;
-      const currentDrag = dragOffsetRef.current;
+      const currentDrag = dragOffset;
 
       if (!info || info.cancelled) {
         touchRef.current = null;
-        dragOffsetRef.current = 0;
-        phaseRef.current = 'idle';
-        forceRender((n) => n + 1);
+        setDragOffset(0);
+        setPhase('idle');
         return;
       }
 
       const elapsed = Math.max(Date.now() - info.startTime, 1);
       const velocity = Math.abs(currentDrag) / elapsed;
 
-      let direction = 0; // -1 = go to prev, +1 = go to next
+      let direction = 0;
       if (Math.abs(currentDrag) > SWIPE_THRESHOLD || velocity > SWIPE_VELOCITY_THRESHOLD) {
         direction = currentDrag > 0 ? -1 : 1;
       }
 
       touchRef.current = null;
-
-      // Phase 2: snap animation
-      // Animate dragOffset from its current value to the snap target.
-      // direction=+1 (swipe left, next card): target dragOffset = -step
-      // direction=-1 (swipe right, prev card): target dragOffset = +step
-      // direction=0 (snap back): target dragOffset = 0
-      phaseRef.current = 'snapping';
+      setPhase('snapping');
       snapDirectionRef.current = direction;
+      isSnapPendingRef.current = true;
 
       if (direction !== 0) {
-        dragOffsetRef.current = direction > 0 ? -step : step;
+        setDragOffset(direction > 0 ? -step : step);
       } else {
-        dragOffsetRef.current = 0;
+        setDragOffset(0);
       }
-      forceRender((n) => n + 1);
+    }
 
-      // After CSS transition completes, settle using rAF double-buffer:
-      // 1. First render: set phase='settling' (transition: none) — browser paints it
-      // 2. Next frame: swap activeIndex + reset dragOffset — no transition so no flash
-      snapTimerRef.current = setTimeout(() => {
-        // Step 1: disable transition, keep positions as-is
-        phaseRef.current = 'settling';
-        forceRender((n) => n + 1);
+    function handleTransitionEnd(e: TransitionEvent) {
+      if (!isSnapPendingRef.current) return;
+      if (!(e.target instanceof HTMLElement)) return;
+      if (!e.target.classList.contains('home-event-card')) return;
+      if (e.propertyName !== 'transform') return;
 
-        // Step 2: after browser paints transition:none, swap data
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            const dir = snapDirectionRef.current;
-            setActiveIndex((prev) => prev + dir);
-            dragOffsetRef.current = 0;
-            snapDirectionRef.current = 0;
-            phaseRef.current = 'idle';
-            forceRender((n) => n + 1);
-          });
-        });
-      }, 340); // slightly longer than 320ms transition to ensure it finishes
+      isSnapPendingRef.current = false;
+      const dir = snapDirectionRef.current;
+      if (dir !== 0) {
+        setActiveIndex((prev) => prev + dir);
+      }
+      snapDirectionRef.current = 0;
+      setDragOffset(0);
+      setPhase('idle');
+    }
+
+    function handleTouchCancel() {
+      touchRef.current = null;
+      if (phase !== 'snapping') {
+        setDragOffset(0);
+        setPhase('idle');
+      }
     }
 
     rail.addEventListener('touchstart', handleTouchStart, { passive: true });
     rail.addEventListener('touchmove', handleTouchMove, { passive: false });
     rail.addEventListener('touchend', handleTouchEnd, { passive: true });
+    rail.addEventListener('touchcancel', handleTouchCancel, { passive: true });
+    rail.addEventListener('transitionend', handleTransitionEnd);
 
     return () => {
       rail.removeEventListener('touchstart', handleTouchStart);
       rail.removeEventListener('touchmove', handleTouchMove);
       rail.removeEventListener('touchend', handleTouchEnd);
-      if (snapTimerRef.current) clearTimeout(snapTimerRef.current);
+      rail.removeEventListener('touchcancel', handleTouchCancel);
+      rail.removeEventListener('transitionend', handleTransitionEnd);
     };
-  }, [eventCount, getStep]);
+  }, [dragOffset, eventCount, getStep, phase]);
 
   // ── Essential Items ────────────────────────────────────────────────────────
   const essentialItems = gearItems?.filter((item) => item.essential) ?? [];
@@ -282,8 +273,7 @@ export function HomePage() {
   // ── Compute card positions ─────────────────────────────────────────────────
   const step = getStep();
   const cardWidth = getCardWidth();
-  const dragOffset = dragOffsetRef.current;
-  const isSnapping = phaseRef.current === 'snapping';
+  const isSnapping = phase === 'snapping';
 
   // Center offset: position where the active card's left edge should be
   const centerOffset = PEEK_WIDTH + CARD_GAP;
@@ -309,6 +299,7 @@ export function HomePage() {
     // Scale: center card = 1, neighbors shrink
     const distFromCenter = Math.abs(offset * step + dragOffset) / step;
     const scale = 1 - Math.min(distFromCenter, 1) * 0.08;
+    const zIndex = 20 - Math.round(Math.min(distFromCenter, 2) * 10);
 
     return (
       <div
@@ -322,6 +313,7 @@ export function HomePage() {
           width: `${cardWidth}px`,
           transform: `translateX(${x}px) scale(${scale})`,
           transition: isSnapping ? 'transform 0.32s cubic-bezier(0.25, 1, 0.5, 1)' : 'none',
+          zIndex,
         }}
         onClick={() => handleCardClick(event.id)}
       >
@@ -453,8 +445,8 @@ export function HomePage() {
             {eventCount > 1 && (
               <div className="home-event-dots">
                 {upcomingEvents.map((_, idx) => {
-                  // During snap/settling, show the dot for the target index
-                  const dotIdx = (phaseRef.current === 'snapping' || phaseRef.current === 'settling')
+                  // During snap animation, show the target index dot
+                  const dotIdx = phase === 'snapping'
                     ? wrapIndex(activeIndex + snapDirectionRef.current, eventCount)
                     : wrapIndex(activeIndex, eventCount);
                   return (
