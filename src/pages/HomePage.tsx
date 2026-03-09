@@ -78,6 +78,8 @@ export function HomePage() {
   const [dragOffset, setDragOffset] = useState(0);
   // Phase: 'idle' | 'dragging' | 'snapping'
   const [phase, setPhase] = useState<'idle' | 'dragging' | 'snapping'>('idle');
+  const dragOffsetRef = useRef(0);
+  const phaseRef = useRef<'idle' | 'dragging' | 'snapping'>('idle');
   // Direction pending during snap: which way activeIndex should shift when snap completes
   const snapDirectionRef = useRef(0);
   const isSnapPendingRef = useRef(false);
@@ -106,6 +108,14 @@ export function HomePage() {
   }, [getCardWidth]);
 
   useEffect(() => {
+    dragOffsetRef.current = dragOffset;
+  }, [dragOffset]);
+
+  useEffect(() => {
+    phaseRef.current = phase;
+  }, [phase]);
+
+  useEffect(() => {
     if (eventCount <= 0) {
       setActiveIndex(0);
       setDragOffset(0);
@@ -126,7 +136,7 @@ export function HomePage() {
     const step = getStep();
 
     function handleTouchStart(e: TouchEvent) {
-      if (isSnapPendingRef.current || phase === 'snapping') return;
+      if (isSnapPendingRef.current || phaseRef.current === 'snapping') return;
 
       const touch = e.touches[0];
       touchRef.current = {
@@ -155,6 +165,7 @@ export function HomePage() {
 
         if (absDy > absDx * 1.2) {
           info.cancelled = true;
+          dragOffsetRef.current = 0;
           setDragOffset(0);
           setPhase('idle');
           return;
@@ -166,15 +177,17 @@ export function HomePage() {
 
       e.preventDefault();
       info.moved = true;
+      dragOffsetRef.current = dx;
       setDragOffset(dx);
     }
 
     function handleTouchEnd() {
       const info = touchRef.current;
-      const currentDrag = dragOffset;
+      const currentDrag = dragOffsetRef.current;
 
       if (!info || info.cancelled) {
         touchRef.current = null;
+        dragOffsetRef.current = 0;
         setDragOffset(0);
         setPhase('idle');
         return;
@@ -194,8 +207,11 @@ export function HomePage() {
       isSnapPendingRef.current = true;
 
       if (direction !== 0) {
-        setDragOffset(direction > 0 ? -step : step);
+        const target = direction > 0 ? -step : step;
+        dragOffsetRef.current = target;
+        setDragOffset(target);
       } else {
+        dragOffsetRef.current = 0;
         setDragOffset(0);
       }
     }
@@ -204,6 +220,7 @@ export function HomePage() {
       if (!isSnapPendingRef.current) return;
       if (!(e.target instanceof HTMLElement)) return;
       if (!e.target.classList.contains('home-event-card')) return;
+      if (e.target.dataset.offset !== '0') return;
       if (e.propertyName !== 'transform') return;
 
       isSnapPendingRef.current = false;
@@ -212,13 +229,15 @@ export function HomePage() {
         setActiveIndex((prev) => prev + dir);
       }
       snapDirectionRef.current = 0;
+      dragOffsetRef.current = 0;
       setDragOffset(0);
       setPhase('idle');
     }
 
     function handleTouchCancel() {
       touchRef.current = null;
-      if (phase !== 'snapping') {
+      if (phaseRef.current !== 'snapping') {
+        dragOffsetRef.current = 0;
         setDragOffset(0);
         setPhase('idle');
       }
@@ -237,7 +256,7 @@ export function HomePage() {
       rail.removeEventListener('touchcancel', handleTouchCancel);
       rail.removeEventListener('transitionend', handleTransitionEnd);
     };
-  }, [dragOffset, eventCount, getStep, phase]);
+  }, [eventCount, getStep]);
 
   // ── Essential Items ────────────────────────────────────────────────────────
   const essentialItems = gearItems?.filter((item) => item.essential) ?? [];
@@ -304,6 +323,7 @@ export function HomePage() {
     return (
       <div
         key={`pos-${offset}`}
+        data-offset={offset}
         className="home-event-card"
         style={{
           background: bg,
