@@ -5208,7 +5208,7 @@ html {
   position: sticky;
   top: 0;
   z-index: 40;
-  padding: max(0.75rem, env(safe-area-inset-top)) 16px 1.5rem;
+  padding: max(0.75rem, env(safe-area-inset-top)) 16px 0.75rem;
   background: #fff;
 }
 
@@ -5222,7 +5222,7 @@ html {
   text-transform: uppercase;
   letter-spacing: 0.04em;
   color: var(--ios-text-secondary);
-  margin-bottom: 10px;
+  margin-bottom: 4px;
   line-height: 1.2;
 }
 
@@ -5230,7 +5230,8 @@ html {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 4px;
+  margin-top: 4px;
+  margin-bottom: 0;
 }
 
 .home-ios-title {
@@ -5269,7 +5270,7 @@ html {
 .home-event-rail {
   position: relative;
   overflow: hidden;
-  padding: 24px 0 0;
+  padding: 14px 0 0;
   /* Height set by card min-height + vertical padding */
   min-height: 224px;
   touch-action: pan-y;
