@@ -5322,9 +5322,7 @@ html {
   pointer-events: none;
 }
 
-.home-event-card:active {
-  transform: scale(0.985) !important;
-}
+/* :active scale removed — conflicts with carousel inline transforms */
 
 /* Single-card layout: static card with full width */
 .home-event-rail--single .home-event-card {

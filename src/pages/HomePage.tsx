@@ -77,7 +77,11 @@ export function HomePage() {
   const [activeIndex, setActiveIndex] = useState(0);
   const dragOffsetRef = useRef(0);
   const [, forceRender] = useState(0);
-  const isAnimatingRef = useRef(false);
+  // Phase: 'idle' | 'dragging' | 'snapping'
+  // idle = no interaction, dragging = finger down + moving, snapping = animating to target
+  const phaseRef = useRef<'idle' | 'dragging' | 'snapping'>('idle');
+  // Direction pending during snap: which way activeIndex should shift when snap completes
+  const snapDirectionRef = useRef(0);
   const railRef = useRef<HTMLDivElement>(null);
   const touchRef = useRef<{
     startX: number;
@@ -87,6 +91,7 @@ export function HomePage() {
     locked: boolean;
     cancelled: boolean;
   } | null>(null);
+  const snapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Detect dark mode for card colors
   const isDark = document.documentElement.classList.contains('dark');
@@ -104,12 +109,28 @@ export function HomePage() {
   }, [getCardWidth]);
 
   // ── Touch handlers for swipe ────────────────────────────────────────────────
+  // Two-phase animation model:
+  // Phase 1 (drag): finger moves cards via dragOffset, no CSS transition
+  // Phase 2 (snap): on touchEnd, animate dragOffset to the snap target (+/-step or 0)
+  //                 via CSS transition. When transition ends, update activeIndex and
+  //                 reset dragOffset to 0 in one frame — no visible jump.
   useEffect(() => {
     const rail = railRef.current;
     if (!rail || eventCount <= 1) return;
 
+    const step = getStep();
+
     function handleTouchStart(e: TouchEvent) {
-      if (isAnimatingRef.current) return;
+      // If snapping, finish it immediately so user can start a new gesture
+      if (phaseRef.current === 'snapping') {
+        if (snapTimerRef.current) clearTimeout(snapTimerRef.current);
+        // Settle immediately: apply pending index change, reset drag
+        setActiveIndex((prev) => prev + snapDirectionRef.current);
+        dragOffsetRef.current = 0;
+        snapDirectionRef.current = 0;
+        phaseRef.current = 'idle';
+      }
+
       const touch = e.touches[0];
       touchRef.current = {
         startX: touch.clientX,
@@ -119,6 +140,7 @@ export function HomePage() {
         locked: false,
         cancelled: false,
       };
+      phaseRef.current = 'dragging';
     }
 
     function handleTouchMove(e: TouchEvent) {
@@ -136,8 +158,10 @@ export function HomePage() {
         if (absDx < 8 && absDy < 8) return;
 
         if (absDy > absDx * 1.2) {
+          // Vertical scroll — cancel carousel drag
           info.cancelled = true;
           dragOffsetRef.current = 0;
+          phaseRef.current = 'idle';
           forceRender((n) => n + 1);
           return;
         }
@@ -159,36 +183,44 @@ export function HomePage() {
       if (!info || info.cancelled) {
         touchRef.current = null;
         dragOffsetRef.current = 0;
+        phaseRef.current = 'idle';
         forceRender((n) => n + 1);
         return;
       }
 
-      const elapsed = Date.now() - info.startTime;
+      const elapsed = Math.max(Date.now() - info.startTime, 1);
       const velocity = Math.abs(currentDrag) / elapsed;
 
-      let direction = 0;
+      let direction = 0; // -1 = go to prev, +1 = go to next
       if (Math.abs(currentDrag) > SWIPE_THRESHOLD || velocity > SWIPE_VELOCITY_THRESHOLD) {
         direction = currentDrag > 0 ? -1 : 1;
       }
 
       touchRef.current = null;
-      dragOffsetRef.current = 0;
+
+      // Phase 2: snap animation
+      // Animate dragOffset from its current value to the snap target.
+      // direction=+1 (swipe left, next card): target dragOffset = -step
+      // direction=-1 (swipe right, prev card): target dragOffset = +step
+      // direction=0 (snap back): target dragOffset = 0
+      phaseRef.current = 'snapping';
+      snapDirectionRef.current = direction;
 
       if (direction !== 0) {
-        isAnimatingRef.current = true;
-        setActiveIndex((prev) => prev + direction);
-        forceRender((n) => n + 1);
-        setTimeout(() => {
-          isAnimatingRef.current = false;
-        }, 320);
+        dragOffsetRef.current = direction > 0 ? -step : step;
       } else {
-        // Snap back
-        isAnimatingRef.current = true;
-        forceRender((n) => n + 1);
-        setTimeout(() => {
-          isAnimatingRef.current = false;
-        }, 320);
+        dragOffsetRef.current = 0;
       }
+      forceRender((n) => n + 1);
+
+      // After CSS transition completes, settle: update activeIndex, reset dragOffset
+      snapTimerRef.current = setTimeout(() => {
+        setActiveIndex((prev) => prev + snapDirectionRef.current);
+        dragOffsetRef.current = 0;
+        snapDirectionRef.current = 0;
+        phaseRef.current = 'idle';
+        forceRender((n) => n + 1);
+      }, 340); // slightly longer than 320ms transition to ensure it finishes
     }
 
     rail.addEventListener('touchstart', handleTouchStart, { passive: true });
@@ -199,6 +231,7 @@ export function HomePage() {
       rail.removeEventListener('touchstart', handleTouchStart);
       rail.removeEventListener('touchmove', handleTouchMove);
       rail.removeEventListener('touchend', handleTouchEnd);
+      if (snapTimerRef.current) clearTimeout(snapTimerRef.current);
     };
   }, [eventCount, getStep]);
 
@@ -234,13 +267,10 @@ export function HomePage() {
   }
 
   // ── Compute card positions ─────────────────────────────────────────────────
-  // Render cards at positions relative to the active card.
-  // Each card's translateX = (offset from active) * step + centerOffset + dragOffset
-  // The "center offset" places the active card (offset=0) in the center of the rail.
   const step = getStep();
   const cardWidth = getCardWidth();
   const dragOffset = dragOffsetRef.current;
-  const isAnimating = isAnimatingRef.current;
+  const isSnapping = phaseRef.current === 'snapping';
 
   // Center offset: position where the active card's left edge should be
   const centerOffset = PEEK_WIDTH + CARD_GAP;
@@ -278,7 +308,7 @@ export function HomePage() {
           top: 0,
           width: `${cardWidth}px`,
           transform: `translateX(${x}px) scale(${scale})`,
-          transition: isAnimating ? 'transform 0.32s cubic-bezier(0.25, 1, 0.5, 1)' : 'none',
+          transition: isSnapping ? 'transform 0.32s cubic-bezier(0.25, 1, 0.5, 1)' : 'none',
         }}
         onClick={() => handleCardClick(event.id)}
       >
