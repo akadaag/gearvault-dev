@@ -5210,6 +5210,18 @@ html {
   background: #fff;
 }
 
+.home-ios-header-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.home-ios-header-copy {
+  flex: 1;
+  min-width: 0;
+}
+
 :root.dark .home-ios-header {
   background: #000;
 }
@@ -5230,7 +5242,6 @@ html {
   justify-content: space-between;
   margin-top: 4px;
   margin-bottom: 0;
-  transform: translateY(4px);
 }
 
 .home-ios-title {
@@ -5239,6 +5250,7 @@ html {
   color: var(--ios-text-primary);
   font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, sans-serif;
   line-height: 1.15;
+  transform: translateY(4px);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -13784,10 +13796,11 @@ body:has(.content-assistant) {
   position: relative;
   top: auto;
   right: auto;
-  width: 100%;
+  width: auto;
   justify-content: flex-end;
   padding: 0;
-  margin-top: 12px;
+  margin-top: 0;
+  flex-shrink: 0;
 }
 
 /* When search is open, fade out the toolbar pill / profile avatar */

@@ -390,18 +390,22 @@ export function HomePage() {
 
         {/* ── Header ──────────────────────────────────────────────────────── */}
         <header className="home-ios-header">
-          <div className="home-ios-date">{today}</div>
-          <div className="home-ios-title-row">
-            <h1 className="home-ios-title">
-              {greeting}
-              {firstName ? `, ${firstName}` : ''}
-            </h1>
-          </div>
+          <div className="home-ios-header-main">
+            <div className="home-ios-header-copy">
+              <div className="home-ios-date">{today}</div>
+              <div className="home-ios-title-row">
+                <h1 className="home-ios-title">
+                  {greeting}
+                  {firstName ? `, ${firstName}` : ''}
+                </h1>
+              </div>
+            </div>
 
-          <div className="toolbar-area toolbar-area--home">
-            <ToolbarSearch onOpenChange={setSearchOpen} />
-            <div className={searchOpen ? 'toolbar-pill--search-open' : ''}>
-              <ProfileMenu />
+            <div className="toolbar-area toolbar-area--home">
+              <ToolbarSearch onOpenChange={setSearchOpen} />
+              <div className={searchOpen ? 'toolbar-pill--search-open' : ''}>
+                <ProfileMenu />
+              </div>
             </div>
           </div>
         </header>
