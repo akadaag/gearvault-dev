@@ -5206,8 +5206,8 @@ html {
 
 .home-ios-header {
   position: relative;
-  padding: max(0.75rem, env(safe-area-inset-top)) 16px 0.75rem;
-  background: #fff;
+  padding: 12px 16px 12px;
+  background: transparent;
 }
 
 .home-ios-header-main {
@@ -5220,10 +5220,11 @@ html {
 .home-ios-header-copy {
   flex: 1;
   min-width: 0;
+  padding-right: 92px;
 }
 
 :root.dark .home-ios-header {
-  background: #000;
+  background: transparent;
 }
 
 .home-ios-date {
@@ -13793,14 +13794,15 @@ body:has(.content-assistant) {
 
 /* Home page: search + profile, aligned in a row */
 .toolbar-area--home {
-  position: relative;
-  top: auto;
-  right: auto;
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  right: 16px;
   width: auto;
   justify-content: flex-end;
   padding: 0;
   margin-top: 0;
   flex-shrink: 0;
+  z-index: 41;
 }
 
 /* When search is open, fade out the toolbar pill / profile avatar */
