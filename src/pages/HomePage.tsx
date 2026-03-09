@@ -86,9 +86,7 @@ export function HomePage() {
   // Direction pending during snap: which way activeIndex should shift when snap completes
   const snapDirectionRef = useRef(0);
   const isSnapPendingRef = useRef(false);
-  const homeScrollRef = useRef<HTMLDivElement>(null);
   const railRef = useRef<HTMLDivElement>(null);
-  const edgeTouchRef = useRef<{ startX: number; startY: number } | null>(null);
   const touchRef = useRef<{
     startX: number;
     startY: number;
@@ -131,54 +129,6 @@ export function HomePage() {
     }
     setActiveIndex((prev) => wrapIndex(prev, eventCount));
   }, [eventCount]);
-
-  // ── Prevent iOS viewport rubber-band from escaping Home scroller ───────────
-  useEffect(() => {
-    const scroller = homeScrollRef.current;
-    if (!scroller) return;
-
-    function onTouchStart(e: TouchEvent) {
-      const touch = e.touches[0];
-      edgeTouchRef.current = { startX: touch.clientX, startY: touch.clientY };
-    }
-
-    function onTouchMove(e: TouchEvent) {
-      const touchInfo = edgeTouchRef.current;
-      if (!touchInfo) return;
-      const target = e.target as HTMLElement | null;
-      if (target?.closest('.home-event-rail')) return;
-
-      const touch = e.touches[0];
-      const dx = touch.clientX - touchInfo.startX;
-      const dy = touch.clientY - touchInfo.startY;
-      if (Math.abs(dx) > Math.abs(dy)) return;
-
-      const el = homeScrollRef.current;
-      if (!el) return;
-
-      const atTop = el.scrollTop <= 0;
-      const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 1;
-      if ((atTop && dy > 0) || (atBottom && dy < 0)) {
-        e.preventDefault();
-      }
-    }
-
-    function onTouchEnd() {
-      edgeTouchRef.current = null;
-    }
-
-    scroller.addEventListener('touchstart', onTouchStart, { passive: true });
-    scroller.addEventListener('touchmove', onTouchMove, { passive: false });
-    scroller.addEventListener('touchend', onTouchEnd, { passive: true });
-    scroller.addEventListener('touchcancel', onTouchEnd, { passive: true });
-
-    return () => {
-      scroller.removeEventListener('touchstart', onTouchStart);
-      scroller.removeEventListener('touchmove', onTouchMove);
-      scroller.removeEventListener('touchend', onTouchEnd);
-      scroller.removeEventListener('touchcancel', onTouchEnd);
-    };
-  }, []);
 
   // ── Touch handlers for swipe ────────────────────────────────────────────────
   // Snap completion is driven by transitionend (not timeout) to avoid races.
@@ -436,7 +386,7 @@ export function HomePage() {
   return (
     <section className="home-page ios-theme">
       {/* ── Scrollable Content ────────────────────────────────────────── */}
-      <div className="home-ios-content page-scroll-area" ref={homeScrollRef}>
+      <div className="home-ios-content page-scroll-area">
 
         {/* ── Header ──────────────────────────────────────────────────────── */}
         <header className="home-ios-header">
