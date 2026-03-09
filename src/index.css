@@ -5205,9 +5205,7 @@ html {
 /* ── Sticky Header ──────────────────────────────────────────── */
 
 .home-ios-header {
-  position: sticky;
-  top: 0;
-  z-index: 40;
+  position: relative;
   padding: max(0.75rem, env(safe-area-inset-top)) 16px 0.75rem;
   background: #fff;
 }
@@ -13788,7 +13786,8 @@ body:has(.content-assistant) {
   right: auto;
   width: 100%;
   justify-content: flex-end;
-  padding: 0 16px;
+  padding: 0;
+  margin-top: 12px;
 }
 
 /* When search is open, fade out the toolbar pill / profile avatar */

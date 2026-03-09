@@ -385,26 +385,26 @@ export function HomePage() {
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <section className="home-page ios-theme">
-      {/* ── Header ──────────────────────────────────────────────────────── */}
-      <header className="home-ios-header">
-        <div className="home-ios-date">{today}</div>
-        <div className="home-ios-title-row">
-          <h1 className="home-ios-title">
-            {greeting}
-            {firstName ? `, ${firstName}` : ''}
-          </h1>
-        </div>
-      </header>
-
       {/* ── Scrollable Content ────────────────────────────────────────── */}
       <div className="home-ios-content page-scroll-area">
 
-        <div className="toolbar-area toolbar-area--home">
-          <ToolbarSearch onOpenChange={setSearchOpen} />
-          <div className={searchOpen ? 'toolbar-pill--search-open' : ''}>
-            <ProfileMenu />
+        {/* ── Header ──────────────────────────────────────────────────────── */}
+        <header className="home-ios-header">
+          <div className="home-ios-date">{today}</div>
+          <div className="home-ios-title-row">
+            <h1 className="home-ios-title">
+              {greeting}
+              {firstName ? `, ${firstName}` : ''}
+            </h1>
           </div>
-        </div>
+
+          <div className="toolbar-area toolbar-area--home">
+            <ToolbarSearch onOpenChange={setSearchOpen} />
+            <div className={searchOpen ? 'toolbar-pill--search-open' : ''}>
+              <ProfileMenu />
+            </div>
+          </div>
+        </header>
 
         {/* ── Event Card Carousel ─────────────────────────────────────── */}
         {upcomingEvents.length > 0 ? (
