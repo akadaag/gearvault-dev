@@ -5267,6 +5267,8 @@ html {
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: none;
+  overscroll-behavior-x: none;
   padding: 0 0 var(--bottom-nav-clearance, 80px);
   background: #fff;
 }
