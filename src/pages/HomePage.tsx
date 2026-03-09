@@ -77,9 +77,10 @@ export function HomePage() {
   const [activeIndex, setActiveIndex] = useState(0);
   const dragOffsetRef = useRef(0);
   const [, forceRender] = useState(0);
-  // Phase: 'idle' | 'dragging' | 'snapping'
-  // idle = no interaction, dragging = finger down + moving, snapping = animating to target
-  const phaseRef = useRef<'idle' | 'dragging' | 'snapping'>('idle');
+  // Phase: 'idle' | 'dragging' | 'snapping' | 'settling'
+  // idle = no interaction, dragging = finger down + moving,
+  // snapping = animating to target, settling = transition disabled before data swap
+  const phaseRef = useRef<'idle' | 'dragging' | 'snapping' | 'settling'>('idle');
   // Direction pending during snap: which way activeIndex should shift when snap completes
   const snapDirectionRef = useRef(0);
   const railRef = useRef<HTMLDivElement>(null);
@@ -121,8 +122,8 @@ export function HomePage() {
     const step = getStep();
 
     function handleTouchStart(e: TouchEvent) {
-      // If snapping, finish it immediately so user can start a new gesture
-      if (phaseRef.current === 'snapping') {
+      // If snapping or settling, finish it immediately so user can start a new gesture
+      if (phaseRef.current === 'snapping' || phaseRef.current === 'settling') {
         if (snapTimerRef.current) clearTimeout(snapTimerRef.current);
         // Settle immediately: apply pending index change, reset drag
         setActiveIndex((prev) => prev + snapDirectionRef.current);
@@ -213,13 +214,25 @@ export function HomePage() {
       }
       forceRender((n) => n + 1);
 
-      // After CSS transition completes, settle: update activeIndex, reset dragOffset
+      // After CSS transition completes, settle using rAF double-buffer:
+      // 1. First render: set phase='settling' (transition: none) — browser paints it
+      // 2. Next frame: swap activeIndex + reset dragOffset — no transition so no flash
       snapTimerRef.current = setTimeout(() => {
-        setActiveIndex((prev) => prev + snapDirectionRef.current);
-        dragOffsetRef.current = 0;
-        snapDirectionRef.current = 0;
-        phaseRef.current = 'idle';
+        // Step 1: disable transition, keep positions as-is
+        phaseRef.current = 'settling';
         forceRender((n) => n + 1);
+
+        // Step 2: after browser paints transition:none, swap data
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            const dir = snapDirectionRef.current;
+            setActiveIndex((prev) => prev + dir);
+            dragOffsetRef.current = 0;
+            snapDirectionRef.current = 0;
+            phaseRef.current = 'idle';
+            forceRender((n) => n + 1);
+          });
+        });
       }, 340); // slightly longer than 320ms transition to ensure it finishes
     }
 
@@ -439,12 +452,18 @@ export function HomePage() {
             {/* Dot indicators */}
             {eventCount > 1 && (
               <div className="home-event-dots">
-                {upcomingEvents.map((_, idx) => (
-                  <span
-                    key={idx}
-                    className={`home-event-dot${wrapIndex(activeIndex, eventCount) === idx ? ' active' : ''}`}
-                  />
-                ))}
+                {upcomingEvents.map((_, idx) => {
+                  // During snap/settling, show the dot for the target index
+                  const dotIdx = (phaseRef.current === 'snapping' || phaseRef.current === 'settling')
+                    ? wrapIndex(activeIndex + snapDirectionRef.current, eventCount)
+                    : wrapIndex(activeIndex, eventCount);
+                  return (
+                    <span
+                      key={idx}
+                      className={`home-event-dot${dotIdx === idx ? ' active' : ''}`}
+                    />
+                  );
+                })}
               </div>
             )}
           </>
