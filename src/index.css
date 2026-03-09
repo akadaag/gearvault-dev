@@ -5523,9 +5523,9 @@ html {
 }
 
 .home-action-tile__icon {
-  width: 66px;
-  height: 66px;
-  border-radius: 18px;
+  width: 74px;
+  height: 74px;
+  border-radius: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -5700,7 +5700,7 @@ html {
 /* ── Bottom Spacer ──────────────────────────────────────────── */
 
 .home-ios-bottom-spacer {
-  height: var(--bottom-nav-clearance, 100px);
+  height: calc(var(--bottom-nav-clearance, 100px) - 20px);
   flex-shrink: 0;
 }
 
@@ -5787,9 +5787,9 @@ html {
   }
 
   .home-action-tile__icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
   }
 
   .home-action-tile__label {
