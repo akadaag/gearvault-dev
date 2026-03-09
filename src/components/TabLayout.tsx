@@ -7,7 +7,6 @@ import { useTheme } from '../hooks/useTheme';
 import { resetSheetScrollLock } from '../lib/sheetLock';
 import { FloatingNavBar } from './FloatingNavBar';
 import { ToolbarSearch } from './ToolbarSearch';
-import { ProfileMenu } from './ProfileMenu';
 import { AIAssistantProvider } from '../contexts/AIAssistantContext';
 
 const homeIcon = (
@@ -347,16 +346,6 @@ export function TabLayout() {
       <main className={`${isHomeRoute ? 'content content-home' : isGearDetailRoute || isEventDetailRoute ? 'content content-immersive' : 'content'}${isCatalogRoute ? ' content-catalog' : ''}${isEventsRoute ? ' content-events' : ''}${isAssistantRoute ? ' content-assistant' : ''}${isSettingsRoute ? ' content-settings' : ''}`}>
         <Outlet />
       </main>
-
-      {/* Home toolbar — search + profile */}
-      {isHomeRoute && (
-        <div className="toolbar-area toolbar-area--home">
-          <ToolbarSearch onOpenChange={setSearchOpen} />
-          <div className={searchOpen ? 'toolbar-pill--search-open' : ''}>
-            <ProfileMenu />
-          </div>
-        </div>
-      )}
 
       {/* Catalog action toolbar — outside <main> so glass backdrop-filter blurs real content */}
       {isCatalogRoute && (

@@ -2,6 +2,8 @@ import { useMemo, useRef, useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
+import { ToolbarSearch } from '../components/ToolbarSearch';
+import { ProfileMenu } from '../components/ProfileMenu';
 
 // Color palette for event cards — cycles through by index
 const CARD_COLORS = [
@@ -35,6 +37,7 @@ function wrapIndex(i: number, length: number): number {
 
 export function HomePage() {
   const navigate = useNavigate();
+  const [searchOpen, setSearchOpen] = useState(false);
   const settings = useLiveQuery(() => db.settings.get('app-settings'));
   const gearItems = useLiveQuery(() => db.gearItems.toArray(), []);
   const events = useLiveQuery(() => db.events.toArray(), []);
@@ -395,6 +398,13 @@ export function HomePage() {
 
       {/* ── Scrollable Content ────────────────────────────────────────── */}
       <div className="home-ios-content page-scroll-area">
+
+        <div className="toolbar-area toolbar-area--home">
+          <ToolbarSearch onOpenChange={setSearchOpen} />
+          <div className={searchOpen ? 'toolbar-pill--search-open' : ''}>
+            <ProfileMenu />
+          </div>
+        </div>
 
         {/* ── Event Card Carousel ─────────────────────────────────────── */}
         {upcomingEvents.length > 0 ? (

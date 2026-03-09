@@ -5271,7 +5271,7 @@ html {
 .home-event-rail {
   position: relative;
   overflow: hidden;
-  padding: 20px 0 0;
+  padding: 26px 0 0;
   /* Height set by card min-height + vertical padding */
   min-height: 224px;
   touch-action: pan-y;
@@ -5489,7 +5489,7 @@ html {
   justify-content: center;
   gap: 6px;
   padding: 0 0 2px;
-  margin-top: -12px;
+  margin-top: -16px;
 }
 
 .home-event-dot {
@@ -5696,6 +5696,7 @@ html {
 }
 
 .home-ios-section--actions {
+  margin-top: 8px;
   margin-bottom: 12px;
 }
 
@@ -13782,8 +13783,12 @@ body:has(.content-assistant) {
 
 /* Home page: search + profile, aligned in a row */
 .toolbar-area--home {
-  right: 16px;
-  top: max(12px, env(safe-area-inset-top));
+  position: relative;
+  top: auto;
+  right: auto;
+  width: 100%;
+  justify-content: flex-end;
+  padding: 0 16px;
 }
 
 /* When search is open, fade out the toolbar pill / profile avatar */
