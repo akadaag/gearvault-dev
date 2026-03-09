@@ -13496,11 +13496,6 @@ body:has(.content-assistant) {
 .floating-nav__ai-icon svg {
   width: 25px;
   height: 25px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  stroke-linejoin: round;
 }
 
 /* ── AI Pill (expanded) ──────────────────────────────────────────────── */
