@@ -5232,6 +5232,7 @@ html {
   justify-content: space-between;
   margin-top: 4px;
   margin-bottom: 0;
+  transform: translateY(4px);
 }
 
 .home-ios-title {
@@ -5270,7 +5271,7 @@ html {
 .home-event-rail {
   position: relative;
   overflow: hidden;
-  padding: 14px 0 0;
+  padding: 20px 0 0;
   /* Height set by card min-height + vertical padding */
   min-height: 224px;
   touch-action: pan-y;
@@ -5488,7 +5489,7 @@ html {
   justify-content: center;
   gap: 6px;
   padding: 0 0 2px;
-  margin-top: -8px;
+  margin-top: -12px;
 }
 
 .home-event-dot {
