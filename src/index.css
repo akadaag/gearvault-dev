@@ -7682,15 +7682,15 @@ body:has(.content-assistant) {
 .ev-ios-swipe-row {
   position: relative;
   margin-bottom: 10px;
-  border-radius: 22px;
+  border-radius: 28px;
   overflow: hidden;
   background: transparent;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.04), 0 0 0 0.5px rgba(0, 0, 0, 0.02);
 }
 
 .ev-ios-swipe-row .ev-ios-event-item {
   margin-bottom: 0;
-  border-radius: 22px;
+  border-radius: 28px;
   box-shadow: none;
   background: #ffffff;
 }
@@ -7976,9 +7976,9 @@ body:has(.content-assistant) {
 
 .ev-ios-cal-card {
   background: #ffffff;
-  border-radius: 22px;
+  border-radius: 28px;
   border: none;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.04), 0 0 0 0.5px rgba(0, 0, 0, 0.02);
   padding: 16px;
   margin: 0 16px 16px;
 }
@@ -8164,12 +8164,12 @@ body:has(.content-assistant) {
 
 :root.dark .ev-ios-event-item {
   background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
 }
 
 :root.dark .ev-ios-swipe-row {
   background: transparent;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
 }
 
 :root.dark .ev-ios-swipe-row .ev-ios-event-item {
@@ -8196,7 +8196,7 @@ body:has(.content-assistant) {
 
 :root.dark .ev-ios-cal-card {
   background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
 }
 
 @media (min-width: 768px) {
@@ -10098,7 +10098,7 @@ body:has(.content-assistant) {
   right: 0;
   bottom: 0;
   z-index: 1101;
-  background: #ffffff;
+  background: var(--bg);
   border-radius: 28px 28px 0 0;
   box-shadow: 0 -2px 24px rgba(0, 0, 0, 0.12);
   display: flex;
@@ -10114,7 +10114,7 @@ body:has(.content-assistant) {
 }
 
 :root.dark .ios-theme .ios-sheet-modal {
-  background: #1C1C1E;
+  background: var(--bg);
   box-shadow: 0 -2px 32px rgba(0, 0, 0, 0.4);
 }
 
