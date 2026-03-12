@@ -5180,6 +5180,9 @@ html {
 /* ── Base Layout ─────────────────────────────────────────────── */
 
 .home-page.ios-theme {
+  --home-header-safe-top: max(12px, env(safe-area-inset-top));
+  --home-header-body-height: 72px;
+  --home-header-offset: calc(var(--home-header-safe-top) + var(--home-header-body-height));
   width: 100%;
   height: 100%;
   min-height: 0;
@@ -5189,8 +5192,10 @@ html {
   max-width: 600px;
   margin: 0 auto;
   background: #fff;
-  overflow-x: hidden;
+  overflow: hidden;
   padding: 0;
+  position: relative;
+  isolation: isolate;
 }
 
 :root.dark .home-page.ios-theme {
@@ -5202,12 +5207,26 @@ html {
   line-height: 1.3;
 }
 
-/* ── Sticky Header ──────────────────────────────────────────── */
+/* ── Fixed Home Header Layer ────────────────────────────────── */
+
+.home-ios-header-shell {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  pointer-events: none;
+}
 
 .home-ios-header {
   position: relative;
-  padding: 12px 16px 12px;
-  background: transparent;
+  height: var(--home-header-offset);
+  padding: var(--home-header-safe-top) 16px 10px;
+  background: rgba(242, 242, 247, 0.84);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  backdrop-filter: blur(18px) saturate(140%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  pointer-events: auto;
 }
 
 .home-ios-header-main {
@@ -5220,11 +5239,12 @@ html {
 .home-ios-header-copy {
   flex: 1;
   min-width: 0;
-  padding-right: 92px;
+  padding-right: 0;
 }
 
 :root.dark .home-ios-header {
-  background: transparent;
+  background: rgba(0, 0, 0, 0.82);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .home-ios-date {
@@ -5274,6 +5294,11 @@ html {
   background: #fff;
 }
 
+.home-ios-header-spacer {
+  height: var(--home-header-offset);
+  flex: 0 0 auto;
+}
+
 :root.dark .home-ios-content {
   background: #000;
 }
@@ -5285,7 +5310,7 @@ html {
 .home-event-rail {
   position: relative;
   overflow: hidden;
-  padding: 26px 0 0;
+  padding: 14px 0 0;
   /* Height set by card min-height + vertical padding */
   min-height: 224px;
   touch-action: pan-y;
@@ -13797,15 +13822,17 @@ body:has(.content-assistant) {
 
 /* Home page: search + profile, aligned in a row */
 .toolbar-area--home {
-  position: fixed;
-  top: max(12px, env(safe-area-inset-top));
-  right: 16px;
+  position: relative;
+  top: auto;
+  right: auto;
   width: auto;
+  display: flex;
+  align-items: center;
   justify-content: flex-end;
   padding: 0;
   margin-top: 0;
   flex-shrink: 0;
-  z-index: 41;
+  z-index: auto;
 }
 
 /* When search is open, fade out the toolbar pill / profile avatar */

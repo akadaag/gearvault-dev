@@ -385,9 +385,7 @@ export function HomePage() {
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <section className="home-page ios-theme">
-      {/* ── Scrollable Content ────────────────────────────────────────── */}
-      <div className="home-ios-content page-scroll-area">
-
+      <div className="home-ios-header-shell">
         {/* ── Header ──────────────────────────────────────────────────────── */}
         <header className="home-ios-header">
           <div className="home-ios-header-main">
@@ -409,6 +407,11 @@ export function HomePage() {
             </div>
           </div>
         </header>
+      </div>
+
+      {/* ── Scrollable Content ────────────────────────────────────────── */}
+      <div className="home-ios-content page-scroll-area">
+        <div className="home-ios-header-spacer" aria-hidden="true" />
 
         {/* ── Event Card Carousel ─────────────────────────────────────── */}
         {upcomingEvents.length > 0 ? (
