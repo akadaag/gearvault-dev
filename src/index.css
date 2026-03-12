@@ -7083,7 +7083,7 @@ html {
   padding-top: env(safe-area-inset-top, 0px);
   padding-left: 0;
   padding-right: 0;
-  background: var(--ios-bg);
+  background: var(--bg);
 }
 
 /* Settings page flex layout */
@@ -7291,7 +7291,7 @@ body:has(.content-assistant) {
   padding: 0;
   min-height: 0;
   flex: 1;
-  background: #ffffff;
+  background: var(--bg);
 }
 
 /* ── Header ────────────────────────────────────────────────────── */
@@ -9046,7 +9046,7 @@ body:has(.content-assistant) {
 .ai-page.ios-theme {
   display: flex;
   flex-direction: column;
-  background: #ffffff;
+  background: var(--bg);
   min-height: 0;
   flex: 1;
   gap: 0;
