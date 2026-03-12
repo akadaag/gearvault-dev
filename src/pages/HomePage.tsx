@@ -1,9 +1,8 @@
 import { useMemo, useRef, useEffect, useState, useCallback } from 'react';
+import type { UIEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../db';
-import { ToolbarSearch } from '../components/ToolbarSearch';
-import { ProfileMenu } from '../components/ProfileMenu';
 
 // Color palette for event cards — cycles through by index
 const CARD_COLORS = [
@@ -37,7 +36,6 @@ function wrapIndex(i: number, length: number): number {
 
 export function HomePage() {
   const navigate = useNavigate();
-  const [searchOpen, setSearchOpen] = useState(false);
   const settings = useLiveQuery(() => db.settings.get('app-settings'));
   const gearItems = useLiveQuery(() => db.gearItems.toArray(), []);
   const events = useLiveQuery(() => db.events.toArray(), []);
@@ -382,36 +380,46 @@ export function HomePage() {
     );
   }
 
+  // ── Scroll-driven title crossfade ────────────────────────────────────────
+  const largeTitleRef = useRef<HTMLDivElement>(null);
+  const glassTitleRef = useRef<HTMLHeadingElement>(null);
+  const handleScroll = (e: UIEvent<HTMLDivElement>) => {
+    const progress = Math.min(1, Math.max(0, (e.currentTarget.scrollTop - 10) / 40));
+    if (largeTitleRef.current) largeTitleRef.current.style.opacity = String(1 - progress);
+    if (glassTitleRef.current) glassTitleRef.current.style.opacity = String(progress);
+  };
+
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <section className="home-page ios-theme">
-      <div className="home-ios-header-shell">
-        {/* ── Header ──────────────────────────────────────────────────────── */}
-        <header className="home-ios-header">
-          <div className="home-ios-header-main">
-            <div className="home-ios-header-copy">
-              <div className="home-ios-date">{today}</div>
-              <div className="home-ios-title-row">
-                <h1 className="home-ios-title">
-                  {greeting}
-                  {firstName ? `, ${firstName}` : ''}
-                </h1>
-              </div>
-            </div>
+      {/* ── Floating Header (matches Catalog/Events pattern) ─────────── */}
+      <header className="ios-home-header">
+        {/* Left: large title — fades out on scroll */}
+        <div
+          ref={largeTitleRef}
+          className="ios-home-header-left"
+          style={{ opacity: 1, pointerEvents: 'none' }}
+        >
+          <div className="home-ios-date">{today}</div>
+          <h1 className="ios-home-title" style={{ margin: 0 }}>
+            {greeting}
+            {firstName ? `, ${firstName}` : ''}
+          </h1>
+        </div>
 
-            <div className="toolbar-area toolbar-area--home">
-              <ToolbarSearch onOpenChange={setSearchOpen} />
-              <div className={searchOpen ? 'toolbar-pill--search-open' : ''}>
-                <ProfileMenu />
-              </div>
-            </div>
-          </div>
-        </header>
-      </div>
+        {/* Center title — fades in on scroll */}
+        <h2
+          ref={glassTitleRef}
+          className="ios-home-glass-title"
+          style={{ opacity: 0, pointerEvents: 'none' }}
+        >
+          Home
+        </h2>
+      </header>
 
       {/* ── Scrollable Content ────────────────────────────────────────── */}
-      <div className="home-ios-content page-scroll-area">
-        <div className="home-ios-header-spacer" aria-hidden="true" />
+      <div className="home-ios-content page-scroll-area" onScroll={handleScroll}>
+        <div style={{ height: 'calc(env(safe-area-inset-top) + 70px)' }} />
 
         {/* ── Event Card Carousel ─────────────────────────────────────── */}
         {upcomingEvents.length > 0 ? (
