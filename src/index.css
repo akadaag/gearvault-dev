@@ -5940,6 +5940,7 @@ html {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 12px;
 }
 
 .ios-theme .ios-list-content {
@@ -6443,7 +6444,7 @@ html {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  padding: 2px 2px 10px;
+  padding: 2px 6px 14px;
   background: none;
   border: none;
   width: 100%;
@@ -6464,6 +6465,9 @@ html {
 }
 
 .ios-catalog-group-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
   border-radius: 22px;
   margin-bottom: 0;
   max-height: 10000px;
@@ -6481,9 +6485,9 @@ html {
 }
 
 .catalog-page.ios-theme .ios-list-group {
-  border-radius: 22px;
+  border-radius: 28px;
   margin-bottom: 0;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.07), 0 0 0 0.5px rgba(0, 0, 0, 0.05);
+  box-shadow: none;
   border: none;
   background: transparent;
   backdrop-filter: none;
@@ -6492,50 +6496,58 @@ html {
 }
 
 :root.dark .catalog-page.ios-theme .ios-list-group {
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.36), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
+  box-shadow: none;
   background: transparent;
 }
 
 .catalog-page.ios-theme .ios-list-item {
   gap: 16px;
-  padding: 14px 16px;
+  padding: 16px 20px;
   border-bottom: none;
-  min-height: 84px;
+  min-height: auto;
   position: relative;
+  border-radius: 28px;
 }
 
 .catalog-swipe-row {
   position: relative;
   overflow: hidden;
   background: transparent;
+  border-radius: 28px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.04), 0 0 0 0.5px rgba(0, 0, 0, 0.02);
 }
 
 :root.dark .catalog-swipe-row {
-  background: transparent;
+  background: #1c1c1e;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 0 0 0.5px rgba(255, 255, 255, 0.06);
 }
 
 .catalog-swipe-row .ios-list-item {
   background: #ffffff;
+  border-radius: 28px;
+  transition: transform 0.12s ease;
+}
+
+.catalog-swipe-row .ios-list-item:active {
+  transform: scale(0.98);
 }
 
 :root.dark .catalog-swipe-row .ios-list-item {
   background: #1c1c1e;
 }
 
-/* Grouped shape: first/last/only child border-radius */
+:root.dark .catalog-swipe-row .ios-list-item:active {
+  background: #2c2c2e;
+}
+
+/* Grouped shape: no longer grouped, all have 28px */
 .catalog-swipe-row:first-child,
-.catalog-swipe-row:first-child .ios-list-item {
-  border-radius: 22px 22px 0 0;
-}
-
+.catalog-swipe-row:first-child .ios-list-item,
 .catalog-swipe-row:last-child,
-.catalog-swipe-row:last-child .ios-list-item {
-  border-radius: 0 0 22px 22px;
-}
-
+.catalog-swipe-row:last-child .ios-list-item,
 .catalog-swipe-row:only-child,
 .catalog-swipe-row:only-child .ios-list-item {
-  border-radius: 22px;
+  border-radius: 28px;
 }
 
 .catalog-swipe-row .ios-list-action {
@@ -6546,44 +6558,25 @@ html {
   opacity: 0;
 }
 
-.catalog-swipe-row .ios-list-item::after {
-  display: none;
-}
-
-.catalog-swipe-row:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  left: 88px;
-  right: 16px;
-  bottom: 0;
-  height: 0.5px;
-  background: rgba(60, 60, 67, 0.18);
-  z-index: 2;
-  pointer-events: none;
-}
-
-.catalog-page.ios-theme .ios-list-item:not(:last-child)::after {
-  content: '';
-  position: absolute;
-  left: 88px;
-  right: 16px;
-  bottom: 0;
-  height: 0.5px;
-  background: rgba(60, 60, 67, 0.18);
-}
-
-:root.dark .catalog-page.ios-theme .ios-list-item:not(:last-child)::after {
-  background: rgba(255, 255, 255, 0.16);
-}
-
+.catalog-swipe-row .ios-list-item::after,
+.catalog-swipe-row:not(:last-child)::after,
+.catalog-page.ios-theme .ios-list-item:not(:last-child)::after,
+:root.dark .catalog-page.ios-theme .ios-list-item:not(:last-child)::after,
 :root.dark .catalog-swipe-row:not(:last-child)::after {
-  background: rgba(255, 255, 255, 0.16);
+  display: none !important;
+  content: none !important;
 }
 
 .catalog-page.ios-theme .ios-list-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 14px;
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: rgba(142, 142, 147, 0.08);
+  padding: 8px;
+}
+
+:root.dark .catalog-page.ios-theme .ios-list-icon {
+  background: rgba(118, 118, 128, 0.16);
 }
 
 .catalog-page.ios-theme .ios-list-title,
