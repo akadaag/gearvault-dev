@@ -5219,33 +5219,7 @@ html {
   background: transparent;
 }
 
-.ios-home-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.85) 0px,
-    rgba(255, 255, 255, 0.85) calc(100% - 8px),
-    rgba(255, 255, 255, 0) 100%
-  );
-  -webkit-mask-image: linear-gradient(to right, black calc(100% - 120px), transparent 100%);
-  mask-image: linear-gradient(to right, black calc(100% - 120px), transparent 100%);
-  pointer-events: none;
-  z-index: -1;
-}
-
-:root.dark .ios-home-header::before {
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.85) 0px,
-    rgba(0, 0, 0, 0.85) calc(100% - 24px),
-    rgba(0, 0, 0, 0) 100%
-  );
-}
+/* ::before gradient fade removed — replaced by text-shadow on glass title */
 
 .ios-home-header-left {
   flex: 1;
@@ -5273,6 +5247,11 @@ html {
   color: var(--ios-text-primary);
   margin: 0;
   pointer-events: none;
+  text-shadow:
+    0 0 8px var(--ios-bg),
+    0 0 16px var(--ios-bg),
+    0 0 24px var(--ios-bg),
+    0 0 32px var(--ios-bg);
 }
 
 .home-ios-date {
@@ -6187,33 +6166,7 @@ html {
   background: transparent;
 }
 
-/* Gradient fade — covers status bar + header, fades to transparent below */
-.ios-catalog-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: -24px;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.85) 0px,
-    rgba(255, 255, 255, 0.85) calc(100% - 24px),
-    rgba(255, 255, 255, 0) 100%
-  );
-  -webkit-mask-image: linear-gradient(to right, black calc(100% - 120px), transparent 100%);
-  mask-image: linear-gradient(to right, black calc(100% - 120px), transparent 100%);
-  pointer-events: none;
-  z-index: -1;
-}
-:root.dark .ios-catalog-header::before {
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.85) 0px,
-    rgba(0, 0, 0, 0.85) calc(100% - 24px),
-    rgba(0, 0, 0, 0) 100%
-  );
-}
+/* ::before gradient fade removed — replaced by text-shadow on glass title */
 
 .ios-catalog-glass-title {
   position: absolute;
@@ -6224,6 +6177,11 @@ html {
   color: var(--ios-text-primary);
   margin: 0;
   pointer-events: none;
+  text-shadow:
+    0 0 8px var(--ios-bg),
+    0 0 16px var(--ios-bg),
+    0 0 24px var(--ios-bg),
+    0 0 32px var(--ios-bg);
 }
 
 
@@ -7343,33 +7301,7 @@ body:has(.content-assistant) {
   background: transparent;
 }
 
-/* Gradient fade — covers status bar + header, fades to transparent below */
-.ev-ios-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: -24px;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.85) 0px,
-    rgba(255, 255, 255, 0.85) calc(100% - 24px),
-    rgba(255, 255, 255, 0) 100%
-  );
-  -webkit-mask-image: linear-gradient(to right, black calc(100% - 120px), transparent 100%);
-  mask-image: linear-gradient(to right, black calc(100% - 120px), transparent 100%);
-  pointer-events: none;
-  z-index: -1;
-}
-:root.dark .ev-ios-header::before {
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.85) 0px,
-    rgba(0, 0, 0, 0.85) calc(100% - 24px),
-    rgba(0, 0, 0, 0) 100%
-  );
-}
+/* ::before gradient fade removed — replaced by text-shadow on glass title */
 
 .ev-ios-glass-title {
   position: absolute;
@@ -7380,6 +7312,11 @@ body:has(.content-assistant) {
   color: var(--ios-text-primary);
   margin: 0;
   pointer-events: none;
+  text-shadow:
+    0 0 8px var(--ios-bg),
+    0 0 16px var(--ios-bg),
+    0 0 24px var(--ios-bg),
+    0 0 32px var(--ios-bg);
 }
 
 
@@ -9171,35 +9108,7 @@ body:has(.content-assistant) {
   background: transparent;
 }
 
-/* Gradient fade — covers status bar + header, fades to transparent below.
-   Horizontal mask cuts out the right side so the glass toolbar is not double-covered. */
-.ai-page.ios-theme .ai-ios-header::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: -24px;
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0.85) 0px,
-    rgba(255, 255, 255, 0.85) calc(100% - 24px),
-    rgba(255, 255, 255, 0) 100%
-  );
-  -webkit-mask-image: linear-gradient(to right, black calc(100% - 120px), transparent 100%);
-  mask-image: linear-gradient(to right, black calc(100% - 120px), transparent 100%);
-  pointer-events: none;
-  z-index: -1;
-}
-
-:root.dark .ai-page.ios-theme .ai-ios-header::before {
-  background: linear-gradient(
-    to bottom,
-    rgba(0, 0, 0, 0.85) 0px,
-    rgba(0, 0, 0, 0.85) calc(100% - 24px),
-    rgba(0, 0, 0, 0) 100%
-  );
-}
+/* ::before gradient fade removed — replaced by text-shadow on glass title */
 
 .ai-page.ios-theme .ai-ios-header-left {
   display: flex;
@@ -9222,6 +9131,11 @@ body:has(.content-assistant) {
   color: var(--ios-text-primary);
   margin: 0;
   pointer-events: none;
+  text-shadow:
+    0 0 8px var(--ios-bg),
+    0 0 16px var(--ios-bg),
+    0 0 24px var(--ios-bg),
+    0 0 32px var(--ios-bg);
 }
 
 /* ── AI Assistant glass toolbar (matches catalog / events toolbar pattern) ── */
