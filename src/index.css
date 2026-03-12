@@ -9107,6 +9107,19 @@ body:has(.content-assistant) {
 /* ::before gradient fade removed — replaced by text-shadow on glass title */
 
 .ai-page.ios-theme .ai-ios-header-left {
+  display: flex;
+  align-items: center;
+}
+
+.ai-page.ios-theme .ai-ios-large-title {
+  font-size: 34px;
+  font-weight: 700;
+  color: var(--ios-text-primary);
+  letter-spacing: -0.02em;
+}
+
+/* ── Chat mode: "Assistant" pill (matches gear-detail-back-pill) ── */
+.ai-page.ios-theme .ai-ios-header-pill {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -9114,16 +9127,21 @@ body:has(.content-assistant) {
   border-radius: 999px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   background: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  pointer-events: auto;
-}
-
-.ai-page.ios-theme .ai-ios-large-title {
+  color: #000;
   font-size: 15px;
   font-weight: 500;
-  color: #000;
-  letter-spacing: normal;
+  font-family: inherit;
+  line-height: 1.3;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  pointer-events: auto;
   margin: 0;
+}
+
+:root.dark .ai-page.ios-theme .ai-ios-header-pill {
+  color: #ffffff;
+  background: #1C1C1E;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .ai-page.ios-theme .ai-ios-glass-title {
@@ -14779,15 +14797,6 @@ body:has(.content-assistant) {
   display: flex;
   justify-content: flex-start;
   margin-bottom: 16px;
-}
-
-:root.dark .ai-page.ios-theme .ai-ios-header-left {
-  background: #1C1C1E;
-  border-color: rgba(255, 255, 255, 0.12);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-}
-:root.dark .ai-page.ios-theme .ai-ios-large-title {
-  color: #ffffff;
 }
 
 :root.dark .ai-page.ios-theme .ai-ios-bubble.assistant {

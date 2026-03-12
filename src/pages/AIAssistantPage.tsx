@@ -947,12 +947,19 @@ export function AIAssistantPage() {
   // ---------------------------------------------------------------------------
   return (
     <section className="ai-page ios-theme">
-      {/* -- HEADER -- large title + gradient overlay; glass toolbar buttons are in TabLayout */}
+      {/* -- HEADER -- large title or pill depending on mode; glass toolbar buttons are in TabLayout */}
       <header className="ai-ios-header">
-        {/* Left: large title — matches catalog/events pattern */}
-        <div className="ai-ios-header-left" style={{ pointerEvents: 'none' }}>
-          <h1 className="ai-ios-large-title" style={{ margin: 0, fontSize: '32px', lineHeight: 1.2 }}>Assistant</h1>
-        </div>
+        {mode === 'chat' && currentSession ? (
+          /* Chat mode: small floating pill matching gear-detail-back-pill */
+          <div className="ai-ios-header-left">
+            <span className="ai-ios-header-pill">Assistant</span>
+          </div>
+        ) : (
+          /* Default: large title — matches catalog/events pattern */
+          <div className="ai-ios-header-left" style={{ pointerEvents: 'none' }}>
+            <h1 className="ai-ios-large-title" style={{ margin: 0, fontSize: '32px', lineHeight: 1.2 }}>Assistant</h1>
+          </div>
+        )}
         {/* Center title — fades in on scroll (kept invisible for now, same slot as catalog) */}
         <h2 className="ai-ios-glass-title" style={{ opacity: 0, pointerEvents: 'none' }}>Assistant</h2>
       </header>
