@@ -6137,7 +6137,7 @@ html {
   padding-top: env(safe-area-inset-top, 0px);
   padding-left: 0;
   padding-right: 0;
-  background: #ffffff;
+  background: var(--bg);
 }
 
 :root.dark .ios-theme .content.content-catalog {
@@ -6962,7 +6962,7 @@ html {
   padding-top: env(safe-area-inset-top, 0px);
   padding-left: 0;
   padding-right: 0;
-  background: #ffffff;
+  background: var(--bg);
 }
 
 :root.dark .ios-theme .content.content-events {
@@ -7173,7 +7173,7 @@ input[type="checkbox"].ios-toggle:checked::after {
   padding-top: 0;
   padding-left: 0;
   padding-right: 0;
-  background: #ffffff;
+  background: var(--bg);
 }
 
 /* Remove viewport-level overflow clip for assistant page only so that
@@ -7184,12 +7184,12 @@ input[type="checkbox"].ios-toggle:checked::after {
 
 /* Ensure body background is white when assistant page is open */
 body:has(.content-assistant) {
-  background: #ffffff;
+  background: var(--bg);
 }
 
 /* Override ai-page background in ios-theme */
 .ios-theme .ai-page {
-  background: #ffffff;
+  background: var(--bg);
 }
 
 /* iOS style chat bubbles */
@@ -8244,7 +8244,7 @@ body:has(.content-assistant) {
 .event-detail-page.ios-theme {
   display: flex;
   flex-direction: column;
-  background: #ffffff;
+  background: var(--bg);
   min-height: 100vh;
   min-height: 100dvh;
   margin-top: calc(-1 * env(safe-area-inset-top));
@@ -12489,7 +12489,7 @@ body:has(.content-assistant) {
 .gear-detail-page.ios-theme {
   display: flex;
   flex-direction: column;
-  background: #ffffff;
+  background: var(--bg);
   min-height: 100vh;
   min-height: 100dvh;
   margin-top: calc(-1 * env(safe-area-inset-top));
