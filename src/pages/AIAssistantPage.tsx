@@ -967,8 +967,8 @@ export function AIAssistantPage() {
 
       {/* -- SCROLL AREA -- */}
       <div className="ai-ios-content page-scroll-area" ref={scrollAreaRef}>
-        {/* Spacer to push content below the fixed header */}
-        <div style={{ height: 'calc(env(safe-area-inset-top) + 70px)' }} />
+        {/* Spacer to push content below the fixed header + toolbar pills */}
+        <div style={{ height: 'calc(env(safe-area-inset-top) + 90px)' }} />
         {/* Initial empty state */}
         {mode === 'packing' && step === 'input' && !loading && !plan && (
           <div className="ai-ios-empty">
