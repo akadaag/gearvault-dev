@@ -1,6 +1,6 @@
 :root {
   /* Claude-inspired color palette - Light mode */
-  --bg: #ffffff;
+  --bg: #F4F6F9;
   --bg-elevated: #ffffff;
   --bg-soft: #e9eef4;
   --card: #ffffff;
@@ -5509,7 +5509,7 @@ html {
   justify-content: center;
   gap: 6px;
   padding: 0 0 2px;
-  margin-top: -16px;
+  margin-top: -24px;
 }
 
 .home-event-dot {
@@ -5569,25 +5569,25 @@ html {
 
 .home-action-tile__icon--blue {
   background: #E8F1FF;
-  box-shadow: 0 10px 22px rgba(0, 122, 255, 0.22);
+  box-shadow: 0 2px 24px rgba(0, 122, 255, 0.25);
   color: var(--ios-blue);
 }
 
 .home-action-tile__icon--orange {
   background: #FFF1E6;
-  box-shadow: 0 10px 22px rgba(255, 149, 0, 0.22);
+  box-shadow: 0 2px 24px rgba(255, 149, 0, 0.25);
   color: #FF9500;
 }
 
 .home-action-tile__icon--purple {
   background: #F4E8FC;
-  box-shadow: 0 10px 22px rgba(175, 82, 222, 0.22);
+  box-shadow: 0 2px 24px rgba(175, 82, 222, 0.25);
   color: #AF52DE;
 }
 
 .home-action-tile__icon--green {
   background: #E8F8EE;
-  box-shadow: 0 10px 22px rgba(52, 199, 89, 0.22);
+  box-shadow: 0 2px 24px rgba(52, 199, 89, 0.25);
   color: var(--ios-green);
 }
 
@@ -5722,7 +5722,7 @@ html {
 }
 
 .home-ios-section--actions {
-  margin-top: 8px;
+  margin-top: -4px;
   margin-bottom: 12px;
 }
 
